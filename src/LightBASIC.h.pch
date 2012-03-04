@@ -1,0 +1,71 @@
+//
+//  LightBASIC.h.pch
+//  LightBASIC
+//
+//  Created by Albert Varaksin on 25/02/2012.
+//  Copyright (c) 2012 LightBASIC development team. All rights reserved.
+//
+
+
+// use c++11 standard library for shared_ptr, hash maps, etc...
+// clang 3.1 has issues with boost if using this.
+//#define USE_CPP11_LIB
+
+#include <vector>
+#include <list>
+#include <map>
+#include <typeinfo>
+#include <stdexcept>
+#include <algorithm>
+#include <memory>
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <iterator>
+#include <cctype>
+#include <string>
+#include <stack>
+#include <inttypes.h>
+#ifdef USE_CPP11_LIB
+	#include <unordered_map>
+#else
+	#include <boost/shared_ptr.hpp> 
+	#include <boost/make_shared.hpp>
+	#include <boost/unordered_map.hpp>
+	#include <boost/scoped_ptr.hpp>
+#endif
+#include <boost/filesystem.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/ptr_container/ptr_map.hpp>
+#include <boost/pool/pool.hpp>
+
+// some helpers
+namespace lbc {
+	
+	// namespace shortcuts
+#ifndef USE_CPP11_LIB
+	using namespace boost;
+	template<typename T> using unique_ptr = boost::scoped_ptr<T>;
+#endif
+	using namespace std;
+	namespace FS = boost::filesystem;
+
+	/**
+	 * Base class for exceptions
+	 */
+	struct Exception : public runtime_error
+	{
+		// Create new instance of Exception
+		explicit Exception(const string & message) : runtime_error(message) {}
+	}; 
+
+	/**
+	 * NonCopyable c++11 style
+	 */
+	struct NonCopyable
+	{
+		NonCopyable() = default;
+		NonCopyable(const NonCopyable &) = delete;
+		NonCopyable & operator = (const NonCopyable &) = delete;
+	};
+}
