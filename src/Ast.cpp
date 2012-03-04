@@ -19,11 +19,11 @@ using namespace lbc;
 // * virtual destructor so that unique_ptr can work
 // * virtual visitor method
 #define IMPL_AST(C, ...) \
-	static boost::pool<> _pool##C(sizeof(C)); \
-	void * C::operator new(size_t) { return _pool##C.malloc(); } \
-	void C::operator delete(void * addr) { _pool##C.free(addr); } \
-	C::~C() {} \
-	void C::accept(AstVisitor * visitor) { visitor->visit(this); }
+    static boost::pool<> _pool##C(sizeof(C)); \
+    void * C::operator new(size_t) { return _pool##C.malloc(); } \
+    void C::operator delete(void * addr) { _pool##C.free(addr); } \
+    C::~C() {} \
+    void C::accept(AstVisitor * visitor) { visitor->visit(this); }
 AST_CONTENT_NODES(IMPL_AST)
 #undef IMPL_AST
 

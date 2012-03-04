@@ -15,7 +15,7 @@ using namespace lbc;
 // AstProgram
 void RecursiveAstVisitor::visit(AstProgram * ast)
 {
-	for (auto & decl : ast->decls) decl.accept(this);
+    for (auto & decl : ast->decls) decl.accept(this);
 }
 
 
@@ -23,7 +23,7 @@ void RecursiveAstVisitor::visit(AstProgram * ast)
 // AstStmtList
 void RecursiveAstVisitor::visit(AstStmtList * ast)
 {
-	for (auto & stmt : ast->stmts) stmt.accept(this);
+    for (auto & stmt : ast->stmts) stmt.accept(this);
 }
 
 
@@ -31,14 +31,14 @@ void RecursiveAstVisitor::visit(AstStmtList * ast)
 // AstFuncParamList
 void RecursiveAstVisitor::visit(AstFuncParamList * ast)
 {
-	for (auto & stmt : ast->params) stmt.accept(this);
+    for (auto & stmt : ast->params) stmt.accept(this);
 }
 
 //
 // AstFuncArgList
 void RecursiveAstVisitor::visit(AstFuncArgList * ast)
 {
-	for (auto & arg : ast->args) arg.accept(this);
+    for (auto & arg : ast->args) arg.accept(this);
 }
 
 
@@ -46,7 +46,7 @@ void RecursiveAstVisitor::visit(AstFuncArgList * ast)
 // AstAttributeList
 void RecursiveAstVisitor::visit(AstAttributeList * ast)
 {
-	for (auto & attr : ast->attribs) attr.accept(this);
+    for (auto & attr : ast->attribs) attr.accept(this);
 }
 
 
@@ -54,5 +54,5 @@ void RecursiveAstVisitor::visit(AstAttributeList * ast)
 // AstAttribParamList
 void RecursiveAstVisitor::visit(AstAttribParamList * ast)
 {
-	for (auto & param : ast->params) param.accept(this);
+    for (auto & param : ast->params) param.accept(this);
 }

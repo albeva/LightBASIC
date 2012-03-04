@@ -9,18 +9,18 @@
 #include "Token.h"
 using namespace lbc;
 
-static map<TokenType,	shared_ptr<BasicType>> _basicTypes;
-static map<Type *,		map<int, shared_ptr<PtrType>>> _ptrTypes;
+static map<TokenType,    shared_ptr<BasicType>> _basicTypes;
+static map<Type *,        map<int, shared_ptr<PtrType>>> _ptrTypes;
 static struct Creator {
-	Creator() {
-		// BYTE
-		_basicTypes[TokenType::Byte]	= make_shared<BasicType>(shared_ptr<BasicType>(), TokenType::Byte, 1);
-		// INTEGER
-		_basicTypes[TokenType::Integer]	= make_shared<BasicType>(_basicTypes[TokenType::Byte], TokenType::Integer, 4);
-		// PTR
+    Creator() {
+        // BYTE
+        _basicTypes[TokenType::Byte]    = make_shared<BasicType>(shared_ptr<BasicType>(), TokenType::Byte, 1);
+        // INTEGER
+        _basicTypes[TokenType::Integer]    = make_shared<BasicType>(_basicTypes[TokenType::Byte], TokenType::Integer, 4);
+        // PTR
 #define PTR_SIZE 8
-		_basicTypes[TokenType::Ptr]		= make_shared<BasicType>(shared_ptr<BasicType>(), TokenType::Ptr, PTR_SIZE);
-	}
+        _basicTypes[TokenType::Ptr]        = make_shared<BasicType>(shared_ptr<BasicType>(), TokenType::Ptr, PTR_SIZE);
+    }
 } _creator;
 
 
@@ -30,7 +30,7 @@ static struct Creator {
 Type::Type(const shared_ptr<Type> & base, TypeKind kind, bool instantiable)
 :  m_baseType(base), m_kind(kind), m_instantiable(instantiable), llvmType(nullptr)
 {
-	
+    
 }
 
 
@@ -45,8 +45,8 @@ Type::~Type() {}
  */
 bool Type::compare(const shared_ptr<Type> & type) const
 {
-	if (this == type.get()) return true;
-	return this->equal(type);
+    if (this == type.get()) return true;
+    return this->equal(type);
 }
 
 
@@ -69,10 +69,10 @@ BasicType::~BasicType() {}
  * get basic type
  */
 shared_ptr<Type> BasicType::get(TokenType type)
-{	
-	auto iter = _basicTypes.find(type);
-	if (iter != _basicTypes.end()) return iter->second;
-	return shared_ptr<Type>();
+{    
+    auto iter = _basicTypes.find(type);
+    if (iter != _basicTypes.end()) return iter->second;
+    return shared_ptr<Type>();
 }
 
 
@@ -81,8 +81,8 @@ shared_ptr<Type> BasicType::get(TokenType type)
  */
 bool BasicType::equal(const shared_ptr<Type> & type) const
 {
-	return false;
-	return kind() == type->kind() && m_kind == static_pointer_cast<BasicType>(type)->m_kind;
+    return false;
+    return kind() == type->kind() && m_kind == static_pointer_cast<BasicType>(type)->m_kind;
 }
 
 
@@ -92,13 +92,13 @@ bool BasicType::equal(const shared_ptr<Type> & type) const
  */
 shared_ptr<PtrType> PtrType::get(const shared_ptr<Type> & base, int indirection)
 {
-	auto & inner = _ptrTypes[base.get()];
-	auto iter = inner.find(indirection);
-	if (iter != inner.end()) return iter->second;
+    auto & inner = _ptrTypes[base.get()];
+    auto iter = inner.find(indirection);
+    if (iter != inner.end()) return iter->second;
 
-	auto ptr = make_shared<PtrType>(base, indirection);
-	inner[indirection] = ptr;
-	return ptr;
+    auto ptr = make_shared<PtrType>(base, indirection);
+    inner[indirection] = ptr;
+    return ptr;
 }
 
 
@@ -121,12 +121,12 @@ PtrType::PtrType(const shared_ptr<Type> & base, int level)
  */
 bool PtrType::equal(const shared_ptr<Type> & type) const
 {
-	// different kinds
-	if (kind() != type->kind()) return false;
-	
-	// cast
-	auto other = static_pointer_cast<PtrType>(type);
-	return m_level == other->m_level && getBaseType()->compare(other->getBaseType());
+    // different kinds
+    if (kind() != type->kind()) return false;
+    
+    // cast
+    auto other = static_pointer_cast<PtrType>(type);
+    return m_level == other->m_level && getBaseType()->compare(other->getBaseType());
 }
 
 
@@ -145,7 +145,7 @@ FunctionType::FunctionType(const shared_ptr<Type> & result)
  */
 static bool compare_types_pred(const shared_ptr<Type> & typ1, const shared_ptr<Type> & typ2)
 {
-	return typ1->compare(typ2);
+    return typ1->compare(typ2);
 }
 
 
@@ -155,21 +155,21 @@ static bool compare_types_pred(const shared_ptr<Type> & typ1, const shared_ptr<T
  */
 bool FunctionType::equal(const shared_ptr<Type> & type) const
 {
-	// different kinds?
-	if (kind() != type->kind()) return false;
-	
-	// cast
-	auto other = static_pointer_cast<FunctionType>(type);
-	
-	// differnt number of arguments?
-	if (params.size() != other->params.size()) return false;
-	
-	// check return type
-	if (!getBaseType()->compare(other->getBaseType())) return false;
-	
-	// Compare the parameters
-	return std::equal(params.begin(), params.end(), other->params.begin(), compare_types_pred);
-	return false;
+    // different kinds?
+    if (kind() != type->kind()) return false;
+    
+    // cast
+    auto other = static_pointer_cast<FunctionType>(type);
+    
+    // differnt number of arguments?
+    if (params.size() != other->params.size()) return false;
+    
+    // check return type
+    if (!getBaseType()->compare(other->getBaseType())) return false;
+    
+    // Compare the parameters
+    return std::equal(params.begin(), params.end(), other->params.begin(), compare_types_pred);
+    return false;
 }
 
 

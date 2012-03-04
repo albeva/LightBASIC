@@ -39,7 +39,7 @@ Context & Context::add(const FS::path & path, ResourceTypes type)
         rct.push_back(source);
     }
 
-	return *this;
+    return *this;
 }
 
 
@@ -65,7 +65,7 @@ FS::path Context::resolveDir(const FS::path & dir) const
     
     // if nor absolute then check against registered global directories
     if (!path.is_absolute()) {
-		for (auto dir : m_resources[GlobalPath]) {
+        for (auto dir : m_resources[GlobalPath]) {
             FS::path tmp = dir / path;
             if (FS::is_directory(tmp)) {
                 return tmp.normalize();
@@ -88,14 +88,14 @@ FS::path Context::resolveFile(const FS::path & file, ResourceTypes type) const
     // is absolute path?
     if (!file.is_absolute()) {
         // search the container
-		for (auto dir : m_resources[type]) {
+        for (auto dir : m_resources[type]) {
             FS::path tmp = dir / file;
             if (FS::is_regular_file(tmp)) {
                 return tmp.normalize();
             }
         }
         // search global container
-		for (auto dir : m_resources[GlobalPath]) {
+        for (auto dir : m_resources[GlobalPath]) {
             FS::path tmp = dir / file;
             if (FS::is_regular_file(tmp)) {
                 return tmp.normalize();

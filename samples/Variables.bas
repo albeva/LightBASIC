@@ -2,6 +2,6 @@ DIM i AS INTEGER
 DIM b AS BYTE PTR
 
 FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
-	i = 10
-	b = *argv
+    i = 10
+    b = *argv
 END FUNCTION

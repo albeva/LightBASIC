@@ -10,31 +10,31 @@
 #include "AstVisitor.h"
 
 namespace lbc {
-	
-	/**
-	 * recursievly visit nodes. Statements, declarations
-	 * and program
-	 */
-	struct RecursiveAstVisitor : AstVisitor
-	{
-		// create
-		RecursiveAstVisitor(bool debug = false) : AstVisitor(debug) {}
-		
-		// AstProgram
-		virtual void visit(AstProgram * ast);
-		// AstStmtList
-		virtual void visit(AstStmtList * ast);
-		// AstFuncParamList
-		virtual void visit(AstFuncParamList * ast);
-		// AstFuncArgList
-		virtual void visit(AstFuncArgList * ast);
-		// AstAttributeList
-		virtual void visit(AstAttributeList * ast);
-		// AstAttribParamList
-		virtual void visit(AstAttribParamList * ast);
-		
-		private:
-		
-	};
+    
+    /**
+     * recursievly visit nodes. Statements, declarations
+     * and program
+     */
+    struct RecursiveAstVisitor : AstVisitor
+    {
+        // create
+        RecursiveAstVisitor(bool debug = false) : AstVisitor(debug) {}
+        
+        // AstProgram
+        virtual void visit(AstProgram * ast);
+        // AstStmtList
+        virtual void visit(AstStmtList * ast);
+        // AstFuncParamList
+        virtual void visit(AstFuncParamList * ast);
+        // AstFuncArgList
+        virtual void visit(AstFuncArgList * ast);
+        // AstAttributeList
+        virtual void visit(AstAttributeList * ast);
+        // AstAttribParamList
+        virtual void visit(AstAttribParamList * ast);
+        
+        private:
+        
+    };
 
 }

@@ -244,9 +244,9 @@
 		369056F5150388D400E2C917 /* Type */ = {
 			isa = PBXGroup;
 			children = (
-				369056D91503881700E2C917 /* Type.cpp */,
 				369056DA1503881700E2C917 /* Type.def.h */,
 				369056DB1503881700E2C917 /* Type.h */,
+				369056D91503881700E2C917 /* Type.cpp */,
 			);
 			name = Type;
 			sourceTree = "<group>";

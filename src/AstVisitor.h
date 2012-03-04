@@ -10,25 +10,25 @@
 #include "Ast.def.h"
 
 namespace lbc {
-	
-	// forward declare Ast classes
-	AST_DECLARE_CLASSES();
-	
-	/**
-	 * ast tree visitor base class
-	 */
-	struct AstVisitor
-	{
-		// create new visitor
-		AstVisitor(bool debug = false) : m_debug(debug) {}
-		
-		#define DECL_AST(C, ...) virtual void visit(C * ast);
-		AST_CONTENT_NODES(DECL_AST)
-		#undef DECL_AST
-		
-	private:
-		bool m_debug;
-	};
-	
+    
+    // forward declare Ast classes
+    AST_DECLARE_CLASSES();
+    
+    /**
+     * ast tree visitor base class
+     */
+    struct AstVisitor
+    {
+        // create new visitor
+        AstVisitor(bool debug = false) : m_debug(debug) {}
+        
+        #define DECL_AST(C, ...) virtual void visit(C * ast);
+        AST_CONTENT_NODES(DECL_AST)
+        #undef DECL_AST
+        
+    private:
+        bool m_debug;
+    };
+    
 }
 

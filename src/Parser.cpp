@@ -38,8 +38,8 @@ AstProgram * Parser::parse(const shared_ptr<Source> & source)
     
     // { DeclList }
     while (!match(TokenType::EndOfFile)) {
-    	ast->decls.push_back(declaration());
-    	expect(TokenType::EndOfLine);
+        ast->decls.push_back(declaration());
+        expect(TokenType::EndOfLine);
     }
     
     // clean up
@@ -52,45 +52,45 @@ AstProgram * Parser::parse(const shared_ptr<Source> & source)
 
 
 /**
- * Declaration	= [ "[" Attributes "]" ]
- *				( VariableDecl
- *				| FunctionDecl
- *				| FunctionImpl
- *				)
+ * Declaration  = [ "[" Attributes "]" ]
+ *              ( VariableDecl
+ *              | FunctionDecl
+ *              | FunctionImpl
+ *              )
  */
 AstDeclaration * Parser::declaration()
 {
-	AstAttributeList * attribs = nullptr;
-	AstDeclaration * decl = nullptr;
-	
-	// [ ... ]
-	if (accept(TokenType::BracketOpen)) {
-		attribs = attributesList();
-		expect(TokenType::BracketClose);
-	}
+    AstAttributeList * attribs = nullptr;
+    AstDeclaration * decl = nullptr;
+    
+    // [ ... ]
+    if (accept(TokenType::BracketOpen)) {
+        attribs = attributesList();
+        expect(TokenType::BracketClose);
+    }
 
-	switch (m_token->type()) {
-		case TokenType::Dim:
-			decl = variableDecl();
-			break;
-		case TokenType::Declare:
-			decl = functionDecl();
-			break;
-		case TokenType::Function:
-			decl = functionStmt();
-			break;
-		default:
-			throw Exception(string("Invalid input. Expected declaration. Found: ") + m_token->name());
-			break;
-	}
-	
-	// add attribs
-	if (decl && attribs) {
-		decl->attribs.reset(attribs);
-	}
-	
-	// done
-	return decl;
+    switch (m_token->type()) {
+        case TokenType::Dim:
+            decl = variableDecl();
+            break;
+        case TokenType::Declare:
+            decl = functionDecl();
+            break;
+        case TokenType::Function:
+            decl = functionStmt();
+            break;
+        default:
+            throw Exception(string("Invalid input. Expected declaration. Found: ") + m_token->name());
+            break;
+    }
+    
+    // add attribs
+    if (decl && attribs) {
+        decl->attribs.reset(attribs);
+    }
+    
+    // done
+    return decl;
 }
 
 
@@ -99,49 +99,49 @@ AstDeclaration * Parser::declaration()
  */
 AstStmtList * Parser::statementList()
 {
-	auto ast = new AstStmtList();
-	
-	// { Statement }
-	while(!match(TokenType::End) && !match(TokenType::EndOfFile)) {
-		auto stmt = statement();
-		if (stmt) ast->stmts.push_back(stmt);
-		expect(TokenType::EndOfLine);
-	}
-	
-	return ast;
+    auto ast = new AstStmtList();
+    
+    // { Statement }
+    while(!match(TokenType::End) && !match(TokenType::EndOfFile)) {
+        auto stmt = statement();
+        if (stmt) ast->stmts.push_back(stmt);
+        expect(TokenType::EndOfLine);
+    }
+    
+    return ast;
 }
 
 
 /**
- * Statement	= VariableDecl
- *				| AssignStmt
- *				| FuncCallExpr
- *				| ReturnStmt
+ * Statement    = VariableDecl
+ *              | AssignStmt
+ *              | FuncCallExpr
+ *              | ReturnStmt
  */
 AstStatement * Parser::statement()
 {
-	AstStatement * stmt = nullptr;
-	switch (m_token->type()) {
-		case TokenType::Dim:
-			stmt = variableDecl();
-			break;
-		case TokenType::Return:
-			stmt = returnStmt();
-			break;
-		case TokenType::Identifier:
-			if (m_next->type() == TokenType::Assign) {
-				stmt = assignStmt();
-				break;
-			} else if (m_next->type() == TokenType::ParenOpen) {
-				stmt = callStmt();
-				break;
-			}
-		default:
-			throw Exception(string("Invalid input. Expected statement. Found: ") + m_token->name());
-			break;
-	}
-	
-	return stmt;
+    AstStatement * stmt = nullptr;
+    switch (m_token->type()) {
+        case TokenType::Dim:
+            stmt = variableDecl();
+            break;
+        case TokenType::Return:
+            stmt = returnStmt();
+            break;
+        case TokenType::Identifier:
+            if (m_next->type() == TokenType::Assign) {
+                stmt = assignStmt();
+                break;
+            } else if (m_next->type() == TokenType::ParenOpen) {
+                stmt = callStmt();
+                break;
+            }
+        default:
+            throw Exception(string("Invalid input. Expected statement. Found: ") + m_token->name());
+            break;
+    }
+    
+    return stmt;
 }
 
 
@@ -150,15 +150,15 @@ AstStatement * Parser::statement()
  */
 AstAssignStmt * Parser::assignStmt()
 {
-	// id
-	auto id = identifier();
-	// =
-	expect(TokenType::Assign);
-	// expression
-	auto expr = expression();
-	
-	// done
-	return new AstAssignStmt(id, expr);
+    // id
+    auto id = identifier();
+    // =
+    expect(TokenType::Assign);
+    // expression
+    auto expr = expression();
+    
+    // done
+    return new AstAssignStmt(id, expr);
 }
 
 
@@ -167,7 +167,7 @@ AstAssignStmt * Parser::assignStmt()
  */
 AstCallStmt * Parser::callStmt()
 {
-	return new AstCallStmt(callExpr());
+    return new AstCallStmt(callExpr());
 }
 
 
@@ -176,40 +176,40 @@ AstCallStmt * Parser::callStmt()
  */
 AstReturnStmt * Parser::returnStmt()
 {
-	expect(TokenType::Return);
-	return new AstReturnStmt(expression());
+    expect(TokenType::Return);
+    return new AstReturnStmt(expression());
 }
 
 
 /**
- * Expression	= IntegerLiteral
- *				| StringLiteral
- *				| FuncCallExpr
- *				| id
+ * Expression   = IntegerLiteral
+ *              | StringLiteral
+ *              | FuncCallExpr
+ *              | id
  */
 AstExpression * Parser::expression()
 {
-	AstExpression * expr = nullptr;
-	
-	switch (m_token->type()) {
-		case TokenType::NumericLiteral:
-		case TokenType::StringLiteral:
-			expr = new AstLiteralExpr(m_token);
-			move();
-			break;
-		case TokenType::Identifier:
-			if (m_next->type() == TokenType::ParenOpen) {
-				expr = callExpr();
-				break;
-			} else {
-				expr = identifier();
-				break;
-			}
-		default:
-			throw Exception(string("Invalid input. Expected expression. Found: ") + m_token->name());
-	}
-	
-	return expr;
+    AstExpression * expr = nullptr;
+    
+    switch (m_token->type()) {
+        case TokenType::NumericLiteral:
+        case TokenType::StringLiteral:
+            expr = new AstLiteralExpr(m_token);
+            move();
+            break;
+        case TokenType::Identifier:
+            if (m_next->type() == TokenType::ParenOpen) {
+                expr = callExpr();
+                break;
+            } else {
+                expr = identifier();
+                break;
+            }
+        default:
+            throw Exception(string("Invalid input. Expected expression. Found: ") + m_token->name());
+    }
+    
+    return expr;
 }
 
 
@@ -218,21 +218,21 @@ AstExpression * Parser::expression()
  */
 AstCallExpr * Parser::callExpr()
 {
-	// id
-	auto id = identifier();
-	AstFuncArgList * args = nullptr;
-	
-	// "("
-	expect(TokenType::ParenOpen);
-	
-	// [ funcArgList ]
-	if (!accept(TokenType::ParenClose)) {
-		args = funcArgList();
-		// ")"
-		expect(TokenType::ParenClose);
-	}
-	
-	return new AstCallExpr(id, args);
+    // id
+    auto id = identifier();
+    AstFuncArgList * args = nullptr;
+    
+    // "("
+    expect(TokenType::ParenOpen);
+    
+    // [ funcArgList ]
+    if (!accept(TokenType::ParenClose)) {
+        args = funcArgList();
+        // ")"
+        expect(TokenType::ParenClose);
+    }
+    
+    return new AstCallExpr(id, args);
 }
 
 
@@ -241,35 +241,35 @@ AstCallExpr * Parser::callExpr()
  */
 AstFuncArgList * Parser::funcArgList()
 {
-	auto ast = new AstFuncArgList();
-	
-	do {
-		auto arg = expression();
-		if (arg) ast->args.push_back(arg);
-	} while (accept(TokenType::Comma));
-	
-	return ast;
+    auto ast = new AstFuncArgList();
+    
+    do {
+        auto arg = expression();
+        if (arg) ast->args.push_back(arg);
+    } while (accept(TokenType::Comma));
+    
+    return ast;
 }
 
 
 /**
- * FunctionImpl	= FuncSignature
- *				  StatementList
- *				  "END" "FUNCTION"
+ * FunctionImpl = FuncSignature
+ *              StatementList
+ *              "END" "FUNCTION"
  */
 AstFunctionStmt * Parser::functionStmt()
 {
-	// FuncSignature
-	auto sig = funcSignature();
-	expect(TokenType::EndOfLine);
-	// StatementList
-	auto stmts = statementList();
-	// END FUNCTION
-	expect(TokenType::End);
-	expect(TokenType::Function);
-	
-	// done
-	return new AstFunctionStmt(sig, stmts);
+    // FuncSignature
+    auto sig = funcSignature();
+    expect(TokenType::EndOfLine);
+    // StatementList
+    auto stmts = statementList();
+    // END FUNCTION
+    expect(TokenType::End);
+    expect(TokenType::Function);
+    
+    // done
+    return new AstFunctionStmt(sig, stmts);
 }
 
 
@@ -278,8 +278,8 @@ AstFunctionStmt * Parser::functionStmt()
  */
 AstFunctionDecl * Parser::functionDecl()
 {
-	expect(TokenType::Declare);
-	return new AstFunctionDecl(funcSignature());
+    expect(TokenType::Declare);
+    return new AstFunctionDecl(funcSignature());
 }
 
 
@@ -288,35 +288,35 @@ AstFunctionDecl * Parser::functionDecl()
  */
 AstFuncSignature * Parser::funcSignature()
 {
-	// FUNCTION
-	expect(TokenType::Function);
-	
-	// id
-	auto id = identifier();
-	
-	// args
-	AstFuncParamList * params = nullptr;
-	
-	// "("
-	expect(TokenType::ParenOpen);
-	
-	// [ FuncArgumentList ]
-	if (!accept(TokenType::ParenClose)) {
-		
-		params = funcParamList();
-		
-		// ")"
-		expect(TokenType::ParenClose);
-	}
-	
-	// AS
-	expect(TokenType::As);
-	
-	// type
-	auto type = typeExpr();
-	
-	// done
-	return new AstFuncSignature(id, params, type);
+    // FUNCTION
+    expect(TokenType::Function);
+    
+    // id
+    auto id = identifier();
+    
+    // args
+    AstFuncParamList * params = nullptr;
+    
+    // "("
+    expect(TokenType::ParenOpen);
+    
+    // [ FuncArgumentList ]
+    if (!accept(TokenType::ParenClose)) {
+        
+        params = funcParamList();
+        
+        // ")"
+        expect(TokenType::ParenClose);
+    }
+    
+    // AS
+    expect(TokenType::As);
+    
+    // type
+    auto type = typeExpr();
+    
+    // done
+    return new AstFuncSignature(id, params, type);
 }
 
 
@@ -325,13 +325,13 @@ AstFuncSignature * Parser::funcSignature()
  */
 AstFuncParamList * Parser::funcParamList()
 {
-	auto ast = new AstFuncParamList();
-	do {
-		auto param = funcParam();
-		if (param != nullptr) ast->params.push_back(param);
-	} while (accept(TokenType::Comma));
-	
-	return ast;
+    auto ast = new AstFuncParamList();
+    do {
+        auto param = funcParam();
+        if (param != nullptr) ast->params.push_back(param);
+    } while (accept(TokenType::Comma));
+    
+    return ast;
 }
 
 
@@ -340,130 +340,130 @@ AstFuncParamList * Parser::funcParamList()
  */
 AstFuncParam * Parser::funcParam()
 {
-	// id
-	auto id = identifier();
-	// AS
-	expect(TokenType::As);
-	// type
-	auto type = typeExpr();
-	
-	// done
-	return new AstFuncParam(id, type);
+    // id
+    auto id = identifier();
+    // AS
+    expect(TokenType::As);
+    // type
+    auto type = typeExpr();
+    
+    // done
+    return new AstFuncParam(id, type);
 }
 
 
 /**
- * VariableDecl	= "DIM" id "AS" TypeExpr
+ * VariableDecl = "DIM" id "AS" TypeExpr
  */
 AstVarDecl * Parser::variableDecl()
 {
-	// DIM
-	expect(TokenType::Dim);
-	// id
-	auto id = identifier();
-	// AS
-	expect(TokenType::As);
-	// TypeExpr
-	auto t = typeExpr();
-	// done
-	return new AstVarDecl(id, t);
+    // DIM
+    expect(TokenType::Dim);
+    // id
+    auto id = identifier();
+    // AS
+    expect(TokenType::As);
+    // TypeExpr
+    auto t = typeExpr();
+    // done
+    return new AstVarDecl(id, t);
 }
 
 
 /**
- * TypeExpr	= ("INTEGER" | "BYTE") { "PTR" }
+ * TypeExpr = ("INTEGER" | "BYTE") { "PTR" }
  */
 AstTypeExpr * Parser::typeExpr()
 {
-	AstTypeExpr * ast = nullptr;
-	Token * tmp = m_token;
-	if (accept(TokenType::Integer) || accept(TokenType::Byte)) {
-		int deref = 0;
-		while (accept(TokenType::Ptr)) deref++;
-		ast = new AstTypeExpr(tmp, deref);
-	} else {
-		throw Exception("Expected type");
-	}
-	return ast;
+    AstTypeExpr * ast = nullptr;
+    Token * tmp = m_token;
+    if (accept(TokenType::Integer) || accept(TokenType::Byte)) {
+        int deref = 0;
+        while (accept(TokenType::Ptr)) deref++;
+        ast = new AstTypeExpr(tmp, deref);
+    } else {
+        throw Exception("Expected type");
+    }
+    return ast;
 }
 
 
 /**
- * Attributes	= Attribute { ","  Attribute }
+ * Attributes = Attribute { ","  Attribute }
  */
 AstAttributeList * Parser::attributesList()
 {
-	auto list = new AstAttributeList();
-	
-	do {
-		auto attrib = attribute();
-		if (attrib != nullptr) {
-			list->attribs.push_back(attrib);
-		}
-	} while (accept(TokenType::Comma));
-	
-	return list;
+    auto list = new AstAttributeList();
+    
+    do {
+        auto attrib = attribute();
+        if (attrib != nullptr) {
+            list->attribs.push_back(attrib);
+        }
+    } while (accept(TokenType::Comma));
+    
+    return list;
 }
 
 
 /**
- * Attribute	= id [
- *					( "=" AttribParam
- *					| "(" [ AttribParamList ] ")"
- *					)
- *				]
+ * Attribute    = id [
+ *                  ( "=" AttribParam
+ *                  | "(" [ AttribParamList ] ")"
+ *                  )
+ *              ]
  */
 AstAttribute * Parser::attribute()
 {
-	// id
-	AstAttribute * attr = new AstAttribute(identifier());
-	
-	// "(" AttribParam { "," AttribParam } ")"
-	if (accept(TokenType::ParenOpen)) {
-		if (!accept(TokenType::ParenClose)) {
-			attr->params.reset(attribParamList());
-			expect(TokenType::ParenClose);
-		}
-	}
-	// "=" AttribParam
-	else if (accept(TokenType::Assign)) {
-		auto params = new AstAttribParamList();
-		params->params.push_back(attribParam());
-		attr->params.reset(params);
-	}
-	
-	return attr;
+    // id
+    AstAttribute * attr = new AstAttribute(identifier());
+    
+    // "(" AttribParam { "," AttribParam } ")"
+    if (accept(TokenType::ParenOpen)) {
+        if (!accept(TokenType::ParenClose)) {
+            attr->params.reset(attribParamList());
+            expect(TokenType::ParenClose);
+        }
+    }
+    // "=" AttribParam
+    else if (accept(TokenType::Assign)) {
+        auto params = new AstAttribParamList();
+        params->params.push_back(attribParam());
+        attr->params.reset(params);
+    }
+    
+    return attr;
 }
 
 
 /**
- * AttribParamList	= AttribParam { "," AttribParam }
+ * AttribParamList = AttribParam { "," AttribParam }
  */
 AstAttribParamList * Parser::attribParamList()
 {
-	auto params = new AstAttribParamList();
-	do {
-		auto param = attribParam();
-		if (param) {
-			params->params.push_back(param);
-		}
-	} while(accept(TokenType::Comma));
-	return params;
+    auto params = new AstAttribParamList();
+    do {
+        auto param = attribParam();
+        if (param) {
+            params->params.push_back(param);
+        }
+    } while(accept(TokenType::Comma));
+    return params;
 }
 
 
 /**
- * AttribParam		= IntegerLiteral
- *					| StringLiteral
+ * AttribParam  = IntegerLiteral
+ *              | StringLiteral
  */
 AstLiteralExpr * Parser::attribParam()
 {
-	auto tmp = m_token;
-	if (accept(TokenType::StringLiteral) || accept(TokenType::NumericLiteral)) {
-		return new AstLiteralExpr(tmp);
-	}
-	expect(TokenType::StringLiteral);
-	return nullptr;
+    auto tmp = m_token;
+    if (accept(TokenType::StringLiteral) || accept(TokenType::NumericLiteral)) {
+        return new AstLiteralExpr(tmp);
+    }
+    expect(TokenType::StringLiteral);
+    return nullptr;
 }
 
 
@@ -472,9 +472,9 @@ AstLiteralExpr * Parser::attribParam()
  */
 AstIdentExpr * Parser::identifier()
 {
-	Token * tmp = m_token;
-	expect(TokenType::Identifier);
-	return new AstIdentExpr(tmp);
+    Token * tmp = m_token;
+    expect(TokenType::Identifier);
+    return new AstIdentExpr(tmp);
 }
 
 
@@ -516,6 +516,6 @@ void Parser::expect(TokenType type)
  */
 void Parser::move()
 {
-	m_token = m_next;
-	m_next = m_lexer->next();
+    m_token = m_next;
+    m_next = m_lexer->next();
 }

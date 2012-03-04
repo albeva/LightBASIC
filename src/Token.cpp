@@ -13,16 +13,16 @@ using namespace lbc;
 
 // define array of token names
 static string _tokenNames[] = {
-	#define IMPL_TOKENS(ID, NAME, ...) NAME,
-	ALL_TOKENS(IMPL_TOKENS)
-	#undef IMPL_TOKENS
+    #define IMPL_TOKENS(ID, NAME, ...) NAME,
+    ALL_TOKENS(IMPL_TOKENS)
+    #undef IMPL_TOKENS
 };
 
 // keyword lookup
 static unordered_map<std::string, TokenType> _tokenTypes = boost::assign::map_list_of
-	#define IMPL_TOKENS(ID, NAME, ...) (NAME, TokenType::ID)
-	ALL_TOKENS(IMPL_TOKENS)
-	#undef IMPL_TOKENS
+    #define IMPL_TOKENS(ID, NAME, ...) (NAME, TokenType::ID)
+    ALL_TOKENS(IMPL_TOKENS)
+    #undef IMPL_TOKENS
 ;
 
 
@@ -31,7 +31,7 @@ static unordered_map<std::string, TokenType> _tokenTypes = boost::assign::map_li
  */
 const string & Token::getTokenName(TokenType type)
 {
-	return _tokenNames[(int)type];
+    return _tokenNames[(int)type];
 }
 
 
@@ -40,9 +40,9 @@ const string & Token::getTokenName(TokenType type)
  */
 TokenType Token::getTokenType(const string & id, TokenType def)
 {
-	auto iter = _tokenTypes.find(id);
-	if (iter != _tokenTypes.end()) return iter->second;
-	return def;
+    auto iter = _tokenTypes.find(id);
+    if (iter != _tokenTypes.end()) return iter->second;
+    return def;
 }
 
 
@@ -53,13 +53,13 @@ static boost::pool<> _pool(sizeof(Token));
 // allocate
 void * Token::operator new(size_t)
 {
-	return _pool.malloc();
+    return _pool.malloc();
 }
 
 
 // release
 void Token::operator delete(void * addr)
 {
-	_pool.free(addr);
+    _pool.free(addr);
 }
 

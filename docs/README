@@ -49,7 +49,7 @@ FunctionImpl    = FuncSignature
                   StatementList
                   "END" "FUNCTION"
                 .
-StatementList	= { Statement }
+StatementList    = { Statement }
                 .
 Statement       = VariableDecl
                 | AssignStmt

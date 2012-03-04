@@ -17,14 +17,14 @@ static boost::pool<> _pool(sizeof(Symbol));
 // allocate
 void * Symbol::operator new(size_t)
 {
-	return _pool.malloc();
+    return _pool.malloc();
 }
 
 
 // release
 void Symbol::operator delete(void * addr)
 {
-	_pool.free(addr);
+    _pool.free(addr);
 }
 
 
@@ -35,7 +35,7 @@ void Symbol::operator delete(void * addr)
 Symbol::Symbol(const string & id, const shared_ptr<Type> & type, AstDeclaration * decl, AstDeclaration * impl)
 : m_id(id), m_type(type), m_decl(decl), m_impl(impl)
 {
-	
+    
 }
 
 

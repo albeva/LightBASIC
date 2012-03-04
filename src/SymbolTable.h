@@ -9,38 +9,38 @@
 
 namespace lbc {
 
-	// type information
-	class Symbol;
-	
-	/**
-	 * Keep information about defined symbols (variables, functions, ...)
-	 */
-	struct SymbolTable : NonCopyable
-	{
-		// create new symbol table. Providing parent will inherit the scope
-		SymbolTable(SymbolTable * parent = nullptr);
+    // type information
+    class Symbol;
+    
+    /**
+     * Keep information about defined symbols (variables, functions, ...)
+     */
+    struct SymbolTable : NonCopyable
+    {
+        // create new symbol table. Providing parent will inherit the scope
+        SymbolTable(SymbolTable * parent = nullptr);
         
         // 
         ~SymbolTable();
-		
-		// get parent symbol table
-		SymbolTable * parent() const { return m_parent; }
-		
-		// add new type
-		void add(const string & id, Symbol * type);
-		
-		// exists?
-		bool exists(const string & id, bool recursive = false);
-		
-		// get
-		Symbol * get(const string & id, bool recursive = true);
-		
-	private:
-		// parent table
-		SymbolTable * m_parent;
-		
-		// symbols
-		unordered_map<string, Symbol *> m_symbols;
-	};
+        
+        // get parent symbol table
+        SymbolTable * parent() const { return m_parent; }
+        
+        // add new type
+        void add(const string & id, Symbol * type);
+        
+        // exists?
+        bool exists(const string & id, bool recursive = false);
+        
+        // get
+        Symbol * get(const string & id, bool recursive = true);
+        
+    private:
+        // parent table
+        SymbolTable * m_parent;
+        
+        // symbols
+        unordered_map<string, Symbol *> m_symbols;
+    };
 
 }

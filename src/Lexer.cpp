@@ -119,8 +119,8 @@ static inline bool IsLineOrFileEnd(unsigned char ch)
  */
 Lexer::Lexer(const shared_ptr<Source> & src) : m_src(src)
 {
-	m_input = m_src->begin();
-	m_line = 1;
+    m_input = m_src->begin();
+    m_line = 1;
 }
 
 
@@ -129,18 +129,18 @@ Lexer::Lexer(const shared_ptr<Source> & src) : m_src(src)
  */
 Token * Lexer::next()
 {
-	unsigned char ch, nextCh, info;
-	while((ch = *m_input) != '\0') {
-		m_input++;
-		m_col++;
-		info = CharInfo[ch];
-		
-		// skip spaces
-		if (info & CHAR_HORZ_WS) continue;
-		
-		nextCh = *m_input;
-		
-		
+    unsigned char ch, nextCh, info;
+    while((ch = *m_input) != '\0') {
+        m_input++;
+        m_col++;
+        info = CharInfo[ch];
+        
+        // skip spaces
+        if (info & CHAR_HORZ_WS) continue;
+        
+        nextCh = *m_input;
+        
+        
         // line endings
         if (ch == '\n') {
             if (m_hasStmt) {
@@ -155,7 +155,7 @@ Token * Lexer::next()
             m_col = 0;
             continue;
         }
-		
+        
         // single line comment
         if (ch == '\'') {
             ch = *m_input++;
@@ -163,13 +163,13 @@ Token * Lexer::next()
             m_input--; // TODO get rid of backtracking ?
             continue;
         }
-		
+        
         // multline comments
         if (ch == '/' && nextCh == '\'') {
             multilineComment();
             continue;
         }
-		
+        
         // statement continuation _
         if (ch == '_' && (CharInfo[nextCh] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) == 0) {
             ch = *m_input++;
@@ -183,33 +183,33 @@ Token * Lexer::next()
             }
             continue;
         }
-		
+        
         // has a statement
         m_hasStmt = true;
         m_tokenStart = m_col;
         
         // identifier
         if (info & CHAR_LETTER) return identifier();
-		
+        
         // string literal
         if (ch == '"') return string();
-		
+        
         // number
         if (info & CHAR_NUMBER) return number();
-		
-		// get the operators
-		#define IMPL_TOKENS(ID, STR, ...) if (STR[0] == ch) return MakeToken(TokenType::ID, STR);
-		TKN_OPERATOR(IMPL_TOKENS)
-		#undef IMPL_TOKENS
-		
-		// should not get here ...
+        
+        // get the operators
+        #define IMPL_TOKENS(ID, STR, ...) if (STR[0] == ch) return MakeToken(TokenType::ID, STR);
+        TKN_OPERATOR(IMPL_TOKENS)
+        #undef IMPL_TOKENS
+        
+        // should not get here ...
         // invalid input
         // TODO read until end of garpabe and then return
         std::string invalid = "<invalid>";
         invalid += ch;
         return MakeToken(TokenType::Invalid, invalid);
-	}
-	
+    }
+    
     // end token mark
     m_tokenStart = m_col + 1;
     
@@ -218,8 +218,8 @@ Token * Lexer::next()
         m_hasStmt = false;
         return MakeToken(TokenType::EndOfLine);
     }
-	
-	return MakeToken(TokenType::EndOfFile);
+    
+    return MakeToken(TokenType::EndOfFile);
 }
 
 
@@ -365,7 +365,7 @@ Token * Lexer::string()
  */
 Token * Lexer::MakeToken(TokenType type, int len)
 {
-	return new Token(type, SourceLocation(m_line, m_col, len));
+    return new Token(type, SourceLocation(m_line, m_col, len));
 }
 
 
@@ -374,5 +374,5 @@ Token * Lexer::MakeToken(TokenType type, int len)
  */
 Token * Lexer::MakeToken(TokenType type, const std::string & lexeme, int len)
 {
-	return new Token(type, SourceLocation(m_line, m_col, len == -1 ? lexeme.length() : len), lexeme);
+    return new Token(type, SourceLocation(m_line, m_col, len == -1 ? lexeme.length() : len), lexeme);
 }

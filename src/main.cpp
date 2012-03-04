@@ -20,13 +20,13 @@ using namespace lbc;
 
 int main(int argc, const char * argv[])
 {
-	try {
-		// create the context
-		auto ctx = make_shared<Context>();
-		ctx->add(FS::current_path(), Context::GlobalPath);
-		ctx->add("examples/HelloWorld.bas", Context::Source);
-		// create the parser
-		auto parser = make_shared<Parser>(ctx);
+    try {
+        // create the context
+        auto ctx = make_shared<Context>();
+        ctx->add(FS::current_path(), Context::GlobalPath);
+        ctx->add("examples/HelloWorld.bas", Context::Source);
+        // create the parser
+        auto parser = make_shared<Parser>(ctx);
         // process the files
         for (auto & file : ctx->get(Context::Source)) {
             auto ast = parser->parse(make_shared<SourceFile>(file));
@@ -49,11 +49,11 @@ int main(int argc, const char * argv[])
                 std::cout << "NO AST\n";
             }
         }
-		
-	} catch (Exception e) {
-		cout << "Error: " << e.what() << endl;
-		return EXIT_FAILURE;
-	}
+        
+    } catch (Exception e) {
+        cout << "Error: " << e.what() << endl;
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
 

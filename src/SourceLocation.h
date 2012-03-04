@@ -8,10 +8,10 @@
 
 #pragma once
 namespace lbc {
-	
-	// The source
-	class Source;
-	
+    
+    // The source
+    class Source;
+    
     /**
      * Represent a source location
      */
@@ -19,7 +19,7 @@ namespace lbc {
     {
         /// create Source Reference
         SourceLocation(unsigned int line, unsigned short column, unsigned short length)
-		: line(line), column(column), length(length)
+        : line(line), column(column), length(length)
         {}
         
         // copy contructor
@@ -33,12 +33,12 @@ namespace lbc {
         
         // get length
         inline unsigned short getLength() const { return length; }
-		
-	private:
-        unsigned int		line;
-        unsigned short		column;
-        unsigned short		length;
+        
+    private:
+        unsigned int        line;
+        unsigned short        column;
+        unsigned short        length;
     };
 
-	
+    
 }

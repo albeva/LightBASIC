@@ -42,8 +42,8 @@ void SymbolTable::add(const string & id, Symbol * sym)
  */
 bool SymbolTable::exists(const string & id, bool recursive)
 {
-	if (m_symbols.find(id) != m_symbols.end()) return true;
-	return recursive && m_parent != nullptr && m_parent->exists(id, true);
+    if (m_symbols.find(id) != m_symbols.end()) return true;
+    return recursive && m_parent != nullptr && m_parent->exists(id, true);
 }
 
 
@@ -53,9 +53,9 @@ bool SymbolTable::exists(const string & id, bool recursive)
 Symbol * SymbolTable::get(const string & id, bool recursive)
 {
     // symbol exists?
-	auto iter = m_symbols.find(id);
-	if (iter != m_symbols.end()) return iter->second;
-	
+    auto iter = m_symbols.find(id);
+    if (iter != m_symbols.end()) return iter->second;
+    
     // get from the parent?
     // DON'T cache because symbol table owns the symbols
     // so when cleaning up there is no way to know to wich table
@@ -64,8 +64,8 @@ Symbol * SymbolTable::get(const string & id, bool recursive)
     // - make symbols shared_ptr - decrease perfomance and increase memory usage
     // - have symbols to know their table - simple. probably will go for this. later
     // - some other option?
-	if (recursive && m_parent != nullptr) return m_parent->get(id, true);
-	
+    if (recursive && m_parent != nullptr) return m_parent->get(id, true);
+    
     // nothing found.
-	return nullptr;
+    return nullptr;
 }

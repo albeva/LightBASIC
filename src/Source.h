@@ -8,16 +8,16 @@
 #pragma once
 
 namespace lbc {
-	
+    
     // forward decl
     class SourceLocation;
-	
-	/**
+    
+    /**
      * Base class for Source providers (for exmaple SourceString and SourceFile)
      */
     class Source : boost::noncopyable
     {
-	public:
+    public:
         
         // character type used by the Source
         typedef char CharT;
@@ -40,7 +40,7 @@ namespace lbc {
             // node
             typedef const CharT *                   nodeptr;
             
-		private:
+        private:
             friend class Source;
             
             // create new iterator
@@ -57,7 +57,7 @@ namespace lbc {
                 }
             };
             
-		public:
+        public:
             
             /// Default constructor
             Iterator() : m_p(nullptr), m_src(nullptr) {};
@@ -228,12 +228,12 @@ namespace lbc {
         // get string
         string getString(const SourceLocation & loc);
         
-	protected:
+    protected:
         
         /// pointer to character array
         char * m_data;
         
-	private:
+    private:
         typedef uint32_t OffsetType;
         
         /// Add cache line
@@ -257,5 +257,5 @@ namespace lbc {
         vector<OffsetType> m_lineCache;
     };
 
-	
+    
 }

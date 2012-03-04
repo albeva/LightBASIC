@@ -10,55 +10,55 @@
 #include "Ast.def.h"
 
 namespace lbc {
-	
-	// forward decl
-	class Context;
-	class Lexer;
-	class Token;
+    
+    // forward decl
+    class Context;
+    class Lexer;
+    class Token;
     class Source;
-	
-	// TokenType enum
-	enum class TokenType : int;
+    
+    // TokenType enum
+    enum class TokenType : int;
 
-	// forward declare Ast nodes
-	AST_DECLARE_CLASSES();
-	
-	/**
-	 * This class parses the tokens into AST
-	 */
-	struct Parser : NonCopyable
-	{
-		// create new parser object
-		Parser(const shared_ptr<Context> & ctx);
-		
-		// parse and return AstProgram
-		AstProgram * parse(const shared_ptr<Source> & source);
-		
-	private:
-		
-		// program
-		AstDeclaration * declaration();
-		AstAttributeList * attributesList();
-		AstAttribParamList * attribParamList();
-		AstAttribute * attribute();
-		AstIdentExpr * identifier();
-		AstLiteralExpr * attribParam();
-		AstVarDecl * variableDecl();
-		AstTypeExpr * typeExpr();
-		AstFunctionDecl * functionDecl();
-		AstFuncSignature * funcSignature();
-		AstFuncParamList * funcParamList();
-		AstFuncParam * funcParam();
-		AstFunctionStmt * functionStmt();
-		AstStmtList * statementList();
-		AstStatement * statement();
-		AstAssignStmt * assignStmt();
-		AstCallStmt * callStmt();
-		AstCallExpr * callExpr();
-		AstExpression * expression();
-		AstReturnStmt * returnStmt();
-		AstFuncArgList * funcArgList();
-		
+    // forward declare Ast nodes
+    AST_DECLARE_CLASSES();
+    
+    /**
+     * This class parses the tokens into AST
+     */
+    struct Parser : NonCopyable
+    {
+        // create new parser object
+        Parser(const shared_ptr<Context> & ctx);
+        
+        // parse and return AstProgram
+        AstProgram * parse(const shared_ptr<Source> & source);
+        
+    private:
+        
+        // program
+        AstDeclaration * declaration();
+        AstAttributeList * attributesList();
+        AstAttribParamList * attribParamList();
+        AstAttribute * attribute();
+        AstIdentExpr * identifier();
+        AstLiteralExpr * attribParam();
+        AstVarDecl * variableDecl();
+        AstTypeExpr * typeExpr();
+        AstFunctionDecl * functionDecl();
+        AstFuncSignature * funcSignature();
+        AstFuncParamList * funcParamList();
+        AstFuncParam * funcParam();
+        AstFunctionStmt * functionStmt();
+        AstStmtList * statementList();
+        AstStatement * statement();
+        AstAssignStmt * assignStmt();
+        AstCallStmt * callStmt();
+        AstCallExpr * callExpr();
+        AstExpression * expression();
+        AstReturnStmt * returnStmt();
+        AstFuncArgList * funcArgList();
+        
         // match current token
         bool match(TokenType type) const;
         
@@ -72,10 +72,10 @@ namespace lbc {
         void move();
         
         // tokens
-		shared_ptr<Context>	m_ctx;
-        Token				* m_token;
-        Token				* m_next;
-		Lexer				* m_lexer;
-	};
-	
+        shared_ptr<Context>    m_ctx;
+        Token                * m_token;
+        Token                * m_next;
+        Lexer                * m_lexer;
+    };
+    
 }
