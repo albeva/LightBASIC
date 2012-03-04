@@ -37,3 +37,10 @@ Symbol::Symbol(const string & id, const shared_ptr<Type> & type, AstDeclaration 
 {
 	
 }
+
+
+
+/**
+ * clean up
+ */
+Symbol::~Symbol() {}

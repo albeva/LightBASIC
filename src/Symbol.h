@@ -21,6 +21,9 @@ namespace lbc {
 	{
 		// create new symbol
 		Symbol(const string & id, const shared_ptr<Type> & type, AstDeclaration * decl = nullptr, AstDeclaration * impl = nullptr);
+        
+        // clean up
+        ~Symbol();
 		
 		// get id
 		const string & id() const { return m_id; }

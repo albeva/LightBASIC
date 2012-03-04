@@ -18,7 +18,10 @@ namespace lbc {
 	struct SymbolTable : NonCopyable
 	{
 		// create new symbol table. Providing parent will inherit the scope
-		SymbolTable(SymbolTable * parent = nullptr) : m_parent(parent) {}
+		SymbolTable(SymbolTable * parent = nullptr);
+        
+        // 
+        ~SymbolTable();
 		
 		// get parent symbol table
 		SymbolTable * parent() const { return m_parent; }
@@ -31,10 +34,6 @@ namespace lbc {
 		
 		// get
 		Symbol * get(const string & id, bool recursive = true);
-		
-		// allocate objects from the pool
-		void * operator new(size_t);
-		void operator delete(void *);
 		
 	private:
 		// parent table

@@ -6,32 +6,33 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 #include "SymbolTable.h"
+#include "Symbol.h"
 using namespace lbc;
 
-// Tokens memory pool
-static boost::pool<> _pool(sizeof(SymbolTable));
 
-
-// allocate
-void * SymbolTable::operator new(size_t)
+/**
+ * Create the symbol table
+ */
+SymbolTable::SymbolTable(SymbolTable * parent) : m_parent(parent)
 {
-	return _pool.malloc();
 }
 
 
-// release
-void SymbolTable::operator delete(void * addr)
+/**
+ * clean up the symbol table
+ */
+SymbolTable::~SymbolTable()
 {
-	_pool.free(addr);
+    for (auto iter : m_symbols) delete iter.second;
 }
 
 
 /**
  * add symbol to the table. Overwrite if exists.
  */
-void SymbolTable::add(const string & id, Symbol * type)
+void SymbolTable::add(const string & id, Symbol * sym)
 {
-	m_symbols[id] = type;
+    m_symbols[id] = sym;
 }
 
 
@@ -51,14 +52,20 @@ bool SymbolTable::exists(const string & id, bool recursive)
  */
 Symbol * SymbolTable::get(const string & id, bool recursive)
 {
+    // symbol exists?
 	auto iter = m_symbols.find(id);
 	if (iter != m_symbols.end()) return iter->second;
 	
-	if (recursive && m_parent != nullptr) {
-		auto sym = m_parent->get(id, true);
-		if (sym != nullptr) m_symbols[id] = sym;
-		return sym;
-	}
+    // get from the parent?
+    // DON'T cache because symbol table owns the symbols
+    // so when cleaning up there is no way to know to wich table
+    // symbol belongs. Options:
+    // - seperate hashmap for cached symbols. Simple, but reduce perfomance and increase memory usage
+    // - make symbols shared_ptr - decrease perfomance and increase memory usage
+    // - have symbols to know their table - simple. probably will go for this. later
+    // - some other option?
+	if (recursive && m_parent != nullptr) return m_parent->get(id, true);
 	
+    // nothing found.
 	return nullptr;
 }
