@@ -12,78 +12,78 @@ Simple fullscale compiler
 
 EBNF
 ------
-Program			= DeclarationList
-				.
-DeclarationList	= { Declaration }
-				.
-Declaration		= [ "[" Attributes "]" ]
-				( VariableDecl
-				| FunctionDecl
-				| FunctionImpl
-				)
-				.
-AttributeList	= Attribute { ","  Attribute }
-				.
-Attribute		= id [
-					( "=" AttribParam
-					| "(" [ AttribParamList ] ")"
-					)
-				]
-				.
-AttribParamList	= AttribParam { "," AttribParam }
-				.
-AttribParam		= IntegerLiteral
-				| StringLiteral
-				.
-VariableDecl	= "DIM" id "AS" TypeExpr
-				.
-FunctionDecl	= "DECLARE" FunctionSignature
-				.
-FuncSignature	= "FUNCTION" id "(" [ FuncParamList ] ")" "AS" TypeExpr
-				.
-FuncParamList	= FuncParam { "," FuncParam }
-				.
-FuncParam		= id "AS" TypeExpr
-				.
-TypeExpr		= TypeExpr	= ("INTEGER" | "BYTE") { "PTR" }
-				.
-FunctionImpl	= FuncSignature
-				  StatementList
-				  "END" "FUNCTION"
-				.
+Program         = DeclarationList
+                .
+DeclarationList = { Declaration }
+                .
+Declaration     = [ "[" Attributes "]" ]
+                ( VariableDecl
+                | FunctionDecl
+                | FunctionImpl
+                )
+                .
+AttributeList   = Attribute { ","  Attribute }
+                .
+Attribute       = id [
+                    ( "=" AttribParam
+                    | "(" [ AttribParamList ] ")"
+                    )
+                ]
+                .
+AttribParamList = AttribParam { "," AttribParam }
+                .
+AttribParam     = IntegerLiteral
+                | StringLiteral
+                .
+VariableDecl    = "DIM" id "AS" TypeExpr
+                .
+FunctionDecl    = "DECLARE" FunctionSignature
+                .
+FuncSignature   = "FUNCTION" id "(" [ FuncParamList ] ")" "AS" TypeExpr
+                .
+FuncParamList   = FuncParam { "," FuncParam }
+                .
+FuncParam       = id "AS" TypeExpr
+                .
+TypeExpr        = TypeExpr	= ("INTEGER" | "BYTE") { "PTR" }
+                .
+FunctionImpl    = FuncSignature
+                  StatementList
+                  "END" "FUNCTION"
+                .
 StatementList	= { Statement }
-				.
-Statement		= VariableDecl
-				| AssignStmt
-				| CallStmt
-				| ReturnStmt
-				.
-AssignStmt		= id "=" Expression
-				.
-CallStmt		= CallExpr
-				.
-Expression		= IntegerLiteral
-				| StringLiteral
-				| CallExpr
-				| id
-				.
-CallExpr		= id "(" [ funcArgList ] ")"
-				.
-funcArgList		= Expression { "," Expression }
-				.
-ReturnStmt		= "RETURN" Expression
-				.
+                .
+Statement       = VariableDecl
+                | AssignStmt
+                | CallStmt
+                | ReturnStmt
+                .
+AssignStmt      = id "=" Expression
+                .
+CallStmt        = CallExpr
+                .
+Expression      = IntegerLiteral
+                | StringLiteral
+                | CallExpr
+                | id
+                .
+CallExpr        = id "(" [ funcArgList ] ")"
+                .
+funcArgList     = Expression { "," Expression }
+                .
+ReturnStmt      = "RETURN" Expression
+                .
 
 Example
 ---------
 ' Declare puts from libc
-[Alias("puts"), Lib("libc")] _
+[Alias = "puts", Lib = "libc", Extern = "C"] _
 DECLARE FUNCTION puts(str AS BYTE PTR) AS INTEGER
 
 ' implement main function
 FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
-	DIM msg AS BYTE PTR
-	msg = "Hello World"
-	puts(msg)
+    DIM msg AS BYTE PTR
+    msg = "Hello World"
+    puts(msg)
 END FUNCTION
 
