@@ -22,9 +22,7 @@ namespace lbc {
 		// create new visitor
 		AstVisitor(bool debug = false) : m_debug(debug) {}
 		
-		#define DECL_AST(C, ...) virtual void visit(C * ast) { \
-			if(m_debug) std::cout << "Calling undefined visitor method for class " << #C << std::endl; \
-		};
+		#define DECL_AST(C, ...) virtual void visit(C * ast);
 		AST_CONTENT_NODES(DECL_AST)
 		#undef DECL_AST
 		

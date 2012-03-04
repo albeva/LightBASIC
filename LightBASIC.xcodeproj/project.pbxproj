@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
 		369056DD1503881700E2C917 /* CodeGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* CodeGen.cpp */; };
 		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
@@ -46,6 +47,7 @@
 /* Begin PBXFileReference section */
 		365F7A4C14F90D7A00553D98 /* LightBASIC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LightBASIC; sourceTree = BUILT_PRODUCTS_DIR; };
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
+		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		369056B61503881700E2C917 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ast.cpp; path = src/Ast.cpp; sourceTree = SOURCE_ROOT; };
 		369056B71503881700E2C917 /* Ast.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.def.h; path = src/Ast.def.h; sourceTree = SOURCE_ROOT; };
 		369056B81503881700E2C917 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.h; path = src/Ast.h; sourceTree = SOURCE_ROOT; };
@@ -145,12 +147,13 @@
 		369056EC1503883900E2C917 /* Ast */ = {
 			isa = PBXGroup;
 			children = (
-				369056B61503881700E2C917 /* Ast.cpp */,
 				369056B71503881700E2C917 /* Ast.def.h */,
 				369056B81503881700E2C917 /* Ast.h */,
+				369056B61503881700E2C917 /* Ast.cpp */,
 				369056B91503881700E2C917 /* AstVisitor.h */,
-				369056C71503881700E2C917 /* RecursiveAstVisitor.cpp */,
+				36779A091503A96D00369AFF /* AstVisitor.cpp */,
 				369056C81503881700E2C917 /* RecursiveAstVisitor.h */,
+				369056C71503881700E2C917 /* RecursiveAstVisitor.cpp */,
 				369056F11503888D00E2C917 /* Printer */,
 			);
 			name = Ast;
@@ -159,8 +162,8 @@
 		369056ED1503884300E2C917 /* Code Generation */ = {
 			isa = PBXGroup;
 			children = (
-				369056BA1503881700E2C917 /* CodeGen.cpp */,
 				369056BB1503881700E2C917 /* CodeGen.h */,
+				369056BA1503881700E2C917 /* CodeGen.cpp */,
 			);
 			name = "Code Generation";
 			sourceTree = "<group>";
@@ -168,8 +171,8 @@
 		369056EE1503884F00E2C917 /* Context */ = {
 			isa = PBXGroup;
 			children = (
-				369056BC1503881700E2C917 /* Context.cpp */,
 				369056BD1503881700E2C917 /* Context.h */,
+				369056BC1503881700E2C917 /* Context.cpp */,
 			);
 			name = Context;
 			sourceTree = "<group>";
@@ -177,11 +180,11 @@
 		369056EF1503885A00E2C917 /* Lexer */ = {
 			isa = PBXGroup;
 			children = (
-				369056BE1503881700E2C917 /* Lexer.cpp */,
-				369056BF1503881700E2C917 /* Lexer.h */,
-				369056D61503881700E2C917 /* Token.cpp */,
 				369056D71503881700E2C917 /* Token.def.h */,
 				369056D81503881700E2C917 /* Token.h */,
+				369056D61503881700E2C917 /* Token.cpp */,
+				369056BF1503881700E2C917 /* Lexer.h */,
+				369056BE1503881700E2C917 /* Lexer.cpp */,
 			);
 			name = Lexer;
 			sourceTree = "<group>";
@@ -189,8 +192,8 @@
 		369056F01503886600E2C917 /* Parser */ = {
 			isa = PBXGroup;
 			children = (
-				369056C21503881700E2C917 /* Parser.cpp */,
 				369056C31503881700E2C917 /* Parser.h */,
+				369056C21503881700E2C917 /* Parser.cpp */,
 			);
 			name = Parser;
 			sourceTree = "<group>";
@@ -198,8 +201,8 @@
 		369056F11503888D00E2C917 /* Printer */ = {
 			isa = PBXGroup;
 			children = (
-				369056C41503881700E2C917 /* PrinterVisitor.cpp */,
 				369056C51503881700E2C917 /* PrinterVisitor.h */,
+				369056C41503881700E2C917 /* PrinterVisitor.cpp */,
 			);
 			name = Printer;
 			sourceTree = "<group>";
@@ -207,8 +210,8 @@
 		369056F21503889700E2C917 /* Semantic Analyser */ = {
 			isa = PBXGroup;
 			children = (
-				369056C91503881700E2C917 /* SemanticAnalyser.cpp */,
 				369056CA1503881700E2C917 /* SemanticAnalyser.h */,
+				369056C91503881700E2C917 /* SemanticAnalyser.cpp */,
 			);
 			name = "Semantic Analyser";
 			sourceTree = "<group>";
@@ -216,13 +219,13 @@
 		369056F3150388A600E2C917 /* Input Source */ = {
 			isa = PBXGroup;
 			children = (
-				369056CB1503881700E2C917 /* Source.cpp */,
-				369056CC1503881700E2C917 /* Source.h */,
-				369056CD1503881700E2C917 /* SourceFile.cpp */,
-				369056CE1503881700E2C917 /* SourceFile.h */,
 				369056CF1503881700E2C917 /* SourceLocation.h */,
-				369056D01503881700E2C917 /* SourceString.cpp */,
+				369056CC1503881700E2C917 /* Source.h */,
+				369056CB1503881700E2C917 /* Source.cpp */,
+				369056CE1503881700E2C917 /* SourceFile.h */,
+				369056CD1503881700E2C917 /* SourceFile.cpp */,
 				369056D11503881700E2C917 /* SourceString.h */,
+				369056D01503881700E2C917 /* SourceString.cpp */,
 			);
 			name = "Input Source";
 			sourceTree = "<group>";
@@ -230,10 +233,10 @@
 		369056F4150388C100E2C917 /* Symbol table */ = {
 			isa = PBXGroup;
 			children = (
-				369056D21503881700E2C917 /* Symbol.cpp */,
 				369056D31503881700E2C917 /* Symbol.h */,
-				369056D41503881700E2C917 /* SymbolTable.cpp */,
+				369056D21503881700E2C917 /* Symbol.cpp */,
 				369056D51503881700E2C917 /* SymbolTable.h */,
+				369056D41503881700E2C917 /* SymbolTable.cpp */,
 			);
 			name = "Symbol table";
 			sourceTree = "<group>";
@@ -367,6 +370,7 @@
 				369056E91503881700E2C917 /* SymbolTable.cpp in Sources */,
 				369056EA1503881700E2C917 /* Token.cpp in Sources */,
 				369056EB1503881700E2C917 /* Type.cpp in Sources */,
+				36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
