@@ -15,6 +15,7 @@ namespace lbc {
 	class Context;
 	class Lexer;
 	class Token;
+    class Source;
 	
 	// TokenType enum
 	enum class TokenType : int;
@@ -31,12 +32,11 @@ namespace lbc {
 		Parser(const shared_ptr<Context> & ctx);
 		
 		// parse and return AstProgram
-		AstProgram * parse();
+		AstProgram * parse(const shared_ptr<Source> & source);
 		
 	private:
 		
 		// program
-		AstDeclList * declList();
 		AstDeclaration * declaration();
 		AstAttributeList * attributesList();
 		AstAttribParamList * attribParamList();

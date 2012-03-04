@@ -57,9 +57,11 @@ namespace lbc {
 	 */
 	struct AstProgram : Ast {
 		// create
-		AstProgram();
+		AstProgram(SymbolTable * table = nullptr);
 		// list of declaration lists
-		boost::ptr_vector<AstDeclList> list;
+		boost::ptr_vector<AstDeclaration> decls;
+		// symbol table
+		unique_ptr<SymbolTable> symbolTable;
 		// content node
 		DECLARE_AST(AstProgram);
 	};
@@ -68,22 +70,6 @@ namespace lbc {
 	//--------------------------------------------------------------------------
 	// Declarations
 	//--------------------------------------------------------------------------
-	
-	
-	/**
-	 * list of declarations
-	 */
-	struct AstDeclList : Ast
-	{
-		// create
-		AstDeclList(SymbolTable * table = nullptr);
-		// hold list of declarations
-		boost::ptr_vector<AstDeclaration> decls;
-		// symbol table
-		unique_ptr<SymbolTable> symbolTable;
-		// content node
-		DECLARE_AST(AstDeclList)
-	};
 	
 	
 	/**

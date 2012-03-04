@@ -24,8 +24,6 @@ namespace lbc {
 		virtual void visit(AstProgram * ast);
 		// AstStmtList
 		virtual void visit(AstStmtList * ast);
-		// AstDeclList
-		virtual void visit(AstDeclList * ast);
 		// AstFuncParamList
 		virtual void visit(AstFuncParamList * ast);
 		// AstFuncArgList

@@ -31,7 +31,7 @@ CodeGen::CodeGen() : m_module(nullptr), m_table(nullptr), m_function(nullptr)
 
 //
 // AstDeclList
-void CodeGen::visit(AstDeclList * ast)
+void CodeGen::visit(AstProgram * ast)
 {
 	m_module = new llvm::Module("app", llvm::getGlobalContext());
 	m_table = ast->symbolTable.get();

@@ -30,8 +30,8 @@ SemanticAnalyser::SemanticAnalyser()
 
 
 //
-// AstDeclList
-void SemanticAnalyser::visit(AstDeclList * ast)
+// AstProgram
+void SemanticAnalyser::visit(AstProgram * ast)
 {
 	// create new scope
 	ast->symbolTable.reset((m_table = new SymbolTable(m_table)));

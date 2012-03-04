@@ -27,7 +27,6 @@
 // extend statement
 #define AST_DECL_NODES(_)		\
 	_( AstDeclaration )			\
-	_( AstDeclList )			\
 	_( AstVarDecl )				\
 	_( AstFunctionDecl )		\
 	_( AstFuncSignature )		\
@@ -36,6 +35,7 @@
 
 //
 // expression statements. these extend the AstExpression
+// AstExpression is a root node, but it has content. so place it here
 #define AST_EXPR_NODES(_)		\
 	_( AstExpression )			\
 	_( AstIdentExpr )			\

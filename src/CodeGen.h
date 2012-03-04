@@ -29,7 +29,7 @@ namespace lbc {
 		CodeGen();
 		
 		// AstDeclList
-		virtual void visit(AstDeclList * ast);
+		virtual void visit(AstProgram * ast);
 		
 		// AstStmtList
 		//		virtual void visit(AstStmtList * ast);

@@ -26,10 +26,7 @@ namespace lbc {
 		SemanticAnalyser();
 		
 		// AstDeclList
-		virtual void visit(AstDeclList * ast);
-		
-		// AstStmtList
-//		virtual void visit(AstStmtList * ast);
+		virtual void visit(AstProgram * ast);
 		
 		// AstFunctionDecl
 		virtual void visit(AstFunctionDecl * ast);

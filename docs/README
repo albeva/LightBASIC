@@ -12,9 +12,7 @@ Simple fullscale compiler
 
 EBNF
 ------
-Program         = DeclarationList
-                .
-DeclarationList = { Declaration }
+Program         = { Declaration }
                 .
 Declaration     = [ "[" Attributes "]" ]
                 ( VariableDecl

@@ -27,18 +27,14 @@ using namespace lbc;
 AST_CONTENT_NODES(IMPL_AST)
 #undef IMPL_AST
 
+
 // AstProgram
-AstProgram::AstProgram()
+AstProgram::AstProgram(SymbolTable * table) : symbolTable(table)
 {}
 
 
 // AstDeclaration
 AstDeclaration::AstDeclaration(AstAttributeList * attribs) : attribs(attribs)
-{}
-
-
-// AstDeclList
-AstDeclList::AstDeclList(SymbolTable * table) : symbolTable(table)
 {}
 
 

@@ -24,38 +24,30 @@ Parser::Parser(const shared_ptr<Context> & ctx)
 
 
 /**
- * Parse the input and return the
- * AST tree
- * Program = { DeclList } // each list is a sperate file!
+ * Parse the input and return the Ast tree
+ * Program = { Declaration }
  */
-AstProgram * Parser::parse()
+AstProgram * Parser::parse(const shared_ptr<Source> & source)
 {
-	auto root = new AstProgram();
-	for (auto src : m_ctx->get(Context::Source)) {
-		auto source = make_shared<SourceFile>(src);
-		m_lexer = new Lexer(source);
-		move(); move();
-		auto ast = declList();
-		if (ast != nullptr) root->list.push_back(ast);
-	}	
-	return root;
-}
-
-
-/**
- * DeclList = { Declaration }
- */
-AstDeclList * Parser::declList()
-{
-	auto decls = new AstDeclList();
-	AstDeclaration * ast = nullptr;
-	
-	while (!match(TokenType::EndOfFile) && (ast = declaration())) {
-		decls->decls.push_back(ast);
-		expect(TokenType::EndOfLine);
-	}
-	
-	return decls;
+    // init the lexer
+    m_lexer = new Lexer(source);
+    move(); move();
+    
+    // resulting ast node
+    auto ast = new AstProgram();
+    
+    // { DeclList }
+    while (!match(TokenType::EndOfFile)) {
+    	ast->decls.push_back(declaration());
+    	expect(TokenType::EndOfLine);
+    }
+    
+    // clean up
+    delete m_lexer;
+    m_lexer = nullptr;
+    
+    // done
+    return ast;
 }
 
 

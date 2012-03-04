@@ -15,7 +15,7 @@ using namespace lbc;
 // AstProgram
 void RecursiveAstVisitor::visit(AstProgram * ast)
 {
-	for (auto & list : ast->list) list.accept(this);
+	for (auto & decl : ast->decls) decl.accept(this);
 }
 
 
@@ -24,14 +24,6 @@ void RecursiveAstVisitor::visit(AstProgram * ast)
 void RecursiveAstVisitor::visit(AstStmtList * ast)
 {
 	for (auto & stmt : ast->stmts) stmt.accept(this);
-}
-
-
-//
-// AstDeclList
-void RecursiveAstVisitor::visit(AstDeclList * ast)
-{
-	for (auto & decl : ast->decls) decl.accept(this);
 }
 
 
