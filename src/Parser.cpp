@@ -34,7 +34,7 @@ AstProgram * Parser::parse(const shared_ptr<Source> & source)
     move(); move();
     
     // resulting ast node
-    auto ast = new AstProgram();
+    auto ast = new AstProgram(source->getName());
     
     // { DeclList }
     while (!match(TokenType::EndOfFile)) {

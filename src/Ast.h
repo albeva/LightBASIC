@@ -57,7 +57,9 @@ namespace lbc {
      */
     struct AstProgram : Ast {
         // create
-        AstProgram(SymbolTable * table = nullptr);
+        AstProgram(const string & name);
+        // program name
+        string name;
         // list of declaration lists
         boost::ptr_vector<AstDeclaration> decls;
         // symbol table

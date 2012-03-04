@@ -19,6 +19,8 @@
 #include "llvm/Module.h"
 #include "llvm/Analysis/Verifier.h"
 #include "llvm/Support/IRBuilder.h"
+#include <llvm/Support/raw_ostream.h>
+
 
 using namespace lbc;
 
@@ -38,10 +40,17 @@ CodeGen::CodeGen()
 // AstDeclList
 void CodeGen::visit(AstProgram * ast)
 {
-    m_module = new llvm::Module("app", llvm::getGlobalContext());
+    m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
     m_table = ast->symbolTable.get();
     for (auto & decl : ast->decls) decl.accept(this);
-    m_module->dump();
+    if (!llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
+        string errors;
+        llvm::raw_fd_ostream stream((ast->name + ".ll").c_str(), errors);
+        m_module->print(stream, nullptr);
+        std::cout << errors << '\n';
+        
+        
+    }
 }
 
 
@@ -100,10 +109,13 @@ void CodeGen::visit(AstFuncSignature * ast)
         // get the symbol
         auto sym = m_table->get(id);
         auto llvmType = getType(sym->type(), m_module->getContext());
+        string alias = id;
+        if (id == "MAIN") alias = "main";
+        else if (id == "PRINT") alias = "puts"; // TEMP hack
         m_function = llvm::Function::Create(
              llvm::cast<llvm::FunctionType>(llvmType),
              llvm::GlobalValue::ExternalLinkage,
-             id == "PRINT" ? "puts" : id, // temporary HACK. until attributes are properly proccessed
+             alias,
              m_module
         );
         m_function->setCallingConv(llvm::CallingConv::C);
@@ -184,10 +196,12 @@ void CodeGen::visit(AstLiteralExpr * ast)
         global->setInitializer(const_value);
         
         std::vector<llvm::Constant*> indeces;
-        llvm::ConstantInt * const_int64 = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(64, 0, false));
+        llvm::ConstantInt * const_int64 = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(32, 0, false));
         indeces.push_back(const_int64);
         indeces.push_back(const_int64);
         m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
+    } else if (ast->token->type() == TokenType::NumericLiteral) {
+        m_value = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(32, 0, false));
     }
 }
 
@@ -196,7 +210,16 @@ void CodeGen::visit(AstLiteralExpr * ast)
 // AstVarDecl
 void CodeGen::visit(AstVarDecl * ast)
 {
-    
+    const string & id = ast->id->token->lexeme();
+    auto sym = m_table->get(id);
+    auto llType = getType(sym->type(), m_module->getContext());
+    auto alloc = new llvm::AllocaInst(llType, id, m_block);
+    if (sym->type()->kind() == Type::Ptr) {
+        alloc->setAlignment(8);
+    } else {
+        alloc->setAlignment(4);
+    }
+    sym->value = alloc;
 }
 
 
@@ -204,7 +227,44 @@ void CodeGen::visit(AstVarDecl * ast)
 // AstAssignStmt
 void CodeGen::visit(AstAssignStmt * ast)
 {
+    const string & id = ast->id->token->lexeme();
+    auto sym = m_table->get(id);
+    ast->expr->accept(this);
+    auto store = new llvm::StoreInst(m_value, sym->value, m_block);
+    if (sym->type()->kind() == Type::Ptr) {
+        store->setAlignment(8); // size of the ptr
+    } else {
+        store->setAlignment(4); // size of the ptr
+    }
     
+}
+
+
+//
+// AstCallExpr
+void CodeGen::visit(AstCallExpr * ast)
+{
+    const string & id = ast->id->token->lexeme();
+    auto sym = m_table->get(id);
+    
+    vector<llvm::Value *> args;
+    if (ast->args) {
+        for (auto & arg : ast->args->args) {
+            arg.accept(this);
+            args.push_back(m_value);
+        }
+    }
+    
+    m_value = llvm::CallInst::Create(sym->value, args, id, m_block);
+}
+
+
+//
+// AstIdentExpr
+void CodeGen::visit(AstIdentExpr * ast)
+{
+    const string & id = ast->token->lexeme();
+    m_value = new llvm::LoadInst(m_table->get(id)->value, "", m_block);
 }
 
 
@@ -214,21 +274,3 @@ void CodeGen::visit(AstCallStmt * ast)
 {
     ast->expr->accept(this);
 }
-
-
-//
-// AstCallExpr
-void CodeGen::visit(AstCallExpr * ast)
-{
-    if (ast->args) ast->args->accept(this);
-}
-
-
-//
-// AstIdentExpr
-void CodeGen::visit(AstIdentExpr * ast)
-{
-    
-}
-
-

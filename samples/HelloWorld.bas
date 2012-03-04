@@ -1,19 +1,20 @@
 ' Declare puts from libc
 [Extern = "C", Alias = "puts", Lib = "libc"] _
-DECLARE FUNCTION print(str AS BYTE PTR) AS INTEGER
+Declare Function print(str As Byte Ptr) As Integer
 
-function message() AS BYTE PTR
-    return "I am the first LightBASIC app"
-end function
+Function message() As Byte Ptr
+    Return "I am the first LightBASIC app"
+End Function
 
 ' implement main function
-FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
-    DIM greeting AS BYTE PTR
+Function main(argc As Integer, argv AS Byte Ptr Ptr) As Integer
+    Dim greeting As Byte Ptr
     greeting = "Hello World,"
     print(greeting)
     print(message())
     print("Bye fo now...")
-END FUNCTION
+    Return 0
+End Function
 
 /'
     // This is equivelent C program

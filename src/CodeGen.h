@@ -30,11 +30,11 @@ namespace lbc {
     {
         CodeGen();
         
+        // get the generated module
+        llvm::Module * getModule() const { return m_module; }
+        
         // AstDeclList
         virtual void visit(AstProgram * ast);
-        
-        // AstStmtList
-        //        virtual void visit(AstStmtList * ast);
         
         // AstFunctionDecl
         virtual void visit(AstFunctionDecl * ast);

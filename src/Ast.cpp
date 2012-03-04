@@ -29,7 +29,7 @@ AST_CONTENT_NODES(IMPL_AST)
 
 
 // AstProgram
-AstProgram::AstProgram(SymbolTable * table) : symbolTable(table)
+AstProgram::AstProgram(const string & name) : name(name)
 {}
 
 

@@ -304,7 +304,7 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
 {
     if (ast->token->type() == TokenType::StringLiteral) {
         ast->type = PtrType::get(BasicType::get(TokenType::Byte), 1);
-    } else if (ast->token->type() == TokenType::Integer) {
+    } else if (ast->token->type() == TokenType::NumericLiteral) {
         ast->type = BasicType::get(TokenType::Integer);
     } else {
         throw Exception("Invalid type");
