@@ -47,7 +47,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		365F7A4C14F90D7A00553D98 /* LightBASIC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LightBASIC; sourceTree = BUILT_PRODUCTS_DIR; };
+		365F7A4C14F90D7A00553D98 /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		36779A0B1503BD9700369AFF /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -125,7 +125,7 @@
 		365F7A4D14F90D7A00553D98 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				365F7A4C14F90D7A00553D98 /* LightBASIC */,
+				365F7A4C14F90D7A00553D98 /* lbc */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -295,9 +295,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		365F7A4B14F90D7A00553D98 /* LightBASIC */ = {
+		365F7A4B14F90D7A00553D98 /* lbc */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 365F7A5614F90D7A00553D98 /* Build configuration list for PBXNativeTarget "LightBASIC" */;
+			buildConfigurationList = 365F7A5614F90D7A00553D98 /* Build configuration list for PBXNativeTarget "lbc" */;
 			buildPhases = (
 				3675818A150254E60006E4B5 /* ShellScript */,
 				365F7A4814F90D7A00553D98 /* Sources */,
@@ -308,9 +308,9 @@
 			);
 			dependencies = (
 			);
-			name = LightBASIC;
+			name = lbc;
 			productName = LightBASIC;
-			productReference = 365F7A4C14F90D7A00553D98 /* LightBASIC */;
+			productReference = 365F7A4C14F90D7A00553D98 /* lbc */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -334,7 +334,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				365F7A4B14F90D7A00553D98 /* LightBASIC */,
+				365F7A4B14F90D7A00553D98 /* lbc */,
 			);
 		};
 /* End PBXProject section */
@@ -351,7 +351,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\n# llvm libraries\nLLVM_LIBS=core\n# c flags\nLLVM_CFLAGS=`/usr/local/bin/llvm-config --cflags`\n# ld flags\nLLVM_LDFLAGS=`/usr/local/bin/llvm-config --ldflags`\" \"`/usr/local/bin/llvm-config --libs $LLVM_LIBS`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings, generated as a build phase.\" > $LLVM_XCCONFIG\necho \"LLVM_CFLAGS = $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\necho \"LLVM_LDFLAGS = $LLVM_LDFLAGS\" >> $LLVM_XCCONFIG\n";
+			shellScript = "\n# llvm libraries\nLLVM_LIBS=\"core bitwriter\"\n# c flags\nLLVM_CFLAGS=`/usr/local/bin/llvm-config --cflags`\n# ld flags\nLLVM_LDFLAGS=`/usr/local/bin/llvm-config --ldflags`\" \"`/usr/local/bin/llvm-config --libs $LLVM_LIBS`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings, generated as a build phase.\" > $LLVM_XCCONFIG\necho \"LLVM_CFLAGS = $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\necho \"LLVM_LDFLAGS = $LLVM_LDFLAGS\" >> $LLVM_XCCONFIG\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -468,7 +468,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		365F7A5614F90D7A00553D98 /* Build configuration list for PBXNativeTarget "LightBASIC" */ = {
+		365F7A5614F90D7A00553D98 /* Build configuration list for PBXNativeTarget "lbc" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				365F7A5714F90D7A00553D98 /* Debug */,

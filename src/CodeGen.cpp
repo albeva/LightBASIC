@@ -20,6 +20,7 @@
 #include "llvm/Analysis/Verifier.h"
 #include "llvm/Support/IRBuilder.h"
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Bitcode/ReaderWriter.h>
 
 
 using namespace lbc;
@@ -44,12 +45,42 @@ void CodeGen::visit(AstProgram * ast)
     m_table = ast->symbolTable.get();
     for (auto & decl : ast->decls) decl.accept(this);
     if (!llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
+        //
+        // simply emit files for now.
+        // file to .bc -> to asm -> to obj -> link
+        //
+        FS::path path(ast->name);
+        
+        // -> bc
+        path.replace_extension(".bc");
         string errors;
-        llvm::raw_fd_ostream stream((ast->name + ".ll").c_str(), errors);
-        m_module->print(stream, nullptr);
+        llvm::raw_fd_ostream stream(path.string().c_str(), errors, llvm::raw_fd_ostream::F_Binary);
+        llvm::WriteBitcodeToFile(m_module, stream);
         std::cout << errors << '\n';
+        stream.flush();
+        stream.close();
         
+        // -> .s
+        auto asm_path = path;
+        asm_path.replace_extension(".s");
+        string cmd = string("/usr/local/bin/llc --disable-cfi ") + path.string() + " -o " + asm_path.string();
+        ::system(cmd.c_str());
         
+        // -> obj
+        auto obj_path = path;
+        obj_path.replace_extension(".o");
+        cmd = string("as ") + asm_path.string() + " -o " + obj_path.string();
+        ::system(cmd.c_str());
+        
+        // link
+        auto exec_path = path;
+        exec_path.replace_extension();
+        cmd = string("ld -lSystem -lcrt1.10.6.o -arch x86_64 -L\"/usr/lib/\" -macosx_version_min 10.6.0 ") + obj_path.string() + " -o " + exec_path.string();
+        ::system(cmd.c_str());
+        
+        // remove stuff
+        cmd = string("rm ") + path.string() + " " + asm_path.string() + " " + obj_path.string();
+        ::system(cmd.c_str());
     }
 }
 

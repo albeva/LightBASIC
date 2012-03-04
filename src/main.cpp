@@ -20,11 +20,15 @@ using namespace lbc;
 
 int main(int argc, const char * argv[])
 {
+    const char * input = "examples/HelloWorld.bas";
+    if (argc == 2) {
+        input = argv[1];
+    }
     try {
         // create the context
         auto ctx = make_shared<Context>();
         ctx->add(FS::current_path(), Context::GlobalPath);
-        ctx->add("examples/HelloWorld.bas", Context::Source);
+        ctx->add(input, Context::Source);
         // create the parser
         auto parser = make_shared<Parser>(ctx);
         // process the files
