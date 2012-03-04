@@ -43,7 +43,7 @@ FuncParamList   = FuncParam { "," FuncParam }
                 .
 FuncParam       = id "AS" TypeExpr
                 .
-TypeExpr        = TypeExpr	= ("INTEGER" | "BYTE") { "PTR" }
+TypeExpr        = ("INTEGER" | "BYTE") { "PTR" }
                 .
 FunctionImpl    = FuncSignature
                   StatementList
