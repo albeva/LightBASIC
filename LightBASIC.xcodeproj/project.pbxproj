@@ -1,0 +1,473 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
+		369056DD1503881700E2C917 /* CodeGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* CodeGen.cpp */; };
+		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
+		369056DF1503881700E2C917 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BE1503881700E2C917 /* Lexer.cpp */; };
+		369056E01503881700E2C917 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C11503881700E2C917 /* main.cpp */; };
+		369056E11503881700E2C917 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C21503881700E2C917 /* Parser.cpp */; };
+		369056E21503881700E2C917 /* PrinterVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C41503881700E2C917 /* PrinterVisitor.cpp */; };
+		369056E31503881700E2C917 /* RecursiveAstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C71503881700E2C917 /* RecursiveAstVisitor.cpp */; };
+		369056E41503881700E2C917 /* SemanticAnalyser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C91503881700E2C917 /* SemanticAnalyser.cpp */; };
+		369056E51503881700E2C917 /* Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056CB1503881700E2C917 /* Source.cpp */; };
+		369056E61503881700E2C917 /* SourceFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056CD1503881700E2C917 /* SourceFile.cpp */; };
+		369056E71503881700E2C917 /* SourceString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D01503881700E2C917 /* SourceString.cpp */; };
+		369056E81503881700E2C917 /* Symbol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D21503881700E2C917 /* Symbol.cpp */; };
+		369056E91503881700E2C917 /* SymbolTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D41503881700E2C917 /* SymbolTable.cpp */; };
+		369056EA1503881700E2C917 /* Token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D61503881700E2C917 /* Token.cpp */; };
+		369056EB1503881700E2C917 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D91503881700E2C917 /* Type.cpp */; };
+		369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056F9150389CA00E2C917 /* HelloWorld.bas */; };
+		369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056FA150389CA00E2C917 /* Variables.bas */; };
+		36A6E97F14F9206200C3EEA1 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 36A6E97E14F9206200C3EEA1 /* libboost_filesystem.dylib */; };
+		36A6E98114F9207100C3EEA1 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 36A6E98014F9207100C3EEA1 /* libboost_system.dylib */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		365F7A4A14F90D7A00553D98 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = examples;
+			dstSubfolderSpec = 6;
+			files = (
+				369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */,
+				369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		365F7A4C14F90D7A00553D98 /* LightBASIC */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = LightBASIC; sourceTree = BUILT_PRODUCTS_DIR; };
+		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
+		369056B61503881700E2C917 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ast.cpp; path = src/Ast.cpp; sourceTree = SOURCE_ROOT; };
+		369056B71503881700E2C917 /* Ast.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.def.h; path = src/Ast.def.h; sourceTree = SOURCE_ROOT; };
+		369056B81503881700E2C917 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.h; path = src/Ast.h; sourceTree = SOURCE_ROOT; };
+		369056B91503881700E2C917 /* AstVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AstVisitor.h; path = src/AstVisitor.h; sourceTree = SOURCE_ROOT; };
+		369056BA1503881700E2C917 /* CodeGen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeGen.cpp; path = src/CodeGen.cpp; sourceTree = SOURCE_ROOT; };
+		369056BB1503881700E2C917 /* CodeGen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeGen.h; path = src/CodeGen.h; sourceTree = SOURCE_ROOT; };
+		369056BC1503881700E2C917 /* Context.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Context.cpp; path = src/Context.cpp; sourceTree = SOURCE_ROOT; };
+		369056BD1503881700E2C917 /* Context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Context.h; path = src/Context.h; sourceTree = SOURCE_ROOT; };
+		369056BE1503881700E2C917 /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lexer.cpp; path = src/Lexer.cpp; sourceTree = SOURCE_ROOT; };
+		369056BF1503881700E2C917 /* Lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lexer.h; path = src/Lexer.h; sourceTree = SOURCE_ROOT; };
+		369056C01503881700E2C917 /* LightBASIC.h.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LightBASIC.h.pch; path = src/LightBASIC.h.pch; sourceTree = SOURCE_ROOT; };
+		369056C11503881700E2C917 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
+		369056C21503881700E2C917 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Parser.cpp; path = src/Parser.cpp; sourceTree = SOURCE_ROOT; };
+		369056C31503881700E2C917 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Parser.h; path = src/Parser.h; sourceTree = SOURCE_ROOT; };
+		369056C41503881700E2C917 /* PrinterVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrinterVisitor.cpp; path = src/PrinterVisitor.cpp; sourceTree = SOURCE_ROOT; };
+		369056C51503881700E2C917 /* PrinterVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrinterVisitor.h; path = src/PrinterVisitor.h; sourceTree = SOURCE_ROOT; };
+		369056C71503881700E2C917 /* RecursiveAstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RecursiveAstVisitor.cpp; path = src/RecursiveAstVisitor.cpp; sourceTree = SOURCE_ROOT; };
+		369056C81503881700E2C917 /* RecursiveAstVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RecursiveAstVisitor.h; path = src/RecursiveAstVisitor.h; sourceTree = SOURCE_ROOT; };
+		369056C91503881700E2C917 /* SemanticAnalyser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SemanticAnalyser.cpp; path = src/SemanticAnalyser.cpp; sourceTree = SOURCE_ROOT; };
+		369056CA1503881700E2C917 /* SemanticAnalyser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SemanticAnalyser.h; path = src/SemanticAnalyser.h; sourceTree = SOURCE_ROOT; };
+		369056CB1503881700E2C917 /* Source.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Source.cpp; path = src/Source.cpp; sourceTree = SOURCE_ROOT; };
+		369056CC1503881700E2C917 /* Source.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Source.h; path = src/Source.h; sourceTree = SOURCE_ROOT; };
+		369056CD1503881700E2C917 /* SourceFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourceFile.cpp; path = src/SourceFile.cpp; sourceTree = SOURCE_ROOT; };
+		369056CE1503881700E2C917 /* SourceFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceFile.h; path = src/SourceFile.h; sourceTree = SOURCE_ROOT; };
+		369056CF1503881700E2C917 /* SourceLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceLocation.h; path = src/SourceLocation.h; sourceTree = SOURCE_ROOT; };
+		369056D01503881700E2C917 /* SourceString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourceString.cpp; path = src/SourceString.cpp; sourceTree = SOURCE_ROOT; };
+		369056D11503881700E2C917 /* SourceString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceString.h; path = src/SourceString.h; sourceTree = SOURCE_ROOT; };
+		369056D21503881700E2C917 /* Symbol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Symbol.cpp; path = src/Symbol.cpp; sourceTree = SOURCE_ROOT; };
+		369056D31503881700E2C917 /* Symbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Symbol.h; path = src/Symbol.h; sourceTree = SOURCE_ROOT; };
+		369056D41503881700E2C917 /* SymbolTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbolTable.cpp; path = src/SymbolTable.cpp; sourceTree = SOURCE_ROOT; };
+		369056D51503881700E2C917 /* SymbolTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SymbolTable.h; path = src/SymbolTable.h; sourceTree = SOURCE_ROOT; };
+		369056D61503881700E2C917 /* Token.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Token.cpp; path = src/Token.cpp; sourceTree = SOURCE_ROOT; };
+		369056D71503881700E2C917 /* Token.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.def.h; path = src/Token.def.h; sourceTree = SOURCE_ROOT; };
+		369056D81503881700E2C917 /* Token.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Token.h; path = src/Token.h; sourceTree = SOURCE_ROOT; };
+		369056D91503881700E2C917 /* Type.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Type.cpp; path = src/Type.cpp; sourceTree = SOURCE_ROOT; };
+		369056DA1503881700E2C917 /* Type.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Type.def.h; path = src/Type.def.h; sourceTree = SOURCE_ROOT; };
+		369056DB1503881700E2C917 /* Type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Type.h; path = src/Type.h; sourceTree = SOURCE_ROOT; };
+		369056F8150389AE00E2C917 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = docs/README; sourceTree = SOURCE_ROOT; };
+		369056F9150389CA00E2C917 /* HelloWorld.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = HelloWorld.bas; path = samples/HelloWorld.bas; sourceTree = "<group>"; };
+		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
+		36A6E97E14F9206200C3EEA1 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
+		36A6E98014F9207100C3EEA1 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		365F7A4914F90D7A00553D98 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				36A6E98114F9207100C3EEA1 /* libboost_system.dylib in Frameworks */,
+				36A6E97F14F9206200C3EEA1 /* libboost_filesystem.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		365F7A4114F90D7A00553D98 = {
+			isa = PBXGroup;
+			children = (
+				3675818C150255B50006E4B5 /* llvm.xcconfig */,
+				369056F7150388FF00E2C917 /* docs */,
+				369056FB150389D000E2C917 /* samples */,
+				365F7A4F14F90D7A00553D98 /* src */,
+				36A6E98314F923A900C3EEA1 /* Libraries */,
+				365F7A4D14F90D7A00553D98 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		365F7A4D14F90D7A00553D98 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				365F7A4C14F90D7A00553D98 /* LightBASIC */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		365F7A4F14F90D7A00553D98 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				369056C11503881700E2C917 /* main.cpp */,
+				369056EE1503884F00E2C917 /* Context */,
+				369056F3150388A600E2C917 /* Input Source */,
+				369056EF1503885A00E2C917 /* Lexer */,
+				369056F01503886600E2C917 /* Parser */,
+				369056EC1503883900E2C917 /* Ast */,
+				369056F21503889700E2C917 /* Semantic Analyser */,
+				369056F4150388C100E2C917 /* Symbol table */,
+				369056ED1503884300E2C917 /* Code Generation */,
+				369056F5150388D400E2C917 /* Type */,
+				369056F6150388E700E2C917 /* Support Files */,
+			);
+			name = src;
+			path = LightBASIC;
+			sourceTree = "<group>";
+		};
+		369056EC1503883900E2C917 /* Ast */ = {
+			isa = PBXGroup;
+			children = (
+				369056B61503881700E2C917 /* Ast.cpp */,
+				369056B71503881700E2C917 /* Ast.def.h */,
+				369056B81503881700E2C917 /* Ast.h */,
+				369056B91503881700E2C917 /* AstVisitor.h */,
+				369056C71503881700E2C917 /* RecursiveAstVisitor.cpp */,
+				369056C81503881700E2C917 /* RecursiveAstVisitor.h */,
+				369056F11503888D00E2C917 /* Printer */,
+			);
+			name = Ast;
+			sourceTree = "<group>";
+		};
+		369056ED1503884300E2C917 /* Code Generation */ = {
+			isa = PBXGroup;
+			children = (
+				369056BA1503881700E2C917 /* CodeGen.cpp */,
+				369056BB1503881700E2C917 /* CodeGen.h */,
+			);
+			name = "Code Generation";
+			sourceTree = "<group>";
+		};
+		369056EE1503884F00E2C917 /* Context */ = {
+			isa = PBXGroup;
+			children = (
+				369056BC1503881700E2C917 /* Context.cpp */,
+				369056BD1503881700E2C917 /* Context.h */,
+			);
+			name = Context;
+			sourceTree = "<group>";
+		};
+		369056EF1503885A00E2C917 /* Lexer */ = {
+			isa = PBXGroup;
+			children = (
+				369056BE1503881700E2C917 /* Lexer.cpp */,
+				369056BF1503881700E2C917 /* Lexer.h */,
+				369056D61503881700E2C917 /* Token.cpp */,
+				369056D71503881700E2C917 /* Token.def.h */,
+				369056D81503881700E2C917 /* Token.h */,
+			);
+			name = Lexer;
+			sourceTree = "<group>";
+		};
+		369056F01503886600E2C917 /* Parser */ = {
+			isa = PBXGroup;
+			children = (
+				369056C21503881700E2C917 /* Parser.cpp */,
+				369056C31503881700E2C917 /* Parser.h */,
+			);
+			name = Parser;
+			sourceTree = "<group>";
+		};
+		369056F11503888D00E2C917 /* Printer */ = {
+			isa = PBXGroup;
+			children = (
+				369056C41503881700E2C917 /* PrinterVisitor.cpp */,
+				369056C51503881700E2C917 /* PrinterVisitor.h */,
+			);
+			name = Printer;
+			sourceTree = "<group>";
+		};
+		369056F21503889700E2C917 /* Semantic Analyser */ = {
+			isa = PBXGroup;
+			children = (
+				369056C91503881700E2C917 /* SemanticAnalyser.cpp */,
+				369056CA1503881700E2C917 /* SemanticAnalyser.h */,
+			);
+			name = "Semantic Analyser";
+			sourceTree = "<group>";
+		};
+		369056F3150388A600E2C917 /* Input Source */ = {
+			isa = PBXGroup;
+			children = (
+				369056CB1503881700E2C917 /* Source.cpp */,
+				369056CC1503881700E2C917 /* Source.h */,
+				369056CD1503881700E2C917 /* SourceFile.cpp */,
+				369056CE1503881700E2C917 /* SourceFile.h */,
+				369056CF1503881700E2C917 /* SourceLocation.h */,
+				369056D01503881700E2C917 /* SourceString.cpp */,
+				369056D11503881700E2C917 /* SourceString.h */,
+			);
+			name = "Input Source";
+			sourceTree = "<group>";
+		};
+		369056F4150388C100E2C917 /* Symbol table */ = {
+			isa = PBXGroup;
+			children = (
+				369056D21503881700E2C917 /* Symbol.cpp */,
+				369056D31503881700E2C917 /* Symbol.h */,
+				369056D41503881700E2C917 /* SymbolTable.cpp */,
+				369056D51503881700E2C917 /* SymbolTable.h */,
+			);
+			name = "Symbol table";
+			sourceTree = "<group>";
+		};
+		369056F5150388D400E2C917 /* Type */ = {
+			isa = PBXGroup;
+			children = (
+				369056D91503881700E2C917 /* Type.cpp */,
+				369056DA1503881700E2C917 /* Type.def.h */,
+				369056DB1503881700E2C917 /* Type.h */,
+			);
+			name = Type;
+			sourceTree = "<group>";
+		};
+		369056F6150388E700E2C917 /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				369056C01503881700E2C917 /* LightBASIC.h.pch */,
+			);
+			name = "Support Files";
+			sourceTree = "<group>";
+		};
+		369056F7150388FF00E2C917 /* docs */ = {
+			isa = PBXGroup;
+			children = (
+				369056F8150389AE00E2C917 /* README */,
+			);
+			name = docs;
+			path = LightBASIC;
+			sourceTree = "<group>";
+		};
+		369056FB150389D000E2C917 /* samples */ = {
+			isa = PBXGroup;
+			children = (
+				369056F9150389CA00E2C917 /* HelloWorld.bas */,
+				369056FA150389CA00E2C917 /* Variables.bas */,
+			);
+			name = samples;
+			sourceTree = "<group>";
+		};
+		36A6E98314F923A900C3EEA1 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				36A6E98014F9207100C3EEA1 /* libboost_system.dylib */,
+				36A6E97E14F9206200C3EEA1 /* libboost_filesystem.dylib */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		365F7A4B14F90D7A00553D98 /* LightBASIC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 365F7A5614F90D7A00553D98 /* Build configuration list for PBXNativeTarget "LightBASIC" */;
+			buildPhases = (
+				3675818A150254E60006E4B5 /* ShellScript */,
+				365F7A4814F90D7A00553D98 /* Sources */,
+				365F7A4914F90D7A00553D98 /* Frameworks */,
+				365F7A4A14F90D7A00553D98 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LightBASIC;
+			productName = LightBASIC;
+			productReference = 365F7A4C14F90D7A00553D98 /* LightBASIC */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		365F7A4314F90D7A00553D98 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0430;
+				ORGANIZATIONNAME = "LightBASIC development team";
+			};
+			buildConfigurationList = 365F7A4614F90D7A00553D98 /* Build configuration list for PBXProject "LightBASIC" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 365F7A4114F90D7A00553D98;
+			productRefGroup = 365F7A4D14F90D7A00553D98 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				365F7A4B14F90D7A00553D98 /* LightBASIC */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3675818A150254E60006E4B5 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\n# llvm libraries\nLLVM_LIBS=core\n# c flags\nLLVM_CFLAGS=`/usr/local/bin/llvm-config --cflags`\n# ld flags\nLLVM_LDFLAGS=`/usr/local/bin/llvm-config --ldflags`\" \"`/usr/local/bin/llvm-config --libs $LLVM_LIBS`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings, generated as a build phase.\" > $LLVM_XCCONFIG\necho \"LLVM_CFLAGS = $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\necho \"LLVM_LDFLAGS = $LLVM_LDFLAGS\" >> $LLVM_XCCONFIG\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		365F7A4814F90D7A00553D98 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				369056DC1503881700E2C917 /* Ast.cpp in Sources */,
+				369056DD1503881700E2C917 /* CodeGen.cpp in Sources */,
+				369056DE1503881700E2C917 /* Context.cpp in Sources */,
+				369056DF1503881700E2C917 /* Lexer.cpp in Sources */,
+				369056E01503881700E2C917 /* main.cpp in Sources */,
+				369056E11503881700E2C917 /* Parser.cpp in Sources */,
+				369056E21503881700E2C917 /* PrinterVisitor.cpp in Sources */,
+				369056E31503881700E2C917 /* RecursiveAstVisitor.cpp in Sources */,
+				369056E41503881700E2C917 /* SemanticAnalyser.cpp in Sources */,
+				369056E51503881700E2C917 /* Source.cpp in Sources */,
+				369056E61503881700E2C917 /* SourceFile.cpp in Sources */,
+				369056E71503881700E2C917 /* SourceString.cpp in Sources */,
+				369056E81503881700E2C917 /* Symbol.cpp in Sources */,
+				369056E91503881700E2C917 /* SymbolTable.cpp in Sources */,
+				369056EA1503881700E2C917 /* Token.cpp in Sources */,
+				369056EB1503881700E2C917 /* Type.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		365F7A5414F90D7A00553D98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		365F7A5514F90D7A00553D98 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = "compiler-default";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		365F7A5714F90D7A00553D98 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3675818C150255B50006E4B5 /* llvm.xcconfig */;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = src/LightBASIC.h.pch;
+				OTHER_CFLAGS = "$(LLVM_CFLAGS)";
+				OTHER_LDFLAGS = "$(LLVM_LDFLAGS)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		365F7A5814F90D7A00553D98 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3675818C150255B50006E4B5 /* llvm.xcconfig */;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libstdc++";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = src/LightBASIC.h.pch;
+				OTHER_CFLAGS = "$(LLVM_CFLAGS)";
+				OTHER_LDFLAGS = "$(LLVM_LDFLAGS)";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		365F7A4614F90D7A00553D98 /* Build configuration list for PBXProject "LightBASIC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				365F7A5414F90D7A00553D98 /* Debug */,
+				365F7A5514F90D7A00553D98 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		365F7A5614F90D7A00553D98 /* Build configuration list for PBXNativeTarget "LightBASIC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				365F7A5714F90D7A00553D98 /* Debug */,
+				365F7A5814F90D7A00553D98 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 365F7A4314F90D7A00553D98 /* Project object */;
+}

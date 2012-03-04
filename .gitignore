@@ -1,0 +1,6 @@
+.DS_Store
+DerivedData/
+build/
+llvm.xcconfig
+xcuserdata/
+project.xcworkspace
