@@ -34,7 +34,8 @@ SemanticAnalyser::SemanticAnalyser()
 void SemanticAnalyser::visit(AstProgram * ast)
 {
 	// create new scope
-	ast->symbolTable.reset((m_table = new SymbolTable(m_table)));
+	ast->symbolTable = make_shared<SymbolTable>(m_table);
+    m_table = ast->symbolTable.get();
 	// visit all declarations
 	for (auto & decl : ast->decls) decl.accept(this);
 	// restore the symbol table
@@ -64,7 +65,7 @@ void SemanticAnalyser::visit(AstFunctionDecl * ast)
 	if (ast->attribs) ast->attribs->accept(this);
 	
 	// store in the ast. Should Ast own the symbol or the symbol table?
-	ast->symbol.reset(m_symbol);
+	ast->symbol = m_symbol;
 	
 	// store in the symbol table
 	m_table->add(id, m_symbol);
@@ -81,8 +82,8 @@ void SemanticAnalyser::visit(AstFuncSignature * ast)
 	m_type = funcType;
 	if (ast->params) ast->params->accept(this);
 	// process result type
-	if (ast->type) {
-		ast->type->accept(this);
+	if (ast->typeExpr) {
+		ast->typeExpr->accept(this);
 		funcType->result(m_type);
 	}
 	m_type = funcType;
@@ -94,7 +95,7 @@ void SemanticAnalyser::visit(AstFuncSignature * ast)
 void SemanticAnalyser::visit(AstFuncParam * ast)
 {
 	auto funcType = static_pointer_cast<FunctionType>(m_type);
-	ast->type->accept(this);
+	ast->typeExpr->accept(this);
 	funcType->params.push_back(m_type);
 	m_type = funcType;
 }
@@ -146,7 +147,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
 		}
 	} else {
 		m_symbol = new Symbol(id, m_type, ast, ast);
-		ast->symbol.reset(m_symbol);
+		ast->symbol = m_symbol;
 		m_table->add(id, m_symbol);
 	}
 	
@@ -155,7 +156,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
 	
 	// create new symbol table
 	m_table = new SymbolTable(m_table);
-	ast->stmts->symbolTable.reset(m_table);
+	ast->stmts->symbolTable = m_table;
 	
 	// function type
 	auto funcType = static_pointer_cast<FunctionType>(m_type);
@@ -170,7 +171,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
 			}
 			auto sym = new Symbol(paramId, funcType->params[i++], &param, nullptr);
 			m_table->add(paramId, sym);
-			param.symbol.reset(sym);
+			param.symbol = sym;
 		}
 	}
 	
@@ -198,16 +199,16 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
 	}
 	
 	// get the type
-	ast->type->accept(this);
+	ast->typeExpr->accept(this);
 	
 	// can this type be instantiated?
 	if (!m_type->isInstantiable()) {
-		throw Exception(string("Cannot declare a variable with type ") + ast->type->token->lexeme());
+		throw Exception(string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
 	}
 	
 	// create new symbol
 	m_symbol= new Symbol(id, m_type, ast, ast);
-	ast->symbol.reset(m_symbol);
+	ast->symbol = m_symbol;
 	
 	// attributes
 	if (ast->attribs) ast->attribs->accept(this);

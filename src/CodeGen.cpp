@@ -122,7 +122,7 @@ void CodeGen::visit(AstFunctionStmt * ast)
 	ast->signature->accept(this);
 	
 	// symbol table
-	m_table = ast->stmts->symbolTable.get();
+	m_table = ast->stmts->symbolTable;
 	
 	// declare function parameters as local variables? how to access them?
 	

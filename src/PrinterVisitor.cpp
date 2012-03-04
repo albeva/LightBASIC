@@ -70,7 +70,7 @@ void PrinterVisitor::visit(AstVarDecl * ast)
 	std::cout << indent() << "DIM ";
 	if (ast->id) ast->id->accept(this);
 	std::cout << " AS ";
-	if (ast->type) ast->type->accept(this);
+	if (ast->typeExpr) ast->typeExpr->accept(this);
 	std::cout << std::endl;
 }
 
@@ -96,7 +96,7 @@ void PrinterVisitor::visit(AstFuncSignature * ast)
 	std::cout << "(";
 	if (ast->params) ast->params->accept(this);
 	std::cout << ") AS ";
-	if (ast->type) ast->type->accept(this);
+	if (ast->typeExpr) ast->typeExpr->accept(this);
 }
 
 
@@ -226,7 +226,7 @@ void PrinterVisitor::visit(AstFuncParam * ast)
 {
 	if (ast->id) ast->id->accept(this);
 	std::cout << " AS ";
-	if (ast->type) ast->type->accept(this);
+	if (ast->typeExpr) ast->typeExpr->accept(this);
 }
 
 

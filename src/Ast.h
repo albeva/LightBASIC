@@ -61,7 +61,7 @@ namespace lbc {
 		// list of declaration lists
 		boost::ptr_vector<AstDeclaration> decls;
 		// symbol table
-		unique_ptr<SymbolTable> symbolTable;
+		shared_ptr<SymbolTable> symbolTable;
 		// content node
 		DECLARE_AST(AstProgram);
 	};
@@ -82,7 +82,7 @@ namespace lbc {
 		// attribs
 		unique_ptr<AstAttributeList> attribs;
 		// declaration symbol
-		unique_ptr<Symbol> symbol;
+		Symbol * symbol;
 		// content node
 		DECLARE_AST(AstDeclaration);
 	};
@@ -138,11 +138,11 @@ namespace lbc {
 	struct AstVarDecl : AstDeclaration
 	{
 		// create
-		AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * type = nullptr);
+		AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
 		// variable id
 		unique_ptr<AstIdentExpr> id;
 		// variable type
-		unique_ptr<AstTypeExpr> type;
+		unique_ptr<AstTypeExpr> typeExpr;
 		// content node
 		DECLARE_AST(AstVarDecl);
 	};
@@ -168,13 +168,13 @@ namespace lbc {
 	struct AstFuncSignature : Ast
 	{
 		// create
-		AstFuncSignature(AstIdentExpr * id = nullptr, AstFuncParamList * args = nullptr, AstTypeExpr * type = nullptr);
+		AstFuncSignature(AstIdentExpr * id = nullptr, AstFuncParamList * args = nullptr, AstTypeExpr * typeExpr = nullptr);
 		// function id
 		unique_ptr<AstIdentExpr> id;
 		// function parameters
 		unique_ptr<AstFuncParamList> params;
 		// function type
-		unique_ptr<AstTypeExpr> type;
+		unique_ptr<AstTypeExpr> typeExpr;
 		// content node
 		DECLARE_AST(AstFuncSignature);
 	};
@@ -200,11 +200,11 @@ namespace lbc {
 	struct AstFuncParam : AstDeclaration
 	{
 		// create
-		AstFuncParam(AstIdentExpr * id = nullptr, AstTypeExpr * type = nullptr);
+		AstFuncParam(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
 		// variable id
 		unique_ptr<AstIdentExpr> id;
 		// variable type
-		unique_ptr<AstTypeExpr> type;
+		unique_ptr<AstTypeExpr> typeExpr;
 		// content node
 		DECLARE_AST(AstFuncParam);
 	};
@@ -237,11 +237,11 @@ namespace lbc {
 	struct AstStmtList : Ast
 	{
 		// create
-		AstStmtList(SymbolTable * table = nullptr);
+		AstStmtList();
 		// list of statements
 		boost::ptr_vector<AstStatement> stmts;
 		// associated symbol table.
-		unique_ptr<SymbolTable> symbolTable;
+		SymbolTable * symbolTable;
 		// content node
 		DECLARE_AST(AstStmtList);
 	};

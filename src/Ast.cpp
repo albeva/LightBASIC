@@ -34,7 +34,7 @@ AstProgram::AstProgram(SymbolTable * table) : symbolTable(table)
 
 
 // AstDeclaration
-AstDeclaration::AstDeclaration(AstAttributeList * attribs) : attribs(attribs)
+AstDeclaration::AstDeclaration(AstAttributeList * attribs) : attribs(attribs), symbol(nullptr)
 {}
 
 
@@ -54,7 +54,7 @@ AstAttribParamList::AstAttribParamList()
 
 
 // AstVarDecl
-AstVarDecl::AstVarDecl(AstIdentExpr * id, AstTypeExpr * type) : id(id), type(type)
+AstVarDecl::AstVarDecl(AstIdentExpr * id, AstTypeExpr * typeExpr) : id(id), typeExpr(typeExpr)
 {}
 
 
@@ -64,7 +64,7 @@ AstFunctionDecl::AstFunctionDecl(AstFuncSignature * signature) : signature(signa
 
 
 // AstFuncSignature
-AstFuncSignature::AstFuncSignature(AstIdentExpr * id, AstFuncParamList * params, AstTypeExpr * type) : id(id), params(params), type(type)
+AstFuncSignature::AstFuncSignature(AstIdentExpr * id, AstFuncParamList * params, AstTypeExpr * typeExpr) : id(id), params(params), typeExpr(typeExpr)
 {}
 
 
@@ -73,7 +73,7 @@ AstFuncParamList::AstFuncParamList()
 {}
 
 // AstFuncParam
-AstFuncParam::AstFuncParam(AstIdentExpr * id, AstTypeExpr * type) : id(id), type(type) {}
+AstFuncParam::AstFuncParam(AstIdentExpr * id, AstTypeExpr * typeExpr) : id(id), typeExpr(typeExpr) {}
 
 // AstFunctionStmt
 AstFunctionStmt::AstFunctionStmt(AstFuncSignature * signature, AstStmtList * stmts) : signature(signature), stmts(stmts)
@@ -81,7 +81,7 @@ AstFunctionStmt::AstFunctionStmt(AstFuncSignature * signature, AstStmtList * stm
 
 
 // AstStmtList
-AstStmtList::AstStmtList(SymbolTable * table) : symbolTable(table)
+AstStmtList::AstStmtList() : symbolTable(nullptr)
 {}
 
 
@@ -102,6 +102,7 @@ AstCallStmt::AstCallStmt(AstCallExpr * expr) : expr(expr)
 
 // AstExpression
 AstExpression::AstExpression() {}
+
 
 // AstIdentExpr
 AstIdentExpr::AstIdentExpr(Token * token) : token(token)
