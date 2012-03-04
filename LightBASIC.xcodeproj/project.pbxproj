@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
+		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
 		369056DD1503881700E2C917 /* CodeGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* CodeGen.cpp */; };
 		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
@@ -37,6 +38,7 @@
 			dstPath = examples;
 			dstSubfolderSpec = 6;
 			files = (
+				36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */,
 				369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */,
 				369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */,
 			);
@@ -49,6 +51,7 @@
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		36779A0B1503BD9700369AFF /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
+		36779A0C1503DA1800369AFF /* Simple.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Simple.bas; path = samples/Simple.bas; sourceTree = "<group>"; };
 		369056B61503881700E2C917 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ast.cpp; path = src/Ast.cpp; sourceTree = SOURCE_ROOT; };
 		369056B71503881700E2C917 /* Ast.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.def.h; path = src/Ast.def.h; sourceTree = SOURCE_ROOT; };
 		369056B81503881700E2C917 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.h; path = src/Ast.h; sourceTree = SOURCE_ROOT; };
@@ -275,6 +278,7 @@
 			children = (
 				369056F9150389CA00E2C917 /* HelloWorld.bas */,
 				369056FA150389CA00E2C917 /* Variables.bas */,
+				36779A0C1503DA1800369AFF /* Simple.bas */,
 			);
 			name = samples;
 			sourceTree = "<group>";

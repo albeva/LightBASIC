@@ -24,7 +24,12 @@ using namespace lbc;
 
 //
 // create
-CodeGen::CodeGen() : m_module(nullptr), m_table(nullptr), m_function(nullptr)
+CodeGen::CodeGen()
+:   m_module(nullptr),
+    m_table(nullptr),
+    m_function(nullptr),
+    m_block(nullptr),
+    m_value(nullptr)
 {
 }
 
@@ -87,21 +92,35 @@ void CodeGen::visit(AstFuncSignature * ast)
 {
     // the id
     const string & id = ast->id->token->lexeme();
+    Symbol * sym = m_table->get(id);
     
     // get the function
-    auto fn = m_module->getFunction(id);
-    if (fn) return;
+    if (!sym->value) {
+        assert(!m_module->getFunction(id));
+        // get the symbol
+        auto sym = m_table->get(id);
+        auto llvmType = getType(sym->type(), m_module->getContext());
+        m_function = llvm::Function::Create(
+             llvm::cast<llvm::FunctionType>(llvmType),
+             llvm::GlobalValue::ExternalLinkage,
+             id == "PRINT" ? "puts" : id, // temporary HACK. until attributes are properly proccessed
+             m_module
+        );
+        m_function->setCallingConv(llvm::CallingConv::C);
+        sym->value = m_function;
+    }
     
-    // get the symbol
-    auto sym = m_table->get(id);
-    auto llvmType = getType(sym->type(), m_module->getContext());
-    m_function = llvm::Function::Create(
-         llvm::cast<llvm::FunctionType>(llvmType),
-         llvm::GlobalValue::ExternalLinkage,
-         id == "PRINT" ? "puts" : id, // temporary HACK. until attributes are properly proccessed
-         m_module
-    );
-    m_function->setCallingConv(llvm::CallingConv::C);
+    // bind function params
+    if (ast->params) {
+        auto llp = m_function->arg_begin();
+        for (auto & p : ast->params->params) {
+            llp->setName(p.id->token->lexeme());
+            if (p.symbol) {
+                p.symbol->value = llp;
+            }
+            llp++;
+        }
+    }
 }
 
 
@@ -123,17 +142,53 @@ void CodeGen::visit(AstFunctionStmt * ast)
     
     // symbol table
     m_table = ast->stmts->symbolTable;
-    
-    // declare function parameters as local variables? how to access them?
-    
+        
     // create the block
-    {
-        llvm::BasicBlock::Create(m_module->getContext(), "", m_function, 0);
-        ast->stmts->accept(this);
-    }
+    m_block = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, 0);
+    ast->stmts->accept(this);
     
     // restore
     m_table = m_table->parent();
+}
+
+
+//
+// AstReturnStmt
+void CodeGen::visit(AstReturnStmt * ast)
+{
+    m_value = nullptr;
+    if (ast->expr) ast->expr->accept(this);
+    llvm::ReturnInst::Create(m_module->getContext(), m_value, m_block);
+}
+
+
+//
+// AstLiteralExpr
+void CodeGen::visit(AstLiteralExpr * ast)
+{
+    const string & lexeme = ast->token->lexeme(); 
+    
+    // string literal
+    if (ast->token->type() == TokenType::StringLiteral) {
+        auto arrType = llvm::ArrayType::get(llvm::IntegerType::get(m_module->getContext(), 8), lexeme.length() + 1);
+        auto global = new llvm::GlobalVariable(
+            *m_module,
+            arrType,
+            true,
+            llvm::GlobalValue::PrivateLinkage,
+            nullptr,
+            ".str"
+        );
+        global->setAlignment(1);
+        llvm::Constant * const_value = llvm::ConstantArray::get(m_module->getContext(), lexeme, true);
+        global->setInitializer(const_value);
+        
+        std::vector<llvm::Constant*> indeces;
+        llvm::ConstantInt * const_int64 = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(64, 0, false));
+        indeces.push_back(const_int64);
+        indeces.push_back(const_int64);
+        m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
+    }
 }
 
 
@@ -154,18 +209,10 @@ void CodeGen::visit(AstAssignStmt * ast)
 
 
 //
-// AstLiteralExpr
-void CodeGen::visit(AstLiteralExpr * ast)
-{
-    
-}
-
-
-//
 // AstCallStmt
 void CodeGen::visit(AstCallStmt * ast)
 {
-    
+    ast->expr->accept(this);
 }
 
 
@@ -173,7 +220,7 @@ void CodeGen::visit(AstCallStmt * ast)
 // AstCallExpr
 void CodeGen::visit(AstCallExpr * ast)
 {
-    
+    if (ast->args) ast->args->accept(this);
 }
 
 
@@ -185,10 +232,3 @@ void CodeGen::visit(AstIdentExpr * ast)
 }
 
 
-
-//
-// AstReturnStmt
-void CodeGen::visit(AstReturnStmt * ast)
-{
-    
-}

@@ -7,11 +7,14 @@
 //
 #pragma once
 
+namespace llvm {
+    class Value;
+}
+
 namespace lbc {
     
     // forward declaration
     class Type;
-    class Token;
     class AstDeclaration;
     
     /**
@@ -50,8 +53,8 @@ namespace lbc {
         void * operator new(size_t);
         void operator delete(void *);
         
-        // symbol attributes
-        unordered_map<string, Token> attribs;
+        // llvm argument
+        llvm::Value * value;
         
     private:
         // id

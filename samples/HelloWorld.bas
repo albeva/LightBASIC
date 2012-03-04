@@ -16,19 +16,19 @@ FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
 END FUNCTION
 
 /'
-// This is equivelent C program
-extern "C" {
-    int puts(const char *);
-}
- 
-const char * message() {
-    return "I am the first LightBASIC app";
-}
+    // This is equivelent C program
+    extern "C" {
+        int puts(const char *);
+    }
+     
+    const char * message() {
+        return "I am the first LightBASIC app";
+    }
 
-int main(int argc, char **argv) {
-    const char * greeting = "Hello World,";
-    puts(greeting);
-    puts(message());
-    puts("Bye fo now...");
-}
+    int main(int argc, char **argv) {
+        const char * greeting = "Hello World,";
+        puts(greeting);
+        puts(message());
+        puts("Bye fo now...");
+    }
 '/

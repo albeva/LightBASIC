@@ -14,6 +14,8 @@ namespace llvm {
     class Module;
     class Type;
     class Function;
+    class Value;
+    class BasicBlock;
 }
 
 namespace lbc {
@@ -67,6 +69,8 @@ namespace lbc {
     private:
         llvm::Module * m_module;
         llvm::Function * m_function;
+        llvm::BasicBlock * m_block;
+        llvm::Value * m_value;
         SymbolTable * m_table;
     };
     

@@ -17,6 +17,9 @@ namespace lbc {
      */
     struct SymbolTable : NonCopyable
     {
+        // the iterator
+        typedef unordered_map<string, Symbol *>::iterator iterator;
+        
         // create new symbol table. Providing parent will inherit the scope
         SymbolTable(SymbolTable * parent = nullptr);
         
@@ -34,6 +37,12 @@ namespace lbc {
         
         // get
         Symbol * get(const string & id, bool recursive = true);
+        
+        // begin
+        iterator begin() { return m_symbols.begin(); }
+        
+        // end
+        iterator end() { return m_symbols.end(); }
         
     private:
         // parent table

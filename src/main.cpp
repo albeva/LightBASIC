@@ -32,16 +32,19 @@ int main(int argc, const char * argv[])
             auto ast = parser->parse(make_shared<SourceFile>(file));
             if (ast) {
                 // print the ast
-                auto printer = new PrinterVisitor();
-                ast->accept(printer);
+//                auto printer = new PrinterVisitor();
+//                ast->accept(printer);
+//                delete printer;
 
                 // analyse
                 auto analyser = new SemanticAnalyser();
                 ast->accept(analyser);
+                delete analyser;
                 
                 // generate llvm code
                 auto codegen = new CodeGen();
                 ast->accept(codegen);
+                delete codegen;
                 
                 // cleanup
                 delete ast;
