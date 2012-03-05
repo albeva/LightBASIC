@@ -94,6 +94,7 @@
 		369056F8150389AE00E2C917 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = docs/README; sourceTree = SOURCE_ROOT; };
 		369056F9150389CA00E2C917 /* HelloWorld.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = HelloWorld.bas; path = samples/HelloWorld.bas; sourceTree = "<group>"; };
 		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
+		36FF07C3150510E400D84F2E /* Milestone 2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Milestone 2.txt"; path = "docs/Milestone 2.txt"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -268,6 +269,7 @@
 			isa = PBXGroup;
 			children = (
 				369056F8150389AE00E2C917 /* README */,
+				36FF07C3150510E400D84F2E /* Milestone 2.txt */,
 			);
 			name = docs;
 			path = LightBASIC;
