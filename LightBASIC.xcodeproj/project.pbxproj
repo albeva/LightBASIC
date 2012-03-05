@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */; };
+		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
 		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
@@ -27,8 +29,6 @@
 		369056EB1503881700E2C917 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D91503881700E2C917 /* Type.cpp */; };
 		369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056F9150389CA00E2C917 /* HelloWorld.bas */; };
 		369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056FA150389CA00E2C917 /* Variables.bas */; };
-		36A6E97F14F9206200C3EEA1 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 36A6E97E14F9206200C3EEA1 /* libboost_filesystem.dylib */; };
-		36A6E98114F9207100C3EEA1 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 36A6E98014F9207100C3EEA1 /* libboost_system.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +47,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
+		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
 		365F7A4C14F90D7A00553D98 /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
@@ -62,7 +64,7 @@
 		369056BD1503881700E2C917 /* Context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Context.h; path = src/Context.h; sourceTree = SOURCE_ROOT; };
 		369056BE1503881700E2C917 /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lexer.cpp; path = src/Lexer.cpp; sourceTree = SOURCE_ROOT; };
 		369056BF1503881700E2C917 /* Lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lexer.h; path = src/Lexer.h; sourceTree = SOURCE_ROOT; };
-		369056C01503881700E2C917 /* LightBASIC.h.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LightBASIC.h.pch; path = src/LightBASIC.h.pch; sourceTree = SOURCE_ROOT; };
+		369056C01503881700E2C917 /* LightBASIC.h.pch */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp.preprocessed; fileEncoding = 4; name = LightBASIC.h.pch; path = src/LightBASIC.h.pch; sourceTree = SOURCE_ROOT; };
 		369056C11503881700E2C917 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		369056C21503881700E2C917 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Parser.cpp; path = src/Parser.cpp; sourceTree = SOURCE_ROOT; };
 		369056C31503881700E2C917 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Parser.h; path = src/Parser.h; sourceTree = SOURCE_ROOT; };
@@ -92,8 +94,6 @@
 		369056F8150389AE00E2C917 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = docs/README; sourceTree = SOURCE_ROOT; };
 		369056F9150389CA00E2C917 /* HelloWorld.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = HelloWorld.bas; path = samples/HelloWorld.bas; sourceTree = "<group>"; };
 		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
-		36A6E97E14F9206200C3EEA1 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
-		36A6E98014F9207100C3EEA1 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -101,8 +101,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				36A6E98114F9207100C3EEA1 /* libboost_system.dylib in Frameworks */,
-				36A6E97F14F9206200C3EEA1 /* libboost_filesystem.dylib in Frameworks */,
+				365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */,
+				365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,8 +286,8 @@
 		36A6E98314F923A900C3EEA1 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				36A6E98014F9207100C3EEA1 /* libboost_system.dylib */,
-				36A6E97E14F9206200C3EEA1 /* libboost_filesystem.dylib */,
+				3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */,
+				365077301504C9BB005061C9 /* libboost_system.dylib */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";

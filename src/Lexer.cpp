@@ -121,6 +121,7 @@ Lexer::Lexer(const shared_ptr<Source> & src) : m_src(src)
 {
     m_input = m_src->begin();
     m_line = 1;
+	m_hasStmt = false;
 }
 
 

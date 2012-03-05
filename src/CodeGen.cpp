@@ -52,11 +52,14 @@ void CodeGen::visit(AstProgram * ast)
         FS::path path(ast->name);
         
         // -> bc
-        path.replace_extension(".bc");
+        path.replace_extension(".ll");
         string errors;
         llvm::raw_fd_ostream stream(path.string().c_str(), errors, llvm::raw_fd_ostream::F_Binary);
-        llvm::WriteBitcodeToFile(m_module, stream);
-        std::cout << errors << '\n';
+		m_module->print(stream, nullptr);
+//        llvm::WriteBitcodeToFile(m_module, stream);
+		if (errors.size()) {
+			throw Exception(errors);
+		}
         stream.flush();
         stream.close();
         
@@ -79,8 +82,8 @@ void CodeGen::visit(AstProgram * ast)
         ::system(cmd.c_str());
         
         // remove stuff
-        cmd = string("rm ") + path.string() + " " + asm_path.string() + " " + obj_path.string();
-        ::system(cmd.c_str());
+//        cmd = string("rm ") + path.string() + " " + asm_path.string() + " " + obj_path.string();
+//        ::system(cmd.c_str());
     }
 }
 
