@@ -1,14 +1,10 @@
 Milestone 2
 -------------
-- remove boost dependency
-  * doesn't play nice with llvm c++11 lib
-  * c++11 library and llvm provide most things required anyway (hash map, filesystem, ptr vectors)
 - rework internal type system
   * add name and alias (for printing out type names)
   * add BOOL and FLOAT data types
   * allow widening, narrowing and casting (integer -> float, float -> integer, bool -> integer)
-  * no Integer to bool casting!
-- add TRUE and FALSE (of type BOOL)
+- add TRUE and FALSE (of type BOOL) ' 1 and 0
 - add IF keyword
   * no else or elseif
   * no single liner variant
@@ -17,9 +13,6 @@ Milestone 2
 		   "END" "IF"
 - add BooleanExpression
   * only "==" and "!="
-- add pointer dereferencing
-  dim arg1 as byte ptr
-  arg1 = *argv
 - add pointer indexing. 0 based
   dim arg2 as byte ptr ptr
   arg2 = argv[1]

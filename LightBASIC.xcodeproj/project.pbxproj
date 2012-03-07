@@ -64,7 +64,7 @@
 		369056BD1503881700E2C917 /* Context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Context.h; path = src/Context.h; sourceTree = SOURCE_ROOT; };
 		369056BE1503881700E2C917 /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lexer.cpp; path = src/Lexer.cpp; sourceTree = SOURCE_ROOT; };
 		369056BF1503881700E2C917 /* Lexer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Lexer.h; path = src/Lexer.h; sourceTree = SOURCE_ROOT; };
-		369056C01503881700E2C917 /* LightBASIC.h.pch */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp.preprocessed; fileEncoding = 4; name = LightBASIC.h.pch; path = src/LightBASIC.h.pch; sourceTree = SOURCE_ROOT; };
+		369056C01503881700E2C917 /* LightBASIC.h.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LightBASIC.h.pch; path = src/LightBASIC.h.pch; sourceTree = SOURCE_ROOT; };
 		369056C11503881700E2C917 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = main.cpp; path = src/main.cpp; sourceTree = SOURCE_ROOT; };
 		369056C21503881700E2C917 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Parser.cpp; path = src/Parser.cpp; sourceTree = SOURCE_ROOT; };
 		369056C31503881700E2C917 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Parser.h; path = src/Parser.h; sourceTree = SOURCE_ROOT; };
