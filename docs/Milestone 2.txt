@@ -4,6 +4,7 @@ Milestone 2
   * add name and alias (for printing out type names)
   * add BOOL and FLOAT data types
   * allow widening, narrowing and casting (integer -> float, float -> integer, bool -> integer)
+- implement alias attribute
 - add TRUE and FALSE (of type BOOL) ' 1 and 0
 - add IF keyword
   * no else or elseif
