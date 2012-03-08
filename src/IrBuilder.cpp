@@ -37,6 +37,19 @@ IrBuilder::IrBuilder()
 }
 
 
+/**
+ * reset the IR builder
+ */
+void IrBuilder::reset()
+{
+	m_module = nullptr;
+	m_function = nullptr;
+	m_block = nullptr;
+	m_value = nullptr;
+	m_table = nullptr;
+}
+
+
 //
 // AstDeclList
 void IrBuilder::visit(AstProgram * ast)

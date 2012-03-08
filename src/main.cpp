@@ -14,6 +14,7 @@
 #include "SemanticAnalyser.h"
 #include "IrBuilder.h"
 #include "SourceFile.h"
+#include "Emitter.h"
 
 using namespace lbc;
 
@@ -31,14 +32,14 @@ int main(int argc, const char * argv[])
         ctx->add(input, Context::Source);
         // create the parser
         auto parser = make_shared<Parser>(ctx);
+		// create output emitter
+		auto emitter = make_shared<Emitter>(ctx);
+		// IR builder
+		auto builder = make_shared<IrBuilder>();
         // process the files
         for (auto & file : ctx->get(Context::Source)) {
             auto ast = parser->parse(make_shared<SourceFile>(file));
             if (ast) {
-                // print the ast
-//                auto printer = new PrinterVisitor();
-//                ast->accept(printer);
-//                delete printer;
 
                 // analyse
                 auto analyser = new SemanticAnalyser();
@@ -46,17 +47,20 @@ int main(int argc, const char * argv[])
                 delete analyser;
                 
                 // generate llvm code
-                auto ir_builder = new IrBuilder();
-                ast->accept(ir_builder);
-                delete ir_builder;
-                
+                builder->reset();
+                ast->accept(builder.get());
+				if (auto module = builder->getModule()) {
+					emitter->add(module);
+				}
+				
                 // cleanup
                 delete ast;
             } else {
                 std::cout << "NO AST\n";
             }
         }
-        
+		// generate the output
+		emitter->generate();
     } catch (Exception e) {
         cout << "Error: " << e.what() << endl;
         return EXIT_FAILURE;

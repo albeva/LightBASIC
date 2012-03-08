@@ -11,6 +11,7 @@
 		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
 		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
+		368378D5150901F7004C7BAB /* Emitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368378D4150901F7004C7BAB /* Emitter.cpp */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
 		369056DD1503881700E2C917 /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
 		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
@@ -54,12 +55,14 @@
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		36779A0B1503BD9700369AFF /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		36779A0C1503DA1800369AFF /* Simple.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Simple.bas; path = samples/Simple.bas; sourceTree = "<group>"; };
+		368378D2150901D3004C7BAB /* Emitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Emitter.h; path = src/Emitter.h; sourceTree = SOURCE_ROOT; };
+		368378D4150901F7004C7BAB /* Emitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Emitter.cpp; path = src/Emitter.cpp; sourceTree = SOURCE_ROOT; };
 		369056B61503881700E2C917 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ast.cpp; path = src/Ast.cpp; sourceTree = SOURCE_ROOT; };
 		369056B71503881700E2C917 /* Ast.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.def.h; path = src/Ast.def.h; sourceTree = SOURCE_ROOT; };
 		369056B81503881700E2C917 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.h; path = src/Ast.h; sourceTree = SOURCE_ROOT; };
 		369056B91503881700E2C917 /* AstVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AstVisitor.h; path = src/AstVisitor.h; sourceTree = SOURCE_ROOT; };
 		369056BA1503881700E2C917 /* IrBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IrBuilder.cpp; path = src/IrBuilder.cpp; sourceTree = SOURCE_ROOT; };
-		369056BB1503881700E2C917 /* IrBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; name = IrBuilder.h; path = src/IrBuilder.h; sourceTree = SOURCE_ROOT; };
+		369056BB1503881700E2C917 /* IrBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IrBuilder.h; path = src/IrBuilder.h; sourceTree = SOURCE_ROOT; };
 		369056BC1503881700E2C917 /* Context.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Context.cpp; path = src/Context.cpp; sourceTree = SOURCE_ROOT; };
 		369056BD1503881700E2C917 /* Context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Context.h; path = src/Context.h; sourceTree = SOURCE_ROOT; };
 		369056BE1503881700E2C917 /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lexer.cpp; path = src/Lexer.cpp; sourceTree = SOURCE_ROOT; };
@@ -170,6 +173,8 @@
 			children = (
 				369056BB1503881700E2C917 /* IrBuilder.h */,
 				369056BA1503881700E2C917 /* IrBuilder.cpp */,
+				368378D2150901D3004C7BAB /* Emitter.h */,
+				368378D4150901F7004C7BAB /* Emitter.cpp */,
 			);
 			name = "Code Generation";
 			sourceTree = "<group>";
@@ -379,6 +384,7 @@
 				369056EA1503881700E2C917 /* Token.cpp in Sources */,
 				369056EB1503881700E2C917 /* Type.cpp in Sources */,
 				36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */,
+				368378D5150901F7004C7BAB /* Emitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
