@@ -22,7 +22,7 @@ using namespace lbc;
 //
 // create new one
 SemanticAnalyser::SemanticAnalyser()
-:    RecursiveAstVisitor(true),
+:   RecursiveAstVisitor(true),
     m_table(nullptr),
     m_symbol(nullptr)
 {
@@ -33,6 +33,11 @@ SemanticAnalyser::SemanticAnalyser()
 // AstProgram
 void SemanticAnalyser::visit(AstProgram * ast)
 {
+    // reset the state
+    m_table = nullptr;
+    m_symbol = nullptr;
+    m_type.reset();
+    
     // create new scope
     ast->symbolTable = make_shared<SymbolTable>(m_table);
     m_table = ast->symbolTable.get();

@@ -10,6 +10,30 @@
 using namespace lbc;
 
 
+
+/**
+ * get output path including filename
+ */
+const FS::path & Context::output()
+{
+    if (m_output.empty() && m_resources[ResourceTypes::Source].size()) {
+        m_output = m_resources[ResourceTypes::Source][0];
+        m_output.replace_extension();
+    }
+    return m_output;
+}
+
+
+/**
+ * set output path
+ */
+Context & Context::output(const FS::path & path)
+{
+    m_output = path;
+    return *this;
+}
+
+
 /**
  * Add path to the resource container
  */

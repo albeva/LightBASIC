@@ -37,66 +37,24 @@ IrBuilder::IrBuilder()
 }
 
 
-/**
- * reset the IR builder
- */
-void IrBuilder::reset()
+//
+// AstDeclList
+void IrBuilder::visit(AstProgram * ast)
 {
+    // reset the sate
 	m_module = nullptr;
 	m_function = nullptr;
 	m_block = nullptr;
 	m_value = nullptr;
 	m_table = nullptr;
-}
-
-
-//
-// AstDeclList
-void IrBuilder::visit(AstProgram * ast)
-{
+    
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
     m_table = ast->symbolTable.get();
     for (auto & decl : ast->decls) decl.accept(this);
-    if (!llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
-        //
-        // simply emit files for now.
-        // file to .bc -> to asm -> to obj -> link
-        //
-        FS::path path(ast->name);
-        
-        // -> bc
-        path.replace_extension(".ll");
-        string errors;
-        llvm::raw_fd_ostream stream(path.string().c_str(), errors, llvm::raw_fd_ostream::F_Binary);
-		m_module->print(stream, nullptr);
-//        llvm::WriteBitcodeToFile(m_module, stream);
-		if (errors.size()) {
-			throw Exception(errors);
-		}
-        stream.flush();
-        stream.close();
-        
-        // -> .s
-        auto asm_path = path;
-        asm_path.replace_extension(".s");
-        string cmd = string("/usr/local/bin/llc --disable-cfi ") + path.string() + " -o " + asm_path.string();
-        ::system(cmd.c_str());
-        
-        // -> obj
-        auto obj_path = path;
-        obj_path.replace_extension(".o");
-        cmd = string("as ") + asm_path.string() + " -o " + obj_path.string();
-        ::system(cmd.c_str());
-        
-        // link
-        auto exec_path = path;
-        exec_path.replace_extension();
-        cmd = string("ld -lSystem -lcrt1.10.6.o -arch x86_64 -L\"/usr/lib/\" -macosx_version_min 10.6.0 ") + obj_path.string() + " -o " + exec_path.string();
-        ::system(cmd.c_str());
-        
-        // remove stuff
-//        cmd = string("rm ") + path.string() + " " + asm_path.string() + " " + obj_path.string();
-//        ::system(cmd.c_str());
+    if (llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
+        // there were errors
+        delete m_module;
+        m_module = nullptr;
     }
 }
 

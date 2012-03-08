@@ -30,6 +30,8 @@
 		369056EB1503881700E2C917 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D91503881700E2C917 /* Type.cpp */; };
 		369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056F9150389CA00E2C917 /* HelloWorld.bas */; };
 		369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056FA150389CA00E2C917 /* Variables.bas */; };
+		36DF7367150953400023F600 /* module_1.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36DF73661509531F0023F600 /* module_1.bas */; };
+		36DF7368150953400023F600 /* module_2.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36DF7365150953070023F600 /* module_2.bas */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -39,6 +41,8 @@
 			dstPath = examples;
 			dstSubfolderSpec = 6;
 			files = (
+				36DF7367150953400023F600 /* module_1.bas in CopyFiles */,
+				36DF7368150953400023F600 /* module_2.bas in CopyFiles */,
 				36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */,
 				369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */,
 				369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */,
@@ -97,6 +101,8 @@
 		369056F8150389AE00E2C917 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = docs/README; sourceTree = SOURCE_ROOT; };
 		369056F9150389CA00E2C917 /* HelloWorld.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = HelloWorld.bas; path = samples/HelloWorld.bas; sourceTree = "<group>"; };
 		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
+		36DF7365150953070023F600 /* module_2.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_2.bas; path = samples/module_2.bas; sourceTree = "<group>"; };
+		36DF73661509531F0023F600 /* module_1.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_1.bas; path = samples/module_1.bas; sourceTree = "<group>"; };
 		36FF07C3150510E400D84F2E /* Milestone 2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Milestone 2.txt"; path = "docs/Milestone 2.txt"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -283,6 +289,8 @@
 		369056FB150389D000E2C917 /* samples */ = {
 			isa = PBXGroup;
 			children = (
+				36DF73661509531F0023F600 /* module_1.bas */,
+				36DF7365150953070023F600 /* module_2.bas */,
 				369056F9150389CA00E2C917 /* HelloWorld.bas */,
 				369056FA150389CA00E2C917 /* Variables.bas */,
 				36779A0C1503DA1800369AFF /* Simple.bas */,

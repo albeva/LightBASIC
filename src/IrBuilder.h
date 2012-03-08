@@ -30,9 +30,6 @@ namespace lbc {
     {
 		// create
         IrBuilder();
-		
-		// reset the ir builder
-		void reset();
         
         // get the generated module
         llvm::Module * getModule() const { return m_module; }

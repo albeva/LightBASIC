@@ -36,7 +36,13 @@ namespace lbc {
         // get resources
         const ResourceContainer & get(ResourceTypes type) const;
         
-        private:
+        // get output path
+        const FS::path & output();
+        
+        // set output path
+        Context & output(const FS::path & path);
+        
+    private:
         /// Resolve directory path
         FS::path resolveDir(const FS::path & path) const;
         
@@ -45,6 +51,9 @@ namespace lbc {
         
         /// array that contains the resources
         ResourceContainer m_resources[_ResourceCount];
+        
+        // output path including filename
+        FS::path m_output;
     };
 
 }; // lbc namespace

@@ -19,10 +19,10 @@ Milestone 2
     dim arg as byte ptr
     arg = argv[1]
 [✓] Rename CodeGen to IrBuilder
-[ ] Add Emitter class
-    [ ] assemble
-	[ ] link
-	[ ] produce binary
+[✓] Add Emitter class
+    [✓] assemble
+	[✓] link
+	[✓] produce binary
 	
   
   
