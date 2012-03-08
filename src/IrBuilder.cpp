@@ -1,11 +1,11 @@
 //
-//  CodeGen.cpp
+//  IrBuilder.cpp
 //  LightBASIC
 //
 //  Created by Albert Varaksin on 03/03/2012.
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
-#include "CodeGen.h"
+#include "IrBuilder.h"
 #include "Token.h"
 #include "Ast.h"
 #include "Type.h"
@@ -27,7 +27,7 @@ using namespace lbc;
 
 //
 // create
-CodeGen::CodeGen()
+IrBuilder::IrBuilder()
 :   m_module(nullptr),
     m_table(nullptr),
     m_function(nullptr),
@@ -39,7 +39,7 @@ CodeGen::CodeGen()
 
 //
 // AstDeclList
-void CodeGen::visit(AstProgram * ast)
+void IrBuilder::visit(AstProgram * ast)
 {
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
     m_table = ast->symbolTable.get();
@@ -131,7 +131,7 @@ llvm::Type * getType(const shared_ptr<Type> & local, llvm::LLVMContext & context
 
 //
 // AstFuncSignature
-void CodeGen::visit(AstFuncSignature * ast)
+void IrBuilder::visit(AstFuncSignature * ast)
 {
     // the id
     const string & id = ast->id->token->lexeme();
@@ -172,7 +172,7 @@ void CodeGen::visit(AstFuncSignature * ast)
 
 //
 // AstFunctionDecl
-void CodeGen::visit(AstFunctionDecl * ast)
+void IrBuilder::visit(AstFunctionDecl * ast)
 {    
     // process the signature
     ast->signature->accept(this);
@@ -181,7 +181,7 @@ void CodeGen::visit(AstFunctionDecl * ast)
 
 //
 // AstFunctionStmt
-void CodeGen::visit(AstFunctionStmt * ast)
+void IrBuilder::visit(AstFunctionStmt * ast)
 {
     // function signature
     ast->signature->accept(this);
@@ -200,7 +200,7 @@ void CodeGen::visit(AstFunctionStmt * ast)
 
 //
 // AstReturnStmt
-void CodeGen::visit(AstReturnStmt * ast)
+void IrBuilder::visit(AstReturnStmt * ast)
 {
     m_value = nullptr;
     if (ast->expr) ast->expr->accept(this);
@@ -210,7 +210,7 @@ void CodeGen::visit(AstReturnStmt * ast)
 
 //
 // AstLiteralExpr
-void CodeGen::visit(AstLiteralExpr * ast)
+void IrBuilder::visit(AstLiteralExpr * ast)
 {
     const string & lexeme = ast->token->lexeme(); 
     
@@ -242,7 +242,7 @@ void CodeGen::visit(AstLiteralExpr * ast)
 
 //
 // AstVarDecl
-void CodeGen::visit(AstVarDecl * ast)
+void IrBuilder::visit(AstVarDecl * ast)
 {
     const string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
@@ -259,7 +259,7 @@ void CodeGen::visit(AstVarDecl * ast)
 
 //
 // AstAssignStmt
-void CodeGen::visit(AstAssignStmt * ast)
+void IrBuilder::visit(AstAssignStmt * ast)
 {
     const string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
@@ -276,7 +276,7 @@ void CodeGen::visit(AstAssignStmt * ast)
 
 //
 // AstCallExpr
-void CodeGen::visit(AstCallExpr * ast)
+void IrBuilder::visit(AstCallExpr * ast)
 {
     const string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
@@ -295,7 +295,7 @@ void CodeGen::visit(AstCallExpr * ast)
 
 //
 // AstIdentExpr
-void CodeGen::visit(AstIdentExpr * ast)
+void IrBuilder::visit(AstIdentExpr * ast)
 {
     const string & id = ast->token->lexeme();
     m_value = new llvm::LoadInst(m_table->get(id)->value, "", m_block);
@@ -304,7 +304,7 @@ void CodeGen::visit(AstIdentExpr * ast)
 
 //
 // AstCallStmt
-void CodeGen::visit(AstCallStmt * ast)
+void IrBuilder::visit(AstCallStmt * ast)
 {
     ast->expr->accept(this);
 }

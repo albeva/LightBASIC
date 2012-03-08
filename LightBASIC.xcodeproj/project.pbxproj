@@ -12,7 +12,7 @@
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
 		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
-		369056DD1503881700E2C917 /* CodeGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* CodeGen.cpp */; };
+		369056DD1503881700E2C917 /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
 		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
 		369056DF1503881700E2C917 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BE1503881700E2C917 /* Lexer.cpp */; };
 		369056E01503881700E2C917 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C11503881700E2C917 /* main.cpp */; };
@@ -58,8 +58,8 @@
 		369056B71503881700E2C917 /* Ast.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.def.h; path = src/Ast.def.h; sourceTree = SOURCE_ROOT; };
 		369056B81503881700E2C917 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ast.h; path = src/Ast.h; sourceTree = SOURCE_ROOT; };
 		369056B91503881700E2C917 /* AstVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AstVisitor.h; path = src/AstVisitor.h; sourceTree = SOURCE_ROOT; };
-		369056BA1503881700E2C917 /* CodeGen.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CodeGen.cpp; path = src/CodeGen.cpp; sourceTree = SOURCE_ROOT; };
-		369056BB1503881700E2C917 /* CodeGen.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CodeGen.h; path = src/CodeGen.h; sourceTree = SOURCE_ROOT; };
+		369056BA1503881700E2C917 /* IrBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IrBuilder.cpp; path = src/IrBuilder.cpp; sourceTree = SOURCE_ROOT; };
+		369056BB1503881700E2C917 /* IrBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; name = IrBuilder.h; path = src/IrBuilder.h; sourceTree = SOURCE_ROOT; };
 		369056BC1503881700E2C917 /* Context.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Context.cpp; path = src/Context.cpp; sourceTree = SOURCE_ROOT; };
 		369056BD1503881700E2C917 /* Context.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Context.h; path = src/Context.h; sourceTree = SOURCE_ROOT; };
 		369056BE1503881700E2C917 /* Lexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Lexer.cpp; path = src/Lexer.cpp; sourceTree = SOURCE_ROOT; };
@@ -168,8 +168,8 @@
 		369056ED1503884300E2C917 /* Code Generation */ = {
 			isa = PBXGroup;
 			children = (
-				369056BB1503881700E2C917 /* CodeGen.h */,
-				369056BA1503881700E2C917 /* CodeGen.cpp */,
+				369056BB1503881700E2C917 /* IrBuilder.h */,
+				369056BA1503881700E2C917 /* IrBuilder.cpp */,
 			);
 			name = "Code Generation";
 			sourceTree = "<group>";
@@ -363,7 +363,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				369056DC1503881700E2C917 /* Ast.cpp in Sources */,
-				369056DD1503881700E2C917 /* CodeGen.cpp in Sources */,
+				369056DD1503881700E2C917 /* IrBuilder.cpp in Sources */,
 				369056DE1503881700E2C917 /* Context.cpp in Sources */,
 				369056DF1503881700E2C917 /* Lexer.cpp in Sources */,
 				369056E01503881700E2C917 /* main.cpp in Sources */,

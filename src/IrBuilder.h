@@ -1,5 +1,5 @@
 //
-//  CodeGen.h
+//  IrBuilder.h
 //  LightBASIC
 //
 //  Created by Albert Varaksin on 03/03/2012.
@@ -26,9 +26,9 @@ namespace lbc {
     /**
      * Generate the llvm structure
      */
-    struct CodeGen : RecursiveAstVisitor
+    struct IrBuilder : RecursiveAstVisitor
     {
-        CodeGen();
+        IrBuilder();
         
         // get the generated module
         llvm::Module * getModule() const { return m_module; }

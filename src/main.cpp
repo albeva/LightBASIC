@@ -12,7 +12,7 @@
 #include "Ast.h"
 #include "PrinterVisitor.h"
 #include "SemanticAnalyser.h"
-#include "CodeGen.h"
+#include "IrBuilder.h"
 #include "SourceFile.h"
 
 using namespace lbc;
@@ -46,9 +46,9 @@ int main(int argc, const char * argv[])
                 delete analyser;
                 
                 // generate llvm code
-                auto codegen = new CodeGen();
-                ast->accept(codegen);
-                delete codegen;
+                auto ir_builder = new IrBuilder();
+                ast->accept(ir_builder);
+                delete ir_builder;
                 
                 // cleanup
                 delete ast;

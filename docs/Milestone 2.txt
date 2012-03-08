@@ -1,23 +1,29 @@
 Milestone 2
 -------------
 - rework internal type system
-  * add name and alias (for printing out type names)
-  * add BOOL and FLOAT data types
-  * allow widening, narrowing and casting (integer -> float, float -> integer, bool -> integer)
-- implement alias attribute
-- add TRUE and FALSE (of type BOOL) ' 1 and 0
-- add IF keyword
+  [ ] add name and alias (for printing out type names)
+  [ ] add BOOL and FLOAT data types
+  [ ] allow widening, narrowing and casting (integer -> float, float -> integer, bool -> integer)
+[ ] implement alias attribute
+[ ] add TRUE and FALSE (of type BOOL) ' 1 and 0
+[ ] add IF keyword
   * no else or elseif
   * no single liner variant
   IfStmt = "IF" BooleanExpression "THEN"
            StmtList
 		   "END" "IF"
-- add BooleanExpression
+[ ] add BooleanExpression
   * only "==" and "!="
-- add pointer indexing. 0 based
-  fim argv as byte ptr ptr
-  dim arg as byte ptr
-  arg = argv[1]
+[ ] add pointer indexing. 0 based
+    fim argv as byte ptr ptr
+    dim arg as byte ptr
+    arg = argv[1]
+[✓] Rename CodeGen to IrBuilder
+[ ] Add Emitter class
+    [ ] assemble
+	[ ] link
+	[ ] produce binary
+	
   
   
 
