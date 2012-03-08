@@ -15,8 +15,9 @@ Milestone 2
 - add BooleanExpression
   * only "==" and "!="
 - add pointer indexing. 0 based
-  dim arg2 as byte ptr ptr
-  arg2 = argv[1]
+  fim argv as byte ptr ptr
+  dim arg as byte ptr
+  arg = argv[1]
   
   
 
