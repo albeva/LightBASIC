@@ -304,7 +304,7 @@ namespace lbc {
         // create
         AstExpression();
         // expression type
-        shared_ptr<Type> type;
+        Type * type;
         // content node
         DECLARE_AST(AstExpression);
     };

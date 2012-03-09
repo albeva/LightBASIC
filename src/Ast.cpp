@@ -101,7 +101,7 @@ AstCallStmt::AstCallStmt(AstCallExpr * expr) : expr(expr)
 
 
 // AstExpression
-AstExpression::AstExpression() {}
+AstExpression::AstExpression() : type(nullptr) {}
 
 
 // AstIdentExpr

@@ -24,7 +24,8 @@ using namespace lbc;
 SemanticAnalyser::SemanticAnalyser()
 :   RecursiveAstVisitor(true),
     m_table(nullptr),
-    m_symbol(nullptr)
+    m_symbol(nullptr),
+    m_type(nullptr)
 {
 }
 
@@ -36,7 +37,7 @@ void SemanticAnalyser::visit(AstProgram * ast)
     // reset the state
     m_table = nullptr;
     m_symbol = nullptr;
-    m_type.reset();
+    m_type = nullptr;
     
     // create new scope
     ast->symbolTable = make_shared<SymbolTable>(m_table);
@@ -82,7 +83,7 @@ void SemanticAnalyser::visit(AstFunctionDecl * ast)
 void SemanticAnalyser::visit(AstFuncSignature * ast)
 {
     // create new type
-    auto funcType = make_shared<FunctionType>(shared_ptr<Type>());
+    auto funcType = new FunctionType();
     // process params
     m_type = funcType;
     if (ast->params) ast->params->accept(this);
@@ -99,7 +100,7 @@ void SemanticAnalyser::visit(AstFuncSignature * ast)
 // AstFuncParam
 void SemanticAnalyser::visit(AstFuncParam * ast)
 {
-    auto funcType = static_pointer_cast<FunctionType>(m_type);
+    auto funcType = static_cast<FunctionType *>(m_type);
     ast->typeExpr->accept(this);
     funcType->params.push_back(m_type);
     m_type = funcType;
@@ -116,7 +117,7 @@ void SemanticAnalyser::visit(AstTypeExpr * ast)
         throw Exception(string("Invalid type: ") + ast->token->name());
     }
     // basic type
-    m_type = BasicType::get(kind);
+    m_type = PrimitiveType::get(kind);
     // is it a pointer?
     if (ast->level) m_type = PtrType::get(m_type, ast->level);
 }
@@ -164,7 +165,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     ast->stmts->symbolTable = m_table;
     
     // function type
-    auto funcType = static_pointer_cast<FunctionType>(m_type);
+    auto funcType = static_cast<FunctionType *>(m_type);
     
     // fill the table with parameters
     if (ast->signature->params) {
@@ -278,7 +279,7 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
         throw Exception(string("Called identifier '") + id + "' is not a function");
     }
     
-    auto type = static_pointer_cast<FunctionType>(sym->type());
+    auto type = static_cast<FunctionType *>(sym->type());
     
     // check the parameter types against the argument types
     if (ast->args) {
@@ -308,9 +309,9 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
 void SemanticAnalyser::visit(AstLiteralExpr * ast)
 {
     if (ast->token->type() == TokenType::StringLiteral) {
-        ast->type = PtrType::get(BasicType::get(TokenType::Byte), 1);
+        ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
     } else if (ast->token->type() == TokenType::NumericLiteral) {
-        ast->type = BasicType::get(TokenType::Integer);
+        ast->type = PrimitiveType::get(TokenType::Integer);
     } else {
         throw Exception("Invalid type");
     }
@@ -342,7 +343,7 @@ void SemanticAnalyser::visit(AstIdentExpr * ast)
 void SemanticAnalyser::visit(AstReturnStmt * ast)
 {
     assert(m_type->kind() == Type::Function);
-    auto funcType = static_pointer_cast<FunctionType>(m_type);
+    auto funcType = static_cast<FunctionType *>(m_type);
     
     if (ast->expr) {
         ast->expr->accept(this);

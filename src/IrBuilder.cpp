@@ -56,19 +56,19 @@ void IrBuilder::visit(AstProgram * ast)
         delete m_module;
         m_module = nullptr;
     }
+    m_module->dump();
 }
 
 
 
 //
 // generate llvm type from local type
-llvm::Type * getType(const shared_ptr<Type> & local, llvm::LLVMContext & context) {
-    
+llvm::Type * getType(lbc::Type * local, llvm::LLVMContext & context)
+{
     llvm::Type * llvmType = nullptr;
-    
     // pointer
-    if (local->kind() == Type::Ptr) {
-        auto ptr = static_pointer_cast<PtrType>(local);
+    if (local->isPointer()) {
+        auto ptr = static_cast<PtrType *>(local);
         auto base = ptr->getBaseType();
         auto llType = llvm::Type::getIntNPtrTy(context, base->getSizeInBits());
         int level = ptr->indirection() - 1;
@@ -78,13 +78,20 @@ llvm::Type * getType(const shared_ptr<Type> & local, llvm::LLVMContext & context
         llvmType = llType;
     }
     // basic type
-    else if (local->kind() == Type::Basic) {
-        llvmType = llvm::Type::getIntNTy(context, local->getSizeInBits());
+    else if (local->isPrimitive()) {
+        if (local->isFloatingPoint()) {
+            if (local->getSizeInBits() == 32)
+                llvmType = llvm::Type::getFloatTy(context);
+            else
+                llvmType = llvm::Type::getDoubleTy(context);
+        } else {
+            llvmType = llvm::Type::getIntNTy(context, local->getSizeInBits());
+        }
     }
     // function type
-    else if (local->kind() == Type::Function) {
+    else if (local->isFunction()) {
         std::vector<llvm::Type*> params;
-        auto fnType = static_pointer_cast<FunctionType>(local);
+        auto fnType = static_cast<FunctionType *>(local);
         for (auto p : fnType->params) {
             params.push_back(getType(p, context));
         }
@@ -161,8 +168,10 @@ void IrBuilder::visit(AstFunctionStmt * ast)
     m_table = ast->stmts->symbolTable;
         
     // create the block
+    auto tmp = m_block;
     m_block = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, 0);
     ast->stmts->accept(this);
+    m_block = tmp;
     
     // restore
     m_table = m_table->parent();
@@ -206,7 +215,7 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         indeces.push_back(const_int64);
         m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
     } else if (ast->token->type() == TokenType::NumericLiteral) {
-        m_value = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(32, 0, false));
+        m_value = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(32, lexeme, 10));
     }
 }
 
@@ -218,13 +227,25 @@ void IrBuilder::visit(AstVarDecl * ast)
     const string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
     auto llType = getType(sym->type(), m_module->getContext());
-    auto alloc = new llvm::AllocaInst(llType, id, m_block);
-    if (sym->type()->kind() == Type::Ptr) {
-        alloc->setAlignment(8);
+    // if m_block is null then is a global variable
+    if (m_block == nullptr) {
+        llvm::Constant * constant;
+        if (llType->isPointerTy()) {
+            constant = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(llType));
+        } else {
+            constant = llvm::ConstantInt::get(llType, 0, false);
+        }
+        sym->value = new llvm::GlobalVariable(
+            *m_module,
+            llType,
+            false,
+            llvm::GlobalValue::ExternalLinkage,
+            constant,
+            id
+        );
     } else {
-        alloc->setAlignment(4);
+        sym->value = new llvm::AllocaInst(llType, id, m_block);
     }
-    sym->value = alloc;
 }
 
 
@@ -236,7 +257,7 @@ void IrBuilder::visit(AstAssignStmt * ast)
     auto sym = m_table->get(id);
     ast->expr->accept(this);
     auto store = new llvm::StoreInst(m_value, sym->value, m_block);
-    if (sym->type()->kind() == Type::Ptr) {
+    if (sym->type()->kind() == Type::Pointer) {
         store->setAlignment(8); // size of the ptr
     } else {
         store->setAlignment(4); // size of the ptr

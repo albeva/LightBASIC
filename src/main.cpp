@@ -25,8 +25,12 @@ int main(int argc, const char * argv[])
         // create the context
         auto ctx = make_shared<Context>();
         ctx->add(FS::current_path(), Context::GlobalPath);
-        for (int i = 1; i < argc; i++) {
-            ctx->add(argv[i], Context::Source);
+        if (argc > 1) {
+            for (int i = 1; i < argc; i++) {
+                ctx->add(argv[i], Context::Source);
+            }
+        } else {
+            ctx->add("examples/Variables.bas", Context::Source);
         }
         // create the parser
         auto parser = make_shared<Parser>(ctx);

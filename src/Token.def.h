@@ -6,6 +6,8 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 
+#include "Type.def.h"
+
 //
 // TOKEN defines basic token types
 //     Name             String
@@ -37,15 +39,20 @@
     _( Declare,         "DECLARE"   ) \
     _( Function,        "FUNCTION"  ) \
     _( Ptr,             "PTR"       ) \
-    _( Integer,         "INTEGER"   ) \
-    _( Byte,            "BYTE"      ) \
     _( End,             "END"       ) \
     _( Return,          "RETURN"    )
 
 //
+// Types define the type keywords
+//
+#define TKN_TYPES(_) \
+    ALL_TYPES(_)
+
+//
 // All tokens
 //
-#define ALL_TOKENS(_) \
-    TKN_BASIC(_)    \
-    TKN_OPERATOR(_) \
-    TKN_KEYWORD(_)
+#define ALL_TOKENS(_)   \
+    TKN_BASIC(_)        \
+    TKN_OPERATOR(_)     \
+    TKN_KEYWORD(_)      \
+    TKN_TYPES(_)

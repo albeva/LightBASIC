@@ -23,7 +23,7 @@ namespace lbc {
     struct Symbol : NonCopyable
     {
         // create new symbol
-        Symbol(const string & id, const shared_ptr<Type> & type, AstDeclaration * decl = nullptr, AstDeclaration * impl = nullptr);
+        Symbol(const string & id, Type * type = nullptr, AstDeclaration * decl = nullptr, AstDeclaration * impl = nullptr);
         
         // clean up
         ~Symbol();
@@ -32,10 +32,10 @@ namespace lbc {
         const string & id() const { return m_id; }
         
         // get type
-        shared_ptr<Type> type() const { return m_type; }
+        Type * type() const { return m_type; }
         
         // set type
-        void type(const shared_ptr<Type> & type) { m_type = type; }
+        void type(Type * type) { m_type = type; }
         
         // get declaration ast node
         AstDeclaration * decl() const { return m_decl; }
@@ -60,7 +60,7 @@ namespace lbc {
         // id
         string m_id;
         // symbol type
-        shared_ptr<Type> m_type;
+        Type * m_type;
         // symbol declaration (ast node)
         AstDeclaration * m_decl;
         // implementation ( functions may have seperate declaration )

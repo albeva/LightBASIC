@@ -7,6 +7,8 @@
 //
 #pragma once
 
+#include "Type.def.h"
+
 namespace llvm {
 	class Type;
 }
@@ -20,29 +22,41 @@ namespace lbc {
 	/**
 	 * Information about type
 	 */
-	struct Type : NonCopyable
+	struct Type // : NonCopyable
 	{
-		
+		/**
+         * Type kind.
+         */
 		enum TypeKind {
-			Basic,
-			Ptr,
-			Function
+            Primitive       = 1 << 0,
+            Integral        = 1 << 1,
+            FloatingPoint   = 1 << 2,
+			Pointer         = 1 << 3,
+			Function        = 1 << 4,
+            Unsigned        = 1 << 5,
+            Instantiable    = 1 << 6
 		};
+        bool isPrimitive() const { return (m_kind & TypeKind::Primitive) != 0; }
+        bool isIntegral() const { return (m_kind & TypeKind::Integral) != 0; }
+        bool isFloatingPoint() const { return (m_kind & TypeKind::FloatingPoint) != 0; }
+        bool isPointer() const { return (m_kind & TypeKind::Pointer) != 0; }
+        bool isFunction() const { return (m_kind & TypeKind::Function) != 0; }
+        bool isUnsignedIntegral() const { return isIntegral() && (m_kind & TypeKind::Unsigned) != 0; }
+        bool isSignedIntegral() const { return isIntegral() && (m_kind & TypeKind::Unsigned) == 0; }
+        bool isInstantiable() const { return (m_kind & TypeKind::Instantiable) != 0; }
 		
 		// create with base type
-		Type(const shared_ptr<Type> & base, TypeKind kind, bool instantiable);
+		Type(Type *  base, TypeKind kind, bool instantiable);
 		
 		// clean up
 		virtual ~Type();
-		
-		// can instantiate
-		bool isInstantiable() const { return m_instantiable; }
+    
 		
 		// compare types
-		bool compare(const shared_ptr<Type> &) const;
+		bool compare(Type * ) const;
 		
 		// return base type
-		shared_ptr<Type> getBaseType() const { return m_baseType; }
+		Type *  getBaseType() const { return m_baseType; }
 		
 		// get type kind
 		TypeKind kind() const { return m_kind; }
@@ -56,42 +70,39 @@ namespace lbc {
 	protected:
 		
 		// are types equal?
-		virtual bool equal(const shared_ptr<Type> &) const = 0;
+		virtual bool equal(Type * ) const = 0;
 		
 		// base type
-		shared_ptr<Type> m_baseType;
+		Type *  m_baseType;
 		
 	private:
-		// can instantiate this type?
-		unsigned m_instantiable: 1;
-		
-		TypeKind m_kind:4;
+		// the kind of the token
+		TypeKind m_kind;
 	};
 	
 	
 	/**
-	 * Basic type byte, short, integer, long, float, double, bool
-	 */
-	struct BasicType : Type
+	 * Primitive types
+     */
+	struct PrimitiveType : Type
 	{
+		// get pointer to a basic type
+		static Type * get(TokenType type);
+        
 		// create
-		BasicType(const shared_ptr<Type> & base, TokenType kind, int size);
+		PrimitiveType(TypeKind kind, int size);
 		
 		// cleanup
-		virtual ~BasicType();
+		virtual ~PrimitiveType();
 		
 		// is this equal to another type?
-		virtual bool equal(const shared_ptr<Type> &) const;
-		
-		// get pointer to a basic type
-		static shared_ptr<Type> get(TokenType type);
+		virtual bool equal(Type *) const;
 		
 		// get the size
-		virtual int getSizeInBits() const { return m_size * 8; }
+		virtual int getSizeInBits() const { return m_size; }
 		
 	private:
-		TokenType m_kind;
-		int m_size; // in bytes
+		int m_size;
 	};
 	
 	
@@ -100,17 +111,17 @@ namespace lbc {
 	 */
 	struct PtrType : Type
 	{
+		// get shared pointer type instance
+        static Type * get(Type *  base, int indirection);
+        
 		// create
-		PtrType(const shared_ptr<Type> & base, int level);
+		PtrType(Type * base, int level);
 		
 		// clean up
 		virtual ~PtrType();
 		
-		// get shared pointer type instance
-		static shared_ptr<PtrType> get(const shared_ptr<Type> & base, int indirection);
-		
 		// is this equal to another type?
-		virtual bool equal(const shared_ptr<Type> &) const;
+		virtual bool equal(Type * ) const;
 		
 		// get pointer size
 		virtual int getSizeInBits() const { return 64; }
@@ -129,21 +140,24 @@ namespace lbc {
 	struct FunctionType : Type
 	{
 		// create
-		FunctionType(const shared_ptr<Type> & result);
+		FunctionType(Type * result = nullptr);
 		
 		// clean up
 		virtual ~FunctionType();
 		
 		// is this equal to another type?
-		virtual bool equal(const shared_ptr<Type> &) const;
+		virtual bool equal(Type * ) const;
 		
 		// get function result type
-		shared_ptr<Type> result() const { return m_baseType; }
+		Type *  result() const { return m_baseType; }
 		
 		// set the function result type
-		void result(const shared_ptr<Type> & type) { m_baseType = type; }
+		void result(Type * type) { m_baseType = type; }
+        
+		// get pointer size
+		virtual int getSizeInBits() const { return 64; }
 		
 		// parameters
-		vector<shared_ptr<Type>> params;
+		vector<Type * > params;
 	};
 }

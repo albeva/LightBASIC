@@ -31,7 +31,7 @@ void Symbol::operator delete(void * addr)
 /**
  * Create new Symbol object
  */
-Symbol::Symbol(const string & id, const shared_ptr<Type> & type, AstDeclaration * decl, AstDeclaration * impl)
+Symbol::Symbol(const string & id, Type * type, AstDeclaration * decl, AstDeclaration * impl)
 : m_id(id), m_type(type), m_decl(decl), m_impl(impl), value(nullptr)
 {
     

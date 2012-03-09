@@ -70,7 +70,7 @@ namespace lbc {
     private:
         SymbolTable * m_table;
         Symbol * m_symbol;
-        shared_ptr<Type> m_type;
+        Type * m_type;
     };
 
 }

@@ -1,5 +1,5 @@
 ' Declare puts from libc
-[Extern = "C", Alias = "puts", Lib = "libc"] _
+[Extern = "C", Alias = "puts", Lib = "crt"] _
 Declare Function print(str As Byte Ptr) As Integer
 
 Function message() As Byte Ptr

@@ -1,7 +1,15 @@
-DIM i AS INTEGER
-DIM b AS BYTE PTR
+' Declare puts from libc
+[Extern = "C", Alias = "puts", Lib = "crt"] _
+Declare Function print(str As Byte Ptr) As Integer
 
-FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
+' global variables
+Dim i As Integer
+Dim b As Byte Ptr
+
+' entry point
+Function main() As Integer
     i = 10
-    b = *argv
-END FUNCTION
+    b = "Hello"
+    print(b)
+    Return 0
+End Function
