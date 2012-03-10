@@ -17,8 +17,8 @@ Milestone 2
     * no else or elseif
     * no single liner variant
     IfStmt = "IF" BooleanExpression "THEN"
-           StmtList
-		   "END" "IF"
+             StmtList
+             "END" "IF"
 [ ] add BooleanExpression
     * only "==" and "!="
 [ ] add pointer indexing. 0 based
@@ -30,7 +30,3 @@ Milestone 2
     [✓] assemble
     [✓] link
     [✓] produce binary
-	
-  
-  
-
