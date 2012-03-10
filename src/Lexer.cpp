@@ -117,11 +117,14 @@ static inline bool IsLineOrFileEnd(unsigned char ch)
 /**
  * Create new lexer object
  */
-Lexer::Lexer(const shared_ptr<Source> & src) : m_src(src)
+Lexer::Lexer(const shared_ptr<Source> & src)
+:   m_src(src),
+    m_input(m_src->begin()),
+    m_line(1),
+    m_col(0),
+    m_tokenStart(0),
+    m_hasStmt(false)
 {
-    m_input = m_src->begin();
-    m_line = 1;
-	m_hasStmt = false;
 }
 
 
@@ -196,10 +199,32 @@ Token * Lexer::next()
         if (ch == '"') return string();
         
         // number
-        if (info & CHAR_NUMBER) return number();
+        if ((info & CHAR_NUMBER) || (ch == '-' && CharInfo[nextCh] & CHAR_NUMBER)) return number();
         
-        // get the operators
-        #define IMPL_TOKENS(ID, STR, ...) if (STR[0] == ch) return MakeToken(TokenType::ID, STR);
+        // 3 char operators
+        #define IMPL_TOKENS(ID, STR, ...)                       \
+            if (sizeof(STR) == 4 && STR[0] == ch)               \
+                if (STR[1] == nextCh && STR[2] == m_input[1]) { \
+                    m_input++; m_input++; m_col += 2;          \
+                    return MakeToken(TokenType::ID, STR);       \
+                }
+        TKN_OPERATOR(IMPL_TOKENS)
+        #undef IMPL_TOKENS
+        
+        // 2 char operators
+        #define IMPL_TOKENS(ID, STR, ...)                       \
+            if (sizeof(STR) == 3 && STR[0] == ch)               \
+                if (STR[1] == nextCh) {                         \
+                    m_input++; m_col++;                         \
+                    return MakeToken(TokenType::ID, STR);       \
+                }
+        TKN_OPERATOR(IMPL_TOKENS)
+        #undef IMPL_TOKENS
+        
+        // 1 char operators
+        #define IMPL_TOKENS(ID, STR, ...)                       \
+            if (sizeof(STR) == 2 && STR[0] == ch)               \
+                return MakeToken(TokenType::ID, STR);
         TKN_OPERATOR(IMPL_TOKENS)
         #undef IMPL_TOKENS
         
@@ -291,6 +316,7 @@ Token * Lexer::number()
     // strat point
     Source::const_iterator begin = m_input;
     begin--;
+    
     // read whil identifier char
     while (CharInfo[(*m_input++)] & CHAR_NUMBER);
     m_input--;
@@ -329,6 +355,7 @@ Token * Lexer::string()
         if (ch == '"') {
             if (*m_input == '"') {
                 ch = *(++m_input);
+                m_input++;
                 buffer += '"';
                 continue;
             }
@@ -341,7 +368,18 @@ Token * Lexer::string()
             // \"
             if (nextCh == '"' || nextCh == '\\') {
                 ch = *(++m_input);
+                m_input++;
                 buffer += nextCh;
+                continue;
+            } else if (nextCh == 'n') {
+                ch = *(++m_input);
+                m_input++;
+                buffer += '\n';
+                continue;
+            } else if (nextCh == 't') {
+                ch = *(++m_input);
+                m_input++;
+                buffer += '\t';
                 continue;
             } else {
                 /// complain about invalid escape

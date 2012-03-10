@@ -134,8 +134,8 @@ bool PtrType::equal(Type *type) const
 /**
  * create function type
  */
-FunctionType::FunctionType(Type *result)
-: Type(result, TypeKind::Function, false)
+FunctionType::FunctionType(Type *result, bool vararg)
+: Type(result, TypeKind::Function, false), vararg(vararg)
 {}
 
 

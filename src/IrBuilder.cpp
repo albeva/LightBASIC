@@ -48,15 +48,22 @@ void IrBuilder::visit(AstProgram * ast)
 	m_value = nullptr;
 	m_table = nullptr;
     
+    // the module
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
+    
+    // symbol table
     m_table = ast->symbolTable.get();
-    for (auto & decl : ast->decls) decl.accept(this);
+    
+    // process declarations
+    for (auto decl : ast->decls) decl->accept(this);
+    
+    // verify module integrity
+//    m_module->dump();
     if (llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
         // there were errors
         delete m_module;
         m_module = nullptr;
     }
-    m_module->dump();
 }
 
 
@@ -98,7 +105,7 @@ llvm::Type * getType(lbc::Type * local, llvm::LLVMContext & context)
         llvmType = llvm::FunctionType::get(
             getType(fnType->result(), context),
             params,
-            false
+            fnType->vararg
         );
     }
     // nothing
@@ -121,9 +128,9 @@ void IrBuilder::visit(AstFuncSignature * ast)
         // get the symbol
         auto sym = m_table->get(id);
         auto llvmType = getType(sym->type(), m_module->getContext());
-        string alias = id;
+        string alias = sym->alias();
         if (id == "MAIN") alias = "main";
-        else if (id == "PRINT") alias = "puts"; // TEMP hack
+//        else if (id == "PRINT") alias = "puts"; // TEMP hack
         m_function = llvm::Function::Create(
              llvm::cast<llvm::FunctionType>(llvmType),
              llvm::GlobalValue::ExternalLinkage,
@@ -137,10 +144,10 @@ void IrBuilder::visit(AstFuncSignature * ast)
     // bind function params
     if (ast->params) {
         auto llp = m_function->arg_begin();
-        for (auto & p : ast->params->params) {
-            llp->setName(p.id->token->lexeme());
-            if (p.symbol) {
-                p.symbol->value = llp;
+        for (auto p : ast->params->params) {
+            llp->setName(p->id->token->lexeme());
+            if (p->symbol) {
+                p->symbol->value = llp;
             }
             llp++;
         }
@@ -215,7 +222,11 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         indeces.push_back(const_int64);
         m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
     } else if (ast->token->type() == TokenType::NumericLiteral) {
-        m_value = llvm::ConstantInt::get(m_module->getContext(), llvm::APInt(32, lexeme, 10));
+        if (ast->type->isIntegral()) {
+            m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(getType(ast->type, m_module->getContext())), lexeme, 10);
+        } else {
+            throw Exception("Only integral constants supported");
+        }
     }
 }
 
@@ -267,6 +278,47 @@ void IrBuilder::visit(AstAssignStmt * ast)
 
 
 //
+// AstCastExpr
+void IrBuilder::visit(AstCastExpr * ast)
+{
+    std::cout << __PRETTY_FUNCTION__ << '\n';
+    ast->expr->accept(this);
+    auto src = ast->expr->type;
+    auto dst = ast->type;
+    
+    if (src->isSignedIntegral()) {
+        if (dst->isSignedIntegral()) {
+            // truncate
+            if (src->getSizeInBits() > dst->getSizeInBits()) {
+                m_value = new llvm::TruncInst(m_value, dst->llvmType, "", m_block);
+            }
+            // extend
+            else {
+                m_value = new llvm::SExtInst(m_value, dst->llvmType, "", m_block);
+            }
+        } else if (dst->isUnsignedIntegral()) {
+            // truncate
+            if (src->getSizeInBits() > dst->getSizeInBits()) {
+                m_value = new llvm::TruncInst(m_value, dst->llvmType, "", m_block);
+            }
+            // extend
+            else {
+                m_value = new llvm::ZExtInst(m_value, dst->llvmType, "", m_block);
+            }
+        } else if (dst->isFloatingPoint()) {
+            throw Exception("Pointer casting not supported");
+        }
+    } else if (src->isUnsignedIntegral()) {
+        throw Exception("Pointer casting not supported");
+    } else if (src->isFloatingPoint()) {
+        throw Exception("Pointer casting not supported");        
+    } else if (src->isPointer()) {
+        throw Exception("Pointer casting not supported");
+    }
+}
+
+
+//
 // AstCallExpr
 void IrBuilder::visit(AstCallExpr * ast)
 {
@@ -275,8 +327,8 @@ void IrBuilder::visit(AstCallExpr * ast)
     
     vector<llvm::Value *> args;
     if (ast->args) {
-        for (auto & arg : ast->args->args) {
-            arg.accept(this);
+        for (auto arg : ast->args->args) {
+            arg->accept(this);
             args.push_back(m_value);
         }
     }

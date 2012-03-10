@@ -38,6 +38,8 @@ namespace lbc {
         void visit(AstFuncSignature * ast);
         // AstFunctionStmt
         void visit(AstFunctionStmt * ast);
+        // AstCastExpr
+        void visit(AstCastExpr * ast);
         // AstIdentExpr
         void visit(AstIdentExpr * ast);
         // AstLiteralExpr

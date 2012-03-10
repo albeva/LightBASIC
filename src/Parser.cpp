@@ -86,7 +86,7 @@ AstDeclaration * Parser::declaration()
     
     // add attribs
     if (decl && attribs) {
-        decl->attribs.reset(attribs);
+        decl->attribs = attribs;
     }
     
     // done
@@ -261,6 +261,11 @@ AstFunctionStmt * Parser::functionStmt()
 {
     // FuncSignature
     auto sig = funcSignature();
+    // no vararg support within lbc for now
+    if (sig->vararg) {
+        throw Exception("Variable arguments not supported");
+    }
+    
     expect(TokenType::EndOfLine);
     // StatementList
     auto stmts = statementList();
@@ -293,6 +298,7 @@ AstFuncSignature * Parser::funcSignature()
     
     // id
     auto id = identifier();
+    bool vararg = false;
     
     // args
     AstFuncParamList * params = nullptr;
@@ -305,6 +311,11 @@ AstFuncSignature * Parser::funcSignature()
         
         params = funcParamList();
         
+        // ellipsis
+        if (accept(TokenType::Ellipsis)) {
+            vararg = true;
+        }
+        
         // ")"
         expect(TokenType::ParenClose);
     }
@@ -316,7 +327,7 @@ AstFuncSignature * Parser::funcSignature()
     auto type = typeExpr();
     
     // done
-    return new AstFuncSignature(id, params, type);
+    return new AstFuncSignature(id, params, type, vararg);
 }
 
 
@@ -327,6 +338,7 @@ AstFuncParamList * Parser::funcParamList()
 {
     auto ast = new AstFuncParamList();
     do {
+        if (match(TokenType::Ellipsis)) break;
         auto param = funcParam();
         if (param != nullptr) ast->params.push_back(param);
     } while (accept(TokenType::Comma));
@@ -377,7 +389,9 @@ AstTypeExpr * Parser::typeExpr()
 {
     AstTypeExpr * ast = nullptr;
     Token * tmp = m_token;
-    if (accept(TokenType::Integer) || accept(TokenType::Byte)) {
+#define EXPECT_TYPE(ID, ...) accept(TokenType::ID) ||
+//    if (accept(TokenType::Integer) || accept(TokenType::Byte)) {
+    if (ALL_TYPES(EXPECT_TYPE) false) {
         int deref = 0;
         while (accept(TokenType::Ptr)) deref++;
         ast = new AstTypeExpr(tmp, deref);
@@ -421,7 +435,7 @@ AstAttribute * Parser::attribute()
     // "(" AttribParam { "," AttribParam } ")"
     if (accept(TokenType::ParenOpen)) {
         if (!accept(TokenType::ParenClose)) {
-            attr->params.reset(attribParamList());
+            attr->params = attribParamList();
             expect(TokenType::ParenClose);
         }
     }
@@ -429,7 +443,7 @@ AstAttribute * Parser::attribute()
     else if (accept(TokenType::Assign)) {
         auto params = new AstAttribParamList();
         params->params.push_back(attribParam());
-        attr->params.reset(params);
+        attr->params = params;
     }
     
     return attr;

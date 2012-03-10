@@ -140,7 +140,7 @@ namespace lbc {
 	struct FunctionType : Type
 	{
 		// create
-		FunctionType(Type * result = nullptr);
+		FunctionType(Type * result = nullptr, bool vararg = false);
 		
 		// clean up
 		virtual ~FunctionType();
@@ -157,6 +157,9 @@ namespace lbc {
 		// get pointer size
 		virtual int getSizeInBits() const { return 64; }
 		
+        // vararg?
+        bool vararg;
+        
 		// parameters
 		vector<Type * > params;
 	};

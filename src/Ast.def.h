@@ -40,7 +40,8 @@
     _( AstExpression )      \
     _( AstIdentExpr )       \
     _( AstLiteralExpr )     \
-    _( AstCallExpr )
+    _( AstCallExpr )        \
+    _( AstCastExpr )
 
 //
 // ast nodes for attributes

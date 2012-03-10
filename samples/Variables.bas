@@ -1,15 +1,15 @@
-' Declare puts from libc
-[Extern = "C", Alias = "puts", Lib = "crt"] _
-Declare Function print(str As Byte Ptr) As Integer
+' Declare printf
+[Alias = "printf"] _
+Declare Function printf(str As Byte Ptr, ...) As Integer
 
 ' global variables
-Dim i As Byte
-Dim b As Byte Ptr
+Dim i As Integer
+Dim s As Byte Ptr
 
 ' entry point
 Function main() As Integer
-    i = 10
-    b = "Hello"
-    print(b)
+    i = -10
+    s = "Hello"
+    printf("s = %s, i = %i\n", s, i)
     Return 0
 End Function

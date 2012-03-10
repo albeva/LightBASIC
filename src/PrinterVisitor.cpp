@@ -95,6 +95,10 @@ void PrinterVisitor::visit(AstFuncSignature * ast)
     if (ast->id) ast->id->accept(this);
     std::cout << "(";
     if (ast->params) ast->params->accept(this);
+    if (ast->vararg) {
+        if (ast->params && ast->params->params.size()) std::cout << ", ";
+        std::cout << "...";
+    }
     std::cout << ") AS ";
     if (ast->typeExpr) ast->typeExpr->accept(this);
 }
@@ -113,6 +117,18 @@ void PrinterVisitor::visit(AstFunctionStmt * ast)
     if (ast->stmts) ast->stmts->accept(this);
     m_indent--;
     std::cout << indent() << "END FUNCTION" << std::endl;
+}
+
+
+//
+// AstCastExpr
+void PrinterVisitor::visit(AstCastExpr * ast)
+{
+    std::cout << "CAST(";
+    if (ast->typeExpr) ast->typeExpr->accept(this);
+    std::cout << ", ";
+    if (ast->expr) ast->expr->accept(this);
+    std::cout << ")";
 }
 
 
@@ -155,10 +171,10 @@ void PrinterVisitor::visit(AstAttributeList * ast)
 {
     std::cout << indent() << '[';
     bool first = true;
-    for (auto & attr : ast->attribs) {
+    for (auto attr : ast->attribs) {
         if (first) first = false;
         else std::cout << ", ";
-        attr.accept(this);
+        attr->accept(this);
     }
     std::cout << "] _" << std::endl;
 }
@@ -187,10 +203,10 @@ void PrinterVisitor::visit(AstAttribute * ast)
 void PrinterVisitor::visit(AstAttribParamList * ast)
 {
     bool first = true;
-    for (auto & p : ast->params) {
+    for (auto p : ast->params) {
         if (first) first = false;
         else std::cout << ", ";
-        p.accept(this);
+        p->accept(this);
     }
 }
 
@@ -212,10 +228,10 @@ void PrinterVisitor::visit(AstTypeExpr * ast)
 void PrinterVisitor::visit(AstFuncParamList * ast)
 {
     bool first = true;
-    for (auto & param : ast->params) {
+    for (auto param : ast->params) {
         if (first) first = false;
         else std::cout << ", ";
-        param.accept(this);
+        param->accept(this);
     }
 }
 
@@ -235,10 +251,10 @@ void PrinterVisitor::visit(AstFuncParam * ast)
 void PrinterVisitor::visit(AstFuncArgList * ast)
 {
     bool first = true;
-    for (auto & arg : ast->args) {
+    for (auto arg : ast->args) {
         if (first) first = false;
         else std::cout << ", ";
-        arg.accept(this);
+        arg->accept(this);
     }
 }
 

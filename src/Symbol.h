@@ -31,6 +31,12 @@ namespace lbc {
         // get id
         const string & id() const { return m_id; }
         
+        // get alias
+        const string & alias() const { return m_alias.length() ? m_alias : m_id; }
+        
+        // set alias
+        void alias(const string & alias) { m_alias = alias; }
+        
         // get type
         Type * type() const { return m_type; }
         
@@ -58,7 +64,7 @@ namespace lbc {
         
     private:
         // id
-        string m_id;
+        string m_id, m_alias;
         // symbol type
         Type * m_type;
         // symbol declaration (ast node)

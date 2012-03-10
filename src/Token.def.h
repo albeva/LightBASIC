@@ -23,12 +23,13 @@
 // OPERATOR defines operator tokens
 //     Name             String
 #define TKN_OPERATOR(_) \
-    _( BracketOpen,     "[" ) \
-    _( BracketClose,    "]" ) \
-    _( ParenOpen,       "(" ) \
-    _( ParenClose,      ")" ) \
-    _( Comma,           "," ) \
-    _( Assign,          "=" )
+    _( BracketOpen,     "["     ) \
+    _( BracketClose,    "]"     ) \
+    _( ParenOpen,       "("     ) \
+    _( ParenClose,      ")"     ) \
+    _( Comma,           ","     ) \
+    _( Assign,          "="     ) \
+    _( Ellipsis,        "..."   )
 
 //
 // KEYWORD defines keyword tokens

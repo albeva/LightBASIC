@@ -19,13 +19,42 @@
 
 using namespace lbc;
 
+/**
+ * Simple helper. Basically ensured that original
+ * value of a variable provided is restored apon
+ * exiting the scope
+ */
+template<typename T> struct ScopeGuard : NonCopyable{
+    
+    // create
+    ScopeGuard(T & value) : target(value), value(value)
+    {
+    }
+    
+    // restore
+    ~ScopeGuard() {
+        target = value;
+    }
+    
+    // members
+    T & target;
+    T   value;
+};
+
+#define CONCATENATE_DETAIL(x, y) x##y
+#define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
+#define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
+#define SCOPED_GUARD(V) ScopeGuard<decltype(V)> MAKE_UNIQUE(_tmp_guard) (V);
+
+
 //
 // create new one
 SemanticAnalyser::SemanticAnalyser()
 :   RecursiveAstVisitor(true),
     m_table(nullptr),
     m_symbol(nullptr),
-    m_type(nullptr)
+    m_type(nullptr),
+    m_coerceType(nullptr)
 {
 }
 
@@ -38,12 +67,13 @@ void SemanticAnalyser::visit(AstProgram * ast)
     m_table = nullptr;
     m_symbol = nullptr;
     m_type = nullptr;
+    m_coerceType = nullptr;
     
     // create new scope
     ast->symbolTable = make_shared<SymbolTable>(m_table);
     m_table = ast->symbolTable.get();
     // visit all declarations
-    for (auto & decl : ast->decls) decl.accept(this);
+    for (auto decl : ast->decls) decl->accept(this);
     // restore the symbol table
     m_table = m_table->parent();
 }
@@ -92,6 +122,9 @@ void SemanticAnalyser::visit(AstFuncSignature * ast)
         ast->typeExpr->accept(this);
         funcType->result(m_type);
     }
+    // var arg?
+    funcType->vararg = ast->vararg;
+    //
     m_type = funcType;
 }
 
@@ -113,11 +146,11 @@ void SemanticAnalyser::visit(AstTypeExpr * ast)
 {
     // get the kind
     auto kind = ast->token->type();
-    if (kind != TokenType::Integer && kind != TokenType::Byte) {
-        throw Exception(string("Invalid type: ") + ast->token->name());
-    }
     // basic type
     m_type = PrimitiveType::get(kind);
+    if (!m_type) {
+        throw Exception(string("Invalid type: ") + ast->token->name());
+    }
     // is it a pointer?
     if (ast->level) m_type = PtrType::get(m_type, ast->level);
 }
@@ -170,14 +203,14 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     // fill the table with parameters
     if (ast->signature->params) {
         int i = 0;
-        for(auto & param : ast->signature->params->params) {
-            const string & paramId = param.id->token->lexeme();
+        for(auto param : ast->signature->params->params) {
+            const string & paramId = param->id->token->lexeme();
             if (m_table->exists(paramId)) {
                 throw Exception(string("Duplicate defintion of ") + paramId);
             }
-            auto sym = new Symbol(paramId, funcType->params[i++], &param, nullptr);
+            auto sym = new Symbol(paramId, funcType->params[i++], param, nullptr);
             m_table->add(paramId, sym);
-            param.symbol = sym;
+            param->symbol = sym;
         }
     }
     
@@ -245,11 +278,9 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     }
     
     // m_type will hold the result of the expression
-    ast->expr->accept(this);
-    auto exprType = ast->expr->type;
-    if (!exprType->compare(symbol->type())) {
-        throw Exception(string("Incompatible types"));
-    }
+    SCOPED_GUARD(m_coerceType);
+    m_coerceType = symbol->type();
+    expression(ast->expr);
 }
 
 
@@ -258,6 +289,38 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
 void SemanticAnalyser::visit(AstCallStmt * ast)
 {
     ast->expr->accept(this);
+}
+
+
+//
+// Process the expression. If type coercion is required
+// then insert AstCastExpr node in front of current ast expression
+void SemanticAnalyser::expression(AstExpression *& ast)
+{
+    // process the expression
+    ast->accept(this);
+    
+    if (m_coerceType) ast = coerce(ast, m_coerceType);
+}
+
+
+//
+// coerce expression to a type if needed
+AstExpression * SemanticAnalyser::coerce(AstExpression * ast, Type * type)
+{
+    // deal with type coercion. If can create implicit cast node
+    if (!type->compare(ast->type)) {
+        // check if this is signed -> unsigned or vice versa
+        if (ast->type->isIntegral() && type->isIntegral()) {
+            if (ast->type->getSizeInBits() == type->getSizeInBits()) {
+                return ast;
+            }
+        }
+        // figure out casting
+        ast = new AstCastExpr(ast);
+        ast->type = type;
+    }
+    return ast;
 }
 
 
@@ -283,16 +346,22 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
     
     // check the parameter types against the argument types
     if (ast->args) {
-        if (type->params.size() != ast->args->args.size()) {
+        if (type->vararg && ast->args->args.size() < type->params.size()) {
+            throw Exception("Argument count mismatch");
+        }
+        else if (!type->vararg && type->params.size() != ast->args->args.size()) {
             throw Exception("Argument count mismatch");
         }
         int i = 0;
+        SCOPED_GUARD(m_coerceType);
         for(auto & arg : ast->args->args) {
-            arg.accept(this);
-            if (!arg.type) {
-                throw Exception("Somethign is wrong");
-            } else if (!arg.type->compare(type->params[i++])) {
-                throw Exception(string("Argument type mismatch"));
+            m_coerceType = type->params.size() < i + 1 ? type->params[i++] : nullptr;
+            expression(arg);
+            if (!m_coerceType) {
+                // cast vararg params to ints if less than 32bit
+                if (arg->type->isIntegral() && arg->type->getSizeInBits() < 32) {
+                    arg = coerce(arg, PrimitiveType::get(TokenType::Integer));
+                }
             }
         }
     } else if (type->params.size() != 0) {
@@ -311,7 +380,8 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
     if (ast->token->type() == TokenType::StringLiteral) {
         ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
     } else if (ast->token->type() == TokenType::NumericLiteral) {
-        ast->type = PrimitiveType::get(TokenType::Integer);
+        if (m_coerceType) ast->type = m_coerceType;
+        else ast->type = PrimitiveType::get(TokenType::Integer);
     } else {
         throw Exception("Invalid type");
     }
@@ -342,14 +412,13 @@ void SemanticAnalyser::visit(AstIdentExpr * ast)
 // AstReturnStmt
 void SemanticAnalyser::visit(AstReturnStmt * ast)
 {
-    assert(m_type->kind() == Type::Function);
+    assert(m_type->isFuntion());
     auto funcType = static_cast<FunctionType *>(m_type);
     
     if (ast->expr) {
-        ast->expr->accept(this);
-        if (!funcType->result()->compare(ast->expr->type)) {
-            throw Exception("Mismatching return type");
-        }
+        SCOPED_GUARD(m_coerceType);
+        m_coerceType = funcType->result();
+        expression(ast->expr);
     }
 }
 
@@ -358,7 +427,18 @@ void SemanticAnalyser::visit(AstReturnStmt * ast)
 // AstAttribute
 void SemanticAnalyser::visit(AstAttribute * ast)
 {
-    
+    const string & id = ast->id->token->lexeme();
+    if (id == "ALIAS") {
+        if (!ast->params) 
+            throw Exception("Alias expects a string value");
+        if (ast->params->params.size() != 1)
+            throw Exception("Alias expects one string value");
+        if (ast->params->params[0]->token->type() != TokenType::StringLiteral)
+            throw Exception("Incorrect Alias value. String expected");
+        if (m_symbol) {
+            m_symbol->alias(ast->params->params[0]->token->lexeme());
+        }
+    }
 }
 
 

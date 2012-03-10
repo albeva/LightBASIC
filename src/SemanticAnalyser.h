@@ -25,6 +25,14 @@ namespace lbc {
     {
         SemanticAnalyser();
         
+        // process expression
+        // this CAN replace the current ast node
+        // with a new one!
+        void expression(AstExpression *& ast);
+        
+        // coerce expression to a type if needed
+        AstExpression * coerce(AstExpression * ast, Type * type);
+        
         // AstDeclList
         virtual void visit(AstProgram * ast);
         
@@ -68,9 +76,14 @@ namespace lbc {
         virtual void visit(AstAttribute * ast);
         
     private:
+        // cyrrent scope backeed by symbol table
         SymbolTable * m_table;
+        // cyrrent symbol
         Symbol * m_symbol;
+        // current type
         Type * m_type;
+        // coercion type
+        Type * m_coerceType;
     };
 
 }
