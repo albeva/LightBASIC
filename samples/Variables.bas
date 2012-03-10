@@ -3,7 +3,7 @@
 Declare Function print(str As Byte Ptr) As Integer
 
 ' global variables
-Dim i As Integer
+Dim i As Byte
 Dim b As Byte Ptr
 
 ' entry point

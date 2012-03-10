@@ -15,7 +15,7 @@ Milestone 2
            StmtList
 		   "END" "IF"
 [ ] add BooleanExpression
-  * only "==" and "!="
+    * only "==" and "!="
 [ ] add pointer indexing. 0 based
     Dim argv As Byte Ptr Ptr
     Dim arg As Byte Ptr
