@@ -28,8 +28,8 @@ Milestone 2
 [✓] Rename CodeGen to IrBuilder
 [✓] Add Emitter class
     [✓] assemble
-	[✓] link
-	[✓] produce binary
+    [✓] link
+    [✓] produce binary
 	
   
   
