@@ -3,7 +3,7 @@ Milestone 2
 [✓] global variables
 [ ] rework internal type system
     [✓] rename basic type to PrimitiveType
-    [ ] add name and alias (for printing out type names)
+    [✓] add alias to Symbol
     [ ] add BOOL and FLOAT data types
     [ ] allow widening, narrowing and casting (integer -> float, float -> integer, bool -> integer)
     [✓] unsigned types
