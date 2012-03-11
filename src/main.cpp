@@ -30,7 +30,7 @@ int main(int argc, const char * argv[])
                 ctx->add(argv[i], Context::Source);
             }
         } else {
-            ctx->add("examples/Variables.bas", Context::Source);
+            ctx->add("examples/FloatingPoint.bas", Context::Source);
         }
         // create the parser
         auto parser = make_shared<Parser>(ctx);

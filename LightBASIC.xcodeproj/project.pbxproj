@@ -11,6 +11,7 @@
 		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
 		36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
 		36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368378D4150901F7004C7BAB /* Emitter.cpp */; };
+		36682DCC150D2AC000E1038A /* FloatingPoint.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36682DCB150D2AB500E1038A /* FloatingPoint.bas */; };
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
 		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
@@ -41,6 +42,7 @@
 			dstPath = examples;
 			dstSubfolderSpec = 6;
 			files = (
+				36682DCC150D2AC000E1038A /* FloatingPoint.bas in CopyFiles */,
 				36DF7367150953400023F600 /* module_1.bas in CopyFiles */,
 				36DF7368150953400023F600 /* module_2.bas in CopyFiles */,
 				36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */,
@@ -55,6 +57,7 @@
 		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
 		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
 		365F7A4C14F90D7A00553D98 /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
+		36682DCB150D2AB500E1038A /* FloatingPoint.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = FloatingPoint.bas; path = samples/FloatingPoint.bas; sourceTree = "<group>"; };
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		36779A0B1503BD9700369AFF /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -294,6 +297,7 @@
 				369056F9150389CA00E2C917 /* HelloWorld.bas */,
 				369056FA150389CA00E2C917 /* Variables.bas */,
 				36779A0C1503DA1800369AFF /* Simple.bas */,
+				36682DCB150D2AB500E1038A /* FloatingPoint.bas */,
 			);
 			name = samples;
 			sourceTree = "<group>";
