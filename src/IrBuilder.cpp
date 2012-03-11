@@ -58,11 +58,12 @@ void IrBuilder::visit(AstProgram * ast)
     for (auto & decl : ast->decls) decl->accept(this);
     
     // verify module integrity
-    m_module->dump();
     if (llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
         // there were errors
         delete m_module;
         m_module = nullptr;
+    } else {
+        m_module->dump();
     }
 }
 
@@ -72,6 +73,8 @@ void IrBuilder::visit(AstProgram * ast)
 // generate llvm type from local type
 llvm::Type * getType(lbc::Type * local, llvm::LLVMContext & context)
 {
+    if (local->llvmType) return local->llvmType;
+    
     llvm::Type * llvmType = nullptr;
     // pointer
     if (local->isPointer()) {
@@ -86,13 +89,13 @@ llvm::Type * getType(lbc::Type * local, llvm::LLVMContext & context)
     }
     // basic type
     else if (local->isPrimitive()) {
-        if (local->isFloatingPoint()) {
+        if (local->isIntegral()) {
+            llvmType = llvm::Type::getIntNTy(context, local->getSizeInBits());
+        } else if (local->isFloatingPoint()) {
             if (local->getSizeInBits() == 32)
                 llvmType = llvm::Type::getFloatTy(context);
             else
                 llvmType = llvm::Type::getDoubleTy(context);
-        } else {
-            llvmType = llvm::Type::getIntNTy(context, local->getSizeInBits());
         }
     }
     // function type
@@ -221,12 +224,10 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         indeces.push_back(const_int64);
         indeces.push_back(const_int64);
         m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
-    } else if (ast->token->type() == TokenType::NumericLiteral) {
-        if (ast->type->isIntegral()) {
-            m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(getType(ast->type, m_module->getContext())), lexeme, 10);
-        } else {
-            throw Exception("Only integral constants supported");
-        }
+    } else if (ast->token->type() == TokenType::IntegerLiteral) {
+        m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(getType(ast->type, m_module->getContext())), lexeme, 10);
+    } else if (ast->token->type() == TokenType::FloatingPointLiteral) {
+        m_value = llvm::ConstantFP::get(getType(ast->type, m_module->getContext()), lexeme);
     }
 }
 
@@ -243,8 +244,10 @@ void IrBuilder::visit(AstVarDecl * ast)
         llvm::Constant * constant;
         if (llType->isPointerTy()) {
             constant = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(llType));
-        } else {
+        } else if (llType->isIntegerTy()) {
             constant = llvm::ConstantInt::get(llType, 0, false);
+        } else if (llType->isFloatingPointTy()) {
+            constant = llvm::ConstantFP::get(llType, 0);
         }
         sym->value = new llvm::GlobalVariable(
             *m_module,
@@ -281,10 +284,10 @@ void IrBuilder::visit(AstAssignStmt * ast)
 // AstCastExpr
 void IrBuilder::visit(AstCastExpr * ast)
 {
-    std::cout << __PRETTY_FUNCTION__ << '\n';
     ast->expr->accept(this);
     auto src = ast->expr->type;
     auto dst = ast->type;
+    if (!dst->llvmType) dst->llvmType = getType(dst, m_module->getContext());
     
     if (src->isSignedIntegral()) {
         if (dst->isSignedIntegral()) {
@@ -306,14 +309,32 @@ void IrBuilder::visit(AstCastExpr * ast)
                 m_value = new llvm::ZExtInst(m_value, dst->llvmType, "", m_block);
             }
         } else if (dst->isFloatingPoint()) {
-            throw Exception("Pointer casting not supported");
+            THROW_EXCEPTION("no int -> fp");
+        } else if (dst->isPointer()) {
+            THROW_EXCEPTION("no int -> ptr");
         }
     } else if (src->isUnsignedIntegral()) {
-        throw Exception("Pointer casting not supported");
+        THROW_EXCEPTION("no unsigned -> any");
     } else if (src->isFloatingPoint()) {
-        throw Exception("Pointer casting not supported");        
+        if (dst->isSignedIntegral()) {
+            THROW_EXCEPTION("no fp -> int");
+        } else if (dst->isUnsignedIntegral()) {
+            THROW_EXCEPTION("no fp -> unsigned int");
+        } else if (dst->isFloatingPoint()) {
+            // narrow
+            if (src->getSizeInBits() > dst->getSizeInBits()) {
+                m_value = new llvm::FPTruncInst(m_value, dst->llvmType, "", m_block);
+            }
+            // extend
+            else {
+                m_value = new llvm::FPExtInst(m_value, dst->llvmType, "", m_block);
+            }
+            
+        } else if (dst->isPointer()) {
+            THROW_EXCEPTION("no fp -> ptr");
+        }
     } else if (src->isPointer()) {
-        throw Exception("Pointer casting not supported");
+        THROW_EXCEPTION("no ptr -> any");
     }
 }
 

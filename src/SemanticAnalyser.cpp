@@ -88,7 +88,7 @@ void SemanticAnalyser::visit(AstFunctionDecl * ast)
     
     // check if already exists
     if (m_table->exists(id)) {
-        throw Exception(string("Duplicate symbol: ") + id);
+        THROW_EXCEPTION(string("Duplicate symbol: ") + id);
     }
     
     // analyse the signature. This will create a type
@@ -149,7 +149,7 @@ void SemanticAnalyser::visit(AstTypeExpr * ast)
     // basic type
     m_type = PrimitiveType::get(kind);
     if (!m_type) {
-        throw Exception(string("Invalid type: ") + ast->token->name());
+        THROW_EXCEPTION(string("Invalid type: ") + ast->token->name());
     }
     // is it a pointer?
     if (ast->level) m_type = PtrType::get(m_type, ast->level);
@@ -168,7 +168,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     
     // already implemented?
     if (m_symbol && m_symbol->impl()) {
-        throw Exception(string("Type '") + id + "' is already implemented");
+        THROW_EXCEPTION(string("Type '") + id + "' is already implemented");
     }
     
     // process the signature
@@ -178,11 +178,11 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     // then check that types match.
     if (m_symbol) {
         if (!m_symbol->type()->compare(m_type)) {
-            throw Exception(string("Type mismatch between '") + id + "' and '" + m_symbol->id());
+            THROW_EXCEPTION(string("Type mismatch between '") + id + "' and '" + m_symbol->id());
         }
         m_symbol->impl(ast);
         if (ast->attribs) {
-            throw Exception(string("Duplicate attribute declarations"));
+            THROW_EXCEPTION(string("Duplicate attribute declarations"));
         }
     } else {
         m_symbol = new Symbol(id, m_type, ast, ast);
@@ -206,7 +206,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
         for(auto & param : ast->signature->params->params) {
             const string & paramId = param->id->token->lexeme();
             if (m_table->exists(paramId)) {
-                throw Exception(string("Duplicate defintion of ") + paramId);
+                THROW_EXCEPTION(string("Duplicate defintion of ") + paramId);
             }
             auto sym = new Symbol(paramId, funcType->params[i++], param.get(), nullptr);
             m_table->add(paramId, sym);
@@ -234,7 +234,7 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     
     // exists?
     if (m_table->exists(id)) {
-        throw Exception(string("Duplicate definition of ") + id);
+        THROW_EXCEPTION(string("Duplicate definition of ") + id);
     }
     
     // get the type
@@ -242,7 +242,7 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     
     // can this type be instantiated?
     if (!m_type->isInstantiable()) {
-        throw Exception(string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
+        THROW_EXCEPTION(string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
     }
     
     // create new symbol
@@ -272,9 +272,9 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     
     // check
     if (!symbol) {
-        throw Exception(string("Use of undeclared identifier '") + id + "'");
+        THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
     } else if (!symbol->type()->isInstantiable()) {
-        throw Exception(string("Cannot assign to identifier '") + id + "'");
+        THROW_EXCEPTION(string("Cannot assign to identifier '") + id + "'");
     }
     
     // m_type will hold the result of the expression
@@ -334,12 +334,12 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
     // find
     auto sym = m_table->get(id);
     if (!sym) {
-        throw Exception(string("Use of undeclared identifier '") + id + "'");
+        THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
     }
     
     // not a callable function?
     if (sym->type()->kind() != Type::Function) {
-        throw Exception(string("Called identifier '") + id + "' is not a function");
+        THROW_EXCEPTION(string("Called identifier '") + id + "' is not a function");
     }
     
     auto type = static_cast<FunctionType *>(sym->type());
@@ -347,25 +347,30 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
     // check the parameter types against the argument types
     if (ast->args) {
         if (type->vararg && ast->args->args.size() < type->params.size()) {
-            throw Exception("Argument count mismatch");
+            THROW_EXCEPTION("Argument count mismatch");
         }
         else if (!type->vararg && type->params.size() != ast->args->args.size()) {
-            throw Exception("Argument count mismatch");
+            THROW_EXCEPTION("Argument count mismatch");
         }
         int i = 0;
         SCOPED_GUARD(m_coerceType);
         for(auto & arg : ast->args->args) {
             m_coerceType = type->params.size() < i + 1 ? type->params[i++] : nullptr;
             expression(arg);
+            // cast var args
             if (!m_coerceType) {
-                // cast vararg params to ints if less than 32bit
+                // extend int to 32 bit at least
                 if (arg->type->isIntegral() && arg->type->getSizeInBits() < 32) {
                     coerce(arg, PrimitiveType::get(TokenType::Integer));
+                }
+                // extend single to double. Is this 64bit only?
+                else if (arg->type->isFloatingPoint() && arg->type->getSizeInBits() == 32) {
+                    coerce(arg, PrimitiveType::get(TokenType::Double));
                 }
             }
         }
     } else if (type->params.size() != 0) {
-        throw Exception("Argument count mismatch");
+        THROW_EXCEPTION("Argument count mismatch");
     }
     
     // set the expression type
@@ -377,13 +382,17 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
 // AstLiteralExpr
 void SemanticAnalyser::visit(AstLiteralExpr * ast)
 {
-    if (ast->token->type() == TokenType::StringLiteral) {
+    auto type = ast->token->type();
+    if (type == TokenType::StringLiteral) {
         ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
-    } else if (ast->token->type() == TokenType::NumericLiteral) {
+    } else if (type == TokenType::IntegerLiteral) {
         if (m_coerceType) ast->type = m_coerceType;
         else ast->type = PrimitiveType::get(TokenType::Integer);
+    } else if (type == TokenType::FloatingPointLiteral) {
+        if (m_coerceType) ast->type = m_coerceType;
+        else ast->type = PrimitiveType::get(TokenType::Double);
     } else {
-        throw Exception("Invalid type");
+        THROW_EXCEPTION("Invalid type");
     }
 }
 
@@ -400,7 +409,7 @@ void SemanticAnalyser::visit(AstIdentExpr * ast)
     
     // not found?
     if (!sym) {
-        throw Exception(string("Use of undeclared identifier '") + id + "'");
+        THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
     }
     
     // set type
@@ -430,11 +439,11 @@ void SemanticAnalyser::visit(AstAttribute * ast)
     const string & id = ast->id->token->lexeme();
     if (id == "ALIAS") {
         if (!ast->params) 
-            throw Exception("Alias expects a string value");
+            THROW_EXCEPTION("Alias expects a string value");
         if (ast->params->params.size() != 1)
-            throw Exception("Alias expects one string value");
+            THROW_EXCEPTION("Alias expects one string value");
         if (ast->params->params[0]->token->type() != TokenType::StringLiteral)
-            throw Exception("Incorrect Alias value. String expected");
+            THROW_EXCEPTION("Incorrect Alias value. String expected");
         if (m_symbol) {
             m_symbol->alias(ast->params->params[0]->token->lexeme());
         }

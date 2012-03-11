@@ -18,7 +18,7 @@ SourceFile::SourceFile(const FS::path & path) : Source(path.string())
     ifstream stream;
     stream.open(getName().c_str(), ios::in | ios::binary);
     if (!stream.good()) {
-        throw Exception("Could not open '" + getName() + "'");
+        THROW_EXCEPTION("Could not open '" + getName() + "'");
     }
 
     // get lenght

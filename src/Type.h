@@ -66,6 +66,9 @@ namespace lbc {
 		
 		// associated llvm type
 		llvm::Type * llvmType;
+        
+        // get string representation of the type
+        virtual string toString() = 0;
 		
 	protected:
 		
@@ -100,6 +103,9 @@ namespace lbc {
 		
 		// get the size
 		virtual int getSizeInBits() const { return m_size; }
+        
+        // get string representation
+        virtual string toString();
 		
 	private:
 		int m_size;
@@ -128,6 +134,9 @@ namespace lbc {
 		
 		// get indirection level
 		int indirection() const { return m_level; }
+        
+        // get string representation
+        virtual string toString();
 		
 	private:
 		int m_level;
@@ -156,6 +165,9 @@ namespace lbc {
         
 		// get pointer size
 		virtual int getSizeInBits() const { return 64; }
+        
+        // get string representation
+        virtual string toString();
 		
         // vararg?
         bool vararg;

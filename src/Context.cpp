@@ -53,7 +53,7 @@ Context & Context::add(const FS::path & path, ResourceTypes type)
             source = resolveFile(path, LibraryPath);
             break;
         default:
-            throw Exception("Invalid ResourceType");
+            THROW_EXCEPTION("Invalid ResourceType");
             break;
     }
     
@@ -73,7 +73,7 @@ Context & Context::add(const FS::path & path, ResourceTypes type)
 const ResourceContainer & Context::get(ResourceTypes type) const
 {
     if (type < 0 || type >= _ResourceCount) {
-        throw Exception("Invalid ResourceType");
+        THROW_EXCEPTION("Invalid ResourceType");
     }
     return m_resources[type];
 }
@@ -100,7 +100,7 @@ FS::path Context::resolveDir(const FS::path & dir) const
     }
     
     // not found
-    throw Exception("Directory '" + dir.string() + "' not found" );
+    THROW_EXCEPTION("Directory '" + dir.string() + "' not found" );
 }
 
 
@@ -130,5 +130,5 @@ FS::path Context::resolveFile(const FS::path & file, ResourceTypes type) const
     }
     
     // not found
-    throw Exception("File '" + file.string() + "' not found");
+    THROW_EXCEPTION("File '" + file.string() + "' not found");
 }

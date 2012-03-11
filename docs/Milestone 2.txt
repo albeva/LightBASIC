@@ -3,13 +3,13 @@ Milestone 2
 [✓] global variables
 [ ] rework internal type system
     [✓] rename basic type to PrimitiveType
-    [ ] add FLOAT and DOUBLE types
+    [✓] add FLOAT and DOUBLE types
     [ ] add BOOL type
         [ ] add TRUE and FALSE keywords
     [✓] add unsigned types
     [ ] implement implicit type casting and conversions
 [✓] Lex negative numbers
-[ ] Lex simple floating point numbers
+[✓] Lex simple floating point numbers
 [✓] variadic function support
     external only. for printf
 [✓] add basic escape codes \n \t

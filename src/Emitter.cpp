@@ -74,7 +74,7 @@ void Emitter::generate()
         string errors;
         llvm::raw_fd_ostream stream(path.c_str(), errors, llvm::raw_fd_ostream::F_Binary);
         if (errors.length()) {
-            throw Exception(errors);
+            THROW_EXCEPTION(errors);
         }
         llvm::WriteBitcodeToFile(module.get(), stream);
         // push the file to the vector

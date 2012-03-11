@@ -10,14 +10,15 @@
 
 //
 // TOKEN defines basic token types
-//     Name             String
+//     Name                 String
 #define TKN_BASIC(_) \
-    _( Invalid,         "Invalid Token"     ) \
-    _( EndOfFile,       "End-Of-File"       ) \
-    _( EndOfLine,       "End-Of-Line"       ) \
-    _( Identifier,      "Identifier"        ) \
-    _( NumericLiteral,  "Numeric-Literal"   ) \
-    _( StringLiteral,   "String-Literal"    )
+    _( Invalid,             "Invalid Token"         ) \
+    _( EndOfFile,           "End-Of-File"           ) \
+    _( EndOfLine,           "End-Of-Line"           ) \
+    _( Identifier,          "Identifier"            ) \
+    _( IntegerLiteral,      "Numeric-Literal"       ) \
+    _( FloatingPointLiteral,"Floating-Point-Literal") \
+    _( StringLiteral,       "String-Literal"        )
 
 //
 // OPERATOR defines operator tokens

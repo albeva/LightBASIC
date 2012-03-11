@@ -199,13 +199,14 @@ Token * Lexer::next()
         if (ch == '"') return string();
         
         // number
-        if ((info & CHAR_NUMBER) || (ch == '-' && CharInfo[nextCh] & CHAR_NUMBER)) return number();
+        if ((info & CHAR_NUMBER) || ((ch == '-' || ch == '.') && CharInfo[nextCh] & CHAR_NUMBER))
+            return number();
         
         // 3 char operators
         #define IMPL_TOKENS(ID, STR, ...)                       \
             if (sizeof(STR) == 4 && STR[0] == ch)               \
                 if (STR[1] == nextCh && STR[2] == m_input[1]) { \
-                    m_input++; m_input++; m_col += 2;          \
+                    m_input++; m_input++; m_col += 2;           \
                     return MakeToken(TokenType::ID, STR);       \
                 }
         TKN_OPERATOR(IMPL_TOKENS)
@@ -318,8 +319,16 @@ Token * Lexer::number()
     begin--;
     
     // read whil identifier char
-    while (CharInfo[(*m_input++)] & CHAR_NUMBER);
-    m_input--;
+    bool fp = *begin == '.';
+    while (true) {
+        if (*m_input == '.') {
+            if (fp) THROW_EXCEPTION("invalid input");
+            fp = true;
+        } else if ((CharInfo[(*m_input)] & CHAR_NUMBER) == 0) {
+            break;
+        }
+        m_input++;
+    }
     
     // the id
     std::string number(begin, m_input);
@@ -327,7 +336,7 @@ Token * Lexer::number()
     m_col += length;
     
     // make token
-    return MakeToken(TokenType::NumericLiteral, number);
+    return MakeToken(fp ? TokenType::FloatingPointLiteral : TokenType::IntegerLiteral, number);
 }
 
 

@@ -85,6 +85,23 @@ bool PrimitiveType::equal(Type *type) const
 }
 
 
+/**
+ * get type as string
+ */
+string PrimitiveType::toString()
+{
+    for (int i = 0; i < sizeof(_primitives); i++) {
+        if (&_primitives[i] == this) {
+            TokenType idx = (TokenType)(i + (int)TokenType::Byte);
+            #define F(ID, STR, ...) if (idx == TokenType::ID) return STR;
+            PRIMITIVE_TYPES(F)
+            #undef F
+        }
+    }
+    return "Invalid-Type";
+}
+
+
 
 /**
  * get shared ptr type instance
@@ -128,6 +145,14 @@ bool PtrType::equal(Type *type) const
     return m_level == other->m_level && getBaseType()->compare(other->getBaseType());
 }
 
+
+/**
+ * to string
+ */
+string PtrType::toString()
+{
+    return getBaseType()->toString() + string(" PTR", indirection());
+}
 
 
 
@@ -176,3 +201,19 @@ bool FunctionType::equal(Type *type) const
  * clean up
  */
 FunctionType::~FunctionType() {}
+
+
+/**
+ * to string
+ */
+string FunctionType::toString()
+{
+    string result =  "FUNCTION (";
+    bool first = true;
+    for(auto & t : params) {
+        if (first) first = false;
+        else result += ", ";
+        result += t->toString();
+    }
+    return result + ") AS " + this->result()->toString();
+}

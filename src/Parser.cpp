@@ -80,7 +80,7 @@ AstDeclaration * Parser::declaration()
             decl = functionStmt();
             break;
         default:
-            throw Exception(string("Invalid input. Expected declaration. Found: ") + m_token->name());
+            THROW_EXCEPTION(string("Invalid input. Expected declaration. Found: ") + m_token->name());
             break;
     }
     
@@ -137,7 +137,7 @@ AstStatement * Parser::statement()
                 break;
             }
         default:
-            throw Exception(string("Invalid input. Expected statement. Found: ") + m_token->name());
+            THROW_EXCEPTION(string("Invalid input. Expected statement. Found: ") + m_token->name());
             break;
     }
     
@@ -183,6 +183,7 @@ AstReturnStmt * Parser::returnStmt()
 
 /**
  * Expression   = IntegerLiteral
+ *              | FloatingPointLiteral
  *              | StringLiteral
  *              | FuncCallExpr
  *              | id
@@ -192,8 +193,9 @@ AstExpression * Parser::expression()
     AstExpression * expr = nullptr;
     
     switch (m_token->type()) {
-        case TokenType::NumericLiteral:
+        case TokenType::IntegerLiteral:
         case TokenType::StringLiteral:
+        case TokenType::FloatingPointLiteral:
             expr = new AstLiteralExpr(m_token);
             move();
             break;
@@ -206,7 +208,7 @@ AstExpression * Parser::expression()
                 break;
             }
         default:
-            throw Exception(string("Invalid input. Expected expression. Found: ") + m_token->name());
+            THROW_EXCEPTION(string("Invalid input. Expected expression. Found: ") + m_token->name());
     }
     
     return expr;
@@ -263,7 +265,7 @@ AstFunctionStmt * Parser::functionStmt()
     auto sig = funcSignature();
     // no vararg support within lbc for now
     if (sig->vararg) {
-        throw Exception("Variable arguments not supported");
+        THROW_EXCEPTION("Variable arguments not supported");
     }
     
     expect(TokenType::EndOfLine);
@@ -396,7 +398,7 @@ AstTypeExpr * Parser::typeExpr()
         while (accept(TokenType::Ptr)) deref++;
         ast = new AstTypeExpr(tmp, deref);
     } else {
-        throw Exception("Expected type");
+        THROW_EXCEPTION("Expected type");
     }
     return ast;
 }
@@ -473,7 +475,7 @@ AstAttribParamList * Parser::attribParamList()
 AstLiteralExpr * Parser::attribParam()
 {
     auto tmp = m_token;
-    if (accept(TokenType::StringLiteral) || accept(TokenType::NumericLiteral)) {
+    if (accept(TokenType::StringLiteral) || accept(TokenType::IntegerLiteral)) {
         return new AstLiteralExpr(tmp);
     }
     expect(TokenType::StringLiteral);
@@ -520,7 +522,7 @@ bool Parser::accept(TokenType type)
 void Parser::expect(TokenType type)
 {
     if (!accept(type)) {
-        throw Exception("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(type));
+        THROW_EXCEPTION("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(type));
     }
 }
 
