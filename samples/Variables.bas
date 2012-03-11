@@ -3,7 +3,7 @@
 Declare Function printf(str As Byte Ptr, ...) As Integer
 
 ' global variables
-Dim i As Integer
+Dim i As Byte
 Dim s As Byte Ptr
 
 ' entry point

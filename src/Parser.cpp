@@ -38,7 +38,7 @@ AstProgram * Parser::parse(const shared_ptr<Source> & source)
     
     // { DeclList }
     while (!match(TokenType::EndOfFile)) {
-        ast->decls.push_back(declaration());
+        ast->decls.push_back(unique_ptr<AstDeclaration>(declaration()));
         expect(TokenType::EndOfLine);
     }
     
@@ -86,7 +86,7 @@ AstDeclaration * Parser::declaration()
     
     // add attribs
     if (decl && attribs) {
-        decl->attribs = attribs;
+        decl->attribs.reset(attribs);
     }
     
     // done
@@ -104,7 +104,7 @@ AstStmtList * Parser::statementList()
     // { Statement }
     while(!match(TokenType::End) && !match(TokenType::EndOfFile)) {
         auto stmt = statement();
-        if (stmt) ast->stmts.push_back(stmt);
+        if (stmt) ast->stmts.push_back(unique_ptr<AstStatement>(stmt));
         expect(TokenType::EndOfLine);
     }
     
@@ -245,7 +245,7 @@ AstFuncArgList * Parser::funcArgList()
     
     do {
         auto arg = expression();
-        if (arg) ast->args.push_back(arg);
+        if (arg) ast->args.push_back(unique_ptr<AstExpression>(arg));
     } while (accept(TokenType::Comma));
     
     return ast;
@@ -340,7 +340,7 @@ AstFuncParamList * Parser::funcParamList()
     do {
         if (match(TokenType::Ellipsis)) break;
         auto param = funcParam();
-        if (param != nullptr) ast->params.push_back(param);
+        if (param != nullptr) ast->params.push_back(unique_ptr<AstFuncParam>(param));
     } while (accept(TokenType::Comma));
     
     return ast;
@@ -412,7 +412,7 @@ AstAttributeList * Parser::attributesList()
     do {
         auto attrib = attribute();
         if (attrib != nullptr) {
-            list->attribs.push_back(attrib);
+            list->attribs.push_back(unique_ptr<AstAttribute>(attrib));
         }
     } while (accept(TokenType::Comma));
     
@@ -435,15 +435,15 @@ AstAttribute * Parser::attribute()
     // "(" AttribParam { "," AttribParam } ")"
     if (accept(TokenType::ParenOpen)) {
         if (!accept(TokenType::ParenClose)) {
-            attr->params = attribParamList();
+            attr->params.reset(attribParamList());
             expect(TokenType::ParenClose);
         }
     }
     // "=" AttribParam
     else if (accept(TokenType::Assign)) {
         auto params = new AstAttribParamList();
-        params->params.push_back(attribParam());
-        attr->params = params;
+        params->params.push_back(unique_ptr<AstLiteralExpr>(attribParam()));
+        attr->params.reset(params);
     }
     
     return attr;
@@ -459,7 +459,7 @@ AstAttribParamList * Parser::attribParamList()
     do {
         auto param = attribParam();
         if (param) {
-            params->params.push_back(param);
+            params->params.push_back(unique_ptr<AstLiteralExpr>(param));
         }
     } while(accept(TokenType::Comma));
     return params;

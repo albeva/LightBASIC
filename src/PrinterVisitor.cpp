@@ -124,11 +124,16 @@ void PrinterVisitor::visit(AstFunctionStmt * ast)
 // AstCastExpr
 void PrinterVisitor::visit(AstCastExpr * ast)
 {
-    std::cout << "CAST(";
-    if (ast->typeExpr) ast->typeExpr->accept(this);
-    std::cout << ", ";
-    if (ast->expr) ast->expr->accept(this);
-    std::cout << ")";
+    // if no typeExpr then this is an implicit cast
+    if (!ast->typeExpr) {
+        if (ast->expr) ast->expr->accept(this);
+    } else {
+        std::cout << "CAST(";
+        if (ast->typeExpr) ast->typeExpr->accept(this);
+        std::cout << ", ";
+        if (ast->expr) ast->expr->accept(this);
+        std::cout << ")";
+    }
 }
 
 
@@ -146,7 +151,16 @@ void PrinterVisitor::visit(AstLiteralExpr * ast)
 {
     if (ast->token) {
         if (ast->token->type() == TokenType::StringLiteral) {
-            std::cout << '"' << ast->token->lexeme() << '"';
+            std::cout << '"';
+            for (auto ch : ast->token->lexeme()) {
+                if      (ch == '\n') std::cout << "\\n";
+                else if (ch == '\r') std::cout << "\\r";
+                else if (ch == '\t') std::cout << "\\t";
+                else if (ch == '\\') std::cout << "\\\\";
+                else if (ch == '"')  std::cout << "\\\"";
+                else                 std::cout << ch;
+            }
+            std::cout << '"';
         } else {
             std::cout << ast->token->lexeme();
         }
@@ -171,7 +185,7 @@ void PrinterVisitor::visit(AstAttributeList * ast)
 {
     std::cout << indent() << '[';
     bool first = true;
-    for (auto attr : ast->attribs) {
+    for (auto & attr : ast->attribs) {
         if (first) first = false;
         else std::cout << ", ";
         attr->accept(this);
@@ -203,7 +217,7 @@ void PrinterVisitor::visit(AstAttribute * ast)
 void PrinterVisitor::visit(AstAttribParamList * ast)
 {
     bool first = true;
-    for (auto p : ast->params) {
+    for (auto & p : ast->params) {
         if (first) first = false;
         else std::cout << ", ";
         p->accept(this);
@@ -228,7 +242,7 @@ void PrinterVisitor::visit(AstTypeExpr * ast)
 void PrinterVisitor::visit(AstFuncParamList * ast)
 {
     bool first = true;
-    for (auto param : ast->params) {
+    for (auto & param : ast->params) {
         if (first) first = false;
         else std::cout << ", ";
         param->accept(this);
@@ -251,7 +265,7 @@ void PrinterVisitor::visit(AstFuncParam * ast)
 void PrinterVisitor::visit(AstFuncArgList * ast)
 {
     bool first = true;
-    for (auto arg : ast->args) {
+    for (auto & arg : ast->args) {
         if (first) first = false;
         else std::cout << ", ";
         arg->accept(this);

@@ -61,7 +61,7 @@ namespace lbc {
         // program name
         string name;
         // list of declaration lists
-        vector<AstDeclaration *> decls;
+        vector<unique_ptr<AstDeclaration>> decls;
         // symbol table
         shared_ptr<SymbolTable> symbolTable;
         // content node
@@ -82,7 +82,7 @@ namespace lbc {
         // create
         AstDeclaration(AstAttributeList * attribs = nullptr);
         // attribs
-        AstAttributeList * attribs;
+        unique_ptr<AstAttributeList> attribs;
         // declaration symbol. Does not own the symbol!
         Symbol * symbol;
         // content node
@@ -98,7 +98,7 @@ namespace lbc {
         // create
         AstAttributeList();
         // hold list of attributes
-        vector<AstAttribute *> attribs;
+        vector<unique_ptr<AstAttribute>> attribs;
         // content node
         DECLARE_AST(AstAttributeList);
     };
@@ -112,9 +112,9 @@ namespace lbc {
         // create
         AstAttribute(AstIdentExpr * id = nullptr, AstAttribParamList * params = nullptr);
         // attribute id
-        AstIdentExpr * id;
+        unique_ptr<AstIdentExpr> id;
         // attribute params
-        AstAttribParamList * params;
+        unique_ptr<AstAttribParamList> params;
         // content node
         DECLARE_AST(AstAttribute);
     };
@@ -128,7 +128,7 @@ namespace lbc {
         // create
         AstAttribParamList();
         // attribute params
-        vector<AstLiteralExpr *> params;
+        vector<unique_ptr<AstLiteralExpr>> params;
         // content node
         DECLARE_AST(AstAttribParamList);
     };
@@ -142,9 +142,9 @@ namespace lbc {
         // create
         AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
         // variable id
-        AstIdentExpr * id;
+        unique_ptr<AstIdentExpr> id;
         // variable type
-        AstTypeExpr * typeExpr;
+        unique_ptr<AstTypeExpr> typeExpr;
         // content node
         DECLARE_AST(AstVarDecl);
     };
@@ -158,7 +158,7 @@ namespace lbc {
         // create
         AstFunctionDecl(AstFuncSignature * signature = nullptr);
         // function signature
-        AstFuncSignature * signature;
+        unique_ptr<AstFuncSignature> signature;
         // content node
         DECLARE_AST(AstFunctionDecl);
     };
@@ -172,11 +172,11 @@ namespace lbc {
         // create
         AstFuncSignature(AstIdentExpr * id = nullptr, AstFuncParamList * args = nullptr, AstTypeExpr * typeExpr = nullptr, bool vararg = false);
         // function id
-        AstIdentExpr * id;
+        unique_ptr<AstIdentExpr> id;
         // function parameters
-        AstFuncParamList * params;
+        unique_ptr<AstFuncParamList> params;
         // function type
-        AstTypeExpr * typeExpr;
+        unique_ptr<AstTypeExpr> typeExpr;
         // flags
         int vararg:1;
         // content node
@@ -192,7 +192,7 @@ namespace lbc {
         // create
         AstFuncParamList();
         // list of function parameters
-        vector<AstFuncParam *> params;
+        vector<unique_ptr<AstFuncParam>> params;
         // content node
         DECLARE_AST(AstFuncParamList);
     };
@@ -206,9 +206,9 @@ namespace lbc {
         // create
         AstFuncParam(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
         // variable id
-        AstIdentExpr * id;
+        unique_ptr<AstIdentExpr> id;
         // variable type
-        AstTypeExpr * typeExpr;
+        unique_ptr<AstTypeExpr> typeExpr;
         // content node
         DECLARE_AST(AstFuncParam);
     };
@@ -222,9 +222,9 @@ namespace lbc {
         // create
         AstFunctionStmt(AstFuncSignature * signature = nullptr, AstStmtList * stmts = nullptr);
         // function signature
-        AstFuncSignature * signature;
+        unique_ptr<AstFuncSignature> signature;
         // function body
-        AstStmtList * stmts;
+        unique_ptr<AstStmtList> stmts;
         // content node
         DECLARE_AST(AstFunctionStmt);
     };
@@ -243,7 +243,7 @@ namespace lbc {
         // create
         AstStmtList();
         // list of statements
-        vector<AstStatement *> stmts;
+        vector<unique_ptr<AstStatement>> stmts;
         // associated symbol table. Does not own!
         SymbolTable * symbolTable;
         // content node
@@ -259,9 +259,9 @@ namespace lbc {
         // create 
         AstAssignStmt(AstIdentExpr * id = nullptr, AstExpression * expr = nullptr);
         // assignee id
-        AstIdentExpr * id;
+        unique_ptr<AstIdentExpr> id;
         // the expression
-        AstExpression * expr;
+        unique_ptr<AstExpression> expr;
         // content node
         DECLARE_AST(AstAssignStmt);
     };
@@ -275,7 +275,7 @@ namespace lbc {
         // create
         AstReturnStmt(AstExpression * expr = nullptr);
         // the expression
-        AstExpression * expr;
+        unique_ptr<AstExpression> expr;
         // content node
         DECLARE_AST(AstReturnStmt);
     };
@@ -289,7 +289,7 @@ namespace lbc {
         // create
         AstCallStmt(AstCallExpr * expr = nullptr);
         // the call expression
-        AstCallExpr * expr;
+        unique_ptr<AstCallExpr> expr;
         // content node
         DECLARE_AST(AstCallStmt);
     };
@@ -320,9 +320,9 @@ namespace lbc {
         // create
         AstCastExpr(AstExpression * expr = nullptr, AstTypeExpr * typeExpr = nullptr);
         // sub expression
-        AstExpression * expr;
+        unique_ptr<AstExpression> expr;
         // type expession
-        AstTypeExpr * typeExpr;
+        unique_ptr<AstTypeExpr> typeExpr;
         // content node
         DECLARE_AST(AstCastExpr);
     };
@@ -336,7 +336,7 @@ namespace lbc {
         // create
         AstIdentExpr(Token * token = nullptr);
         // the id token
-        Token * token;
+        unique_ptr<Token> token;
         // content node
         DECLARE_AST(AstIdentExpr);
     };
@@ -350,7 +350,7 @@ namespace lbc {
         // create
         AstLiteralExpr(Token * token = nullptr);
         // the value token
-        Token * token;
+        unique_ptr<Token> token;
         // content node
         DECLARE_AST(AstLiteralExpr);
     };
@@ -364,9 +364,9 @@ namespace lbc {
         // create
         AstCallExpr(AstIdentExpr * id = nullptr, AstFuncArgList * args = nullptr);
         // callee id
-        AstIdentExpr * id;
+        unique_ptr<AstIdentExpr> id;
         // parameters
-        AstFuncArgList * args;
+        unique_ptr<AstFuncArgList> args;
         // content node
         DECLARE_AST(AstCallExpr);
     };
@@ -380,7 +380,7 @@ namespace lbc {
         // create
         AstFuncArgList();
         // list of arguments
-        vector<AstExpression *> args;
+        vector<unique_ptr<AstExpression>> args;
         // content node
         DECLARE_AST(AstFuncArgList);
     };
@@ -398,7 +398,7 @@ namespace lbc {
         // create
         AstTypeExpr(Token * token = nullptr, int level = 0);
         // type id
-        Token * token;
+        unique_ptr<Token> token;
         // dereference level
         int level;
         // content node

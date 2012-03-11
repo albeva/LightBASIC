@@ -28,10 +28,10 @@ namespace lbc {
         // process expression
         // this CAN replace the current ast node
         // with a new one!
-        void expression(AstExpression *& ast);
+        void expression(unique_ptr<AstExpression> & ast);
         
         // coerce expression to a type if needed
-        AstExpression * coerce(AstExpression * ast, Type * type);
+        void coerce(unique_ptr<AstExpression> & ast, Type * type);
         
         // AstDeclList
         virtual void visit(AstProgram * ast);

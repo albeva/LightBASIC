@@ -73,7 +73,7 @@ void SemanticAnalyser::visit(AstProgram * ast)
     ast->symbolTable = make_shared<SymbolTable>(m_table);
     m_table = ast->symbolTable.get();
     // visit all declarations
-    for (auto decl : ast->decls) decl->accept(this);
+    for (auto & decl : ast->decls) decl->accept(this);
     // restore the symbol table
     m_table = m_table->parent();
 }
@@ -203,12 +203,12 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     // fill the table with parameters
     if (ast->signature->params) {
         int i = 0;
-        for(auto param : ast->signature->params->params) {
+        for(auto & param : ast->signature->params->params) {
             const string & paramId = param->id->token->lexeme();
             if (m_table->exists(paramId)) {
                 throw Exception(string("Duplicate defintion of ") + paramId);
             }
-            auto sym = new Symbol(paramId, funcType->params[i++], param, nullptr);
+            auto sym = new Symbol(paramId, funcType->params[i++], param.get(), nullptr);
             m_table->add(paramId, sym);
             param->symbol = sym;
         }
@@ -295,32 +295,32 @@ void SemanticAnalyser::visit(AstCallStmt * ast)
 //
 // Process the expression. If type coercion is required
 // then insert AstCastExpr node in front of current ast expression
-void SemanticAnalyser::expression(AstExpression *& ast)
+void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast)
 {
     // process the expression
     ast->accept(this);
     
-    if (m_coerceType) ast = coerce(ast, m_coerceType);
+    if (m_coerceType) coerce(ast, m_coerceType);
 }
 
 
 //
 // coerce expression to a type if needed
-AstExpression * SemanticAnalyser::coerce(AstExpression * ast, Type * type)
+void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type)
 {
     // deal with type coercion. If can create implicit cast node
     if (!type->compare(ast->type)) {
         // check if this is signed -> unsigned or vice versa
         if (ast->type->isIntegral() && type->isIntegral()) {
             if (ast->type->getSizeInBits() == type->getSizeInBits()) {
-                return ast;
+                return;
             }
         }
-        // figure out casting
-        ast = new AstCastExpr(ast);
+        // prefix expression with AstCastExpr
+        auto expr = ast.release();
+        ast.reset(new AstCastExpr(expr));
         ast->type = type;
     }
-    return ast;
 }
 
 
@@ -360,7 +360,7 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
             if (!m_coerceType) {
                 // cast vararg params to ints if less than 32bit
                 if (arg->type->isIntegral() && arg->type->getSizeInBits() < 32) {
-                    arg = coerce(arg, PrimitiveType::get(TokenType::Integer));
+                    coerce(arg, PrimitiveType::get(TokenType::Integer));
                 }
             }
         }
@@ -412,7 +412,7 @@ void SemanticAnalyser::visit(AstIdentExpr * ast)
 // AstReturnStmt
 void SemanticAnalyser::visit(AstReturnStmt * ast)
 {
-    assert(m_type->isFuntion());
+    assert(m_type->isFunction());
     auto funcType = static_cast<FunctionType *>(m_type);
     
     if (ast->expr) {

@@ -55,10 +55,10 @@ void IrBuilder::visit(AstProgram * ast)
     m_table = ast->symbolTable.get();
     
     // process declarations
-    for (auto decl : ast->decls) decl->accept(this);
+    for (auto & decl : ast->decls) decl->accept(this);
     
     // verify module integrity
-//    m_module->dump();
+    m_module->dump();
     if (llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
         // there were errors
         delete m_module;
@@ -130,7 +130,7 @@ void IrBuilder::visit(AstFuncSignature * ast)
         auto llvmType = getType(sym->type(), m_module->getContext());
         string alias = sym->alias();
         if (id == "MAIN") alias = "main";
-//        else if (id == "PRINT") alias = "puts"; // TEMP hack
+        // create llvm function
         m_function = llvm::Function::Create(
              llvm::cast<llvm::FunctionType>(llvmType),
              llvm::GlobalValue::ExternalLinkage,
@@ -144,7 +144,7 @@ void IrBuilder::visit(AstFuncSignature * ast)
     // bind function params
     if (ast->params) {
         auto llp = m_function->arg_begin();
-        for (auto p : ast->params->params) {
+        for (auto & p : ast->params->params) {
             llp->setName(p->id->token->lexeme());
             if (p->symbol) {
                 p->symbol->value = llp;
@@ -327,7 +327,7 @@ void IrBuilder::visit(AstCallExpr * ast)
     
     vector<llvm::Value *> args;
     if (ast->args) {
-        for (auto arg : ast->args->args) {
+        for (auto & arg : ast->args->args) {
             arg->accept(this);
             args.push_back(m_value);
         }

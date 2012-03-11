@@ -38,7 +38,7 @@ Emitter::~Emitter()
  */
 void Emitter::add(llvm::Module * module)
 {
-	m_modules.push_back(module);
+	m_modules.push_back(unique_ptr<llvm::Module>(module));
 }
 
 
@@ -66,7 +66,7 @@ void Emitter::generate()
     // generate llvm bitcode files
     for (auto & module : m_modules) {
         // is it safe to use module identifier as filename?
-        FS::path path(module.getModuleIdentifier());
+        FS::path path(module->getModuleIdentifier());
         path.replace_extension(".bc");
         // verbose?
         if (verbose) std::cout << "Generate " << path << '\n';
@@ -76,7 +76,7 @@ void Emitter::generate()
         if (errors.length()) {
             throw Exception(errors);
         }
-        llvm::WriteBitcodeToFile(&module, stream);
+        llvm::WriteBitcodeToFile(module.get(), stream);
         // push the file to the vector
         bc_files.push_back(path.string());
     }

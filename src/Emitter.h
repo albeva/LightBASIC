@@ -40,7 +40,7 @@ namespace lbc {
 		shared_ptr<Context> m_context;
 		
 		// llvm modules
-		boost::ptr_vector<llvm::Module> m_modules;
+		vector<unique_ptr<llvm::Module>> m_modules;
 	};
 	
 }

@@ -9,11 +9,11 @@
 /* Begin PBXBuildFile section */
 		365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */; };
 		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
+		36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
+		36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368378D4150901F7004C7BAB /* Emitter.cpp */; };
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
 		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
-		368378D5150901F7004C7BAB /* Emitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368378D4150901F7004C7BAB /* Emitter.cpp */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
-		369056DD1503881700E2C917 /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
 		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
 		369056DF1503881700E2C917 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BE1503881700E2C917 /* Lexer.cpp */; };
 		369056E01503881700E2C917 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C11503881700E2C917 /* main.cpp */; };
@@ -376,7 +376,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				369056DC1503881700E2C917 /* Ast.cpp in Sources */,
-				369056DD1503881700E2C917 /* IrBuilder.cpp in Sources */,
 				369056DE1503881700E2C917 /* Context.cpp in Sources */,
 				369056DF1503881700E2C917 /* Lexer.cpp in Sources */,
 				369056E01503881700E2C917 /* main.cpp in Sources */,
@@ -392,7 +391,8 @@
 				369056EA1503881700E2C917 /* Token.cpp in Sources */,
 				369056EB1503881700E2C917 /* Type.cpp in Sources */,
 				36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */,
-				368378D5150901F7004C7BAB /* Emitter.cpp in Sources */,
+				36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */,
+				36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -448,13 +448,18 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3675818C150255B50006E4B5 /* llvm.xcconfig */;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CURRENT_PROJECT_VERSION = "";
+				DEAD_CODE_STRIPPING = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = src/LightBASIC.h.pch;
+				LLVM_LTO = NO;
 				OTHER_CFLAGS = "$(LLVM_CFLAGS)";
 				OTHER_LDFLAGS = "$(LLVM_LDFLAGS)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				VERSIONING_SYSTEM = "";
+				VERSION_INFO_EXPORT_DECL = "";
 			};
 			name = Debug;
 		};
@@ -462,13 +467,20 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 3675818C150255B50006E4B5 /* llvm.xcconfig */;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libstdc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CURRENT_PROJECT_VERSION = "";
+				DEAD_CODE_STRIPPING = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = src/LightBASIC.h.pch;
+				LLVM_LTO = YES;
 				OTHER_CFLAGS = "$(LLVM_CFLAGS)";
 				OTHER_LDFLAGS = "$(LLVM_LDFLAGS)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = YES;
+				VERSIONING_SYSTEM = "";
+				VERSION_INFO_EXPORT_DECL = "";
 			};
 			name = Release;
 		};
