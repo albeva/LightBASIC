@@ -4,10 +4,10 @@ Declare Function printf(str As Byte Ptr, ...) As Integer
 
 ' entry point
 Function main() As Integer
-    Dim s As Single
-    Dim d As Double
-    d = 42
-    s = d
-    printf("s = %.2f, d = %.2f\n", s, d)
+    Dim i As Integer
+    Dim ip As Integer Ptr
+    ip = &i
+	*ip = 10
+    printf("ip = %p, *ip = %i\n", ip, *ip)
     Return 0
 End Function

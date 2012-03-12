@@ -49,14 +49,14 @@ FunctionImpl    = FuncSignature
                   StatementList
                   "END" "FUNCTION"
                 .
-StatementList    = { Statement }
+StatementList   = { Statement }
                 .
 Statement       = VariableDecl
                 | AssignStmt
                 | CallStmt
                 | ReturnStmt
                 .
-AssignStmt      = id "=" Expression
+AssignStmt      = Expression "=" Expression
                 .
 CallStmt        = CallExpr
                 .
@@ -65,12 +65,18 @@ Expression      = IntegerLiteral
                 | StringLiteral
                 | CallExpr
                 | id
+                | AddressOf
+                | Dereference
                 .
 CallExpr        = id "(" [ funcArgList ] ")"
                 .
 funcArgList     = Expression { "," Expression }
                 .
 ReturnStmt      = "RETURN" Expression
+                .
+AddressOf         = "&" id
+                .
+Dereference       = "*" Expression
                 .
 
 Example

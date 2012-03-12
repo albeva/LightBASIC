@@ -136,6 +136,13 @@ AstStatement * Parser::statement()
                 stmt = callStmt();
                 break;
             }
+        // NOTE probably very wront. at the moment assume
+        // that line starting with * is assignment to dereferenced
+        // pointer
+        // *ip = 10
+        case TokenType::Dereference:
+            stmt = assignStmt();
+            break;
         default:
             THROW_EXCEPTION(string("Invalid input. Expected statement. Found: ") + m_token->name());
             break;
@@ -146,19 +153,21 @@ AstStatement * Parser::statement()
 
 
 /**
- * AssignStmt = id "=" Expression
+ * AssignStmt = Expression "=" Expression
  */
 AstAssignStmt * Parser::assignStmt()
 {
-    // id
-    auto id = identifier();
+    // left
+    auto left = expression();
+    
     // =
     expect(TokenType::Assign);
-    // expression
-    auto expr = expression();
+    
+    // right
+    auto right = expression();
     
     // done
-    return new AstAssignStmt(id, expr);
+    return new AstAssignStmt(left, right);
 }
 
 
@@ -182,23 +191,30 @@ AstReturnStmt * Parser::returnStmt()
 
 
 /**
- * Expression   = IntegerLiteral
- *              | FloatingPointLiteral
- *              | StringLiteral
- *              | FuncCallExpr
- *              | id
+ * Expression = IntegerLiteral
+ *            | FloatingPointLiteral
+ *            | StringLiteral
+ *            | CallExpr
+ *            | id
+ *            | AddressOf
+ *            | Dereference
  */
 AstExpression * Parser::expression()
 {
     AstExpression * expr = nullptr;
     
     switch (m_token->type()) {
+        // IntegerLiteral
+        // FloatingPointLiteral
+        // StringLiteral
         case TokenType::IntegerLiteral:
         case TokenType::StringLiteral:
         case TokenType::FloatingPointLiteral:
             expr = new AstLiteralExpr(m_token);
             move();
             break;
+        // CallExpr
+        // id
         case TokenType::Identifier:
             if (m_next->type() == TokenType::ParenOpen) {
                 expr = callExpr();
@@ -207,6 +223,16 @@ AstExpression * Parser::expression()
                 expr = identifier();
                 break;
             }
+        // AddressOf
+        case TokenType::AddressOf:
+            move();
+            expr = new AstAddressOfExpr(identifier());
+            break;
+        // Dereference
+        case TokenType::Dereference:
+            move();
+            expr = new AstDereferenceExpr(expression());
+            break;
         default:
             THROW_EXCEPTION(string("Invalid input. Expected expression. Found: ") + m_token->name());
     }

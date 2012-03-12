@@ -30,6 +30,8 @@
     _( ParenClose,      ")"     ) \
     _( Comma,           ","     ) \
     _( Assign,          "="     ) \
+    _( AddressOf,       "&"     ) \
+    _( Dereference,     "*"     ) \
     _( Ellipsis,        "..."   )
 
 //

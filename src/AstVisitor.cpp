@@ -10,7 +10,7 @@ using namespace lbc;
 
 // implement the methods
 #define DECL_AST(C, ...) \
-    void AstVisitor::visit(C * ast) { \
-        if(m_debug) std::cout << "Calling undefined visitor method for class " << #C << std::endl; \
+    void AstVisitor::visit(Ast##C * ast) { \
+        if(m_debug) std::cout << "Calling undefined visitor method for class Ast" << #C << std::endl; \
     };
 AST_CONTENT_NODES(DECL_AST)

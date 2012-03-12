@@ -58,12 +58,11 @@ void IrBuilder::visit(AstProgram * ast)
     for (auto & decl : ast->decls) decl->accept(this);
     
     // verify module integrity
+    m_module->dump();
     if (llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
         // there were errors
         delete m_module;
         m_module = nullptr;
-    } else {
-        m_module->dump();
     }
 }
 
@@ -224,9 +223,9 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         indeces.push_back(const_int64);
         indeces.push_back(const_int64);
         m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
-    } else if (ast->token->type() == TokenType::IntegerLiteral) {
+    } else if (ast->type->isIntegral()) {
         m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(getType(ast->type, m_module->getContext())), lexeme, 10);
-    } else if (ast->token->type() == TokenType::FloatingPointLiteral) {
+    } else if (ast->type->isFloatingPoint()) {
         m_value = llvm::ConstantFP::get(getType(ast->type, m_module->getContext()), lexeme);
     }
 }
@@ -267,16 +266,40 @@ void IrBuilder::visit(AstVarDecl * ast)
 // AstAssignStmt
 void IrBuilder::visit(AstAssignStmt * ast)
 {
-    const string & id = ast->id->token->lexeme();
-    auto sym = m_table->get(id);
-    ast->expr->accept(this);
-    auto store = new llvm::StoreInst(m_value, sym->value, m_block);
-    if (sym->type()->kind() == Type::Pointer) {
-        store->setAlignment(8); // size of the ptr
+    // left value
+    llvm::Value * dst = nullptr;
+    
+    // dereference ?
+    if (ast->left->is(Ast::DereferenceExpr)) {
+        static_cast<AstDereferenceExpr *>(ast->left.get())->expr->accept(this);
+        dst = m_value;
     } else {
-        store->setAlignment(4); // size of the ptr
+        dst = m_table->get(static_cast<AstIdentExpr *>(ast->left.get())->token->lexeme())->value;
     }
     
+    // right hand expression
+    ast->right->accept(this);
+    
+    // istore nstr
+    new llvm::StoreInst(m_value, dst, m_block);
+}
+
+
+//
+// AstAddressOfExpr
+void IrBuilder::visit(AstAddressOfExpr * ast)
+{
+    const string & id = ast->id->token->lexeme();
+    m_value = m_table->get(id)->value;
+}
+
+
+//
+// AstDereferenceExpr
+void IrBuilder::visit(AstDereferenceExpr * ast)
+{
+    ast->expr->accept(this);
+    m_value = new llvm::LoadInst(m_value, "", m_block);
 }
 
 
@@ -289,53 +312,16 @@ void IrBuilder::visit(AstCastExpr * ast)
     auto dst = ast->type;
     if (!dst->llvmType) dst->llvmType = getType(dst, m_module->getContext());
     
-    if (src->isSignedIntegral()) {
-        if (dst->isSignedIntegral()) {
-            // truncate
-            if (src->getSizeInBits() > dst->getSizeInBits()) {
-                m_value = new llvm::TruncInst(m_value, dst->llvmType, "", m_block);
-            }
-            // extend
-            else {
-                m_value = new llvm::SExtInst(m_value, dst->llvmType, "", m_block);
-            }
-        } else if (dst->isUnsignedIntegral()) {
-            // truncate
-            if (src->getSizeInBits() > dst->getSizeInBits()) {
-                m_value = new llvm::TruncInst(m_value, dst->llvmType, "", m_block);
-            }
-            // extend
-            else {
-                m_value = new llvm::ZExtInst(m_value, dst->llvmType, "", m_block);
-            }
-        } else if (dst->isFloatingPoint()) {
-            THROW_EXCEPTION("no int -> fp");
-        } else if (dst->isPointer()) {
-            THROW_EXCEPTION("no int -> ptr");
-        }
-    } else if (src->isUnsignedIntegral()) {
-        THROW_EXCEPTION("no unsigned -> any");
-    } else if (src->isFloatingPoint()) {
-        if (dst->isSignedIntegral()) {
-            THROW_EXCEPTION("no fp -> int");
-        } else if (dst->isUnsignedIntegral()) {
-            THROW_EXCEPTION("no fp -> unsigned int");
-        } else if (dst->isFloatingPoint()) {
-            // narrow
-            if (src->getSizeInBits() > dst->getSizeInBits()) {
-                m_value = new llvm::FPTruncInst(m_value, dst->llvmType, "", m_block);
-            }
-            // extend
-            else {
-                m_value = new llvm::FPExtInst(m_value, dst->llvmType, "", m_block);
-            }
-            
-        } else if (dst->isPointer()) {
-            THROW_EXCEPTION("no fp -> ptr");
-        }
-    } else if (src->isPointer()) {
-        THROW_EXCEPTION("no ptr -> any");
-    }
+    // get cast opcode
+    auto opcode = llvm::CastInst::getCastOpcode(
+        m_value,
+        src->isSignedIntegral(),
+        dst->llvmType,
+        dst->isSignedIntegral()
+    );
+    
+    // create cast instruction
+    m_value = llvm::CastInst::Create(opcode, m_value, dst->llvmType, "", m_block);
 }
 
 

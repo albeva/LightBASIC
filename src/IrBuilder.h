@@ -58,6 +58,12 @@ namespace lbc {
         // AstCastExpr
         virtual void visit(AstCastExpr * ast);
         
+        // AstAddressOfExpr
+        virtual void visit(AstAddressOfExpr * ast);
+        
+        // AstDereferenceExpr
+        virtual void visit(AstDereferenceExpr * ast);
+        
         // AstCallExpr
         virtual void visit(AstCallExpr * ast);
         

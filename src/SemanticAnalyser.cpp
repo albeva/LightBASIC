@@ -264,8 +264,23 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
 // AstAssignStmt
 void SemanticAnalyser::visit(AstAssignStmt * ast)
 {
+    SCOPED_GUARD(m_coerceType);
+    
     // id
-    const string & id = ast->id->token->lexeme();
+    auto left = ast->left.get();
+    auto deref = 0;
+    while (left->is(Ast::DereferenceExpr)) {
+        deref++;
+        left = static_cast<AstDereferenceExpr*>(left)->expr.get();
+    }
+    
+    // not identifier
+    if (left->kind() != Ast::IdentExpr) {
+        THROW_EXCEPTION("Dereferencing non identifier");
+    }
+    
+    // id
+    const string & id = static_cast<AstIdentExpr*>(left)->token->lexeme();
     
     // get the symbol
     auto symbol = m_table->get(id);
@@ -274,13 +289,30 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     if (!symbol) {
         THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
     } else if (!symbol->type()->isInstantiable()) {
-        THROW_EXCEPTION(string("Cannot assign to identifier '") + id + "'");
+        THROW_EXCEPTION(string("Cannot assign to identifier '") + id + "' of type " + symbol->type()->toString());
+    }
+    
+    // check pointer deref
+    if (deref != 0) {
+        if (!symbol->type()->isPointer()) {
+            THROW_EXCEPTION("Dereferencing a non pointer of type " + symbol->type()->toString());
+        }
+        auto pt = static_cast<PtrType *>(symbol->type());
+        if (pt->indirection() < deref) {
+            THROW_EXCEPTION(string("Dereferencing identifier ") + id + " of type " + pt->toString() + " too many levels");
+        }
+        m_coerceType = pt->indirection() - deref == 0
+                     ? pt->getBaseType()
+                     : new PtrType(pt->getBaseType(), pt->indirection() - deref);
+        if (!m_coerceType->isInstantiable()) {
+            THROW_EXCEPTION(string("Cannot assign to identifier '") + id + "' of type " + m_coerceType->toString());
+        }
+    } else {
+        m_coerceType = symbol->type();
     }
     
     // m_type will hold the result of the expression
-    SCOPED_GUARD(m_coerceType);
-    m_coerceType = symbol->type();
-    expression(ast->expr);
+    expression(ast->right);
 }
 
 
@@ -321,6 +353,31 @@ void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type)
         ast.reset(new AstCastExpr(expr));
         ast->type = type;
     }
+}
+
+
+//
+// AstAddressOfExpr
+void SemanticAnalyser::visit(AstAddressOfExpr * ast)
+{
+    SCOPED_GUARD(m_coerceType);
+    m_coerceType = nullptr;
+    ast->id->accept(this);
+    ast->type = new PtrType(ast->id->type, 1);
+}
+
+
+//
+// AstDereferenceExpr
+void SemanticAnalyser::visit(AstDereferenceExpr * ast)
+{
+    SCOPED_GUARD(m_coerceType);
+    m_coerceType = nullptr;
+    ast->expr->accept(this);
+    if (!ast->expr->type->isPointer()) {
+        THROW_EXCEPTION("Dereferencing a non pointer");
+    }
+    ast->type = ast->expr->type->getBaseType();
 }
 
 
@@ -385,12 +442,12 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
     auto type = ast->token->type();
     if (type == TokenType::StringLiteral) {
         ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
-    } else if (type == TokenType::IntegerLiteral) {
-        if (m_coerceType) ast->type = m_coerceType;
-        else ast->type = PrimitiveType::get(TokenType::Integer);
-    } else if (type == TokenType::FloatingPointLiteral) {
-        if (m_coerceType) ast->type = m_coerceType;
-        else ast->type = PrimitiveType::get(TokenType::Double);
+    } else if (type == TokenType::IntegerLiteral || type == TokenType::FloatingPointLiteral) {
+        if (m_coerceType) {
+            ast->type = m_coerceType;
+        } else{
+            ast->type = PrimitiveType::get(type == TokenType::IntegerLiteral ? TokenType::Integer : TokenType::Double);
+        }
     } else {
         THROW_EXCEPTION("Invalid type");
     }

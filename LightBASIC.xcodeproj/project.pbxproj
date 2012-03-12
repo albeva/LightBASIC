@@ -33,6 +33,7 @@
 		369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056FA150389CA00E2C917 /* Variables.bas */; };
 		36DF7367150953400023F600 /* module_1.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36DF73661509531F0023F600 /* module_1.bas */; };
 		36DF7368150953400023F600 /* module_2.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36DF7365150953070023F600 /* module_2.bas */; };
+		36F70ADA150D575C00C0762A /* Pointers.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36F70AD9150D574D00C0762A /* Pointers.bas */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +43,7 @@
 			dstPath = examples;
 			dstSubfolderSpec = 6;
 			files = (
+				36F70ADA150D575C00C0762A /* Pointers.bas in CopyFiles */,
 				36682DCC150D2AC000E1038A /* FloatingPoint.bas in CopyFiles */,
 				36DF7367150953400023F600 /* module_1.bas in CopyFiles */,
 				36DF7368150953400023F600 /* module_2.bas in CopyFiles */,
@@ -106,6 +108,7 @@
 		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
 		36DF7365150953070023F600 /* module_2.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_2.bas; path = samples/module_2.bas; sourceTree = "<group>"; };
 		36DF73661509531F0023F600 /* module_1.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_1.bas; path = samples/module_1.bas; sourceTree = "<group>"; };
+		36F70AD9150D574D00C0762A /* Pointers.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Pointers.bas; path = samples/Pointers.bas; sourceTree = "<group>"; };
 		36FF07C3150510E400D84F2E /* Milestone 2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Milestone 2.txt"; path = "docs/Milestone 2.txt"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
@@ -298,6 +301,7 @@
 				369056FA150389CA00E2C917 /* Variables.bas */,
 				36779A0C1503DA1800369AFF /* Simple.bas */,
 				36682DCB150D2AB500E1038A /* FloatingPoint.bas */,
+				36F70AD9150D574D00C0762A /* Pointers.bas */,
 			);
 			name = samples;
 			sourceTree = "<group>";
@@ -455,7 +459,7 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "c++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CURRENT_PROJECT_VERSION = "";
-				DEAD_CODE_STRIPPING = YES;
+				DEAD_CODE_STRIPPING = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = src/LightBASIC.h.pch;
 				LLVM_LTO = NO;

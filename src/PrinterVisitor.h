@@ -40,6 +40,10 @@ namespace lbc {
         void visit(AstFunctionStmt * ast);
         // AstCastExpr
         void visit(AstCastExpr * ast);
+        // AstAddressOfExpr
+        void visit(AstAddressOfExpr * ast);
+        // AstDereferenceExpr
+        void visit(AstDereferenceExpr * ast);        
         // AstIdentExpr
         void visit(AstIdentExpr * ast);
         // AstLiteralExpr

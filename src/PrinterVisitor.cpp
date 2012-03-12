@@ -28,9 +28,9 @@ string PrinterVisitor::indent(int change)
 void PrinterVisitor::visit(AstAssignStmt * ast)
 {
     std::cout << indent();
-    if (ast->id) ast->id->accept(this);
+    if (ast->left) ast->left->accept(this);
     std::cout << " = ";
-    if (ast->expr) ast->expr->accept(this);
+    if (ast->right) ast->right->accept(this);
     std::cout << std::endl;
 }
 
@@ -134,6 +134,24 @@ void PrinterVisitor::visit(AstCastExpr * ast)
         if (ast->expr) ast->expr->accept(this);
         std::cout << ")";
     }
+}
+
+
+//
+// AstAddressOfExpr
+void PrinterVisitor::visit(AstAddressOfExpr * ast)
+{
+    std::cout << "&";
+    if (ast->id) ast->id->accept(this);
+}
+
+
+//
+// AstDereferenceExpr
+void PrinterVisitor::visit(AstDereferenceExpr * ast)
+{
+    std::cout << "*";
+    if (ast->expr) ast->expr->accept(this);
 }
 
 

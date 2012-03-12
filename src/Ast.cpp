@@ -19,11 +19,11 @@ using namespace lbc;
 // * virtual destructor so that unique_ptr can work
 // * virtual visitor method
 #define IMPL_AST(C, ...) \
-    static boost::pool<> _pool##C(sizeof(C)); \
-    void * C::operator new(size_t) { return _pool##C.malloc(); } \
-    void C::operator delete(void * addr) { _pool##C.free(addr); } \
-    void C::accept(AstVisitor * visitor) { visitor->visit(this); } \
-    C::~C() {}
+    static boost::pool<> _pool##C(sizeof(Ast##C)); \
+    void * Ast##C::operator new(size_t) { return _pool##C.malloc(); } \
+    void Ast##C::operator delete(void * addr) { _pool##C.free(addr); } \
+    void Ast##C::accept(AstVisitor * visitor) { visitor->visit(this); } \
+    Ast##C::~Ast##C() {}
 AST_CONTENT_NODES(IMPL_AST)
 #undef IMPL_AST
 
@@ -78,7 +78,7 @@ AstStmtList::AstStmtList() : symbolTable(nullptr) {}
 
 
 // AstAssignStmt
-AstAssignStmt::AstAssignStmt(AstIdentExpr * id, AstExpression * expr) : id(id), expr(expr) {}
+AstAssignStmt::AstAssignStmt(AstExpression * left, AstExpression * right) : left(left), right(right) {}
 
 
 // AstReturnStmt
@@ -95,6 +95,14 @@ AstExpression::AstExpression() : type(nullptr) {}
 
 // AstCastExpr
 AstCastExpr::AstCastExpr(AstExpression * expr, AstTypeExpr * typeExpr) : expr(expr), typeExpr(typeExpr) {}
+
+
+// AstAddressOfExpr
+AstAddressOfExpr::AstAddressOfExpr(AstIdentExpr * id) : id(id) {}
+
+
+// AstDereferenceExpr
+AstDereferenceExpr::AstDereferenceExpr(AstExpression * expr) : expr(expr) {}
 
 
 // AstIdentExpr
