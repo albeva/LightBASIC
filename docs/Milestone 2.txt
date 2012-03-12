@@ -7,7 +7,7 @@ Milestone 2
     [ ] add BOOL type
         [ ] add TRUE and FALSE keywords
     [✓] add unsigned types
-    [ ] implement implicit type casting and conversions
+    [✓] implement implicit type casting and conversions
 [✓] Lex negative numbers
 [✓] Lex simple floating point numbers
 [✓] variadic function support
@@ -31,7 +31,7 @@ Milestone 2
     Dim argv As Byte Ptr Ptr
     Dim arg As Byte Ptr
     arg = argv[1]
-[ ] add pointer dereferencing
+[✓] add pointer dereferencing
     Dim argv As Byte Ptr Ptr
     Dim arg As Byte Ptr
     arg = *argv
