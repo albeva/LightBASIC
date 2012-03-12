@@ -275,40 +275,46 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     }
     
     // not identifier
-    if (left->kind() != Ast::IdentExpr) {
-        THROW_EXCEPTION("Dereferencing non identifier");
-    }
-    
-    // id
-    const string & id = static_cast<AstIdentExpr*>(left)->token->lexeme();
-    
-    // get the symbol
-    auto symbol = m_table->get(id);
-    
-    // check
-    if (!symbol) {
-        THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
-    } else if (!symbol->type()->isInstantiable()) {
-        THROW_EXCEPTION(string("Cannot assign to identifier '") + id + "' of type " + symbol->type()->toString());
+    string help;
+    Type * leftType = nullptr;
+    if (left->kind() == Ast::IdentExpr) {
+        const string & id = static_cast<AstIdentExpr *>(left)->token->lexeme();
+        
+        // get the symbol
+        auto symbol = m_table->get(id);
+        
+        // check
+        if (!symbol) {
+            THROW_EXCEPTION(string("Use of undeclared '") + id + "'");
+        } else if (!symbol->type()->isInstantiable()) {
+            THROW_EXCEPTION(string("Cannot assign to '") + id + "' of type " + symbol->type()->toString());
+        }
+        leftType = symbol->type();
+        
+        help = string("identifier ") + symbol->id();
+    } else {
+        left->accept(this);
+        leftType = left->type;
+        help = "expression";
     }
     
     // check pointer deref
     if (deref != 0) {
-        if (!symbol->type()->isPointer()) {
-            THROW_EXCEPTION("Dereferencing a non pointer of type " + symbol->type()->toString());
+        if (!leftType->isPointer()) {
+            THROW_EXCEPTION("Dereferencing a non pointer of type " + leftType->toString());
         }
-        auto pt = static_cast<PtrType *>(symbol->type());
+        auto pt = static_cast<PtrType *>(leftType);
         if (pt->indirection() < deref) {
-            THROW_EXCEPTION(string("Dereferencing identifier ") + id + " of type " + pt->toString() + " too many levels");
+            THROW_EXCEPTION(string("Dereferencing ") + help + " of type " + pt->toString() + " too many levels");
         }
         m_coerceType = pt->indirection() - deref == 0
                      ? pt->getBaseType()
                      : new PtrType(pt->getBaseType(), pt->indirection() - deref);
         if (!m_coerceType->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot assign to identifier '") + id + "' of type " + m_coerceType->toString());
+            THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + m_coerceType->toString());
         }
     } else {
-        m_coerceType = symbol->type();
+        m_coerceType = leftType;
     }
     
     // m_type will hold the result of the expression

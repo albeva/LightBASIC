@@ -179,6 +179,17 @@ void IrBuilder::visit(AstFunctionStmt * ast)
     // create the block
     auto tmp = m_block;
     m_block = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, 0);
+    
+    // store function pointers locally
+    if (ast->signature->params) {
+        for (auto & p : ast->signature->params->params) {
+            auto sym = p->symbol;
+            auto value = sym->value;
+            sym->value = new llvm::AllocaInst(sym->type()->llvmType, "", m_block);
+            new llvm::StoreInst(value, sym->value, m_block);
+        }
+    }
+    
     ast->stmts->accept(this);
     m_block = tmp;
     
@@ -227,7 +238,17 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(getType(ast->type, m_module->getContext())), lexeme, 10);
     } else if (ast->type->isFloatingPoint()) {
         m_value = llvm::ConstantFP::get(getType(ast->type, m_module->getContext()), lexeme);
+    } else if (ast->type->isPointer()) {
+        if (lexeme == "0") {
+            m_value = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(getType(ast->type, m_module->getContext())));
+        } else {
+            auto type = getType(PrimitiveType::get(TokenType::LongInt), m_module->getContext());
+            auto llvmType = llvm::cast<llvm::IntegerType>(type);
+            auto constant = llvm::ConstantInt::get(llvmType, lexeme, 10);
+            m_value = new llvm::IntToPtrInst(constant, getType(ast->type, m_module->getContext()), "", m_block);
+        }
     }
+    
 }
 
 
@@ -280,7 +301,7 @@ void IrBuilder::visit(AstAssignStmt * ast)
     // right hand expression
     ast->right->accept(this);
     
-    // istore nstr
+    // store nstr
     new llvm::StoreInst(m_value, dst, m_block);
 }
 
