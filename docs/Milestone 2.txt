@@ -1,15 +1,13 @@
 Milestone 2
 -------------
 [✓] global variables
-[ ] rework internal type system
+[✓] rework internal type system
     [✓] rename basic type to PrimitiveType
     [✓] add FLOAT and DOUBLE types
     [✓] add BOOL type
         [✓] add TRUE and FALSE keywords
     [✓] add unsigned types
     [✓] implement implicit type casting and conversions
-[ ] Add Any Ptr
-[ ] Add null
 [✓] Lex negative numbers
 [✓] Lex simple floating point numbers
 [✓] variadic function support
@@ -27,12 +25,8 @@ Milestone 2
                 StmtList
              ]
              "END" "IF"
-[ ] add BooleanExpression
+[✓] add BooleanExpression
     * only "=" and "<>"
-[ ] add pointer indexing. 0 based
-    Dim argv As Byte Ptr Ptr
-    Dim arg As Byte Ptr
-    arg = argv[1]
 [✓] add pointer dereferencing
     Dim argv As Byte Ptr Ptr
     Dim arg As Byte Ptr

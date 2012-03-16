@@ -30,7 +30,7 @@ int main(int argc, const char * argv[])
                 ctx->add(argv[i], Context::Source);
             }
         } else {
-            ctx->add("examples/AssignBooleanExpr.bas", Context::Source);
+            ctx->add("examples/If.bas", Context::Source);
         }
         // create the parser
         auto parser = make_shared<Parser>(ctx);

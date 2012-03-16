@@ -253,7 +253,7 @@ namespace lbc {
     /**
      * Root node representing whole program
      */
-    struct AstStmtList : AstRoot
+    struct AstStmtList : AstStatement
     {
         // create
         AstStmtList();
@@ -308,6 +308,26 @@ namespace lbc {
         // content node
         DECLARE_AST(CallStmt);
     };
+    
+    
+    /**
+     * If statement
+     */
+    struct AstIfStmt : AstStatement
+    {
+        // create
+        AstIfStmt(AstExpression * expr = nullptr, AstStmtList * block = nullptr, AstStmtList * elseBlock = nullptr);
+        // expression
+        unique_ptr<AstExpression> expr;
+        // true branch
+        unique_ptr<AstStmtList> block;
+        // else
+        unique_ptr<AstStmtList> elseBlock;
+        // content node
+        DECLARE_AST(IfStmt);
+    };
+    
+    
     
     //--------------------------------------------------------------------------
     // Expressions

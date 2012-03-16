@@ -356,7 +356,7 @@ void SemanticAnalyser::visit(AstDereferenceExpr * ast)
     if (!ast->expr->type->isPointer()) {
         THROW_EXCEPTION("Dereferencing a non pointer");
     }
-    ast->type = ast->expr->type->getBaseType();
+    ast->type = static_cast<PtrType *>(ast->expr->type)->dereference();
 }
 
 

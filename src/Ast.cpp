@@ -89,6 +89,16 @@ AstReturnStmt::AstReturnStmt(AstExpression * expr) : expr(expr) {}
 AstCallStmt::AstCallStmt(AstCallExpr * expr) : expr(expr) {}
 
 
+// AstIfStmt
+AstIfStmt::AstIfStmt(AstExpression * expr, AstStmtList * block, AstStmtList * elseBlock)
+: expr(expr), block(block), elseBlock(elseBlock) {}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Expressions
+//----------------------------------------------------------------------------------------------------------------------
+
+
 // AstExpression
 AstExpression::AstExpression() : type(nullptr) {}
 

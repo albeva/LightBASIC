@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		362740E51512B6C2005C8D97 /* Boolean.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740E31512B6B4005C8D97 /* Boolean.bas */; };
 		362740EC1513A9BB005C8D97 /* AssignBooleanExpr.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740EA1513A9B5005C8D97 /* AssignBooleanExpr.bas */; };
+		362740F01513DFFE005C8D97 /* CmdLine.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740EE1513DFF6005C8D97 /* CmdLine.bas */; };
+		362740F11513DFFE005C8D97 /* If.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740EF1513DFF6005C8D97 /* If.bas */; };
 		365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */; };
 		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
 		36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
@@ -46,6 +48,8 @@
 			dstPath = examples;
 			dstSubfolderSpec = 6;
 			files = (
+				362740F01513DFFE005C8D97 /* CmdLine.bas in CopyFiles */,
+				362740F11513DFFE005C8D97 /* If.bas in CopyFiles */,
 				362740EC1513A9BB005C8D97 /* AssignBooleanExpr.bas in CopyFiles */,
 				362740E51512B6C2005C8D97 /* Boolean.bas in CopyFiles */,
 				36981C27150E90BC00F599F9 /* MallocFree.bas in CopyFiles */,
@@ -64,6 +68,9 @@
 /* Begin PBXFileReference section */
 		362740E31512B6B4005C8D97 /* Boolean.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Boolean.bas; path = samples/Boolean.bas; sourceTree = "<group>"; };
 		362740EA1513A9B5005C8D97 /* AssignBooleanExpr.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = AssignBooleanExpr.bas; path = samples/AssignBooleanExpr.bas; sourceTree = "<group>"; };
+		362740ED1513DEC7005C8D97 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = TODO.txt; path = docs/TODO.txt; sourceTree = SOURCE_ROOT; };
+		362740EE1513DFF6005C8D97 /* CmdLine.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CmdLine.bas; path = samples/CmdLine.bas; sourceTree = "<group>"; };
+		362740EF1513DFF6005C8D97 /* If.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = If.bas; path = samples/If.bas; sourceTree = "<group>"; };
 		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
 		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
 		365F7A4C14F90D7A00553D98 /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -294,6 +301,7 @@
 		369056F7150388FF00E2C917 /* docs */ = {
 			isa = PBXGroup;
 			children = (
+				362740ED1513DEC7005C8D97 /* TODO.txt */,
 				369056F8150389AE00E2C917 /* README */,
 				36FF07C3150510E400D84F2E /* Milestone 2.txt */,
 			);
@@ -304,6 +312,8 @@
 		369056FB150389D000E2C917 /* samples */ = {
 			isa = PBXGroup;
 			children = (
+				362740EE1513DFF6005C8D97 /* CmdLine.bas */,
+				362740EF1513DFF6005C8D97 /* If.bas */,
 				362740EA1513A9B5005C8D97 /* AssignBooleanExpr.bas */,
 				362740E31512B6B4005C8D97 /* Boolean.bas */,
 				36981C25150E90A500F599F9 /* MallocFree.bas */,

@@ -11,46 +11,47 @@
 // base nodes that do not have visitors. all other
 // ast nodes extend one of these
 #define AST_ROOT_NODES(_)   \
-    _( Root )            \
+    _( Root )               \
     _( Statement )
 
 //
 // statement nodes. these extend the AstStatement
 #define AST_STMT_NODES(_)   \
-    _( StmtList )        \
-    _( AssignStmt )      \
-    _( ReturnStmt )      \
-    _( CallStmt )
+    _( StmtList )           \
+    _( AssignStmt )         \
+    _( ReturnStmt )         \
+    _( CallStmt )           \
+    _( IfStmt )
 
 //
 // declarations. These nodes can have attributes
 // extend statement
 #define AST_DECL_NODES(_)   \
-    _( Declaration )     \
-    _( VarDecl )         \
-    _( FunctionDecl )    \
-    _( FuncSignature )   \
-    _( FunctionStmt )    \
+    _( Declaration )        \
+    _( VarDecl )            \
+    _( FunctionDecl )       \
+    _( FuncSignature )      \
+    _( FunctionStmt )       \
 
 
 //
 // expression statements. these extend the AstExpression
 // AstExpression is a root node, but it has content. so place it here
 #define AST_EXPR_NODES(_)   \
-    _( Expression )      \
-    _( IdentExpr )       \
-    _( LiteralExpr )     \
-    _( CallExpr )        \
-    _( CastExpr )        \
-    _( AddressOfExpr )   \
-    _( DereferenceExpr ) \
+    _( Expression )         \
+    _( IdentExpr )          \
+    _( LiteralExpr )        \
+    _( CallExpr )           \
+    _( CastExpr )           \
+    _( AddressOfExpr )      \
+    _( DereferenceExpr )    \
     _( BinaryExpr )
 
 //
 // ast nodes for attributes
 #define AST_ATTRIB_NODES(_) \
-    _( AttributeList )   \
-    _( Attribute )       \
+    _( AttributeList )      \
+    _( Attribute )          \
     _( AttribParamList )
 
 //
@@ -61,8 +62,8 @@
 //
 // Function argument and params
 #define AST_FUNC_ARGS(_)    \
-    _( FuncParamList )   \
-    _( FuncArgList )     \
+    _( FuncParamList )      \
+    _( FuncArgList )        \
     _( FuncParam )
 
 

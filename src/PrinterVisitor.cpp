@@ -11,7 +11,7 @@ using namespace lbc;
 
 //
 // create the printer
-PrinterVisitor::PrinterVisitor() : m_indent(0) {}
+PrinterVisitor::PrinterVisitor() : m_indent(0), m_elseIf(false) {}
 
 
 //
@@ -52,6 +52,38 @@ void PrinterVisitor::visit(AstCallStmt * ast)
     std::cout << indent();
     if (ast->expr) ast->expr->accept(this);
     std::cout << std::endl;
+}
+
+
+//
+// AstIfStmt
+void PrinterVisitor::visit(AstIfStmt * ast)
+{
+    if (!m_elseIf) std::cout << indent();
+    SCOPED_GUARD(m_elseIf);
+    m_elseIf = false;
+    
+    std::cout << "IF ";
+    if (ast->expr) ast->expr->accept(this);
+    std::cout << " THEN\n";
+    m_indent++;
+    if (ast->block) ast->block->accept(this);
+    m_indent--;
+    std::cout << indent();
+    if (ast->elseBlock) {
+        if (ast->elseBlock->is(Ast::IfStmt)) {
+            std::cout << "ELSE ";
+            m_elseIf = true;
+            ast->elseBlock->accept(this);
+            return;
+        } else {
+            std::cout << "\n";
+            m_indent++;
+            ast->elseBlock->accept(this);
+            m_indent--;
+        }
+    }
+    std::cout << "END OF\n";
 }
 
 

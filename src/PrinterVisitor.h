@@ -28,6 +28,8 @@ namespace lbc {
         void visit(AstReturnStmt * ast);
         // AstCallStmt
         void visit(AstCallStmt * ast);
+        // AstIfStmt
+        void visit(AstIfStmt * ast);
         // AstDeclaration
         void visit(AstDeclaration * ast);
         // AstVarDecl
@@ -69,6 +71,7 @@ namespace lbc {
         
     private:
         int m_indent;
+        bool m_elseIf;
         string indent(int change = 0);
     };
 

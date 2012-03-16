@@ -1,6 +1,30 @@
+Todo for Milestone 3
+======================
+
+General
+---------
+[ ] add pointer indexing. 0 based
+    Dim argv As Byte Ptr Ptr
+    Dim arg As Byte Ptr
+    arg = argv[1]
+[ ] Add Any Ptr
+[ ] Add Null
+[ ] Add zstring type ????
+[ ] initalize apon declatation
+    Dim i As Integer = 10
+[ ] add Var that deducts the type from right hand expression
+    Var i = 10
+[ ] Add For
+    * no step for now
+    * no inline variable declaration
+    For i = 0 to 10
+    Next
+[ ] make parenthesis optional for FuncStmt
+    printf "hello %s\n", "world"
 Type system
-=============
-[ ] 32bit and 64bit compatible
+-------------
+[ ] 32bit
+[ ] 64bit
 [ ] pointers
     [ ] int
     [ ] fp
@@ -35,9 +59,9 @@ Type system
     [ ] single
     [ ] double
     [ ] bool
-    [ ] ptr (int, fp, bool, any, fn)
+    [ ] ptr (int, fp, bool, any, fn)    
 [ ] function argument
-    [ ] ubyte, ubyte
+    [ ] ubyte, byte
     [ ] ushort, short
     [ ] uinteger, integer
     [ ] ulong, long
@@ -45,6 +69,15 @@ Type system
     [ ] double
     [ ] bool
     [ ] ptr (int, fp, bool, any, fn)
+    [ ] var arg
+        [ ] ubyte, byte
+        [ ] ushort, short
+        [ ] uinteger, integer
+        [ ] ulongint, longint
+        [ ] single
+        [ ] double
+        [ ] bool
+        [ ] ptr (int, fp, bool, any, fn)
 [ ] return type
     [ ] ubyte, ubyte
     [ ] ushort, short
@@ -54,5 +87,4 @@ Type system
     [ ] double
     [ ] bool
     [ ] ptr (int, fp, bool, any, fn)
-[ ] 32bit
-[ ] 64bit
+

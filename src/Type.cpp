@@ -164,6 +164,16 @@ string PtrType::toString()
 }
 
 
+/**
+ * dereference to hold pointer
+ */
+Type * PtrType::dereference() const
+{
+    if (indirection() == 1) return getBaseType();
+    return PtrType::get(getBaseType(), indirection() - 1);
+}
+
+
 
 /**
  * create function type
