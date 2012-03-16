@@ -48,6 +48,8 @@ namespace lbc {
         void visit(AstIdentExpr * ast);
         // AstLiteralExpr
         void visit(AstLiteralExpr * ast);
+        // AstBinaryExpr
+        void visit(AstBinaryExpr * ast);
         // AstCallExpr
         void visit(AstCallExpr * ast);
         // AstAttributeList

@@ -347,6 +347,53 @@ void IrBuilder::visit(AstDereferenceExpr * ast)
 
 
 //
+//
+void IrBuilder::visit(AstBinaryExpr * ast)
+{
+    // left
+    ast->lhs->accept(this);
+    auto left = m_value;
+    // right
+    ast->rhs->accept(this);
+    auto right = m_value;
+    // resulting type
+    ast->type->llvmType = getType(ast->type, m_module->getContext());
+    
+    // integer types
+    if (ast->lhs->type->isIntegral()) {
+        llvm::CmpInst::Predicate pred;
+        auto local = ast->token->type();
+        if (local == TokenType::Equal)          pred = llvm::CmpInst::Predicate::ICMP_EQ;
+        else if (local == TokenType::NotEqual)  pred = llvm::CmpInst::Predicate::ICMP_NE;
+        
+        m_value = new llvm::ICmpInst(*m_block, pred, left, right, "");
+    }
+    // fp types
+    else if (ast->lhs->type->isFloatingPoint())
+    {
+        llvm::CmpInst::Predicate pred;
+        auto local = ast->token->type();
+        if (local == TokenType::Equal)          pred = llvm::CmpInst::Predicate::FCMP_OEQ;
+        else if (local == TokenType::NotEqual)  pred = llvm::CmpInst::Predicate::FCMP_UNE;
+        
+        m_value = new llvm::FCmpInst(*m_block, pred, left, right, "");
+    }
+    
+    // cast i1 to i8
+    // get cast opcode
+    auto opcode = llvm::CastInst::getCastOpcode(
+        m_value,
+        false,
+        ast->type->llvmType,
+        false
+    );
+    
+    // create cast instruction
+    m_value = llvm::CastInst::Create(opcode, m_value, ast->type->llvmType, "", m_block);
+}
+
+
+//
 // AstCastExpr
 void IrBuilder::visit(AstCastExpr * ast)
 {

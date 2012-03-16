@@ -67,6 +67,9 @@ Expression      = IntegerLiteral
                 | id
                 | AddressOf
                 | Dereference
+                | BinaryExpression      (. this is broken. will use a expression parser anyway. so ebnf won't work .)
+                .
+BinaryExpression= Expression Op Expression
                 .
 CallExpr        = id "(" [ funcArgList ] ")"
                 .

@@ -187,6 +187,16 @@ void PrinterVisitor::visit(AstLiteralExpr * ast)
 
 
 //
+// AstBinaryExpr
+void PrinterVisitor::visit(AstBinaryExpr * ast)
+{
+    if (ast->lhs) ast->lhs->accept(this);
+    if (ast->token) std::cout << " " << ast->token->lexeme() << " ";
+    if (ast->rhs) ast->rhs->accept(this);
+}
+
+
+//
 // AstCallExpr
 void PrinterVisitor::visit(AstCallExpr * ast)
 {

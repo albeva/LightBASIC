@@ -113,6 +113,11 @@ AstIdentExpr::AstIdentExpr(Token * token) : token(token) {}
 AstLiteralExpr::AstLiteralExpr(Token * token) : token(token) {}
 
 
+// BinaryExpr
+AstBinaryExpr::AstBinaryExpr(Token * op, AstExpression * lhs, AstExpression * rhs)
+: token(op), lhs(lhs), rhs(rhs) {}
+
+
 // AstCallExpr
 AstCallExpr::AstCallExpr(AstIdentExpr * id, AstFuncArgList * args) : id(id), args(args) {}
 

@@ -42,8 +42,9 @@
     _( LiteralExpr )     \
     _( CallExpr )        \
     _( CastExpr )        \
-    _( AddressOfExpr )       \
-    _( DereferenceExpr )
+    _( AddressOfExpr )   \
+    _( DereferenceExpr ) \
+    _( BinaryExpr )
 
 //
 // ast nodes for attributes

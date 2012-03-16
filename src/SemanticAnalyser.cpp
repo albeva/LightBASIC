@@ -19,33 +19,6 @@
 
 using namespace lbc;
 
-/**
- * Simple helper. Basically ensured that original
- * value of a variable provided is restored apon
- * exiting the scope
- */
-template<typename T> struct ScopeGuard : NonCopyable{
-    
-    // create
-    ScopeGuard(T & value) : target(value), value(value)
-    {
-    }
-    
-    // restore
-    ~ScopeGuard() {
-        target = value;
-    }
-    
-    // members
-    T & target;
-    T   value;
-};
-
-#define CONCATENATE_DETAIL(x, y) x##y
-#define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
-#define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
-#define SCOPED_GUARD(V) ScopeGuard<decltype(V)> MAKE_UNIQUE(_tmp_guard) (V);
-
 
 //
 // create new one
@@ -384,6 +357,108 @@ void SemanticAnalyser::visit(AstDereferenceExpr * ast)
         THROW_EXCEPTION("Dereferencing a non pointer");
     }
     ast->type = ast->expr->type->getBaseType();
+}
+
+
+//
+// AstBinaryExpr
+void SemanticAnalyser::visit(AstBinaryExpr * ast)
+{
+    SCOPED_GUARD(m_coerceType);
+    m_coerceType = nullptr;
+    
+    Type * left = nullptr, * right = nullptr;
+    if (ast->lhs->isConstant() && !ast->rhs->isConstant()) {
+        ast->rhs->accept(this);
+        right = ast->rhs->type;
+        
+        m_coerceType = right;
+        ast->lhs->accept(this);
+        left = ast->lhs->type;
+    } else if (!ast->lhs->isConstant() && ast->rhs->isConstant()) {
+        ast->lhs->accept(this);
+        left = ast->lhs->type;
+        
+        m_coerceType = left;
+        ast->rhs->accept(this);
+        right = ast->rhs->type;        
+    } else {
+        ast->lhs->accept(this);
+        left = ast->lhs->type;
+        
+        // should be okay to try and coerce the right hand side
+        m_coerceType = left;
+        
+        ast->rhs->accept(this);
+        right = ast->rhs->type;
+    }
+    
+    // int -> 
+    if (left->isIntegral()) {
+        // -> int
+        if (right->isIntegral()) {
+            if (left->getSizeInBits() > right->getSizeInBits()) {
+                coerce(ast->rhs, left);
+            } else if (left->getSizeInBits() < right->getSizeInBits()) {
+                coerce(ast->lhs, right);
+            }
+        }
+        // -> fp
+        else if (right->isFloatingPoint()) {
+            coerce(ast->lhs, right);
+        }
+        // -> ptr
+        else if (right->isPointer()) {
+            if (ast->lhs->is(Ast::LiteralExpr)) {
+                coerce(ast->lhs, right);
+            } else {
+                THROW_EXCEPTION("Comparison between integer and a pointer");
+            }
+        }
+    }
+    // fp ->
+    if (left->isFloatingPoint()) {
+        // -> int
+        if (right->isIntegral()) {
+            coerce(ast->rhs, left);
+        }
+        // -> fp
+        else if (right->isFloatingPoint()) {
+            if (left->getSizeInBits() > right->getSizeInBits()) {
+                coerce(ast->rhs, left);
+            } else if (left->getSizeInBits() < right->getSizeInBits()) {
+                coerce(ast->lhs, right);
+            }
+        }
+        // ->ptr
+        else if (right->isPointer()) {
+            THROW_EXCEPTION("Comparison between floating point and a pointer");
+        }
+    }
+    // ptr
+    if (left->isPointer()) {
+        // -> int
+        if (right->isIntegral()) {
+            if (ast->rhs->is(Ast::LiteralExpr)) {
+                coerce(ast->rhs, left);
+            } else {
+                THROW_EXCEPTION("Comparison between integer and a pointer");
+            }
+        }
+        // -> fp
+        else if (right->isFloatingPoint()) {
+            THROW_EXCEPTION("Comparison between floating point and a pointer");
+        }
+        // -> ptr
+        else if (right->isPointer()) {
+            if (!left->compare(right)) {
+                THROW_EXCEPTION("Comparison between distinct pointer types");
+            }
+        }
+    }
+    
+    // result of logical comparison
+    ast->type = PrimitiveType::get(TokenType::Bool);
 }
 
 

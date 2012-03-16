@@ -72,10 +72,11 @@ namespace lbc {
         void move();
         
         // tokens
-        shared_ptr<Context>    m_ctx;
-        Token                * m_token;
-        Token                * m_next;
-        Lexer                * m_lexer;
+        shared_ptr<Context>   m_ctx;
+        Token               * m_token;
+        Token               * m_next;
+        Lexer               * m_lexer;
+        bool                  m_expectAssign;
     };
     
 }

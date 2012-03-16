@@ -18,7 +18,7 @@ using namespace lbc;
  * Create the parser object
  */
 Parser::Parser(const shared_ptr<Context> & ctx)
-: m_ctx(ctx), m_token(nullptr), m_next(nullptr), m_lexer(nullptr)
+: m_ctx(ctx), m_token(nullptr), m_next(nullptr), m_lexer(nullptr), m_expectAssign(false)
 {
 }
 
@@ -29,6 +29,10 @@ Parser::Parser(const shared_ptr<Context> & ctx)
  */
 AstProgram * Parser::parse(const shared_ptr<Source> & source)
 {
+    m_token = nullptr;
+    m_next = nullptr;
+    m_expectAssign = false;
+    
     // init the lexer
     m_lexer = new Lexer(source);
     move(); move();
@@ -136,7 +140,7 @@ AstStatement * Parser::statement()
                 stmt = callStmt();
                 break;
             }
-        // NOTE probably very wront. at the moment assume
+        // NOTE probably very wrong. at the moment assume
         // that line starting with * is assignment to dereferenced
         // pointer
         // *ip = 10
@@ -158,7 +162,9 @@ AstStatement * Parser::statement()
 AstAssignStmt * Parser::assignStmt()
 {
     // left
+    m_expectAssign = true;
     auto left = expression();
+    m_expectAssign = false;
     
     // =
     expect(TokenType::Assign);
@@ -201,54 +207,81 @@ AstReturnStmt * Parser::returnStmt()
  *            | True
  *            | False
  *            | Null
+ *
+ * for the moment use hackish way to add
+ * a binary expression.
+ * later will use an expression parser
+ * that is not easily expressed in ebnf anyways
  */
 AstExpression * Parser::expression()
 {
     AstExpression * expr = nullptr;
     
-    switch (m_token->type()) {
-        // IntegerLiteral
-        // FloatingPointLiteral
-        // StringLiteral
-        case TokenType::IntegerLiteral:
-        case TokenType::StringLiteral:
-        case TokenType::FloatingPointLiteral:
-            expr = new AstLiteralExpr(m_token);
-            move();
-            break;
-        // true, false
-        case TokenType::True:
-        case TokenType::False:
-            expr = new AstLiteralExpr(m_token);
-            move();
-            break;
-        // null
-        case TokenType::Null:
-            expr = new AstLiteralExpr(m_token);
-            move();
-            break;
-        // CallExpr
-        // id
-        case TokenType::Identifier:
-            if (m_next->type() == TokenType::ParenOpen) {
-                expr = callExpr();
+    // create scope
+    {
+        SCOPED_GUARD(m_expectAssign);
+        m_expectAssign = false;
+        switch (m_token->type()) {
+            // IntegerLiteral
+            // FloatingPointLiteral
+            // StringLiteral
+            case TokenType::IntegerLiteral:
+            case TokenType::StringLiteral:
+            case TokenType::FloatingPointLiteral:
+                expr = new AstLiteralExpr(m_token);
+                move();
                 break;
-            } else {
-                expr = identifier();
+            // true, false
+            case TokenType::True:
+            case TokenType::False:
+                expr = new AstLiteralExpr(m_token);
+                move();
+                break;
+            // null
+            case TokenType::Null:
+                expr = new AstLiteralExpr(m_token);
+                move();
+                break;
+            // CallExpr
+            // id
+            case TokenType::Identifier:
+                if (m_next->type() == TokenType::ParenOpen) {
+                    expr = callExpr();
+                    break;
+                } else {
+                    expr = identifier();
+                    break;
+                }
+            // AddressOf
+            case TokenType::AddressOf:
+                move();
+                expr = new AstAddressOfExpr(identifier());
+                break;
+            // Dereference
+            case TokenType::Dereference:
+                move();
+                expr = new AstDereferenceExpr(expression());
+                break;
+            default:
+                THROW_EXCEPTION(string("Invalid input. Expected expression. Found: ") + m_token->name());
+        }
+    }
+    
+    // =
+    if (!m_expectAssign) {
+        switch (m_token->type()) {
+            case TokenType::Assign:
+                m_token->type(TokenType::Equal);
+                // fall through!
+            case TokenType::NotEqual: {
+                auto op = m_token;
+                move();
+                expr = new AstBinaryExpr(op, expr, expression());
                 break;
             }
-        // AddressOf
-        case TokenType::AddressOf:
-            move();
-            expr = new AstAddressOfExpr(identifier());
-            break;
-        // Dereference
-        case TokenType::Dereference:
-            move();
-            expr = new AstDereferenceExpr(expression());
-            break;
-        default:
-            THROW_EXCEPTION(string("Invalid input. Expected expression. Found: ") + m_token->name());
+            default:
+                break;
+        }
     }
     
     return expr;

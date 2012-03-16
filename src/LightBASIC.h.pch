@@ -56,4 +56,31 @@ namespace lbc {
         NonCopyable(const NonCopyable &) = delete;
         NonCopyable & operator = (const NonCopyable &) = delete;
     };
+
+    /**
+     * Simple helper. Basically ensured that original
+     * value of a variable provided is restored apon
+     * exiting the scope
+     */
+    template<typename T> struct ScopeGuard : NonCopyable{
+
+        // create
+        ScopeGuard(T & value) : target(value), value(value)
+        {
+        }
+
+        // restore
+        ~ScopeGuard() {
+            target = value;
+        }
+
+        // members
+        T & target;
+        T   value;
+    };
+
+    #define CONCATENATE_DETAIL(x, y) x##y
+    #define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
+    #define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
+    #define SCOPED_GUARD(V) ScopeGuard<decltype(V)> MAKE_UNIQUE(_tmp_guard) (V);
 }

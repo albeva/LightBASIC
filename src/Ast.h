@@ -320,6 +320,8 @@ namespace lbc {
     {
         // create
         AstExpression();
+        // is this a constant expression ?
+        virtual bool isConstant() const { return false; }
         // expression type. Does not own!
         Type * type;
         // content node
@@ -392,10 +394,28 @@ namespace lbc {
     {
         // create
         AstLiteralExpr(Token * token = nullptr);
+        // is const expression
+        virtual bool isConstant() const { return true; }
         // the value token
         unique_ptr<Token> token;
         // content node
         DECLARE_AST(LiteralExpr);
+    };
+    
+    
+    /**
+     * Binary expression
+     */
+    struct AstBinaryExpr : AstExpression
+    {
+        // create
+        AstBinaryExpr(Token * op = nullptr, AstExpression * lhs = nullptr, AstExpression * rhs = nullptr);
+        // token.
+        unique_ptr<Token> token;
+        // lhs, rhs
+        unique_ptr<AstExpression> lhs, rhs;
+        // content node
+        DECLARE_AST(BinaryExpr);
     };
     
     

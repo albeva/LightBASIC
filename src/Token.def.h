@@ -32,6 +32,8 @@
     _( ParenClose,      ")"     ) \
     _( Comma,           ","     ) \
     _( Assign,          "="     ) \
+    _( Equal,           "="     ) \
+    _( NotEqual,        "<>"    ) \
     _( AddressOf,       "&"     ) \
     _( Dereference,     "*"     ) \
     _( Ellipsis,        "..."   )
