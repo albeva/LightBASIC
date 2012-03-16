@@ -8,6 +8,8 @@ Milestone 2
         [ ] add TRUE and FALSE keywords
     [✓] add unsigned types
     [✓] implement implicit type casting and conversions
+[ ] Add Any Ptr
+[ ] Add null
 [✓] Lex negative numbers
 [✓] Lex simple floating point numbers
 [✓] variadic function support

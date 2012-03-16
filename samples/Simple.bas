@@ -1,3 +1,3 @@
-function message() AS BYTE PTR
-    return "I am the first LightBASIC app"
-end function
+Function message() As Byte Ptr
+    Return "I am the first LightBASIC app"
+End Function

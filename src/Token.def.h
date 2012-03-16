@@ -18,7 +18,9 @@
     _( Identifier,          "Identifier"            ) \
     _( IntegerLiteral,      "Numeric-Literal"       ) \
     _( FloatingPointLiteral,"Floating-Point-Literal") \
-    _( StringLiteral,       "String-Literal"        )
+    _( StringLiteral,       "String-Literal"        ) \
+    _( BooleanLiteral,      "Boolean-Literal"       ) \
+    _( NullLiteral,         "Null-Literal"          )
 
 //
 // OPERATOR defines operator tokens
@@ -44,7 +46,11 @@
     _( Function,        "FUNCTION"  ) \
     _( Ptr,             "PTR"       ) \
     _( End,             "END"       ) \
-    _( Return,          "RETURN"    )
+    _( Return,          "RETURN"    ) \
+    _( True,            "TRUE"      ) \
+    _( False,           "FALSE"     ) \
+    _( Null,            "NULL"      ) \
+    _( Any,             "ANY"       )
 
 //
 // Types define the type keywords

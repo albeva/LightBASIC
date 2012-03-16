@@ -198,6 +198,9 @@ AstReturnStmt * Parser::returnStmt()
  *            | id
  *            | AddressOf
  *            | Dereference
+ *            | True
+ *            | False
+ *            | Null
  */
 AstExpression * Parser::expression()
 {
@@ -210,6 +213,18 @@ AstExpression * Parser::expression()
         case TokenType::IntegerLiteral:
         case TokenType::StringLiteral:
         case TokenType::FloatingPointLiteral:
+            expr = new AstLiteralExpr(m_token);
+            move();
+            break;
+        // true, false
+        case TokenType::True:
+        case TokenType::False:
+            m_token->type(TokenType::BooleanLiteral);
+            expr = new AstLiteralExpr(m_token);
+            move();
+            break;
+        // null
+        case TokenType::Null:
             expr = new AstLiteralExpr(m_token);
             move();
             break;

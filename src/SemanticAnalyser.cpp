@@ -454,6 +454,14 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
         } else{
             ast->type = PrimitiveType::get(type == TokenType::IntegerLiteral ? TokenType::Integer : TokenType::Double);
         }
+    } else if (type == TokenType::BooleanLiteral) {
+        if (m_coerceType) {
+            ast->type = m_coerceType;
+        } else {
+            ast->type = PrimitiveType::get(TokenType::Bool);
+        }   
+    } else if (type == TokenType::Any) {
+        THROW_EXCEPTION("ANY not implemented");
     } else {
         THROW_EXCEPTION("Invalid type");
     }

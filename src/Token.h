@@ -37,7 +37,7 @@ namespace lbc {
             : m_type(type), m_loc(loc), m_lexeme(lexeme) {}
         
         // get lexeme
-        string lexeme() const { return m_lexeme; }
+        const string & lexeme() const { return m_lexeme; }
         
         // get token type name
         const string & name() const { return getTokenName(m_type); }
@@ -47,6 +47,9 @@ namespace lbc {
         
         // get type
         TokenType type() const { return m_type; }
+        
+        // set new type
+        void type(TokenType typ) { m_type = typ; }
         
         // allocate objects from the pool
         void * operator new(size_t);
