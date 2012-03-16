@@ -36,10 +36,10 @@ int main(int argc, const char * argv[])
         auto parser = make_shared<Parser>(ctx);
         // semantic analyser
         auto semantic = make_shared<SemanticAnalyser>();
-		// IR builder
-		auto builder = make_shared<IrBuilder>();
-		// create output emitter
-		auto emitter = make_shared<Emitter>(ctx);
+        // IR builder
+        auto builder = make_shared<IrBuilder>();
+        // create output emitter
+        auto emitter = make_shared<Emitter>(ctx);
         // process the files
         for (auto & file : ctx->get(Context::Source)) {
             auto ast = parser->parse(make_shared<SourceFile>(file));
@@ -49,18 +49,18 @@ int main(int argc, const char * argv[])
                 
                 // generate llvm code
                 ast->accept(builder.get());
-				if (auto module = builder->getModule()) {
-					emitter->add(module);
-				}
-				
+                if (auto module = builder->getModule()) {
+                    emitter->add(module);
+                }
+                
                 // cleanup
                 delete ast;
             } else {
                 std::cout << "NO AST\n";
             }
         }
-		// generate the output
-		emitter->generate();
+        // generate the output
+        emitter->generate();
     } catch (Exception e) {
         cout << "Error: " << e.what() << endl;
         return EXIT_FAILURE;

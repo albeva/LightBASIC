@@ -8,39 +8,39 @@
 #pragma once
 
 namespace llvm {
-	class Module;
+    class Module;
 }
 
 namespace lbc {
-	
-	// the context
-	class Context;
-	
-	/**
-	 * This class deals with combingin the llvm ir's and generating the
-	 * output executable or a library
-	 */
-	class Emitter : NonCopyable {
-	public:
-		
-		// create
-		Emitter(const shared_ptr<Context> & ctx);
-		
-		// destroy
-		virtual ~Emitter();
-		
-		// add module. This takes ownership of the module!
-		void add(llvm::Module * module);
-		
-		// generate the output
-		void generate();
-		
-	private:
-		// compiler state context
-		shared_ptr<Context> m_context;
-		
-		// llvm modules
-		vector<unique_ptr<llvm::Module>> m_modules;
-	};
-	
+    
+    // the context
+    class Context;
+    
+    /**
+     * This class deals with combingin the llvm ir's and generating the
+     * output executable or a library
+     */
+    class Emitter : NonCopyable {
+    public:
+        
+        // create
+        Emitter(const shared_ptr<Context> & ctx);
+        
+        // destroy
+        virtual ~Emitter();
+        
+        // add module. This takes ownership of the module!
+        void add(llvm::Module * module);
+        
+        // generate the output
+        void generate();
+        
+    private:
+        // compiler state context
+        shared_ptr<Context> m_context;
+        
+        // llvm modules
+        vector<unique_ptr<llvm::Module>> m_modules;
+    };
+    
 }

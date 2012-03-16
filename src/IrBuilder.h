@@ -28,7 +28,7 @@ namespace lbc {
      */
     struct IrBuilder : RecursiveAstVisitor
     {
-		// create
+        // create
         IrBuilder();
         
         // get the generated module

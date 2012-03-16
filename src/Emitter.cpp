@@ -38,7 +38,7 @@ Emitter::~Emitter()
  */
 void Emitter::add(llvm::Module * module)
 {
-	m_modules.push_back(unique_ptr<llvm::Module>(module));
+    m_modules.push_back(unique_ptr<llvm::Module>(module));
 }
 
 

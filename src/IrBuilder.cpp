@@ -42,11 +42,11 @@ IrBuilder::IrBuilder()
 void IrBuilder::visit(AstProgram * ast)
 {
     // reset the sate
-	m_module = nullptr;
-	m_function = nullptr;
-	m_block = nullptr;
-	m_value = nullptr;
-	m_table = nullptr;
+    m_module = nullptr;
+    m_function = nullptr;
+    m_block = nullptr;
+    m_value = nullptr;
+    m_table = nullptr;
     
     // the module
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
