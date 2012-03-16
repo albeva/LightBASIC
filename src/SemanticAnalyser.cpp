@@ -309,7 +309,7 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
         }
         m_coerceType = pt->indirection() - deref == 0
                      ? pt->getBaseType()
-                     : new PtrType(pt->getBaseType(), pt->indirection() - deref);
+                     : PtrType::get(pt->getBaseType(), pt->indirection() - deref);
         if (!m_coerceType->isInstantiable()) {
             THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + m_coerceType->toString());
         }
@@ -369,7 +369,7 @@ void SemanticAnalyser::visit(AstAddressOfExpr * ast)
     SCOPED_GUARD(m_coerceType);
     m_coerceType = nullptr;
     ast->id->accept(this);
-    ast->type = new PtrType(ast->id->type, 1);
+    ast->type = PtrType::get(ast->id->type, 1);
 }
 
 
@@ -454,7 +454,7 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
         } else{
             ast->type = PrimitiveType::get(type == TokenType::IntegerLiteral ? TokenType::Integer : TokenType::Double);
         }
-    } else if (type == TokenType::BooleanLiteral) {
+    } else if (type == TokenType::True || type == TokenType::False) {
         if (m_coerceType) {
             ast->type = m_coerceType;
         } else {

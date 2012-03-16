@@ -57,7 +57,7 @@ void Emitter::generate()
     string ld_cmd   = "/usr/bin/ld ";
     string as_cmd   = "/usr/bin/as ";
     string cmd      = "";
-    bool verbose    = true;
+    bool verbose    = false;
     vector<string> bc_files;
     
     // ld options. need to be configurable and different on different platforms

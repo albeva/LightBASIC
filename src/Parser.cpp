@@ -219,7 +219,6 @@ AstExpression * Parser::expression()
         // true, false
         case TokenType::True:
         case TokenType::False:
-            m_token->type(TokenType::BooleanLiteral);
             expr = new AstLiteralExpr(m_token);
             move();
             break;

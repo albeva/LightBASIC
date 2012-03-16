@@ -21,7 +21,7 @@
     _( ULongInt,    "ULONGINT",     64,     Type::Integral | Type::Unsigned)    \
     _( Single,      "SINGLE",       32,     Type::FloatingPoint)                \
     _( Double,      "DOUBLE",       64,     Type::FloatingPoint)                \
-    _( Bool,        "BOOL",         8,      Type::Integral)
+    _( Bool,        "BOOL",         8,      Type::Boolean | Type::Integral | Type::Unsigned)
 
 //
 // All types

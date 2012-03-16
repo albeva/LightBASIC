@@ -79,6 +79,9 @@ llvm::Type * getType(lbc::Type * local, llvm::LLVMContext & context)
     if (local->isPointer()) {
         auto ptr = static_cast<PtrType *>(local);
         auto base = ptr->getBaseType();
+        if (base->isPointer()) {
+            THROW_EXCEPTION("IS pointer");
+        }
         auto llType = llvm::Type::getIntNPtrTy(context, base->getSizeInBits());
         int level = ptr->indirection() - 1;
         while(level--) {
@@ -212,11 +215,12 @@ void IrBuilder::visit(AstReturnStmt * ast)
 // AstLiteralExpr
 void IrBuilder::visit(AstLiteralExpr * ast)
 {
-    string lexeme = ast->token->lexeme();
+    const string & lexeme = ast->token->lexeme();
     auto & context = m_module->getContext();
+    const auto & token = ast->token;
     
     // string literal
-    if (ast->token->type() == TokenType::StringLiteral) {
+    if (token->type() == TokenType::StringLiteral) {
         auto arrType = llvm::ArrayType::get(llvm::IntegerType::get(context, 8), lexeme.length() + 1);
         auto global = new llvm::GlobalVariable(
             *m_module,
@@ -238,22 +242,31 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         return;
     }
     
-    if (lexeme == "TRUE") lexeme = "1";
-    else if (lexeme == "FALSE") lexeme = "0";
-    else if (lexeme == "NULL") lexeme = "0";
-    
-    if (ast->type->isIntegral()) {
-        m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(getType(ast->type, context)), lexeme, 10);
-    } else if (ast->type->isFloatingPoint()) {
-        m_value = llvm::ConstantFP::get(getType(ast->type, context), lexeme);
-    } else if (ast->type->isPointer()) {
-        if (lexeme == "0") {
-            m_value = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(getType(ast->type, context)));
+    auto local = ast->type;
+    auto type = getType(local, context);
+    if (local->isBoolean() || token->type() == TokenType::True || token->type() == TokenType::False) {
+        if (token->type() == TokenType::True) {
+            m_value = llvm::ConstantInt::get(type, 1);
+        } else if (token->type() == TokenType::False) {
+            m_value = llvm::ConstantInt::get(type, 0);
         } else {
-            auto type = getType(PrimitiveType::get(TokenType::LongInt), context);
-            auto llvmType = llvm::cast<llvm::IntegerType>(type);
+            if (std::stod(lexeme) == 0.0) {
+                m_value = llvm::ConstantInt::get(type, 0);
+            } else {
+                m_value = llvm::ConstantInt::get(type, 1);
+            }
+        }
+    } else if (local->isIntegral()) {
+        m_value = llvm::ConstantInt::get(llvm::cast<llvm::IntegerType>(type), lexeme, 10);
+    } else if (ast->type->isFloatingPoint()) {
+        m_value = llvm::ConstantFP::get(type, lexeme);
+    } else if (local->isPointer()) {
+        if (local->IsAnyPtr() || lexeme == "0") {
+            m_value = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(type));
+        } else {
+            auto llvmType = llvm::cast<llvm::IntegerType>(getType(PrimitiveType::get(TokenType::LongInt), context));
             auto constant = llvm::ConstantInt::get(llvmType, lexeme, 10);
-            m_value = new llvm::IntToPtrInst(constant, getType(ast->type, context), "", m_block);
+            m_value = new llvm::IntToPtrInst(constant, type, "", m_block);
         }
     }
 }
@@ -319,6 +332,7 @@ void IrBuilder::visit(AstAddressOfExpr * ast)
 {
     const string & id = ast->id->token->lexeme();
     m_value = m_table->get(id)->value;
+    ast->type->llvmType = getType(ast->type, m_module->getContext());
 }
 
 
@@ -328,6 +342,7 @@ void IrBuilder::visit(AstDereferenceExpr * ast)
 {
     ast->expr->accept(this);
     m_value = new llvm::LoadInst(m_value, "", m_block);
+    ast->type->llvmType = getType(ast->type, m_module->getContext());
 }
 
 
@@ -338,12 +353,32 @@ void IrBuilder::visit(AstCastExpr * ast)
     ast->expr->accept(this);
     auto src = ast->expr->type;
     auto dst = ast->type;
-    if (!dst->llvmType) dst->llvmType = getType(dst, m_module->getContext());
+    bool srcSigned = src->isSignedIntegral();
+    dst->llvmType = getType(dst, m_module->getContext());
+    
+    // if target is boolean
+    // then comparison is required
+    if (dst->isBoolean()) {
+        if (src->isIntegral()) {
+            auto const_int = llvm::ConstantInt::get(src->llvmType, 0);
+            m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_int, "");
+            srcSigned = false;
+        } else if (src->isFloatingPoint()) {
+            auto const_fp = llvm::ConstantFP::get(src->llvmType, 0);
+            m_value = new llvm::FCmpInst(*m_block, llvm::ICmpInst::FCMP_UNE, m_value, const_fp, "");
+            srcSigned = false;
+        } else if (src->isPointer()) {
+            std::cout << src->toString() << '\n';
+            auto const_null = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(src->llvmType));
+            m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_null, "");
+            srcSigned = false;
+        }
+    }
     
     // get cast opcode
     auto opcode = llvm::CastInst::getCastOpcode(
         m_value,
-        src->isSignedIntegral(),
+        srcSigned,
         dst->llvmType,
         dst->isSignedIntegral()
     );

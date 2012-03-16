@@ -1,0 +1,58 @@
+Type system
+=============
+[ ] 32bit and 64bit compatible
+[ ] pointers
+	[ ] int
+	[ ] fp
+	[ ] bool
+	[ ] any
+	[ ] ptr
+	[ ] fn
+[ ] narrowing
+	[ ] integral -> integral
+	[ ] fp -> fp
+[ ] widening 
+	[ ] integral -> integral
+	[ ] fp -> fp
+[ ] cast
+	[ ] int -> fp
+	[ ] int -> ptr
+	[ ] int -> bool
+	[ ] fp -> int
+	[ ] fp -> ptr
+	[ ] fp -> bool
+	[ ] ptr -> int
+	[ ] ptr -> fp
+	[ ] ptr -> bool
+	[ ] bool -> int
+	[ ] bool -> fp
+	[ ] bool -> ptr ?
+[ ] function param
+	[ ] ubyte, ubyte
+	[ ] ushort, short
+	[ ] uinteger, integer
+	[ ] ulong, long
+	[ ] single
+	[ ] double
+	[ ] bool
+	[ ] ptr (int, fp, bool, any, fn)
+[ ] function argument
+	[ ] ubyte, ubyte
+	[ ] ushort, short
+	[ ] uinteger, integer
+	[ ] ulong, long
+	[ ] single
+	[ ] double
+	[ ] bool
+	[ ] ptr (int, fp, bool, any, fn)
+[ ] return type
+	[ ] ubyte, ubyte
+	[ ] ushort, short
+	[ ] uinteger, integer
+	[ ] ulong, long
+	[ ] single
+	[ ] double
+	[ ] bool
+	[ ] ptr (int, fp, bool, any, fn)
+[ ] 32bit
+[ ] 64bit

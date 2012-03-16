@@ -108,6 +108,12 @@ string PrimitiveType::toString()
  */
 Type * PtrType::get(Type *  base, int indirection)
 {
+    // return ptr wih maximum indirection and least deref level
+    if (base->isPointer()) {
+        return get(base->getBaseType(), indirection + static_cast<PtrType *>(base)->indirection());
+    }
+    
+    // retrun pointer to non pointer
     auto & inner = _ptrTypes[base];
     auto iter = inner.find(indirection);
     if (iter != inner.end()) return iter->second;
@@ -151,7 +157,10 @@ bool PtrType::equal(Type *type) const
  */
 string PtrType::toString()
 {
-    return getBaseType()->toString() + string(" PTR", indirection());
+    string result = getBaseType()->toString();
+    for (int i = 0; i < indirection(); i++)
+        result += " ptr";
+    return result;
 }
 
 

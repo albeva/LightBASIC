@@ -34,16 +34,20 @@ namespace lbc {
 			Pointer         = 1 << 3,
 			Function        = 1 << 4,
             Unsigned        = 1 << 5,
-            Instantiable    = 1 << 6
+            Instantiable    = 1 << 6,
+            Boolean         = 1 << 7,
+            AnyPtr          = 1 << 8
 		};
-        bool isPrimitive() const { return (m_kind & TypeKind::Primitive) != 0; }
-        bool isIntegral() const { return (m_kind & TypeKind::Integral) != 0; }
-        bool isFloatingPoint() const { return (m_kind & TypeKind::FloatingPoint) != 0; }
-        bool isPointer() const { return (m_kind & TypeKind::Pointer) != 0; }
-        bool isFunction() const { return (m_kind & TypeKind::Function) != 0; }
-        bool isUnsignedIntegral() const { return isIntegral() && (m_kind & TypeKind::Unsigned) != 0; }
-        bool isSignedIntegral() const { return isIntegral() && (m_kind & TypeKind::Unsigned) == 0; }
-        bool isInstantiable() const { return (m_kind & TypeKind::Instantiable) != 0; }
+        bool isPrimitive()          const { return (m_kind & TypeKind::Primitive) != 0; }
+        bool isIntegral()           const { return (m_kind & TypeKind::Integral) != 0; }
+        bool isFloatingPoint()      const { return (m_kind & TypeKind::FloatingPoint) != 0; }
+        bool isPointer()            const { return (m_kind & TypeKind::Pointer) != 0; }
+        bool isFunction()           const { return (m_kind & TypeKind::Function) != 0; }
+        bool isUnsignedIntegral()   const { return isIntegral() && (m_kind & TypeKind::Unsigned) != 0; }
+        bool isSignedIntegral()     const { return isIntegral() && (m_kind & TypeKind::Unsigned) == 0; }
+        bool isInstantiable()       const { return (m_kind & TypeKind::Instantiable) != 0; }
+        bool isBoolean()            const { return (m_kind & TypeKind::Boolean) != 0; }
+        bool IsAnyPtr()             const { return (m_kind & TypeKind::AnyPtr) != 0; }
 		
 		// create with base type
 		Type(Type *  base, TypeKind kind, bool instantiable);
@@ -119,9 +123,6 @@ namespace lbc {
 	{
 		// get shared pointer type instance
         static Type * get(Type *  base, int indirection);
-        
-		// create
-		PtrType(Type * base, int level);
 		
 		// clean up
 		virtual ~PtrType();
@@ -139,6 +140,9 @@ namespace lbc {
         virtual string toString();
 		
 	private:
+		// create
+		PtrType(Type * base, int level);
+        
 		int m_level;
 	};
 	
