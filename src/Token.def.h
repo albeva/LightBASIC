@@ -52,7 +52,10 @@
     _( True,            "TRUE"      ) \
     _( False,           "FALSE"     ) \
     _( Null,            "NULL"      ) \
-    _( Any,             "ANY"       )
+    _( Any,             "ANY"       ) \
+    _( If,              "IF"        ) \
+    _( Then,            "THEN"      ) \
+    _( Else,            "ELSE"      )
 
 //
 // Types define the type keywords

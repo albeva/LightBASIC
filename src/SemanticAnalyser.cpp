@@ -304,6 +304,37 @@ void SemanticAnalyser::visit(AstCallStmt * ast)
 
 
 //
+// AstIfStmt
+void SemanticAnalyser::visit(AstIfStmt * ast)
+{
+    m_coerceType = nullptr; //PrimitiveType::get(TokenType::Bool);
+    ast->expr->accept(this);
+    coerce(ast->expr, PrimitiveType::get(TokenType::Bool));
+    
+    // true block
+    {
+        SCOPED_GUARD(m_table);
+        m_table = new SymbolTable(m_table);
+        static_cast<AstStmtList *>(ast->trueBlock.get())->symbolTable = m_table;
+        ast->trueBlock->accept(this);
+    }
+    
+    // false block
+    // in false the ast node *might* be an Else If
+    // statement. Don't know if this is the most elegant
+    // aproach however...
+    if (ast->falseBlock) {
+        SCOPED_GUARD(m_table);
+        if (ast->falseBlock->is(Ast::StmtList)) {
+            m_table = new SymbolTable(m_table);
+            static_cast<AstStmtList *>(ast->falseBlock.get())->symbolTable = m_table;
+        }
+        ast->falseBlock->accept(this);
+    }
+}
+
+
+//
 // Process the expression. If type coercion is required
 // then insert AstCastExpr node in front of current ast expression
 void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast)

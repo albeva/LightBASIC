@@ -15,7 +15,7 @@ Milestone 2
 [✓] add basic escape codes \n \t
 [✓] implement alias attribute
     [✓] add alias to Symbol
-[ ] add IF keyword
+[✓] add IF keyword
     * no single liner variant
     * no elseif
     * optional ELSE

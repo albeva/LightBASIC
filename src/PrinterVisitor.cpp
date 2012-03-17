@@ -67,23 +67,24 @@ void PrinterVisitor::visit(AstIfStmt * ast)
     if (ast->expr) ast->expr->accept(this);
     std::cout << " THEN\n";
     m_indent++;
-    if (ast->block) ast->block->accept(this);
+    if (ast->trueBlock) ast->trueBlock->accept(this);
     m_indent--;
     std::cout << indent();
-    if (ast->elseBlock) {
-        if (ast->elseBlock->is(Ast::IfStmt)) {
+    if (ast->falseBlock) {
+        if (ast->falseBlock->is(Ast::IfStmt)) {
             std::cout << "ELSE ";
             m_elseIf = true;
-            ast->elseBlock->accept(this);
+            ast->falseBlock->accept(this);
             return;
         } else {
-            std::cout << "\n";
+            std::cout << "ELSE\n";
             m_indent++;
-            ast->elseBlock->accept(this);
+            ast->falseBlock->accept(this);
             m_indent--;
+            std::cout << indent();
         }
     }
-    std::cout << "END OF\n";
+    std::cout << "END IF\n";
 }
 
 

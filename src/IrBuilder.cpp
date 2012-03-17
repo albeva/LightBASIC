@@ -32,7 +32,9 @@ IrBuilder::IrBuilder()
     m_table(nullptr),
     m_function(nullptr),
     m_block(nullptr),
-    m_value(nullptr)
+    m_endIfBlock(nullptr),
+    m_value(nullptr),
+    m_isElseIf(false)
 {
 }
 
@@ -45,8 +47,10 @@ void IrBuilder::visit(AstProgram * ast)
     m_module = nullptr;
     m_function = nullptr;
     m_block = nullptr;
+    m_endIfBlock = nullptr;
     m_value = nullptr;
     m_table = nullptr;
+    m_isElseIf = false;
     
     // the module
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
@@ -66,6 +70,15 @@ void IrBuilder::visit(AstProgram * ast)
     }
 }
 
+
+//
+// AstStmtList
+void IrBuilder::visit(AstStmtList * ast)
+{
+    SCOPED_GUARD(m_table);
+    m_table = ast->symbolTable;
+    for (auto & stmt : ast->stmts) stmt->accept(this);
+}
 
 
 //
@@ -131,7 +144,6 @@ void IrBuilder::visit(AstFuncSignature * ast)
     if (!sym->value) {
         assert(!m_module->getFunction(id));
         // get the symbol
-        auto sym = m_table->get(id);
         auto llvmType = getType(sym->type(), m_module->getContext());
         string alias = sym->alias();
         if (id == "MAIN") alias = "main";
@@ -175,12 +187,9 @@ void IrBuilder::visit(AstFunctionStmt * ast)
 {
     // function signature
     ast->signature->accept(this);
-    
-    // symbol table
-    m_table = ast->stmts->symbolTable;
         
     // create the block
-    auto tmp = m_block;
+    SCOPED_GUARD(m_block);
     m_block = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, 0);
     
     // store function pointers locally
@@ -193,11 +202,8 @@ void IrBuilder::visit(AstFunctionStmt * ast)
         }
     }
     
+    // process the body
     ast->stmts->accept(this);
-    m_block = tmp;
-    
-    // restore
-    m_table = m_table->parent();
 }
 
 
@@ -469,3 +475,58 @@ void IrBuilder::visit(AstCallStmt * ast)
 {
     ast->expr->accept(this);
 }
+
+
+//
+// AstIfStmt
+void IrBuilder::visit(AstIfStmt * ast)
+{
+    SCOPED_GUARD(m_endIfBlock);
+    SCOPED_GUARD(m_isElseIf);
+    
+    // expression
+    ast->expr->accept(this);
+    
+    // cast to i1
+    m_value = new llvm::TruncInst(m_value, llvm::Type::getInt1Ty(m_module->getContext()), "", m_block);
+    
+    // true block
+    llvm::BasicBlock * trueBlock = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_endIfBlock);
+    
+    // else block
+    llvm::BasicBlock * falseBlock = ast->falseBlock
+                                  ? llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_endIfBlock)
+                                  : nullptr;
+    // end block
+    if (m_isElseIf) {
+        m_isElseIf = false;
+    } else {
+        m_endIfBlock = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_endIfBlock);
+    }
+    
+    // create branch instruction
+    llvm::BranchInst::Create(trueBlock, falseBlock ? falseBlock : m_endIfBlock, m_value, m_block);
+    
+    // process true block
+    m_block = trueBlock;
+    ast->trueBlock->accept(this);
+    llvm::BranchInst::Create(m_endIfBlock, m_block);
+    
+    // process falseBlock
+    if (falseBlock) {
+        if (ast->falseBlock->is(Ast::IfStmt)) m_isElseIf = true;
+        m_block = falseBlock;
+        ast->falseBlock->accept(this);
+        if (!m_isElseIf) llvm::BranchInst::Create(m_endIfBlock, m_block);
+    }
+    
+    // set end block as the new block
+    if (!m_isElseIf) m_block = m_endIfBlock;
+}
+
+
+
+
+
+
+

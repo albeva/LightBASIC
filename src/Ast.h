@@ -316,13 +316,13 @@ namespace lbc {
     struct AstIfStmt : AstStatement
     {
         // create
-        AstIfStmt(AstExpression * expr = nullptr, AstStmtList * block = nullptr, AstStmtList * elseBlock = nullptr);
+        AstIfStmt(AstExpression * expr = nullptr, AstStatement * trueBlock = nullptr, AstStatement * falseBlock = nullptr);
         // expression
         unique_ptr<AstExpression> expr;
         // true branch
-        unique_ptr<AstStmtList> block;
+        unique_ptr<AstStatement> trueBlock;
         // else
-        unique_ptr<AstStmtList> elseBlock;
+        unique_ptr<AstStatement> falseBlock;
         // content node
         DECLARE_AST(IfStmt);
     };

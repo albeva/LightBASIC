@@ -37,6 +37,9 @@ namespace lbc {
         // AstDeclList
         virtual void visit(AstProgram * ast);
         
+        // AstStmtList
+        virtual void visit(AstStmtList * ast);
+        
         // AstFunctionDecl
         virtual void visit(AstFunctionDecl * ast);
         
@@ -51,9 +54,6 @@ namespace lbc {
         
         // AstLiteralExpr
         virtual void visit(AstLiteralExpr * ast);
-        
-        // AstCallStmt
-        virtual void visit(AstCallStmt * ast);
         
         // AstCastExpr
         virtual void visit(AstCastExpr * ast);
@@ -79,12 +79,19 @@ namespace lbc {
         // AstReturnStmt
         virtual void visit(AstReturnStmt * ast);
         
+        // AstCallStmt
+        virtual void visit(AstCallStmt * ast);
+        
+        // AstIfStmt
+        virtual void visit(AstIfStmt * ast);
+        
     private:
         llvm::Module * m_module;
         llvm::Function * m_function;
-        llvm::BasicBlock * m_block;
+        llvm::BasicBlock * m_block, * m_endIfBlock;
         llvm::Value * m_value;
         SymbolTable * m_table;
+        bool m_isElseIf;
     };
     
 }

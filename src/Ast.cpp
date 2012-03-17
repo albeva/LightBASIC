@@ -90,8 +90,8 @@ AstCallStmt::AstCallStmt(AstCallExpr * expr) : expr(expr) {}
 
 
 // AstIfStmt
-AstIfStmt::AstIfStmt(AstExpression * expr, AstStmtList * block, AstStmtList * elseBlock)
-: expr(expr), block(block), elseBlock(elseBlock) {}
+AstIfStmt::AstIfStmt(AstExpression * expr, AstStatement * trueBlock, AstStatement * falseBlock)
+: expr(expr), trueBlock(trueBlock), falseBlock(falseBlock) {}
 
 
 //----------------------------------------------------------------------------------------------------------------------

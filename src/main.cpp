@@ -45,6 +45,7 @@ int main(int argc, const char * argv[])
             auto ast = parser->parse(make_shared<SourceFile>(file));
             if (ast) {
                 // analyse
+//                ast->accept(new PrinterVisitor());
                 ast->accept(semantic.get());
                 
                 // generate llvm code

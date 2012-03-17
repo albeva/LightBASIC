@@ -60,6 +60,9 @@ namespace lbc {
         // AstCallStmt
         virtual void visit(AstCallStmt * ast);
         
+        // AstIfStmt
+        virtual void visit(AstIfStmt * ast);
+        
         // AstAddressOfExpr
         virtual void visit(AstAddressOfExpr * ast);
         

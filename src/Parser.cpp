@@ -106,10 +106,18 @@ AstStmtList * Parser::statementList()
     auto ast = new AstStmtList();
     
     // { Statement }
-    while(!match(TokenType::End) && !match(TokenType::EndOfFile)) {
-        auto stmt = statement();
-        if (stmt) ast->stmts.push_back(unique_ptr<AstStatement>(stmt));
-        expect(TokenType::EndOfLine);
+    while(!match(TokenType::EndOfFile)) {
+        // end of compound statements
+        switch(m_token->type()) {
+            case TokenType::End:
+            case TokenType::Else:
+                return ast;
+            default: {
+                auto stmt = statement();
+                if (stmt) ast->stmts.push_back(unique_ptr<AstStatement>(stmt));
+                expect(TokenType::EndOfLine);
+            }
+        }
     }
     
     return ast;
@@ -121,6 +129,7 @@ AstStmtList * Parser::statementList()
  *              | AssignStmt
  *              | FuncCallExpr
  *              | ReturnStmt
+ *              | IfStmt
  */
 AstStatement * Parser::statement()
 {
@@ -135,17 +144,20 @@ AstStatement * Parser::statement()
         case TokenType::Identifier:
             if (m_next->type() == TokenType::Assign) {
                 stmt = assignStmt();
-                break;
             } else if (m_next->type() == TokenType::ParenOpen) {
                 stmt = callStmt();
-                break;
+                
             }
+            break;
         // NOTE probably very wrong. at the moment assume
         // that line starting with * is assignment to dereferenced
         // pointer
         // *ip = 10
         case TokenType::Dereference:
             stmt = assignStmt();
+            break;
+        case TokenType::If:
+            stmt = ifStmt();
             break;
         default:
             THROW_EXCEPTION(string("Invalid input. Expected statement. Found: ") + m_token->name());
@@ -183,6 +195,56 @@ AstAssignStmt * Parser::assignStmt()
 AstCallStmt * Parser::callStmt()
 {
     return new AstCallStmt(callExpr());
+}
+
+
+/**
+ * ifStmt   = "IF" Expression "THEN"
+ *            StmtList
+ *            ( "ELSE" ( ifStmt | StmtList "END" "IF" )
+ *            | "END" "IF"
+ *            )
+ */
+AstIfStmt * Parser::ifStmt()
+{
+    // if
+    expect(TokenType::If);
+    
+    // expression
+    auto expr = expression();
+    
+    // then
+    expect(TokenType::Then);
+    
+    // End Of Line
+    expect(TokenType::EndOfLine);
+    
+    // stmtlist if true
+    auto trueBlock = statementList();
+    AstStatement * falseBlock = nullptr;
+    
+    // else ?
+    bool expectEndIf = true;
+    if (accept(TokenType::Else)) {
+        // else if ?
+        if (match(TokenType::If)) {
+            falseBlock = ifStmt();
+            expectEndIf = false;
+        } else {
+            expect(TokenType::EndOfLine);
+            falseBlock = statementList();
+        }
+    }
+    
+    // if was Else IF
+    // then recursive ifStmt will parse the End If
+    if (expectEndIf) {
+        expect(TokenType::End);
+        expect(TokenType::If);
+    }
+    
+    // done
+    return new AstIfStmt(expr, trueBlock, falseBlock);
 }
 
 
