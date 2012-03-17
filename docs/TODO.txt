@@ -15,12 +15,13 @@ General
 [ ] add Var that deducts the type from right hand expression
     Var i = 10
 [ ] Add For
-    * no step for now
-    * no inline variable declaration
-    For i = 0 to 10
+    For i = 0 to 10 [ step Expression ]
     Next
 [ ] make parenthesis optional for FuncStmt
     printf "hello %s\n", "world"
+[ ] Overhaul the type system
+[ ] Support building for 32bit and 64bit
+
 Type system
 -------------
 [ ] 32bit
