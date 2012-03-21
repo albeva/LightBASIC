@@ -17,14 +17,11 @@ Milestone 2
     [✓] add alias to Symbol
 [✓] add IF keyword
     * no single liner variant
-    * no elseif
-    * optional ELSE
-    IfStmt = "IF" BooleanExpression "THEN"
-             StmtList
-             [ "ELSE"
+     ifStmt   = "IF" Expression "THEN"
                 StmtList
-             ]
-             "END" "IF"
+                ( "ELSE" ( ifStmt | StmtList "END" "IF" )
+                | "END" "IF"
+                )
 [✓] add BooleanExpression
     * only "=" and "<>"
 [✓] add pointer dereferencing
