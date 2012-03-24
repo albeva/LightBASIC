@@ -3,7 +3,6 @@
 '' - extern C function
 '' - alias attribute
 '' - pass string argument
-''
 '' CHECK: Hello World!
 ''------------------------------------------------------------------------------
 [Alias = "puts", Extern = "C"] _
