@@ -57,7 +57,7 @@ void Emitter::generate()
     string ld_cmd   = "/usr/bin/ld ";
     string as_cmd   = "/usr/bin/as ";
     string cmd      = "";
-    bool verbose    = false;
+    bool verbose    = m_context->verbose();
     vector<string> bc_files;
     
     // ld options. need to be configurable and different on different platforms
@@ -65,6 +65,7 @@ void Emitter::generate()
     
     // generate llvm bitcode files
     for (auto & module : m_modules) {
+        if (verbose) module->dump();
         // is it safe to use module identifier as filename?
         FS::path path(module->getModuleIdentifier());
         path.replace_extension(".bc");

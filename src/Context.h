@@ -42,6 +42,12 @@ namespace lbc {
         // set output path
         Context & output(const FS::path & path);
         
+        // get verbose
+        bool verbose() const { return m_verbose; }
+        
+        // set verbose
+        void verbose(bool verbose) { m_verbose = verbose; }
+        
     private:
         /// Resolve directory path
         FS::path resolveDir(const FS::path & path) const;
@@ -54,6 +60,9 @@ namespace lbc {
         
         // output path including filename
         FS::path m_output;
+        
+        // verbose build?
+        bool m_verbose = false;
     };
 
 }; // lbc namespace

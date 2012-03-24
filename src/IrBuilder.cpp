@@ -52,11 +52,11 @@ void IrBuilder::visit(AstProgram * ast)
     for (auto & decl : ast->decls) decl->accept(this);
     
     // verify module integrity
-    m_module->dump();
     if (llvm::verifyModule(*m_module, llvm::PrintMessageAction)) {
         // there were errors
         delete m_module;
         m_module = nullptr;
+        THROW_EXCEPTION("Failed to build the module");
     }
 }
 
@@ -172,12 +172,10 @@ void IrBuilder::visit(AstLiteralExpr * ast)
             arrType,
             true,
             llvm::GlobalValue::PrivateLinkage,
-            nullptr,
+            llvm::ConstantArray::get(context, lexeme, true),
             ".str"
         );
         global->setAlignment(1);
-        llvm::Constant * const_value = llvm::ConstantArray::get(context, lexeme, true);
-        global->setInitializer(const_value);
         
         std::vector<llvm::Constant*> indeces;
         llvm::ConstantInt * const_int64 = llvm::ConstantInt::get(context, llvm::APInt(32, 0, false));
@@ -356,7 +354,6 @@ void IrBuilder::visit(AstCastExpr * ast)
             m_value = new llvm::FCmpInst(*m_block, llvm::ICmpInst::FCMP_UNE, m_value, const_fp, "");
             srcSigned = false;
         } else if (src->isPointer()) {
-            std::cout << src->toString() << '\n';
             auto const_null = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(src->llvm()));
             m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_null, "");
             srcSigned = false;

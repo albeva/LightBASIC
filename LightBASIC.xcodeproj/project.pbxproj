@@ -7,17 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		362740E51512B6C2005C8D97 /* Boolean.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740E31512B6B4005C8D97 /* Boolean.bas */; };
-		362740EC1513A9BB005C8D97 /* AssignBooleanExpr.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740EA1513A9B5005C8D97 /* AssignBooleanExpr.bas */; };
-		362740F01513DFFE005C8D97 /* CmdLine.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740EE1513DFF6005C8D97 /* CmdLine.bas */; };
-		362740F11513DFFE005C8D97 /* If.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 362740EF1513DFF6005C8D97 /* If.bas */; };
 		365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */; };
 		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
 		36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
 		36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368378D4150901F7004C7BAB /* Emitter.cpp */; };
-		36682DCC150D2AC000E1038A /* FloatingPoint.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36682DCB150D2AB500E1038A /* FloatingPoint.bas */; };
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
-		36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36779A0C1503DA1800369AFF /* Simple.bas */; };
 		369056DC1503881700E2C917 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056B61503881700E2C917 /* Ast.cpp */; };
 		369056DE1503881700E2C917 /* Context.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BC1503881700E2C917 /* Context.cpp */; };
 		369056DF1503881700E2C917 /* Lexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BE1503881700E2C917 /* Lexer.cpp */; };
@@ -33,37 +27,7 @@
 		369056E91503881700E2C917 /* SymbolTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D41503881700E2C917 /* SymbolTable.cpp */; };
 		369056EA1503881700E2C917 /* Token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D61503881700E2C917 /* Token.cpp */; };
 		369056EB1503881700E2C917 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D91503881700E2C917 /* Type.cpp */; };
-		369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056F9150389CA00E2C917 /* HelloWorld.bas */; };
-		369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 369056FA150389CA00E2C917 /* Variables.bas */; };
-		36981C27150E90BC00F599F9 /* MallocFree.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36981C25150E90A500F599F9 /* MallocFree.bas */; };
-		36DF7367150953400023F600 /* module_1.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36DF73661509531F0023F600 /* module_1.bas */; };
-		36DF7368150953400023F600 /* module_2.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36DF7365150953070023F600 /* module_2.bas */; };
-		36F70ADA150D575C00C0762A /* Pointers.bas in CopyFiles */ = {isa = PBXBuildFile; fileRef = 36F70AD9150D574D00C0762A /* Pointers.bas */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		365F7A4A14F90D7A00553D98 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = examples;
-			dstSubfolderSpec = 6;
-			files = (
-				362740F01513DFFE005C8D97 /* CmdLine.bas in CopyFiles */,
-				362740F11513DFFE005C8D97 /* If.bas in CopyFiles */,
-				362740EC1513A9BB005C8D97 /* AssignBooleanExpr.bas in CopyFiles */,
-				362740E51512B6C2005C8D97 /* Boolean.bas in CopyFiles */,
-				36981C27150E90BC00F599F9 /* MallocFree.bas in CopyFiles */,
-				36F70ADA150D575C00C0762A /* Pointers.bas in CopyFiles */,
-				36682DCC150D2AC000E1038A /* FloatingPoint.bas in CopyFiles */,
-				36DF7367150953400023F600 /* module_1.bas in CopyFiles */,
-				36DF7368150953400023F600 /* module_2.bas in CopyFiles */,
-				36779A0D1503DA9900369AFF /* Simple.bas in CopyFiles */,
-				369056FC15038A5600E2C917 /* HelloWorld.bas in CopyFiles */,
-				369056FD15038A5600E2C917 /* Variables.bas in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		362740E31512B6B4005C8D97 /* Boolean.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Boolean.bas; path = samples/Boolean.bas; sourceTree = "<group>"; };
@@ -122,6 +86,8 @@
 		369056F9150389CA00E2C917 /* HelloWorld.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = HelloWorld.bas; path = samples/HelloWorld.bas; sourceTree = "<group>"; };
 		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
 		36981C25150E90A500F599F9 /* MallocFree.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = MallocFree.bas; path = samples/MallocFree.bas; sourceTree = "<group>"; };
+		36D37C0E151E0E5500B3E121 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
+		36D37C0F151E0E5500B3E121 /* test-01.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "test-01.bas"; sourceTree = "<group>"; };
 		36DF7365150953070023F600 /* module_2.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_2.bas; path = samples/module_2.bas; sourceTree = "<group>"; };
 		36DF73661509531F0023F600 /* module_1.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_1.bas; path = samples/module_1.bas; sourceTree = "<group>"; };
 		36F70AD9150D574D00C0762A /* Pointers.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Pointers.bas; path = samples/Pointers.bas; sourceTree = "<group>"; };
@@ -148,6 +114,7 @@
 				3675818C150255B50006E4B5 /* llvm.xcconfig */,
 				369056F7150388FF00E2C917 /* docs */,
 				369056FB150389D000E2C917 /* samples */,
+				36D37C0B151E0D2A00B3E121 /* tests */,
 				365F7A4F14F90D7A00553D98 /* src */,
 				36A6E98314F923A900C3EEA1 /* Libraries */,
 				365F7A4D14F90D7A00553D98 /* Products */,
@@ -337,6 +304,15 @@
 			name = Libraries;
 			sourceTree = "<group>";
 		};
+		36D37C0B151E0D2A00B3E121 /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				36D37C0E151E0E5500B3E121 /* run.sh */,
+				36D37C0F151E0E5500B3E121 /* test-01.bas */,
+			);
+			path = tests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -347,7 +323,8 @@
 				3675818A150254E60006E4B5 /* ShellScript */,
 				365F7A4814F90D7A00553D98 /* Sources */,
 				365F7A4914F90D7A00553D98 /* Frameworks */,
-				365F7A4A14F90D7A00553D98 /* CopyFiles */,
+				36D37C12151E114A00B3E121 /* ShellScript */,
+				36D37C13151E138700B3E121 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -397,6 +374,32 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\n# llvm libraries\nLLVM_LIBS=\"core bitwriter\"\n# c flags\nLLVM_CFLAGS=`/usr/local/bin/llvm-config --cflags`\n# ld flags\nLLVM_LDFLAGS=`/usr/local/bin/llvm-config --ldflags`\" \"`/usr/local/bin/llvm-config --libs $LLVM_LIBS`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings, generated as a build phase.\" > $LLVM_XCCONFIG\necho \"LLVM_CFLAGS = $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\necho \"LLVM_LDFLAGS = $LLVM_LDFLAGS\" >> $LLVM_XCCONFIG\n";
+		};
+		36D37C12151E114A00B3E121 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -R $SRCROOT/tests $BUILT_PRODUCTS_DIR/";
+		};
+		36D37C13151E138700B3E121 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "cp -R $SRCROOT/samples $BUILT_PRODUCTS_DIR/";
 		};
 /* End PBXShellScriptBuildPhase section */
 

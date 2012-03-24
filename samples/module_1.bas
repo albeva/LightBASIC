@@ -5,6 +5,6 @@ Declare Function Print(msg As Byte Ptr) As Integer
 Declare Function GetFromModule2() As Byte Ptr
 
 Function main() As Integer
-	Print(GetFromModule2())
-	Return 0
+    Print(GetFromModule2())
+    Return 0
 End Function

@@ -27,10 +27,12 @@ int main(int argc, const char * argv[])
         ctx->add(FS::current_path(), Context::GlobalPath);
         if (argc > 1) {
             for (int i = 1; i < argc; i++) {
-                ctx->add(argv[i], Context::Source);
+                if (string(argv[i]) == "-v") {
+                    ctx->verbose(true);
+                } else {
+                    ctx->add(argv[i], Context::Source);
+                }
             }
-        } else {
-            ctx->add("examples/If.bas", Context::Source);
         }
         // create the parser
         auto parser = make_shared<Parser>(ctx);
@@ -45,7 +47,6 @@ int main(int argc, const char * argv[])
             auto ast = parser->parse(make_shared<SourceFile>(file));
             if (ast) {
                 // analyse
-//                ast->accept(new PrinterVisitor());
                 ast->accept(semantic.get());
                 
                 // generate llvm code
