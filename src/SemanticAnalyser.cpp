@@ -250,7 +250,7 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     // not identifier
     string help;
     Type * leftType = nullptr;
-    if (left->kind() == Ast::IdentExpr) {
+    if (left->is(Ast::IdentExpr)) {
         const string & id = static_cast<AstIdentExpr *>(left)->token->lexeme();
         
         // get the symbol

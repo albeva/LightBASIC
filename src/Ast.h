@@ -32,7 +32,7 @@ namespace lbc {
         virtual void accept(AstVisitor * visitor);  \
         void * operator new(size_t);                \
         void operator delete(void *);               \
-        virtual Ast kind() const { return Ast::C; } \
+        virtual bool is(Ast ast) const { return ast == Ast::C; } \
         virtual ~Ast##C();
     
     
@@ -52,8 +52,7 @@ namespace lbc {
         virtual ~AstRoot() = default;
         
         // is of type?
-        virtual Ast kind() const { return Ast::Root; }
-        bool is(Ast ast) const { return ast == kind(); }
+        virtual bool is(Ast ast) const = 0;
     };
     
     
@@ -62,8 +61,6 @@ namespace lbc {
      */
     struct AstStatement : AstRoot
     {
-        // ast node kind
-        virtual Ast kind() const { return Ast::Statement; }
     };
     
     
