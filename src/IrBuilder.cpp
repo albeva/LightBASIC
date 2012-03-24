@@ -11,16 +11,6 @@
 #include "Type.h"
 #include "Symbol.h"
 #include "SymbolTable.h"
-#include "stdint.h"
-
-// llvm
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
-#include <llvm/Support/raw_ostream.h>
-#include <llvm/Bitcode/ReaderWriter.h>
 
 
 using namespace lbc;
@@ -82,57 +72,6 @@ void IrBuilder::visit(AstStmtList * ast)
 
 
 //
-// generate llvm type from local type
-llvm::Type * getType(lbc::Type * local, llvm::LLVMContext & context)
-{
-    if (local->llvmType) return local->llvmType;
-    
-    llvm::Type * llvmType = nullptr;
-    // pointer
-    if (local->isPointer()) {
-        auto ptr = static_cast<PtrType *>(local);
-        auto base = ptr->getBaseType();
-        if (base->isPointer()) {
-            THROW_EXCEPTION("IS pointer");
-        }
-        auto llType = llvm::Type::getIntNPtrTy(context, base->getSizeInBits());
-        int level = ptr->indirection() - 1;
-        while(level--) {
-            llType = llType->getPointerTo();
-        }
-        llvmType = llType;
-    }
-    // basic type
-    else if (local->isPrimitive()) {
-        if (local->isIntegral()) {
-            llvmType = llvm::Type::getIntNTy(context, local->getSizeInBits());
-        } else if (local->isFloatingPoint()) {
-            if (local->getSizeInBits() == 32)
-                llvmType = llvm::Type::getFloatTy(context);
-            else
-                llvmType = llvm::Type::getDoubleTy(context);
-        }
-    }
-    // function type
-    else if (local->isFunction()) {
-        std::vector<llvm::Type*> params;
-        auto fnType = static_cast<FunctionType *>(local);
-        for (auto p : fnType->params) {
-            params.push_back(getType(p, context));
-        }
-        llvmType = llvm::FunctionType::get(
-            getType(fnType->result(), context),
-            params,
-            fnType->vararg
-        );
-    }
-    // nothing
-    local->llvmType = llvmType;
-    return llvmType;
-}
-
-
-//
 // AstFuncSignature
 void IrBuilder::visit(AstFuncSignature * ast)
 {
@@ -144,7 +83,7 @@ void IrBuilder::visit(AstFuncSignature * ast)
     if (!sym->value) {
         assert(!m_module->getFunction(id));
         // get the symbol
-        auto llvmType = getType(sym->type(), m_module->getContext());
+        auto llvmType = sym->type()->llvm();
         string alias = sym->alias();
         if (id == "MAIN") alias = "main";
         // create llvm function
@@ -197,7 +136,7 @@ void IrBuilder::visit(AstFunctionStmt * ast)
         for (auto & p : ast->signature->params->params) {
             auto sym = p->symbol;
             auto value = sym->value;
-            sym->value = new llvm::AllocaInst(sym->type()->llvmType, "", m_block);
+            sym->value = new llvm::AllocaInst(sym->type()->llvm(), "", m_block);
             new llvm::StoreInst(value, sym->value, m_block);
         }
     }
@@ -249,7 +188,7 @@ void IrBuilder::visit(AstLiteralExpr * ast)
     }
     
     auto local = ast->type;
-    auto type = getType(local, context);
+    auto type = local->llvm();
     if (local->isBoolean() || token->type() == TokenType::True || token->type() == TokenType::False) {
         if (token->type() == TokenType::True) {
             m_value = llvm::ConstantInt::get(type, 1);
@@ -270,7 +209,7 @@ void IrBuilder::visit(AstLiteralExpr * ast)
         if (local->IsAnyPtr() || lexeme == "0") {
             m_value = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(type));
         } else {
-            auto llvmType = llvm::cast<llvm::IntegerType>(getType(PrimitiveType::get(TokenType::LongInt), context));
+            auto llvmType = llvm::cast<llvm::IntegerType>(PrimitiveType::get(TokenType::LongInt)->llvm());
             auto constant = llvm::ConstantInt::get(llvmType, lexeme, 10);
             m_value = new llvm::IntToPtrInst(constant, type, "", m_block);
         }
@@ -284,7 +223,7 @@ void IrBuilder::visit(AstVarDecl * ast)
 {
     const string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
-    auto llType = getType(sym->type(), m_module->getContext());
+    auto llType = sym->type()->llvm();
     // if m_block is null then is a global variable
     if (m_block == nullptr) {
         llvm::Constant * constant;
@@ -338,7 +277,6 @@ void IrBuilder::visit(AstAddressOfExpr * ast)
 {
     const string & id = ast->id->token->lexeme();
     m_value = m_table->get(id)->value;
-    ast->type->llvmType = getType(ast->type, m_module->getContext());
 }
 
 
@@ -348,7 +286,6 @@ void IrBuilder::visit(AstDereferenceExpr * ast)
 {
     ast->expr->accept(this);
     m_value = new llvm::LoadInst(m_value, "", m_block);
-    ast->type->llvmType = getType(ast->type, m_module->getContext());
 }
 
 
@@ -363,7 +300,6 @@ void IrBuilder::visit(AstBinaryExpr * ast)
     ast->rhs->accept(this);
     auto right = m_value;
     // resulting type
-    ast->type->llvmType = getType(ast->type, m_module->getContext());
     
     // integer types
     if (ast->lhs->type->isIntegral()) {
@@ -390,12 +326,12 @@ void IrBuilder::visit(AstBinaryExpr * ast)
     auto opcode = llvm::CastInst::getCastOpcode(
         m_value,
         false,
-        ast->type->llvmType,
+        ast->type->llvm(),
         false
     );
     
     // create cast instruction
-    m_value = llvm::CastInst::Create(opcode, m_value, ast->type->llvmType, "", m_block);
+    m_value = llvm::CastInst::Create(opcode, m_value, ast->type->llvm(), "", m_block);
 }
 
 
@@ -407,22 +343,21 @@ void IrBuilder::visit(AstCastExpr * ast)
     auto src = ast->expr->type;
     auto dst = ast->type;
     bool srcSigned = src->isSignedIntegral();
-    dst->llvmType = getType(dst, m_module->getContext());
     
     // if target is boolean
     // then comparison is required
     if (dst->isBoolean()) {
         if (src->isIntegral()) {
-            auto const_int = llvm::ConstantInt::get(src->llvmType, 0);
+            auto const_int = llvm::ConstantInt::get(src->llvm(), 0);
             m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_int, "");
             srcSigned = false;
         } else if (src->isFloatingPoint()) {
-            auto const_fp = llvm::ConstantFP::get(src->llvmType, 0);
+            auto const_fp = llvm::ConstantFP::get(src->llvm(), 0);
             m_value = new llvm::FCmpInst(*m_block, llvm::ICmpInst::FCMP_UNE, m_value, const_fp, "");
             srcSigned = false;
         } else if (src->isPointer()) {
             std::cout << src->toString() << '\n';
-            auto const_null = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(src->llvmType));
+            auto const_null = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(src->llvm()));
             m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_null, "");
             srcSigned = false;
         }
@@ -432,12 +367,12 @@ void IrBuilder::visit(AstCastExpr * ast)
     auto opcode = llvm::CastInst::getCastOpcode(
         m_value,
         srcSigned,
-        dst->llvmType,
+        dst->llvm(),
         dst->isSignedIntegral()
     );
     
     // create cast instruction
-    m_value = llvm::CastInst::Create(opcode, m_value, dst->llvmType, "", m_block);
+    m_value = llvm::CastInst::Create(opcode, m_value, dst->llvm(), "", m_block);
 }
 
 

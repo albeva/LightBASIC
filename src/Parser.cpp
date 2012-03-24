@@ -14,6 +14,9 @@
 #include "Token.h"
 using namespace lbc;
 
+
+#define expect(_tok) if (!accept(_tok)) THROW_EXCEPTION("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(_tok));
+
 /**
  * Create the parser object
  */
@@ -282,7 +285,6 @@ AstExpression * Parser::expression()
     // create scope
     {
         SCOPED_GUARD(m_expectAssign);
-        m_expectAssign = false;
         switch (m_token->type()) {
             // IntegerLiteral
             // FloatingPointLiteral
@@ -308,6 +310,7 @@ AstExpression * Parser::expression()
             // id
             case TokenType::Identifier:
                 if (m_next->type() == TokenType::ParenOpen) {
+                    m_expectAssign = false;
                     expr = callExpr();
                     break;
                 } else {
@@ -651,15 +654,15 @@ bool Parser::accept(TokenType type)
 }
 
 
-/**
- * Expect token. Throw an error if doesn't match
- */
-void Parser::expect(TokenType type)
-{
-    if (!accept(type)) {
-        THROW_EXCEPTION("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(type));
-    }
-}
+///**
+// * Expect token. Throw an error if doesn't match
+// */
+//void Parser::expect(TokenType type)
+//{
+//    if (!accept(type)) {
+//        THROW_EXCEPTION("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(type));
+//    }
+//}
 
 
 /**

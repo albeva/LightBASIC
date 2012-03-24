@@ -1,91 +1,82 @@
 Todo for Milestone 3
 ======================
-
-General
----------
 [ ] add pointer indexing. 0 based
     Dim argv As Byte Ptr Ptr
     Dim arg As Byte Ptr
     arg = argv[1]
 [ ] Add Any Ptr
 [ ] Add Null
-[ ] Add zstring type ????
 [ ] initalize apon declatation
     Dim i As Integer = 10
 [ ] add Var that deducts the type from right hand expression
     Var i = 10
 [ ] Add For
     For i = 0 to 10 [ step Expression ]
+		StmtList
     Next
 [ ] make parenthesis optional for FuncStmt
     printf "hello %s\n", "world"
 [ ] Overhaul the type system
 [ ] Support building for 32bit and 64bit
+[✓] Move internal type conversion too llvm into Type class
 
-Type system
--------------
-[ ] 32bit
-[ ] 64bit
-[ ] pointers
-    [ ] int
-    [ ] fp
-    [ ] bool
-    [ ] any
-    [ ] ptr
-    [ ] fn
-[ ] narrowing
-    [ ] integral -> integral
-    [ ] fp -> fp
-[ ] widening 
-    [ ] integral -> integral
-    [ ] fp -> fp
-[ ] cast
-    [ ] int -> fp
-    [ ] int -> ptr
-    [ ] int -> bool
-    [ ] fp -> int
-    [ ] fp -> ptr
-    [ ] fp -> bool
-    [ ] ptr -> int
-    [ ] ptr -> fp
-    [ ] ptr -> bool
-    [ ] bool -> int
-    [ ] bool -> fp
-    [ ] bool -> ptr ?
-[ ] function param
-    [ ] ubyte, ubyte
-    [ ] ushort, short
-    [ ] uinteger, integer
-    [ ] ulong, long
-    [ ] single
-    [ ] double
-    [ ] bool
-    [ ] ptr (int, fp, bool, any, fn)    
-[ ] function argument
-    [ ] ubyte, byte
-    [ ] ushort, short
-    [ ] uinteger, integer
-    [ ] ulong, long
-    [ ] single
-    [ ] double
-    [ ] bool
-    [ ] ptr (int, fp, bool, any, fn)
-    [ ] var arg
-        [ ] ubyte, byte
-        [ ] ushort, short
-        [ ] uinteger, integer
-        [ ] ulongint, longint
-        [ ] single
-        [ ] double
-        [ ] bool
-        [ ] ptr (int, fp, bool, any, fn)
-[ ] return type
-    [ ] ubyte, ubyte
-    [ ] ushort, short
-    [ ] uinteger, integer
-    [ ] ulong, long
-    [ ] single
-    [ ] double
-    [ ] bool
-    [ ] ptr (int, fp, bool, any, fn)
+
+Todo for Milestone 4
+======================
+[ ] Add calling convention info to FunctionType
+[ ] add name mangling to Type
+[ ] Implement compile driver and standard commandline arguments
+[ ] Implement proper error messages (lex, parse, sem. linking)
+
+
+Misc
+======
+[ ] Add char type
+	Need to think about this and figure it out how it should work,
+	what's its underlying datatype, character encoding, etc... 
+	Have a look at Go
+	[ ] string literals should be of type Char Ptr
+	[ ] allow character literals in tildes
+		Dim a As Char = `A` ' 65
+	[ ] allow assigning integer literals to Char type
+	[ ] allow assigning array of integer values to Char array
+		Dim hello As Char[] = [72, 101, 108, 108, 111, 0]
+
+===============================================================================
+
+Todo for Milestone 2
+======================
+[✓] global variables
+[✓] rework internal type system
+    [✓] rename basic type to PrimitiveType
+    [✓] add FLOAT and DOUBLE types
+    [✓] add BOOL type
+        [✓] add TRUE and FALSE keywords
+    [✓] add unsigned types
+    [✓] implement implicit type casting and conversions
+[✓] Lex negative numbers
+[✓] Lex simple floating point numbers
+[✓] variadic function support
+    external only. for printf
+[✓] add basic escape codes \n \t
+[✓] implement alias attribute
+    [✓] add alias to Symbol
+[✓] add IF keyword
+    * no single liner variant
+     ifStmt   = "IF" Expression "THEN"
+                StmtList
+                ( "ELSE" ( ifStmt | StmtList "END" "IF" )
+                | "END" "IF"
+                )
+[✓] add BooleanExpression
+    * only "=" and "<>"
+[✓] add pointer dereferencing
+    Dim argv As Byte Ptr Ptr
+    Dim arg As Byte Ptr
+    arg = *argv
+[✓] Rename CodeGen to IrBuilder
+[✓] Add Emitter
+    [✓] assemble
+    [✓] link
+    [✓] produce binary
 

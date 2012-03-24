@@ -67,7 +67,7 @@ namespace lbc {
         bool accept(TokenType type);
         
         // expect a token. Throw an error if doesn't match
-        void expect(TokenType type);
+//        void expect(TokenType type);
         
         // Move to the next one
         void move();

@@ -68,13 +68,19 @@ namespace lbc {
         // get size
         virtual int getSizeInBits() const { return 0; }
         
-        // associated llvm type
-        llvm::Type * llvmType;
-        
         // get string representation of the type
         virtual string toString() = 0;
         
+        // get llvm type representing this type
+        llvm::Type * llvm() {
+            if (!m_llvm) m_llvm = genLlvmType();
+            return m_llvm;
+        }
+        
     protected:
+        
+        // generate llvm type
+        virtual llvm::Type * genLlvmType() = 0;
         
         // are types equal?
         virtual bool equal(Type * ) const = 0;
@@ -83,8 +89,12 @@ namespace lbc {
         Type *  m_baseType;
         
     private:
+        
         // the kind of the token
         TypeKind m_kind;
+        
+        // associated llvm type
+        llvm::Type * m_llvm;
     };
     
     
@@ -110,6 +120,9 @@ namespace lbc {
         
         // get string representation
         virtual string toString();
+        
+        // get llvm::Type representation
+        virtual llvm::Type * genLlvmType();
         
     private:
         int m_size;
@@ -142,6 +155,9 @@ namespace lbc {
         // get string representation
         virtual string toString();
         
+        // get llvm::Type representation
+        virtual llvm::Type * genLlvmType();
+        
     private:
         // create
         PtrType(Type * base, int level);
@@ -165,7 +181,7 @@ namespace lbc {
         virtual bool equal(Type * ) const;
         
         // get function result type
-        Type *  result() const { return m_baseType; }
+        Type * result() const { return m_baseType; }
         
         // set the function result type
         void result(Type * type) { m_baseType = type; }
@@ -175,6 +191,9 @@ namespace lbc {
         
         // get string representation
         virtual string toString();
+        
+        // get llvm::Type representation
+        virtual llvm::Type * genLlvmType();
         
         // vararg?
         bool vararg;

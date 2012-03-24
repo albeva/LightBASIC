@@ -27,7 +27,7 @@ static PrimitiveType _primitives[] = {
 Type::Type(Type *base, TypeKind kind, bool instantiable)
 :   m_baseType(base),
     m_kind((TypeKind)(kind | (instantiable ? TypeKind::Instantiable : 0))),
-    llvmType(nullptr)
+    m_llvm(nullptr)
 {
     
 }
@@ -45,9 +45,15 @@ Type::~Type() {}
 bool Type::compare(Type *type) const
 {
     if (this == type) return true;
+    if (kind() != type->kind()) return false;
+    
     return this->equal(type);
 }
 
+
+//----------------------------------------------------------------------------------------------------------------------
+// Primitive Type
+//----------------------------------------------------------------------------------------------------------------------
 
 
 /**
@@ -80,8 +86,7 @@ Type * PrimitiveType::get(TokenType type)
  */
 bool PrimitiveType::equal(Type *type) const
 {
-    return false;
-    return kind() == type->kind() && kind() == static_cast<PrimitiveType *>(type)->kind();
+    return getSizeInBits() == type->getSizeInBits();
 }
 
 
@@ -101,6 +106,29 @@ string PrimitiveType::toString()
     return "Invalid-Type";
 }
 
+
+/**
+ * Return llvm::Type representation of the internal type
+ */
+llvm::Type * PrimitiveType::genLlvmType()
+{
+    if (isIntegral()) {
+        return llvm::Type::getIntNTy(llvm::getGlobalContext(), getSizeInBits());
+    } else if (isFloatingPoint()) {
+        if (getSizeInBits() == 32)
+            return llvm::Type::getFloatTy(llvm::getGlobalContext());
+        else if (getSizeInBits() == 64)
+            return llvm::Type::getDoubleTy(llvm::getGlobalContext());
+        else if (getSizeInBits() == 80)
+            return llvm::Type::getX86_FP80Ty(llvm::getGlobalContext());
+    }
+    return nullptr;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Pointer Type
+//----------------------------------------------------------------------------------------------------------------------
 
 
 /**
@@ -143,9 +171,6 @@ PtrType::PtrType(Type *base, int level)
  */
 bool PtrType::equal(Type *type) const
 {
-    // different kinds
-    if (kind() != type->kind()) return false;
-    
     // cast
     auto other = static_cast<PtrType *>(type);
     return m_level == other->m_level && getBaseType()->compare(other->getBaseType());
@@ -174,6 +199,27 @@ Type * PtrType::dereference() const
 }
 
 
+/**
+ * Return llvm::Type representation of the internal type
+ */
+llvm::Type * PtrType::genLlvmType()
+{
+    if (getBaseType()->isPointer()) {
+        THROW_EXCEPTION("IS pointer");
+    }
+    auto type = getBaseType()->llvm()->getPointerTo();
+    int level = indirection() - 1;
+    while(level--) {
+        type = type->getPointerTo();
+    }
+    return type;
+}
+
+
+//----------------------------------------------------------------------------------------------------------------------
+// Function Type
+//----------------------------------------------------------------------------------------------------------------------
+
 
 /**
  * create function type
@@ -198,9 +244,6 @@ static bool compare_types_pred(Type *typ1, Type *typ2)
  */
 bool FunctionType::equal(Type *type) const
 {
-    // different kinds?
-    if (kind() != type->kind()) return false;
-    
     // cast
     auto other = static_cast<FunctionType *>(type);
     
@@ -212,7 +255,6 @@ bool FunctionType::equal(Type *type) const
     
     // Compare the parameters
     return std::equal(params.begin(), params.end(), other->params.begin(), compare_types_pred);
-    return false;
 }
 
 
@@ -236,3 +278,23 @@ string FunctionType::toString()
     }
     return result + ") AS " + this->result()->toString();
 }
+
+
+/**
+ * Return llvm::Type representation of the internal type
+ */
+llvm::Type * FunctionType::genLlvmType()
+{
+    std::vector<llvm::Type*> params;
+    for (auto p : this->params) {
+        params.push_back(p->llvm());
+    }
+    return llvm::FunctionType::get(result()->llvm(), params, vararg);
+}
+
+
+
+
+
+
+
