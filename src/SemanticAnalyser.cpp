@@ -20,6 +20,7 @@
 using namespace lbc;
 
 
+
 //
 // create new one
 SemanticAnalyser::SemanticAnalyser()
@@ -29,6 +30,40 @@ SemanticAnalyser::SemanticAnalyser()
     m_type(nullptr),
     m_coerceType(nullptr)
 {
+}
+
+
+/**
+ * Process the expression. If type coercion is required
+ * then insert AstCastExpr node in front of current ast expression
+ */
+void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast)
+{
+    // process the expression
+    ast->accept(this);
+    
+    if (m_coerceType) coerce(ast, m_coerceType);
+}
+
+
+/**
+ * coerce expression to a type if needed. Allow only "safe" implicit casts
+ */
+void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type)
+{
+    // deal with type coercion. If can create implicit cast node
+    if (!type->compare(ast->type)) {
+        // check if this is signed -> unsigned or vice versa
+        if (ast->type->isIntegral() && type->isIntegral()) {
+            if (ast->type->getSizeInBits() == type->getSizeInBits()) {
+                return;
+            }
+        }
+        // prefix expression with AstCastExpr
+        auto expr = ast.release();
+        ast.reset(new AstCastExpr(expr));
+        ast->type = type;
+    }
 }
 
 
@@ -119,13 +154,20 @@ void SemanticAnalyser::visit(AstTypeExpr * ast)
 {
     // get the kind
     auto kind = ast->token->type();
-    // basic type
-    m_type = PrimitiveType::get(kind);
-    if (!m_type) {
-        THROW_EXCEPTION(string("Invalid type: ") + ast->token->name());
+    
+    // is any ptr?
+    if (kind == TokenType::Any) {
+        m_type = PtrType::getAnyPtr();
+        if (ast->level > 1) m_type = PtrType::get(m_type, ast->level);
+    } else {
+        // basic type
+        m_type = PrimitiveType::get(kind);
+        if (!m_type) {
+            THROW_EXCEPTION(string("Invalid type: ") + ast->token->name());
+        }
+        // is it a pointer?
+        if (ast->level) m_type = PtrType::get(m_type, ast->level);
     }
-    // is it a pointer?
-    if (ast->level) m_type = PtrType::get(m_type, ast->level);
 }
 
 
@@ -280,18 +322,31 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
         if (pt->indirection() < deref) {
             THROW_EXCEPTION(string("Dereferencing ") + help + " of type " + pt->toString() + " too many levels");
         }
-        m_coerceType = pt->indirection() - deref == 0
-                     ? pt->getBaseType()
-                     : PtrType::get(pt->getBaseType(), pt->indirection() - deref);
-        if (!m_coerceType->isInstantiable()) {
+        leftType = pt->indirection() - deref == 0
+                 ? pt->getBaseType()
+                 : PtrType::get(pt->getBaseType(), pt->indirection() - deref);
+        if (!leftType->isInstantiable()) {
             THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + m_coerceType->toString());
         }
-    } else {
-        m_coerceType = leftType;
     }
     
-    // m_type will hold the result of the expression
-    expression(ast->right);
+    // right hand side
+    m_coerceType = leftType;
+    ast->right->accept(this);
+    auto rightType = ast->right->type;
+    
+    // check for incompatible pointer type assignments
+    if (leftType->isPointer()) {
+        if (!rightType->isPointer()) {
+            THROW_EXCEPTION(string("Assigning a non pointer to a pointer: ") + rightType->toString());
+        }
+        if (!rightType->IsAnyPtr() && !leftType->IsAnyPtr() && !leftType->compare(rightType)) {
+            THROW_EXCEPTION(string("Mismatching pointer types: ") + leftType->toString() + " and " + rightType->toString());
+        }
+    }
+    
+    // coerce
+    if (m_coerceType) coerce(ast->right, m_coerceType);
 }
 
 
@@ -335,38 +390,6 @@ void SemanticAnalyser::visit(AstIfStmt * ast)
 
 
 //
-// Process the expression. If type coercion is required
-// then insert AstCastExpr node in front of current ast expression
-void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast)
-{
-    // process the expression
-    ast->accept(this);
-    
-    if (m_coerceType) coerce(ast, m_coerceType);
-}
-
-
-//
-// coerce expression to a type if needed
-void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type)
-{
-    // deal with type coercion. If can create implicit cast node
-    if (!type->compare(ast->type)) {
-        // check if this is signed -> unsigned or vice versa
-        if (ast->type->isIntegral() && type->isIntegral()) {
-            if (ast->type->getSizeInBits() == type->getSizeInBits()) {
-                return;
-            }
-        }
-        // prefix expression with AstCastExpr
-        auto expr = ast.release();
-        ast.reset(new AstCastExpr(expr));
-        ast->type = type;
-    }
-}
-
-
-//
 // AstAddressOfExpr
 void SemanticAnalyser::visit(AstAddressOfExpr * ast)
 {
@@ -399,30 +422,30 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
     m_coerceType = nullptr;
     
     Type * left = nullptr, * right = nullptr;
-    if (ast->lhs->isConstant() && !ast->rhs->isConstant()) {
+//    if (ast->lhs->isConstant() && !ast->rhs->isConstant()) {
+//        ast->rhs->accept(this);
+//        right = ast->rhs->type;
+//        
+//        m_coerceType = right;
+//        ast->lhs->accept(this);
+//        left = ast->lhs->type;
+//    } else if (!ast->lhs->isConstant() && ast->rhs->isConstant()) {
+//        ast->lhs->accept(this);
+//        left = ast->lhs->type;
+//        
+//        m_coerceType = left;
+//        ast->rhs->accept(this);
+//        right = ast->rhs->type;        
+//    } else {
+        ast->lhs->accept(this);
+        left = ast->lhs->type;
+        
+        // null
+        m_coerceType = nullptr;
+        
         ast->rhs->accept(this);
         right = ast->rhs->type;
-        
-        m_coerceType = right;
-        ast->lhs->accept(this);
-        left = ast->lhs->type;
-    } else if (!ast->lhs->isConstant() && ast->rhs->isConstant()) {
-        ast->lhs->accept(this);
-        left = ast->lhs->type;
-        
-        m_coerceType = left;
-        ast->rhs->accept(this);
-        right = ast->rhs->type;        
-    } else {
-        ast->lhs->accept(this);
-        left = ast->lhs->type;
-        
-        // should be okay to try and coerce the right hand side
-        m_coerceType = left;
-        
-        ast->rhs->accept(this);
-        right = ast->rhs->type;
-    }
+//    }
     
     // int -> 
     if (left->isIntegral()) {
@@ -439,16 +462,12 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
             coerce(ast->lhs, right);
         }
         // -> ptr
-        else if (right->isPointer()) {
-            if (ast->lhs->is(Ast::LiteralExpr)) {
-                coerce(ast->lhs, right);
-            } else {
-                THROW_EXCEPTION("Comparison between integer and a pointer");
-            }
+        else {
+            THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
         }
     }
     // fp ->
-    if (left->isFloatingPoint()) {
+    else if (left->isFloatingPoint()) {
         // -> int
         if (right->isIntegral()) {
             coerce(ast->rhs, left);
@@ -462,29 +481,22 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
             }
         }
         // ->ptr
-        else if (right->isPointer()) {
-            THROW_EXCEPTION("Comparison between floating point and a pointer");
+        else {
+            THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
         }
     }
     // ptr
-    if (left->isPointer()) {
-        // -> int
-        if (right->isIntegral()) {
-            if (ast->rhs->is(Ast::LiteralExpr)) {
+    else if (left->isPointer()) {
+        if (right->isPointer()) {
+            if (left->IsAnyPtr() && !right->IsAnyPtr()) {
+                coerce(ast->lhs, right);
+            } else if (!left->IsAnyPtr() && right->IsAnyPtr()) {
                 coerce(ast->rhs, left);
-            } else {
-                THROW_EXCEPTION("Comparison between integer and a pointer");
+            } else if (!right->compare(left)) {
+                THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
             }
-        }
-        // -> fp
-        else if (right->isFloatingPoint()) {
-            THROW_EXCEPTION("Comparison between floating point and a pointer");
-        }
-        // -> ptr
-        else if (right->isPointer()) {
-            if (!left->compare(right)) {
-                THROW_EXCEPTION("Comparison between distinct pointer types");
-            }
+        } else {
+            THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
         }
     }
     
@@ -524,7 +536,7 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
         int i = 0;
         SCOPED_GUARD(m_coerceType);
         for(auto & arg : ast->args->args) {
-            m_coerceType = type->params.size() < i + 1 ? type->params[i++] : nullptr;
+            m_coerceType = type->params.size() > i ? type->params[i++] : nullptr;
             expression(arg);
             // cast var args
             if (!m_coerceType) {
@@ -555,19 +567,15 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
     if (type == TokenType::StringLiteral) {
         ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
     } else if (type == TokenType::IntegerLiteral || type == TokenType::FloatingPointLiteral) {
-        if (m_coerceType) {
-            ast->type = m_coerceType;
-        } else{
+//        if (m_coerceType) {
+//            ast->type = m_coerceType;
+//        } else{
             ast->type = PrimitiveType::get(type == TokenType::IntegerLiteral ? TokenType::Integer : TokenType::Double);
-        }
+//        }
     } else if (type == TokenType::True || type == TokenType::False) {
-        if (m_coerceType) {
-            ast->type = m_coerceType;
-        } else {
-            ast->type = PrimitiveType::get(TokenType::Bool);
-        }   
-    } else if (type == TokenType::Any) {
-        THROW_EXCEPTION("ANY not implemented");
+        ast->type = PrimitiveType::get(TokenType::Bool);
+    } else if (type == TokenType::Null) {
+        ast->type = PtrType::getAnyPtr();
     } else {
         THROW_EXCEPTION("Invalid type");
     }

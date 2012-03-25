@@ -134,7 +134,7 @@ llvm::Type * PrimitiveType::genLlvmType()
 /**
  * get shared ptr type instance
  */
-Type * PtrType::get(Type *  base, int indirection)
+PtrType * PtrType::get(Type *  base, int indirection)
 {
     // return ptr wih maximum indirection and least deref level
     if (base->isPointer()) {
@@ -153,6 +153,16 @@ Type * PtrType::get(Type *  base, int indirection)
 
 
 /**
+ * get Any ptr
+ */
+PtrType * PtrType::getAnyPtr()
+{
+    static PtrType type(PrimitiveType::get(TokenType::UByte), 1, TypeKind::Pointer | TypeKind::AnyPtr);
+    return &type;
+}
+
+
+/**
  * clean up
  */
 PtrType::~PtrType() {}
@@ -161,8 +171,8 @@ PtrType::~PtrType() {}
 /**
  * create ptr type
  */
-PtrType::PtrType(Type *base, int level)
-: Type(base, TypeKind::Pointer, true), m_level(level)
+PtrType::PtrType(Type *base, int level, int flags)
+: Type(base, (TypeKind)flags, true), m_level(level)
 {}
 
 

@@ -4,8 +4,8 @@ Todo for Milestone 3
     Dim argv As Byte Ptr Ptr
     Dim arg As Byte Ptr
     arg = argv[1]
-[ ] Add Any Ptr
-[ ] Add Null
+[✓] Add Any Ptr
+[✓] Add Null
 [ ] initalize apon declatation
     Dim i As Integer = 10
 [ ] add Var that deducts the type from right hand expression

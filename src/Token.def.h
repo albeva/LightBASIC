@@ -61,7 +61,7 @@
 // Types define the type keywords
 //
 #define TKN_TYPES(_) \
-    ALL_TYPES(_)
+    KEYWORD_TYPES(_)
 
 //
 // All tokens

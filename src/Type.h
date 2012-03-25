@@ -135,7 +135,10 @@ namespace lbc {
     struct PtrType : Type
     {
         // get shared pointer type instance
-        static Type * get(Type *  base, int indirection);
+        static PtrType * get(Type *  base, int indirection);
+        
+        // get any ptr
+        static PtrType * getAnyPtr();
         
         // clean up
         virtual ~PtrType();
@@ -160,7 +163,7 @@ namespace lbc {
         
     private:
         // create
-        PtrType(Type * base, int level);
+        PtrType(Type * base, int level, int flags = TypeKind::Pointer);
         
         int m_level;
     };

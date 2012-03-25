@@ -27,3 +27,9 @@
 // All types
 #define ALL_TYPES(_)        \
     PRIMITIVE_TYPES(_)
+
+//
+// User facing types (keywords)
+#define KEYWORD_TYPES(_) \
+    PRIMITIVE_TYPES(_)
+

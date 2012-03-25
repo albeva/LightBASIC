@@ -29,6 +29,13 @@ int main(int argc, const char * argv[])
             for (int i = 1; i < argc; i++) {
                 if (string(argv[i]) == "-v") {
                     ctx->verbose(true);
+                } else if (string(argv[i]) == "-o") {
+                    if (i + 1 >= argc) {
+                        std::cout << "output name missing\n";
+                        return EXIT_FAILURE;
+                    }
+                    ctx->output(argv[i + 1]);
+                    i++;
                 } else {
                     ctx->add(argv[i], Context::Source);
                 }

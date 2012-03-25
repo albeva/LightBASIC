@@ -204,7 +204,7 @@ void IrBuilder::visit(AstLiteralExpr * ast)
     } else if (ast->type->isFloatingPoint()) {
         m_value = llvm::ConstantFP::get(type, lexeme);
     } else if (local->isPointer()) {
-        if (local->IsAnyPtr() || lexeme == "0") {
+        if (local->IsAnyPtr()) {
             m_value = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(type));
         } else {
             auto llvmType = llvm::cast<llvm::IntegerType>(PrimitiveType::get(TokenType::LongInt)->llvm());
@@ -220,6 +220,8 @@ void IrBuilder::visit(AstLiteralExpr * ast)
 void IrBuilder::visit(AstVarDecl * ast)
 {
     const string & id = ast->id->token->lexeme();
+    m_lastId = id;
+    
     auto sym = m_table->get(id);
     auto llType = sym->type()->llvm();
     // if m_block is null then is a global variable
@@ -259,6 +261,7 @@ void IrBuilder::visit(AstAssignStmt * ast)
         dst = m_value;
     } else {
         dst = m_table->get(static_cast<AstIdentExpr *>(ast->left.get())->token->lexeme())->value;
+        m_lastId = static_cast<AstIdentExpr *>(ast->left.get())->token->lexeme();
     }
     
     // right hand expression
@@ -275,6 +278,7 @@ void IrBuilder::visit(AstAddressOfExpr * ast)
 {
     const string & id = ast->id->token->lexeme();
     m_value = m_table->get(id)->value;
+    m_lastId = id;
 }
 
 
@@ -300,7 +304,7 @@ void IrBuilder::visit(AstBinaryExpr * ast)
     // resulting type
     
     // integer types
-    if (ast->lhs->type->isIntegral()) {
+    if (ast->lhs->type->isIntegral() || ast->lhs->type->isPointer()) {
         llvm::CmpInst::Predicate pred;
         auto local = ast->token->type();
         if (local == TokenType::Equal)          pred = llvm::CmpInst::Predicate::ICMP_EQ;
@@ -377,18 +381,20 @@ void IrBuilder::visit(AstCastExpr * ast)
 // AstCallExpr
 void IrBuilder::visit(AstCallExpr * ast)
 {
+    
     const string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
     
     vector<llvm::Value *> args;
     if (ast->args) {
+        SCOPED_GUARD(m_lastId);
         for (auto & arg : ast->args->args) {
             arg->accept(this);
             args.push_back(m_value);
         }
     }
     
-    m_value = llvm::CallInst::Create(sym->value, args, id, m_block);
+    m_value = llvm::CallInst::Create(sym->value, args, m_lastId, m_block);
 }
 
 
@@ -398,6 +404,7 @@ void IrBuilder::visit(AstIdentExpr * ast)
 {
     const string & id = ast->token->lexeme();
     m_value = new llvm::LoadInst(m_table->get(id)->value, "", m_block);
+    m_lastId = id;
 }
 
 
@@ -405,6 +412,7 @@ void IrBuilder::visit(AstIdentExpr * ast)
 // AstCallStmt
 void IrBuilder::visit(AstCallStmt * ast)
 {
+    m_lastId = "";
     ast->expr->accept(this);
 }
 
@@ -413,6 +421,7 @@ void IrBuilder::visit(AstCallStmt * ast)
 // AstIfStmt
 void IrBuilder::visit(AstIfStmt * ast)
 {
+    m_lastId = "";
     SCOPED_GUARD(m_endIfBlock);
     SCOPED_GUARD(m_isElseIf);
     

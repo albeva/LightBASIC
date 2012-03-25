@@ -523,18 +523,22 @@ AstVarDecl * Parser::variableDecl()
 
 
 /**
- * TypeExpr = ("INTEGER" | "BYTE") { "PTR" }
+ * TypeExpr = ("INTEGER" | "BYTE" | "ANY" "PTR") { "PTR" }
  */
 AstTypeExpr * Parser::typeExpr()
 {
     AstTypeExpr * ast = nullptr;
     Token * tmp = m_token;
-#define EXPECT_TYPE(ID, ...) accept(TokenType::ID) ||
-//    if (accept(TokenType::Integer) || accept(TokenType::Byte)) {
-    if (ALL_TYPES(EXPECT_TYPE) false) {
+    #define EXPECT_TYPE(ID, ...) accept(TokenType::ID) ||
+    if (KEYWORD_TYPES(EXPECT_TYPE) false) {
         int deref = 0;
         while (accept(TokenType::Ptr)) deref++;
         ast = new AstTypeExpr(tmp, deref);
+    } else if (accept(TokenType::Any)) {
+        expect(TokenType::Ptr);
+        int deref = 1;
+        while (accept(TokenType::Ptr)) deref++;
+        ast = new AstTypeExpr(tmp, deref);        
     } else {
         THROW_EXCEPTION("Expected type");
     }

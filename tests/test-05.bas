@@ -9,7 +9,7 @@
 '' CHECK: b3 = 1
 '' CHECK: b4 = 1
 '' CHECK: b5 = 1
-'' CHECK: b6 = 0
+'' CHECK: b6 = 1
 '' CHECK: b7 = 1
 '' CHECK: b8 = 0
 '' CHECK: b9 = 0
@@ -37,20 +37,20 @@ Function main() As Integer
     Dim i As Integer
     i = 10
     
-    Dim s As Single
-    s = 3.1415
+    Dim d As Double
+    d = 3.1415
 
     b1 = true
     b2 = false
     b3 = i
-    b4 = s
+    b4 = d
     b5 = i = 10
     b6 = b1 <> 10
     b7 = True <> False
     b8 = True = False
-    b9 = s = i
-    b10 = s <> i
-    b11 = s = 3.1415
+    b9 = d = i
+    b10 = d <> i
+    b11 = d = 3.1415
     b12 = b1 = true = b7
 
     printf("b1 = %d\nb2 = %d\nb3 = %d\nb4 = %d\nb5 = %d\nb6 = %d\n", _

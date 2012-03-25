@@ -1,13 +1,19 @@
-' Declare printf
+''------------------------------------------------------------------------------
+'' test-07
+'' - calls to external functions
+'' - pointers
+'' - null literal assignment
+'' - null literal comparison
+''
+'' CHECK: ip = 0x{{[0-9]+}}, *ip = 10
+''------------------------------------------------------------------------------
+
 [Alias = "printf"] _
 Declare Function printf(str As Byte Ptr, ...) As Integer
 
-' malloc
 [Alias = "malloc"] _
 Declare Function malloc(size As Integer) As Any Ptr
 
-' free
-' need SUBs
 [Alias = "free"] _
 Declare Function free(data As Any Ptr) As Integer
 
