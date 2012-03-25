@@ -67,7 +67,12 @@ void IrBuilder::visit(AstStmtList * ast)
 {
     SCOPED_GUARD(m_table);
     m_table = ast->symbolTable;
-    for (auto & stmt : ast->stmts) stmt->accept(this);
+    for (auto & stmt : ast->stmts) {
+        if (m_block->getTerminator()) {
+            m_block = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, 0);
+        }
+        stmt->accept(this);
+    }
 }
 
 
@@ -143,6 +148,13 @@ void IrBuilder::visit(AstFunctionStmt * ast)
     
     // process the body
     ast->stmts->accept(this);
+    
+    // add return if this is a SUB
+    if (!ast->signature->typeExpr) {
+        if (!m_block->getTerminator()) {
+            llvm::ReturnInst::Create(m_module->getContext(), nullptr, m_block);
+        }
+    }
 }
 
 
@@ -457,14 +469,18 @@ void IrBuilder::visit(AstIfStmt * ast)
     // process true block
     m_block = trueBlock;
     ast->trueBlock->accept(this);
-    llvm::BranchInst::Create(m_endIfBlock, m_block);
+    if (!m_block->getTerminator()) {
+        llvm::BranchInst::Create(m_endIfBlock, m_block);
+    }
     
     // process falseBlock
     if (falseBlock) {
         if (ast->falseBlock->is(Ast::IfStmt)) m_isElseIf = true;
         m_block = falseBlock;
         ast->falseBlock->accept(this);
-        if (!m_isElseIf) llvm::BranchInst::Create(m_endIfBlock, m_block);
+        if (!m_isElseIf && !m_block->getTerminator()) {
+            llvm::BranchInst::Create(m_endIfBlock, m_block);
+        }
     }
     
     // set end block as the new block

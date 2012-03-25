@@ -115,7 +115,7 @@ void SemanticAnalyser::visit(AstFuncSignature * ast)
     // process params
     m_type = funcType;
     if (ast->params) ast->params->accept(this);
-    // process result type
+    // if has a type then it is a function
     if (ast->typeExpr) {
         ast->typeExpr->accept(this);
         funcType->result(m_type);
@@ -566,8 +566,13 @@ void SemanticAnalyser::visit(AstReturnStmt * ast)
     assert(m_type->isFunction());
     auto funcType = static_cast<FunctionType *>(m_type);
     
-    if (ast->expr) {
+    if (funcType->result()) {
+        if (!ast->expr) {
+            THROW_EXCEPTION("Expected expression");
+        }
         castExpr(ast->expr, funcType->result());
+    } else if (ast->expr) {
+        THROW_EXCEPTION(string("Unexpected expression"));
     }
 }
 

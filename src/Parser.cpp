@@ -84,6 +84,7 @@ AstDeclaration * Parser::declaration()
             decl = functionDecl();
             break;
         case TokenType::Function:
+        case TokenType::Sub:
             decl = functionStmt();
             break;
         default:
@@ -147,9 +148,8 @@ AstStatement * Parser::statement()
         case TokenType::Identifier:
             if (m_next->type() == TokenType::Assign) {
                 stmt = assignStmt();
-            } else if (m_next->type() == TokenType::ParenOpen) {
+            } else /* if (m_next->type() == TokenType::ParenOpen) */ {
                 stmt = callStmt();
-                
             }
             break;
         // NOTE probably very wrong. at the moment assume
@@ -193,11 +193,54 @@ AstAssignStmt * Parser::assignStmt()
 
 
 /**
- * callStmt = callExpr
+ * callStmt = id ( "(" FuncArgList ")" | FuncArgList ) 
+ *
+ * This doesn't conform to ebnf. Basically since parens are optional
+ * for callstmt then need to distinguish between the following:
+ * foo
+ * foo(1, 2)
+ * foo 1, 2
+ * foo (1), 2
+ * foo 1, (2)
+ * foo (1), (2)
  */
 AstCallStmt * Parser::callStmt()
 {
-    return new AstCallStmt(callExpr());
+//    return new AstCallStmt(callExpr());
+    // id
+    auto id = identifier();
+    
+    // "("
+    bool paren = accept(TokenType::ParenOpen);
+    
+    // ")"
+    if ((paren && accept(TokenType::ParenClose)) || (!paren && match(TokenType::EndOfLine))) {
+        return new AstCallStmt(new AstCallExpr(id, nullptr));
+    }
+    
+    auto args = new AstFuncArgList();
+    
+    // get 1st argument
+    args->args.push_back(unique_ptr<AstExpression>(expression()));
+    
+    // is it arg list enclosed in ( and )
+    // or are the braces part of the expression?
+    if (paren && accept(TokenType::ParenClose)) {
+        paren = false;
+    }
+    
+    // rest of the arguments
+    while (accept(TokenType::Comma)) {
+        args->args.push_back(unique_ptr<AstExpression>(expression()));
+    }
+    
+    // expect a closing ) ?
+    if (paren) {
+        expect(TokenType::ParenClose);
+    }
+    
+    // done
+    return new AstCallStmt(new AstCallExpr(id, args));
 }
 
 
@@ -257,7 +300,7 @@ AstIfStmt * Parser::ifStmt()
 AstReturnStmt * Parser::returnStmt()
 {
     expect(TokenType::Return);
-    return new AstReturnStmt(expression());
+    return new AstReturnStmt(match(TokenType::EndOfLine) ? nullptr : expression());
 }
 
 
@@ -272,6 +315,7 @@ AstReturnStmt * Parser::returnStmt()
  *            | True
  *            | False
  *            | Null
+ *            | "(" Expression ")"
  *
  * for the moment use hackish way to add
  * a binary expression.
@@ -326,6 +370,12 @@ AstExpression * Parser::expression()
             case TokenType::Dereference:
                 move();
                 expr = new AstDereferenceExpr(expression());
+                break;
+            // ( Expression )
+            case TokenType::ParenOpen:
+                move();
+                expr = expression();
+                expect(TokenType::ParenClose);
                 break;
             default:
                 THROW_EXCEPTION(string("Invalid input. Expected expression. Found: ") + m_token->name());
@@ -405,13 +455,18 @@ AstFunctionStmt * Parser::functionStmt()
     if (sig->vararg) {
         THROW_EXCEPTION("Variable arguments not supported");
     }
-    
     expect(TokenType::EndOfLine);
+    
     // StatementList
     auto stmts = statementList();
-    // END FUNCTION
+    
+    // END FUNCTION or SUB
     expect(TokenType::End);
-    expect(TokenType::Function);
+    if (sig->typeExpr) {
+        expect(TokenType::Function);
+    } else {
+        expect(TokenType::Sub);
+    }
     
     // done
     return new AstFunctionStmt(sig, stmts);
@@ -433,8 +488,11 @@ AstFunctionDecl * Parser::functionDecl()
  */
 AstFuncSignature * Parser::funcSignature()
 {
-    // FUNCTION
-    expect(TokenType::Function);
+    // sub or function
+    bool isSub = accept(TokenType::Sub);
+    if (!isSub) {
+        expect(TokenType::Function);
+    }
     
     // id
     auto id = identifier();
@@ -443,28 +501,34 @@ AstFuncSignature * Parser::funcSignature()
     // args
     AstFuncParamList * params = nullptr;
     
-    // "("
-    expect(TokenType::ParenOpen);
-    
-    // [ FuncArgumentList ]
-    if (!accept(TokenType::ParenClose)) {
-        
-        params = funcParamList();
-        
-        // ellipsis
-        if (accept(TokenType::Ellipsis)) {
-            vararg = true;
+    // make ( and ) optional
+    if (accept(TokenType::ParenOpen)) {
+        // [ FuncArgumentList ]
+        if (!accept(TokenType::ParenClose)) {
+            
+            params = funcParamList();
+            
+            // ellipsis
+            if (accept(TokenType::Ellipsis)) {
+                vararg = true;
+            }
+            
+            // ")"
+            expect(TokenType::ParenClose);
         }
-        
-        // ")"
-        expect(TokenType::ParenClose);
     }
     
-    // AS
-    expect(TokenType::As);
+    // return type
+    AstTypeExpr * type = nullptr;
     
-    // type
-    auto type = typeExpr();
+    // if is a function then expect a type declaration
+    if (!isSub) {
+        // AS
+        expect(TokenType::As);
+        
+        // type
+        type = typeExpr();   
+    }
     
     // done
     return new AstFuncSignature(id, params, type, vararg);

@@ -20,7 +20,7 @@ Todo for Milestone 3
 [ ] Support building for 32bit and 64bit
 [✓] Move internal type conversion too llvm into Type class
 [✓] Add easy way to add testcases to check compiler output
-
+[✓] Add subs
 
 Todo for Milestone 4
 ======================

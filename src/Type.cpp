@@ -299,7 +299,8 @@ llvm::Type * FunctionType::genLlvmType()
     for (auto p : this->params) {
         params.push_back(p->llvm());
     }
-    return llvm::FunctionType::get(result()->llvm(), params, vararg);
+    llvm::Type * res = result() ? result()->llvm() : llvm::Type::getVoidTy(llvm::getGlobalContext());
+    return llvm::FunctionType::get(res, params, vararg);
 }
 
 

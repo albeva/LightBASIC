@@ -124,16 +124,25 @@ void PrinterVisitor::visit(AstFunctionDecl * ast)
 // AstFuncSignature
 void PrinterVisitor::visit(AstFuncSignature * ast)
 {
-    std::cout << "FUNCTION ";
-    if (ast->id) ast->id->accept(this);
-    std::cout << "(";
-    if (ast->params) ast->params->accept(this);
-    if (ast->vararg) {
-        if (ast->params && ast->params->params.size()) std::cout << ", ";
-        std::cout << "...";
+    if (ast->typeExpr) {
+        std::cout << "FUNCTION ";
+    } else {
+        std::cout << "SUB ";
     }
-    std::cout << ") AS ";
-    if (ast->typeExpr) ast->typeExpr->accept(this);
+    if (ast->id) ast->id->accept(this);
+    if (ast->vararg || (ast->params && ast->params->params.size())) {
+        std::cout << "(";
+        if (ast->params) ast->params->accept(this);
+        if (ast->vararg) {
+            if (ast->params && ast->params->params.size()) std::cout << ", ";
+            std::cout << "...";
+        }
+        std::cout << ")";
+    }
+    if (ast->typeExpr) {
+        std::cout << " AS ";
+        ast->typeExpr->accept(this);
+    }
 }
 
 
@@ -149,7 +158,12 @@ void PrinterVisitor::visit(AstFunctionStmt * ast)
     m_indent++;
     if (ast->stmts) ast->stmts->accept(this);
     m_indent--;
-    std::cout << indent() << "END FUNCTION" << std::endl;
+    std::cout << indent() << "END ";
+    if (ast->signature && ast->signature->typeExpr) {
+        std::cout << "FUNCTION" << std::endl;
+    } else {
+        std::cout << "SUB" << std::endl;
+    }
 }
 
 

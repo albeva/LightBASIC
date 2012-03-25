@@ -46,6 +46,7 @@
     _( As,              "AS"        ) \
     _( Declare,         "DECLARE"   ) \
     _( Function,        "FUNCTION"  ) \
+    _( Sub,             "SUB"       ) \
     _( Ptr,             "PTR"       ) \
     _( End,             "END"       ) \
     _( Return,          "RETURN"    ) \
