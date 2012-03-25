@@ -30,7 +30,7 @@ namespace lbc {
         SymbolTable * parent() const { return m_parent; }
         
         // add new type
-        void add(const string & id, Symbol * type);
+        void add(Symbol * type);
         
         // exists?
         bool exists(const string & id, bool recursive = false);

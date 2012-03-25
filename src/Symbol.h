@@ -16,6 +16,7 @@ namespace lbc {
     // forward declaration
     class Type;
     class AstDeclaration;
+    class SymbolTable;
     
     /**
      * Symbol represents a single instance of a type (variables, functions, ...)
@@ -23,7 +24,9 @@ namespace lbc {
     struct Symbol : NonCopyable
     {
         // create new symbol
-        Symbol(const string & id, Type * type = nullptr, AstDeclaration * decl = nullptr, AstDeclaration * impl = nullptr);
+        Symbol(const string & id, Type * type = nullptr,
+               AstDeclaration * decl = nullptr, AstDeclaration * impl = nullptr,
+               SymbolTable * scope = nullptr);
         
         // clean up
         ~Symbol();
@@ -31,29 +34,25 @@ namespace lbc {
         // get id
         const string & id() const { return m_id; }
         
-        // get alias
+        // alias
         const string & alias() const { return m_alias.length() ? m_alias : m_id; }
-        
-        // set alias
         void alias(const string & alias) { m_alias = alias; }
         
-        // get type
+        // type
         Type * type() const { return m_type; }
-        
-        // set type
         void type(Type * type) { m_type = type; }
         
-        // get declaration ast node
+        // declaration ast node
         AstDeclaration * decl() const { return m_decl; }
-        
-        // set declaration ast node
         void decl(AstDeclaration * decl) { m_decl = decl; }
         
-        // get implementation ast node
+        // implementation ast node
         AstDeclaration * impl() const { return m_impl; }
-        
-        // set implementation ast node
         void impl(AstDeclaration * impl) { m_impl = impl; }
+        
+        // scope
+        SymbolTable * scope() const { return m_scope; }
+        void scope(SymbolTable * scope) { m_scope = scope; }
         
         // allocate objects from the pool
         void * operator new(size_t);
@@ -67,6 +66,8 @@ namespace lbc {
         string m_id, m_alias;
         // symbol type
         Type * m_type;
+        // symbol table this belongs to
+        SymbolTable * m_scope;
         // symbol declaration (ast node)
         AstDeclaration * m_decl;
         // implementation ( functions may have seperate declaration )

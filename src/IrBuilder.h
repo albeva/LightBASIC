@@ -93,6 +93,7 @@ namespace lbc {
         SymbolTable * m_table;
         bool m_isElseIf;
         string m_lastId;
+        unordered_map<string, llvm::Value *> m_stringLiterals;
     };
     
 }

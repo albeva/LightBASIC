@@ -25,10 +25,8 @@ namespace lbc {
     {
         SemanticAnalyser();
         
-        // process expression
-        // this CAN replace the current ast node
-        // with a new one!
-        void expression(unique_ptr<AstExpression> & ast);
+        // process the expression and if provided cast it to the given type
+        void castExpr(unique_ptr<AstExpression> & ast, Type * cast = nullptr);
         
         // coerce expression to a type if needed
         void coerce(unique_ptr<AstExpression> & ast, Type * type);
@@ -94,8 +92,8 @@ namespace lbc {
         Symbol * m_symbol;
         // current type
         Type * m_type;
-        // coercion type
-        Type * m_coerceType;
+        //
+        string m_id;
     };
 
 }

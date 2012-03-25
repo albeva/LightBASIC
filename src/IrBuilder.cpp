@@ -166,22 +166,28 @@ void IrBuilder::visit(AstLiteralExpr * ast)
     
     // string literal
     if (token->type() == TokenType::StringLiteral) {
-        auto arrType = llvm::ArrayType::get(llvm::IntegerType::get(context, 8), lexeme.length() + 1);
-        auto global = new llvm::GlobalVariable(
-            *m_module,
-            arrType,
-            true,
-            llvm::GlobalValue::PrivateLinkage,
-            llvm::ConstantArray::get(context, lexeme, true),
-            ".str"
-        );
-        global->setAlignment(1);
-        
-        std::vector<llvm::Constant*> indeces;
-        llvm::ConstantInt * const_int64 = llvm::ConstantInt::get(context, llvm::APInt(32, 0, false));
-        indeces.push_back(const_int64);
-        indeces.push_back(const_int64);
-        m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
+        auto iter = m_stringLiterals.find(lexeme);
+        if (iter != m_stringLiterals.end()) {
+            m_value = iter->second;
+        } else {
+            auto arrType = llvm::ArrayType::get(llvm::IntegerType::get(context, 8), lexeme.length() + 1);
+            auto global = new llvm::GlobalVariable(
+                *m_module,
+                arrType,
+                true,
+                llvm::GlobalValue::PrivateLinkage,
+                llvm::ConstantArray::get(context, lexeme, true),
+                ".str"
+            );
+            global->setAlignment(1);
+            
+            std::vector<llvm::Constant*> indeces;
+            llvm::ConstantInt * const_int64 = llvm::ConstantInt::get(context, llvm::APInt(32, 0, false));
+            indeces.push_back(const_int64);
+            indeces.push_back(const_int64);
+            m_value = llvm::ConstantExpr::getGetElementPtr(global, indeces);
+            m_stringLiterals[lexeme] = m_value;
+        }
         return;
     }
     

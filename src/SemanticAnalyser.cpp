@@ -27,8 +27,7 @@ SemanticAnalyser::SemanticAnalyser()
 :   RecursiveAstVisitor(true),
     m_table(nullptr),
     m_symbol(nullptr),
-    m_type(nullptr),
-    m_coerceType(nullptr)
+    m_type(nullptr)
 {
 }
 
@@ -37,12 +36,12 @@ SemanticAnalyser::SemanticAnalyser()
  * Process the expression. If type coercion is required
  * then insert AstCastExpr node in front of current ast expression
  */
-void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast)
+void SemanticAnalyser::castExpr(unique_ptr<AstExpression> & ast, Type * cast)
 {
     // process the expression
     ast->accept(this);
     
-    if (m_coerceType) coerce(ast, m_coerceType);
+    if (cast) coerce(ast, cast);
 }
 
 
@@ -51,15 +50,7 @@ void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast)
  */
 void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type)
 {
-    // deal with type coercion. If can create implicit cast node
     if (!type->compare(ast->type)) {
-        // check if this is signed -> unsigned or vice versa
-        if (ast->type->isIntegral() && type->isIntegral()) {
-            if (ast->type->getSizeInBits() == type->getSizeInBits()) {
-                return;
-            }
-        }
-        // prefix expression with AstCastExpr
         auto expr = ast.release();
         ast.reset(new AstCastExpr(expr));
         ast->type = type;
@@ -75,7 +66,6 @@ void SemanticAnalyser::visit(AstProgram * ast)
     m_table = nullptr;
     m_symbol = nullptr;
     m_type = nullptr;
-    m_coerceType = nullptr;
     
     // create new scope
     ast->symbolTable = make_shared<SymbolTable>(m_table);
@@ -91,19 +81,19 @@ void SemanticAnalyser::visit(AstProgram * ast)
 // AstFunctionDecl
 void SemanticAnalyser::visit(AstFunctionDecl * ast)
 {
-    // function id
-    auto const & id = ast->signature->id->token->lexeme();
+    // process the id
+    ast->signature->id->accept(this);
     
     // check if already exists
-    if (m_table->exists(id)) {
-        THROW_EXCEPTION(string("Duplicate symbol: ") + id);
+    if (m_symbol && m_symbol->scope() == m_table) {
+        THROW_EXCEPTION(string("Duplicate symbol: ") + m_symbol->id());
     }
     
     // analyse the signature. This will create a type
     ast->signature->accept(this);
     
     // create the symbol
-    m_symbol = new Symbol(id, m_type, ast, nullptr);
+    m_symbol = new Symbol(m_id, m_type, ast, nullptr);
     
     // attributes
     if (ast->attribs) ast->attribs->accept(this);
@@ -112,7 +102,7 @@ void SemanticAnalyser::visit(AstFunctionDecl * ast)
     ast->symbol = m_symbol;
     
     // store in the symbol table
-    m_table->add(id, m_symbol);
+    m_table->add(m_symbol);
 }
 
 
@@ -132,7 +122,6 @@ void SemanticAnalyser::visit(AstFuncSignature * ast)
     }
     // var arg?
     funcType->vararg = ast->vararg;
-    //
     m_type = funcType;
 }
 
@@ -175,15 +164,12 @@ void SemanticAnalyser::visit(AstTypeExpr * ast)
 // AstFunctionStmt
 void SemanticAnalyser::visit(AstFunctionStmt * ast)
 {
-    // function id
-    const string & id = ast->signature->id->token->lexeme();
-    
-    // look up if declared
-    m_symbol= m_table->get(id, true);
+    // process the id
+    ast->signature->id->accept(this);
     
     // already implemented?
-    if (m_symbol && m_symbol->impl()) {
-        THROW_EXCEPTION(string("Type '") + id + "' is already implemented");
+    if (m_symbol && m_symbol->scope() == m_table && m_symbol->impl()) {
+        THROW_EXCEPTION(string("Type '") + m_symbol->id() + "' is already implemented");
     }
     
     // process the signature
@@ -193,16 +179,16 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     // then check that types match.
     if (m_symbol) {
         if (!m_symbol->type()->compare(m_type)) {
-            THROW_EXCEPTION(string("Type mismatch between '") + id + "' and '" + m_symbol->id());
+            THROW_EXCEPTION(string("Type mismatch between '") + m_symbol->id() + "' and '" + m_symbol->id());
         }
         m_symbol->impl(ast);
         if (ast->attribs) {
             THROW_EXCEPTION(string("Duplicate attribute declarations"));
         }
     } else {
-        m_symbol = new Symbol(id, m_type, ast, ast);
+        m_symbol = new Symbol(m_id, m_type, ast, ast);
         ast->symbol = m_symbol;
-        m_table->add(id, m_symbol);
+        m_table->add(m_symbol);
     }
     
     // attributes
@@ -224,7 +210,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
                 THROW_EXCEPTION(string("Duplicate defintion of ") + paramId);
             }
             auto sym = new Symbol(paramId, funcType->params[i++], param.get(), nullptr);
-            m_table->add(paramId, sym);
+            m_table->add(sym);
             param->symbol = sym;
         }
     }
@@ -245,11 +231,11 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     auto tmp = m_type;
     
     // id
-    const string & id = ast->id->token->lexeme();
+    ast->id->accept(this);
     
     // exists?
-    if (m_table->exists(id)) {
-        THROW_EXCEPTION(string("Duplicate definition of ") + id);
+    if (m_symbol && m_symbol->scope() == m_table) {
+        THROW_EXCEPTION(string("Duplicate definition of ") + m_symbol->id());
     }
     
     // get the type
@@ -261,14 +247,14 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     }
     
     // create new symbol
-    m_symbol= new Symbol(id, m_type, ast, ast);
+    m_symbol= new Symbol(m_id, m_type, ast, ast);
     ast->symbol = m_symbol;
     
     // attributes
     if (ast->attribs) ast->attribs->accept(this);
     
     // add to the symbol table
-    m_table->add(id, m_symbol);
+    m_table->add(m_symbol);
     
     // restore type
     m_type = tmp;
@@ -279,8 +265,6 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
 // AstAssignStmt
 void SemanticAnalyser::visit(AstAssignStmt * ast)
 {
-    SCOPED_GUARD(m_coerceType);
-    
     // id
     auto left = ast->left.get();
     auto deref = 0;
@@ -293,20 +277,18 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     string help;
     Type * leftType = nullptr;
     if (left->is(Ast::IdentExpr)) {
-        const string & id = static_cast<AstIdentExpr *>(left)->token->lexeme();
-        
-        // get the symbol
-        auto symbol = m_table->get(id);
+        // process
+        left->accept(this);
         
         // check
-        if (!symbol) {
-            THROW_EXCEPTION(string("Use of undeclared '") + id + "'");
-        } else if (!symbol->type()->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot assign to '") + id + "' of type " + symbol->type()->toString());
+        if (!m_symbol) {
+            THROW_EXCEPTION(string("Use of undeclared '") + m_id + "'");
+        } else if (!m_symbol->type()->isInstantiable()) {
+            THROW_EXCEPTION(string("Cannot assign to '") + m_symbol->id() + "' of type " + m_symbol->type()->toString());
         }
-        leftType = symbol->type();
+        leftType = m_symbol->type();
         
-        help = string("identifier ") + symbol->id();
+        help = string("identifier ") + m_symbol->id();
     } else {
         left->accept(this);
         leftType = left->type;
@@ -326,12 +308,11 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
                  ? pt->getBaseType()
                  : PtrType::get(pt->getBaseType(), pt->indirection() - deref);
         if (!leftType->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + m_coerceType->toString());
+            THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + leftType->toString());
         }
     }
     
     // right hand side
-    m_coerceType = leftType;
     ast->right->accept(this);
     auto rightType = ast->right->type;
     
@@ -346,7 +327,7 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     }
     
     // coerce
-    if (m_coerceType) coerce(ast->right, m_coerceType);
+    coerce(ast->right, leftType);
 }
 
 
@@ -362,7 +343,6 @@ void SemanticAnalyser::visit(AstCallStmt * ast)
 // AstIfStmt
 void SemanticAnalyser::visit(AstIfStmt * ast)
 {
-    m_coerceType = nullptr; //PrimitiveType::get(TokenType::Bool);
     ast->expr->accept(this);
     coerce(ast->expr, PrimitiveType::get(TokenType::Bool));
     
@@ -393,9 +373,12 @@ void SemanticAnalyser::visit(AstIfStmt * ast)
 // AstAddressOfExpr
 void SemanticAnalyser::visit(AstAddressOfExpr * ast)
 {
-    SCOPED_GUARD(m_coerceType);
-    m_coerceType = nullptr;
+    SCOPED_GUARD(m_symbol);
+    SCOPED_GUARD(m_id);
     ast->id->accept(this);
+    if (!m_symbol) {
+        THROW_EXCEPTION(string("Use of undeclared identifier ") + m_id);
+    }
     ast->type = PtrType::get(ast->id->type, 1);
 }
 
@@ -404,8 +387,6 @@ void SemanticAnalyser::visit(AstAddressOfExpr * ast)
 // AstDereferenceExpr
 void SemanticAnalyser::visit(AstDereferenceExpr * ast)
 {
-    SCOPED_GUARD(m_coerceType);
-    m_coerceType = nullptr;
     ast->expr->accept(this);
     if (!ast->expr->type->isPointer()) {
         THROW_EXCEPTION("Dereferencing a non pointer");
@@ -418,34 +399,11 @@ void SemanticAnalyser::visit(AstDereferenceExpr * ast)
 // AstBinaryExpr
 void SemanticAnalyser::visit(AstBinaryExpr * ast)
 {
-    SCOPED_GUARD(m_coerceType);
-    m_coerceType = nullptr;
+    ast->lhs->accept(this);
+    auto left = ast->lhs->type;
     
-    Type * left = nullptr, * right = nullptr;
-//    if (ast->lhs->isConstant() && !ast->rhs->isConstant()) {
-//        ast->rhs->accept(this);
-//        right = ast->rhs->type;
-//        
-//        m_coerceType = right;
-//        ast->lhs->accept(this);
-//        left = ast->lhs->type;
-//    } else if (!ast->lhs->isConstant() && ast->rhs->isConstant()) {
-//        ast->lhs->accept(this);
-//        left = ast->lhs->type;
-//        
-//        m_coerceType = left;
-//        ast->rhs->accept(this);
-//        right = ast->rhs->type;        
-//    } else {
-        ast->lhs->accept(this);
-        left = ast->lhs->type;
-        
-        // null
-        m_coerceType = nullptr;
-        
-        ast->rhs->accept(this);
-        right = ast->rhs->type;
-//    }
+    ast->rhs->accept(this);
+    auto right = ast->rhs->type;
     
     // int -> 
     if (left->isIntegral()) {
@@ -509,21 +467,23 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
 // AstCallExpr
 void SemanticAnalyser::visit(AstCallExpr * ast)
 {
+    SCOPED_GUARD(m_id);
+    SCOPED_GUARD(m_symbol);
+    
     // the id
-    const string & id = ast->id->token->lexeme();
+    ast->id->accept(this);
     
     // find
-    auto sym = m_table->get(id);
-    if (!sym) {
-        THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
+    if (!m_symbol) {
+        THROW_EXCEPTION(string("Use of undeclared identifier '") + m_id + "'");
     }
     
     // not a callable function?
-    if (sym->type()->kind() != Type::Function) {
-        THROW_EXCEPTION(string("Called identifier '") + id + "' is not a function");
+    if (m_symbol->type()->kind() != Type::Function) {
+        THROW_EXCEPTION(string("Called identifier '") + m_symbol->id() + "' is not a function");
     }
     
-    auto type = static_cast<FunctionType *>(sym->type());
+    auto type = static_cast<FunctionType *>(m_symbol->type());
     
     // check the parameter types against the argument types
     if (ast->args) {
@@ -534,12 +494,11 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
             THROW_EXCEPTION("Argument count mismatch");
         }
         int i = 0;
-        SCOPED_GUARD(m_coerceType);
         for(auto & arg : ast->args->args) {
-            m_coerceType = type->params.size() > i ? type->params[i++] : nullptr;
-            expression(arg);
+            auto cast = type->params.size() > i ? type->params[i++] : nullptr;
+            castExpr(arg, cast);
             // cast var args
-            if (!m_coerceType) {
+            if (!cast) {
                 // extend int to 32 bit at least
                 if (arg->type->isIntegral() && arg->type->getSizeInBits() < 32) {
                     coerce(arg, PrimitiveType::get(TokenType::Integer));
@@ -563,21 +522,26 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
 // AstLiteralExpr
 void SemanticAnalyser::visit(AstLiteralExpr * ast)
 {
-    auto type = ast->token->type();
-    if (type == TokenType::StringLiteral) {
-        ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
-    } else if (type == TokenType::IntegerLiteral || type == TokenType::FloatingPointLiteral) {
-//        if (m_coerceType) {
-//            ast->type = m_coerceType;
-//        } else{
-            ast->type = PrimitiveType::get(type == TokenType::IntegerLiteral ? TokenType::Integer : TokenType::Double);
-//        }
-    } else if (type == TokenType::True || type == TokenType::False) {
-        ast->type = PrimitiveType::get(TokenType::Bool);
-    } else if (type == TokenType::Null) {
-        ast->type = PtrType::getAnyPtr();
-    } else {
-        THROW_EXCEPTION("Invalid type");
+    switch (ast->token->type()) {
+        case TokenType::StringLiteral:
+            ast->type = PtrType::get(PrimitiveType::get(TokenType::Byte), 1);
+            break;
+        case TokenType::IntegerLiteral:
+            ast->type = PrimitiveType::get(TokenType::Integer);
+            break;
+        case TokenType::FloatingPointLiteral:
+            ast->type = PrimitiveType::get(TokenType::Double);
+            break;
+        case TokenType::True:
+        case TokenType::False:
+            ast->type = PrimitiveType::get(TokenType::Bool);
+            break;
+        case TokenType::Null:
+            ast->type = PtrType::getAnyPtr();
+            break;            
+        default:
+            THROW_EXCEPTION("Invalid type");
+            break;
     }
 }
 
@@ -587,18 +551,11 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
 void SemanticAnalyser::visit(AstIdentExpr * ast)
 {
     // the id
-    const string & id = ast->token->lexeme();
-    
-    // get from the table
-    auto sym = m_table->get(id);
-    
-    // not found?
-    if (!sym) {
-        THROW_EXCEPTION(string("Use of undeclared identifier '") + id + "'");
+    m_id = ast->token->lexeme();
+    m_symbol = m_table->get(m_id);
+    if (m_symbol) {
+        ast->type = m_symbol->type();
     }
-    
-    // set type
-    ast->type = sym->type();
 }
 
 
@@ -610,9 +567,7 @@ void SemanticAnalyser::visit(AstReturnStmt * ast)
     auto funcType = static_cast<FunctionType *>(m_type);
     
     if (ast->expr) {
-        SCOPED_GUARD(m_coerceType);
-        m_coerceType = funcType->result();
-        expression(ast->expr);
+        castExpr(ast->expr, funcType->result());
     }
 }
 
@@ -634,16 +589,3 @@ void SemanticAnalyser::visit(AstAttribute * ast)
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
