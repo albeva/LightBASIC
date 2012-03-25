@@ -28,6 +28,7 @@ Todo for Milestone 4
 [ ] add name mangling to Type
 [ ] Implement compile driver and standard commandline arguments
 [ ] Implement proper error messages (lex, parse, sem. linking)
+[ ] Function pointers
 
 
 Misc
