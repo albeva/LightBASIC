@@ -78,6 +78,7 @@ AstDeclaration * Parser::declaration()
 
     switch (m_token->type()) {
         case TokenType::Dim:
+        case TokenType::Var:
             decl = variableDecl();
             break;
         case TokenType::Declare:
@@ -140,6 +141,7 @@ AstStatement * Parser::statement()
     AstStatement * stmt = nullptr;
     switch (m_token->type()) {
         case TokenType::Dim:
+        case TokenType::Var:
             stmt = variableDecl();
             break;
         case TokenType::Return:
@@ -568,10 +570,23 @@ AstFuncParam * Parser::funcParam()
 
 
 /**
- * VariableDecl = "DIM" id "AS" TypeExpr [ "=" Expression ]
+ * VariableDecl = "VAR" id "=" Expression
+ *              | "DIM" id "AS" TypeExpr [ "=" Expression ]
  */
 AstVarDecl * Parser::variableDecl()
 {
+    // VAR ?
+    if (accept(TokenType::Var)) {
+        // id
+        auto id = identifier();
+        // "="
+        expect(TokenType::Assign);
+        // Expression
+        auto expr = expression();
+        // done
+        return new AstVarDecl(id, nullptr, expr);
+    }
+    
     // DIM
     expect(TokenType::Dim);
     // id

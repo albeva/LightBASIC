@@ -11,6 +11,7 @@
 #include "Symbol.h"
 #include "SymbolTable.h"
 #include "Type.h"
+#include "PrinterVisitor.h"
 using namespace lbc;
 
 //
@@ -26,6 +27,17 @@ using namespace lbc;
     Ast##C::~Ast##C() {}
 AST_CONTENT_NODES(IMPL_AST)
 #undef IMPL_AST
+
+
+/**
+ * print out the ast node source using PrinterVisitor
+ */
+void AstRoot::dump()
+{
+    PrinterVisitor p;
+    this->accept(&p);
+    std::cout << '\n';
+}
 
 
 // AstProgram

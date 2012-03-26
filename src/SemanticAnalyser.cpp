@@ -36,9 +36,10 @@ SemanticAnalyser::SemanticAnalyser()
  * Process the expression. If type coercion is required
  * then insert AstCastExpr node in front of current ast expression
  */
-void SemanticAnalyser::castExpr(unique_ptr<AstExpression> & ast, Type * cast)
+void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast, Type * cast)
 {
-    // process the expression
+    SCOPED_GUARD(m_id);
+    SCOPED_GUARD(m_symbol);
     ast->accept(this);
     
     if (cast) coerce(ast, cast);
@@ -227,8 +228,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
 // Variable declaration
 void SemanticAnalyser::visit(AstVarDecl * ast)
 {
-    // backup type
-    auto tmp = m_type;
+    SCOPED_GUARD(m_type);
     
     // id
     ast->id->accept(this);
@@ -238,16 +238,33 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
         THROW_EXCEPTION(string("Duplicate definition of ") + m_symbol->id());
     }
     
-    // get the type
-    ast->typeExpr->accept(this);
-    
-    // can this type be instantiated?
-    if (!m_type->isInstantiable()) {
-        THROW_EXCEPTION(string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
+    // declared with DIM
+    if (ast->typeExpr) {
+        // get the type
+        ast->typeExpr->accept(this);
+        
+        // can this type be instantiated?
+        if (!m_type->isInstantiable()) {
+            THROW_EXCEPTION(string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
+        }
+        
+        // has an initalizer expression?
+        if (ast->expr) {
+            expression(ast->expr, m_type);
+        }
+    }
+    // declared with VAR
+    else {
+        expression(ast->expr); // ->accept(this);
+        m_type = ast->expr->type;
+        // can this type be instantiated?
+        if (!m_type->isInstantiable()) {
+            THROW_EXCEPTION(string("Cannot declare a variable of type ") + m_type->toString());
+        }
     }
     
     // create new symbol
-    m_symbol= new Symbol(m_id, m_type, ast, ast);
+    m_symbol = new Symbol(m_id, m_type, ast, ast);
     ast->symbol = m_symbol;
     
     // attributes
@@ -255,14 +272,6 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     
     // add to the symbol table
     m_table->add(m_symbol);
-    
-    // has an initalizer expression?
-    if (ast->expr) {
-        castExpr(ast->expr, m_type);
-    }
-    
-    // restore type
-    m_type = tmp;
 }
 
 
@@ -378,8 +387,6 @@ void SemanticAnalyser::visit(AstIfStmt * ast)
 // AstAddressOfExpr
 void SemanticAnalyser::visit(AstAddressOfExpr * ast)
 {
-    SCOPED_GUARD(m_symbol);
-    SCOPED_GUARD(m_id);
     ast->id->accept(this);
     if (!m_symbol) {
         THROW_EXCEPTION(string("Use of undeclared identifier ") + m_id);
@@ -472,9 +479,6 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
 // AstCallExpr
 void SemanticAnalyser::visit(AstCallExpr * ast)
 {
-    SCOPED_GUARD(m_id);
-    SCOPED_GUARD(m_symbol);
-    
     // the id
     ast->id->accept(this);
     
@@ -501,7 +505,7 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
         int i = 0;
         for(auto & arg : ast->args->args) {
             auto cast = type->params.size() > i ? type->params[i++] : nullptr;
-            castExpr(arg, cast);
+            expression(arg, cast);
             // cast var args
             if (!cast) {
                 // extend int to 32 bit at least
@@ -575,7 +579,7 @@ void SemanticAnalyser::visit(AstReturnStmt * ast)
         if (!ast->expr) {
             THROW_EXCEPTION("Expected expression");
         }
-        castExpr(ast->expr, funcType->result());
+        expression(ast->expr, funcType->result());
     } else if (ast->expr) {
         THROW_EXCEPTION(string("Unexpected expression"));
     }

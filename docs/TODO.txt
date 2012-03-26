@@ -8,7 +8,7 @@ Todo for Milestone 3
 [✓] Add Null
 [✓] initalize apon declatation
     Dim i As Integer = 10
-[ ] add Var that deducts the type from right hand expression
+[✓] add Var that deducts the type from right hand expression
     Var i = 10
 [ ] Add For
     For i = 0 to 10 [ step Expression ]

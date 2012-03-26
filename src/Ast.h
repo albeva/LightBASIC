@@ -53,6 +53,9 @@ namespace lbc {
         
         // is of type?
         virtual bool is(Ast ast) const = 0;
+        
+        // dump the ast node as string
+        void dump();
     };
     
     

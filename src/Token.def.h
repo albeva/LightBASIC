@@ -43,6 +43,7 @@
 //     Name             String
 #define TKN_KEYWORD(_) \
     _( Dim,             "DIM"       ) \
+    _( Var,             "VAR"       ) \
     _( As,              "AS"        ) \
     _( Declare,         "DECLARE"   ) \
     _( Function,        "FUNCTION"  ) \

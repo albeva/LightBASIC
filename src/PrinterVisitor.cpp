@@ -100,11 +100,25 @@ void PrinterVisitor::visit(AstDeclaration * ast)
 // AstVarDecl
 void PrinterVisitor::visit(AstVarDecl * ast)
 {
-    std::cout << indent() << "DIM ";
-    if (ast->id) ast->id->accept(this);
-    std::cout << " AS ";
-    if (ast->typeExpr) ast->typeExpr->accept(this);
-    std::cout << std::endl;
+    if (ast->typeExpr) {
+        std::cout << indent() << "DIM ";
+        if (ast->id) ast->id->accept(this);
+        std::cout << " AS ";
+        if (ast->typeExpr) ast->typeExpr->accept(this);
+        if (ast->expr) {
+            std::cout << " = ";
+            ast->expr->accept(this);
+        }
+        std::cout << std::endl;
+    } else {
+        std::cout << indent() << "VAR ";
+        if (ast->id) ast->id->accept(this);
+        if (ast->expr) {
+            std::cout << " = ";
+            ast->expr->accept(this);
+        }
+        std::cout << std::endl;
+    }
 }
 
 

@@ -26,7 +26,7 @@ namespace lbc {
         SemanticAnalyser();
         
         // process the expression and if provided cast it to the given type
-        void castExpr(unique_ptr<AstExpression> & ast, Type * cast = nullptr);
+        void expression(unique_ptr<AstExpression> & ast, Type * cast = nullptr);
         
         // coerce expression to a type if needed
         void coerce(unique_ptr<AstExpression> & ast, Type * type);
