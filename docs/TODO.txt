@@ -6,7 +6,7 @@ Todo for Milestone 3
     arg = argv[1]
 [✓] Add Any Ptr
 [✓] Add Null
-[ ] initalize apon declatation
+[✓] initalize apon declatation
     Dim i As Integer = 10
 [ ] add Var that deducts the type from right hand expression
     Var i = 10
