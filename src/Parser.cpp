@@ -206,7 +206,6 @@ AstAssignStmt * Parser::assignStmt()
  */
 AstCallStmt * Parser::callStmt()
 {
-//    return new AstCallStmt(callExpr());
     // id
     auto id = identifier();
     
@@ -569,7 +568,7 @@ AstFuncParam * Parser::funcParam()
 
 
 /**
- * VariableDecl = "DIM" id "AS" TypeExpr
+ * VariableDecl = "DIM" id "AS" TypeExpr [ "=" Expression ]
  */
 AstVarDecl * Parser::variableDecl()
 {
@@ -581,8 +580,10 @@ AstVarDecl * Parser::variableDecl()
     expect(TokenType::As);
     // TypeExpr
     auto t = typeExpr();
+    // [ "=" Expression ]
+    auto expr = accept(TokenType::Assign) ? expression() : nullptr;
     // done
-    return new AstVarDecl(id, t);
+    return new AstVarDecl(id, t, expr);
 }
 
 

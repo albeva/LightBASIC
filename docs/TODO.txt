@@ -14,13 +14,14 @@ Todo for Milestone 3
     For i = 0 to 10 [ step Expression ]
         StmtList
     Next
-[ ] make parenthesis optional for FuncStmt
+[✓] make parenthesis optional for FuncStmt
     printf "hello %s\n", "world"
 [ ] Overhaul the type system
 [ ] Support building for 32bit and 64bit
 [✓] Move internal type conversion too llvm into Type class
 [✓] Add easy way to add testcases to check compiler output
 [✓] Add subs
+
 
 Todo for Milestone 4
 ======================
@@ -29,6 +30,7 @@ Todo for Milestone 4
 [ ] Implement compile driver and standard commandline arguments
 [ ] Implement proper error messages (lex, parse, sem. linking)
 [ ] Function pointers
+[ ] assignment expressions outside function bodies
 
 
 Misc

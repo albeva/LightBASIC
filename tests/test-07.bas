@@ -5,7 +5,7 @@
 '' - null literal assignment
 '' - null literal comparison
 ''
-'' CHECK: ip = 0x{{[0-9]+}}, *ip = 10
+'' CHECK: ip = 0x{{[0-9a-f]+}}, *ip = 10
 ''------------------------------------------------------------------------------
 
 [Alias = "printf"] _

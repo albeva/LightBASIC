@@ -262,6 +262,10 @@ void IrBuilder::visit(AstVarDecl * ast)
         );
     } else {
         sym->value = new llvm::AllocaInst(llType, id, m_block);
+        if (ast->expr) {
+            ast->expr->accept(this);
+            new llvm::StoreInst(m_value, sym->value, m_block);
+        }
     }
 }
 

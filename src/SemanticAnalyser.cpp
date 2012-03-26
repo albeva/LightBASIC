@@ -256,6 +256,11 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     // add to the symbol table
     m_table->add(m_symbol);
     
+    // has an initalizer expression?
+    if (ast->expr) {
+        castExpr(ast->expr, m_type);
+    }
+    
     // restore type
     m_type = tmp;
 }

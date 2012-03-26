@@ -152,11 +152,13 @@ namespace lbc {
     struct AstVarDecl : AstDeclaration
     {
         // create
-        AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
+        AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr, AstExpression * expr = nullptr);
         // variable id
         unique_ptr<AstIdentExpr> id;
         // variable type
         unique_ptr<AstTypeExpr> typeExpr;
+        // initalizer expression
+        unique_ptr<AstExpression> expr;
         // content node
         DECLARE_AST(VarDecl);
     };

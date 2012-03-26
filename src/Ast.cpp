@@ -49,7 +49,8 @@ AstAttribParamList::AstAttribParamList() {}
 
 
 // AstVarDecl
-AstVarDecl::AstVarDecl(AstIdentExpr * id, AstTypeExpr * typeExpr) : id(id), typeExpr(typeExpr) {}
+AstVarDecl::AstVarDecl(AstIdentExpr * id, AstTypeExpr * typeExpr, AstExpression * expr)
+: id(id), typeExpr(typeExpr), expr(expr) {}
 
 
 // AstFunctionDecl
