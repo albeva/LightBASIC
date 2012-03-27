@@ -1,6 +1,6 @@
-red='\033[31;47m'
+red='\033[31m'
 green='\033[32m'
-alias Reset="tput sgr0"
+reset='\033[0m'
 
 #
 # test files that should succeed
@@ -16,16 +16,16 @@ do
         rm $output
     fi
     # compile
+    echo "$red\c"
     ../lbc $file -o $output
+    echo "$reset\c"
 	if [ $? = 0 ]; then
-        echo "\033[31m\c"
+        echo "$red\c"
         ./$output | FileCheck $file
-        echo "\033[0m\c"
+        echo "$reset\c"
         if [ $? = 0 ]; then
-            echo "$file: \033[32mOk\033[0m"
+            echo "$file: ${green}Ok$reset"
         fi
-    else
-        echo "$file: Compile failed"
     fi
 done
 
@@ -42,8 +42,8 @@ do
     # try to compile. this must fail (lbc should return a non 0 result)
     ../lbc $file -o $output > /dev/null
     if [ $? = 0 ]; then
-        echo "$file: \033[31mFailed\033[0m. This file should not compile"
+        echo "$file: ${red}Failed$reset. This file should not compile"
     else
-        echo "$file: \033[32mOk\033[0m"
+        echo "$file: ${green}Ok$reset"
     fi
 done
