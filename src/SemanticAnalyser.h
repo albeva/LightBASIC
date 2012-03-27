@@ -92,8 +92,10 @@ namespace lbc {
         Symbol * m_symbol;
         // current type
         Type * m_type;
-        //
+        // symbol id
         string m_id;
+        // is callstmt ?
+        bool m_callStmt;
     };
 
 }

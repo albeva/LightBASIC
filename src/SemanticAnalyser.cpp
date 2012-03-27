@@ -27,7 +27,8 @@ SemanticAnalyser::SemanticAnalyser()
 :   RecursiveAstVisitor(true),
     m_table(nullptr),
     m_symbol(nullptr),
-    m_type(nullptr)
+    m_type(nullptr),
+    m_callStmt(false)
 {
 }
 
@@ -67,6 +68,7 @@ void SemanticAnalyser::visit(AstProgram * ast)
     m_table = nullptr;
     m_symbol = nullptr;
     m_type = nullptr;
+    m_callStmt = false;
     
     // create new scope
     ast->symbolTable = make_shared<SymbolTable>(m_table);
@@ -349,7 +351,9 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
 // AstCallStmt
 void SemanticAnalyser::visit(AstCallStmt * ast)
 {
+    m_callStmt = true;
     ast->expr->accept(this);
+    m_callStmt = false;
 }
 
 
@@ -492,7 +496,15 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
         THROW_EXCEPTION(string("Called identifier '") + m_symbol->id() + "' is not a function");
     }
     
+    // get function type
     auto type = static_cast<FunctionType *>(m_symbol->type());
+    
+    // check if this is a sub or a function call
+    if (m_callStmt) {
+        m_callStmt = false;
+    } else if (type->result() == nullptr) {
+        THROW_EXCEPTION(string("Cannot use SUB ") + m_id + " in an expression");
+    }
     
     // check the parameter types against the argument types
     if (ast->args) {
