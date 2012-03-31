@@ -30,19 +30,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		362740E31512B6B4005C8D97 /* Boolean.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Boolean.bas; path = samples/Boolean.bas; sourceTree = "<group>"; };
-		362740EA1513A9B5005C8D97 /* AssignBooleanExpr.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = AssignBooleanExpr.bas; path = samples/AssignBooleanExpr.bas; sourceTree = "<group>"; };
 		362740ED1513DEC7005C8D97 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = TODO.txt; path = docs/TODO.txt; sourceTree = SOURCE_ROOT; };
-		362740EE1513DFF6005C8D97 /* CmdLine.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CmdLine.bas; path = samples/CmdLine.bas; sourceTree = "<group>"; };
-		362740EF1513DFF6005C8D97 /* If.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = If.bas; path = samples/If.bas; sourceTree = "<group>"; };
 		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
 		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
 		365F7A4C14F90D7A00553D98 /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
-		36682DCB150D2AB500E1038A /* FloatingPoint.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = FloatingPoint.bas; path = samples/FloatingPoint.bas; sourceTree = "<group>"; };
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		36779A0B1503BD9700369AFF /* README */ = {isa = PBXFileReference; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
-		36779A0C1503DA1800369AFF /* Simple.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Simple.bas; path = samples/Simple.bas; sourceTree = "<group>"; };
 		368378D2150901D3004C7BAB /* Emitter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Emitter.h; path = src/Emitter.h; sourceTree = SOURCE_ROOT; };
 		368378D4150901F7004C7BAB /* Emitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Emitter.cpp; path = src/Emitter.cpp; sourceTree = SOURCE_ROOT; };
 		369056B61503881700E2C917 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ast.cpp; path = src/Ast.cpp; sourceTree = SOURCE_ROOT; };
@@ -82,16 +76,6 @@
 		369056D91503881700E2C917 /* Type.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Type.cpp; path = src/Type.cpp; sourceTree = SOURCE_ROOT; };
 		369056DA1503881700E2C917 /* Type.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Type.def.h; path = src/Type.def.h; sourceTree = SOURCE_ROOT; };
 		369056DB1503881700E2C917 /* Type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Type.h; path = src/Type.h; sourceTree = SOURCE_ROOT; };
-		369056F8150389AE00E2C917 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = docs/README; sourceTree = SOURCE_ROOT; };
-		369056F9150389CA00E2C917 /* HelloWorld.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = HelloWorld.bas; path = samples/HelloWorld.bas; sourceTree = "<group>"; };
-		369056FA150389CA00E2C917 /* Variables.bas */ = {isa = PBXFileReference; lastKnownFileType = text; name = Variables.bas; path = samples/Variables.bas; sourceTree = "<group>"; };
-		36981C25150E90A500F599F9 /* MallocFree.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = MallocFree.bas; path = samples/MallocFree.bas; sourceTree = "<group>"; };
-		36D37C0E151E0E5500B3E121 /* run.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = run.sh; sourceTree = "<group>"; };
-		36D37C0F151E0E5500B3E121 /* test-01.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "test-01.bas"; sourceTree = "<group>"; };
-		36DF7365150953070023F600 /* module_2.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_2.bas; path = samples/module_2.bas; sourceTree = "<group>"; };
-		36DF73661509531F0023F600 /* module_1.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = module_1.bas; path = samples/module_1.bas; sourceTree = "<group>"; };
-		36F70AD9150D574D00C0762A /* Pointers.bas */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Pointers.bas; path = samples/Pointers.bas; sourceTree = "<group>"; };
-		36FF07C3150510E400D84F2E /* Milestone 2.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = "Milestone 2.txt"; path = "docs/Milestone 2.txt"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,8 +97,6 @@
 				36779A0B1503BD9700369AFF /* README */,
 				3675818C150255B50006E4B5 /* llvm.xcconfig */,
 				369056F7150388FF00E2C917 /* docs */,
-				369056FB150389D000E2C917 /* samples */,
-				36D37C0B151E0D2A00B3E121 /* tests */,
 				365F7A4F14F90D7A00553D98 /* src */,
 				36A6E98314F923A900C3EEA1 /* Libraries */,
 				365F7A4D14F90D7A00553D98 /* Products */,
@@ -269,30 +251,9 @@
 			isa = PBXGroup;
 			children = (
 				362740ED1513DEC7005C8D97 /* TODO.txt */,
-				369056F8150389AE00E2C917 /* README */,
-				36FF07C3150510E400D84F2E /* Milestone 2.txt */,
 			);
 			name = docs;
 			path = LightBASIC;
-			sourceTree = "<group>";
-		};
-		369056FB150389D000E2C917 /* samples */ = {
-			isa = PBXGroup;
-			children = (
-				362740EE1513DFF6005C8D97 /* CmdLine.bas */,
-				362740EF1513DFF6005C8D97 /* If.bas */,
-				362740EA1513A9B5005C8D97 /* AssignBooleanExpr.bas */,
-				362740E31512B6B4005C8D97 /* Boolean.bas */,
-				36981C25150E90A500F599F9 /* MallocFree.bas */,
-				36DF73661509531F0023F600 /* module_1.bas */,
-				36DF7365150953070023F600 /* module_2.bas */,
-				369056F9150389CA00E2C917 /* HelloWorld.bas */,
-				369056FA150389CA00E2C917 /* Variables.bas */,
-				36779A0C1503DA1800369AFF /* Simple.bas */,
-				36682DCB150D2AB500E1038A /* FloatingPoint.bas */,
-				36F70AD9150D574D00C0762A /* Pointers.bas */,
-			);
-			name = samples;
 			sourceTree = "<group>";
 		};
 		36A6E98314F923A900C3EEA1 /* Libraries */ = {
@@ -302,15 +263,6 @@
 				365077301504C9BB005061C9 /* libboost_system.dylib */,
 			);
 			name = Libraries;
-			sourceTree = "<group>";
-		};
-		36D37C0B151E0D2A00B3E121 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-				36D37C0E151E0E5500B3E121 /* run.sh */,
-				36D37C0F151E0E5500B3E121 /* test-01.bas */,
-			);
-			path = tests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

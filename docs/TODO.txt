@@ -29,6 +29,8 @@ Todo for Milestone 4
 [ ] assignment expressions outside function bodies
 [ ] Implement EXIT (for) keyword
 [ ] Implement CONTINUE (for) keyword
+[ ] Improve FOR
+    [ ] Support negative STEP (decrement)
 
 
 Future. M5 ?
