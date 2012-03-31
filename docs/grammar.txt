@@ -1,3 +1,7 @@
+This grammar is closest possible approximation of teh lbc language.
+In several instances (as commented below) the grammar as defines is ambigious,
+but handled by the compiler
+
 EBNF
 ------
 Program         = { Declaration }
@@ -6,6 +10,7 @@ Declaration     = [ "[" Attributes "]" ]
                 ( VariableDecl
                 | FunctionDecl
                 | FunctionImpl
+                | SubImpl
                 )
                 .
 AttributeList   = Attribute { ","  Attribute }
@@ -21,11 +26,14 @@ AttribParamList = AttribParam { "," AttribParam }
 AttribParam     = IntegerLiteral
                 | StringLiteral
                 .
-VariableDecl    = "DIM" id "AS" TypeExpr
+VariableDecl    = "DIM" id "AS" TypeExpr [ "=" Expression ]
+                | "Var" id "=" Expression
                 .
-FunctionDecl    = "DECLARE" FunctionSignature
+FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
                 .
-FuncSignature   = "FUNCTION" id "(" [ FuncParamList ] ")" "AS" TypeExpr
+FuncSignature   = "FUNCTION" id [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
+                .
+SubSignature    = "SUB" [ "(" FuncParamList ")" ]
                 .
 FuncParamList   = FuncParam { "," FuncParam }
                 .
@@ -37,16 +45,41 @@ FunctionImpl    = FuncSignature
                   StatementList
                   "END" "FUNCTION"
                 .
+SubImpl         = SubSignature
+                  StatementList
+                  "END" "SUB"
+                .
 StatementList   = { Statement }
                 .
 Statement       = VariableDecl
                 | AssignStmt
                 | CallStmt
                 | ReturnStmt
+                | IfStmt
+                | ForStmt
                 .
 AssignStmt      = Expression "=" Expression
                 .
-CallStmt        = CallExpr
+CallStmt        = id
+                ( "(" [ funcArgList ] ")"
+                | [ funcArgList ] )
+                .
+ReturnStmt      = "RETURN" [ Expression ]
+                .
+IfStmt          = "IF" Expression "THEN"
+                  StatementList
+                  { "ELSE" "IF" Expression "THEN"
+                    StatementList
+                  }
+                  [ "ELSE"
+                    StatementList
+                  ]
+                  "END" "IF"
+                .
+ForStmt         = "FOR" ( id [ "AS" TypeExpr] | "VAR" id | Expression )
+                  "=" Expression "TO" Expression [ "STEP" Expression ]
+                  StatementList
+                  "NEXT"
                 .
 Expression      = IntegerLiteral
                 | FloatingPointLiteral

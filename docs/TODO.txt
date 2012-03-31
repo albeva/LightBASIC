@@ -1,16 +1,12 @@
 Todo for Milestone 3
 ======================
-[ ] add pointer indexing. 0 based
-    Dim argv As Byte Ptr Ptr
-    Dim arg As Byte Ptr
-    arg = argv[1]
 [✓] Add Any Ptr
 [✓] Add Null
 [✓] initalize apon declatation
     Dim i As Integer = 10
 [✓] add Var that deducts the type from right hand expression
     Var i = 10
-[ ] Add For
+[✓] Add For
     For i = 0 to 10 [ step Expression ]
         StmtList
     Next
@@ -18,7 +14,7 @@ Todo for Milestone 3
     printf "hello %s\n", "world"
 [ ] Overhaul the type system
 [ ] Support building for 32bit and 64bit
-[✓] Move internal type conversion too llvm into Type class
+[✓] Move internal type conversion to llvm into Type class
 [✓] Add easy way to add testcases to check compiler output
 [✓] Add subs
 
@@ -31,10 +27,12 @@ Todo for Milestone 4
 [ ] Implement proper error messages (lex, parse, sem. linking)
 [ ] Function pointers
 [ ] assignment expressions outside function bodies
+[ ] Implement EXIT (for) keyword
+[ ] Implement CONTINUE (for) keyword
 
 
-Misc
-======
+Future. M5 ?
+==============
 [ ] Add char type
     Need to think about this and figure it out how it should work,
     what's its underlying datatype, character encoding, etc... 
@@ -45,6 +43,11 @@ Misc
     [ ] allow assigning integer literals to Char type
     [ ] allow assigning array of integer values to Char array
         Dim hello As Char[] = [72, 101, 108, 108, 111, 0]
+[ ] add pointer indexing. 0 based
+    Dim argv As Byte Ptr Ptr
+    Dim arg As Byte Ptr
+    arg = argv[1]
+
 
 ===============================================================================
 

@@ -301,7 +301,10 @@ AstIfStmt * Parser::ifStmt()
 
 
 /**
- * ForStmt  = "FOR" ( VariableDecl | AssignStmt ) "TO" Expression [ "STEP" Expression ] \n
+ * ForStmt  = "FOR" ( id [ "AS" TypeExpr ]
+ *                  | "Var" id
+ *                  | Expression
+ *                  ) "=" Expression "TO" Expression [ "STEP" Expression ] \n
  *                StmtList
  *            "NEXT"
  */
@@ -312,8 +315,8 @@ AstForStmt * Parser::forStmt()
     
     // ( VariableDecl | AssignStmt )
     AstStatement * stmt = nullptr;
-    if (match(TokenType::Dim) || match(TokenType::Var)) {
-        auto dim = variableDecl();
+    if (match(TokenType::Var) || (match(TokenType::Identifier) && m_next->type() == TokenType::As)) {
+        auto dim = variableDecl(m_next->type() == TokenType::As);
         if (!dim->expr) {
             THROW_EXCEPTION("Expect expression");
         }
@@ -621,7 +624,7 @@ AstFuncParam * Parser::funcParam()
  * VariableDecl = "VAR" id "=" Expression
  *              | "DIM" id "AS" TypeExpr [ "=" Expression ]
  */
-AstVarDecl * Parser::variableDecl()
+AstVarDecl * Parser::variableDecl(bool skipKw)
 {
     // VAR ?
     if (accept(TokenType::Var)) {
@@ -635,8 +638,10 @@ AstVarDecl * Parser::variableDecl()
         return new AstVarDecl(id, nullptr, expr);
     }
     
-    // DIM
-    expect(TokenType::Dim);
+    if (!skipKw) {
+        // DIM
+        expect(TokenType::Dim);
+    }
     // id
     auto id = identifier();
     // AS

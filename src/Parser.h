@@ -43,7 +43,7 @@ namespace lbc {
         AstAttribute * attribute();
         AstIdentExpr * identifier();
         AstLiteralExpr * attribParam();
-        AstVarDecl * variableDecl();
+        AstVarDecl * variableDecl(bool skipKw = false);
         AstTypeExpr * typeExpr();
         AstFunctionDecl * functionDecl();
         AstFuncSignature * funcSignature();
