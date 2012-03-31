@@ -16,6 +16,17 @@ namespace lbc {
     class SymbolTable;
     class Symbol;
     class Type;
+    
+    /**
+     * cast policy
+     */
+    enum class CastPolicy {
+        // strict cast policy. No narrowing, no casts between incompatible types
+        // no casts between incompatible pointer types
+        Strict,
+        // Loose cast. Anything to anything if possible.
+        Reinterpret
+    };
 
     /**
      * Perform semantic analyses on the Ast tree
@@ -26,10 +37,10 @@ namespace lbc {
         SemanticAnalyser();
         
         // process the expression and if provided cast it to the given type
-        void expression(unique_ptr<AstExpression> & ast, Type * cast = nullptr);
+        void expression(unique_ptr<AstExpression> & ast, Type * cast = nullptr, CastPolicy policy = CastPolicy::Strict);
         
         // coerce expression to a type if needed
-        void coerce(unique_ptr<AstExpression> & ast, Type * type);
+        void coerce(unique_ptr<AstExpression> & ast, Type * type, CastPolicy policy = CastPolicy::Strict);
         
         // AstDeclList
         virtual void visit(AstProgram * ast);
@@ -60,6 +71,9 @@ namespace lbc {
         
         // AstIfStmt
         virtual void visit(AstIfStmt * ast);
+        
+        // AstForStmt
+        virtual void visit(AstForStmt * ast);
         
         // AstAddressOfExpr
         virtual void visit(AstAddressOfExpr * ast);

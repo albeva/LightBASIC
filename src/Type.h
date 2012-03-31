@@ -152,8 +152,8 @@ namespace lbc {
         // get indirection level
         int indirection() const { return m_level; }
         
-        // dereference the pointer by 1 level.
-        Type * dereference() const;
+        // dereference the pointer by n level. Default to 1
+        Type * dereference(int levels = 1) const;
         
         // get string representation
         virtual string toString();

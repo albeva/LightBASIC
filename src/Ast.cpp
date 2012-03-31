@@ -107,6 +107,10 @@ AstIfStmt::AstIfStmt(AstExpression * expr, AstStatement * trueBlock, AstStatemen
 : expr(expr), trueBlock(trueBlock), falseBlock(falseBlock) {}
 
 
+// AstForStmt
+AstForStmt::AstForStmt(AstStatement * stmt, AstExpression * end, AstExpression * step, AstStmtList * block)
+: stmt(stmt), end(end), step(step), block(block) {}
+
 //----------------------------------------------------------------------------------------------------------------------
 // Expressions
 //----------------------------------------------------------------------------------------------------------------------

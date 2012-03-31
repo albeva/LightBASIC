@@ -20,7 +20,6 @@
 using namespace lbc;
 
 
-
 //
 // create new one
 SemanticAnalyser::SemanticAnalyser()
@@ -37,22 +36,48 @@ SemanticAnalyser::SemanticAnalyser()
  * Process the expression. If type coercion is required
  * then insert AstCastExpr node in front of current ast expression
  */
-void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast, Type * cast)
+void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast, Type * cast, CastPolicy policy)
 {
+    // current symbol
     SCOPED_GUARD(m_id);
     SCOPED_GUARD(m_symbol);
+    
+    // the expression
     ast->accept(this);
     
-    if (cast) coerce(ast, cast);
+    // cast
+    if (cast) coerce(ast, cast, policy);
 }
 
 
 /**
  * coerce expression to a type if needed. Allow only "safe" implicit casts
  */
-void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type)
+void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type, CastPolicy policy)
 {
     if (!type->compare(ast->type)) {
+        
+        auto rightType = ast->type;
+        auto leftType = type;
+        
+        // strict cast policy:
+        // - no data narrowing (int -> short)
+        // - no casts between incompatible pointer types (except nullptr and any ptr)
+        if (policy == CastPolicy::Strict) {
+            // check for incompatible pointer type assignments
+            if (leftType->isPointer()) {
+                if (!rightType->isPointer()) {
+                    THROW_EXCEPTION(string("Assigning a non pointer to a pointer: ") + rightType->toString());
+                }
+                if (!rightType->IsAnyPtr() && !leftType->IsAnyPtr() && !leftType->compare(rightType)) {
+                    THROW_EXCEPTION(string("Mismatching pointer types: ") + leftType->toString() + " and " + rightType->toString());
+                }
+            } else if (rightType->isPointer()) {
+                THROW_EXCEPTION(string("Invalid type conversion from ") + leftType->toString() + " to " + rightType->toString());
+            }
+        }
+        
+        // create cast expression and inject it into the ast tree
         auto expr = ast.release();
         ast.reset(new AstCastExpr(expr));
         ast->type = type;
@@ -257,7 +282,7 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     }
     // declared with VAR
     else {
-        expression(ast->expr); // ->accept(this);
+        expression(ast->expr);
         m_type = ast->expr->type;
         // can this type be instantiated?
         if (!m_type->isInstantiable()) {
@@ -320,29 +345,15 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
         if (pt->indirection() < deref) {
             THROW_EXCEPTION(string("Dereferencing ") + help + " of type " + pt->toString() + " too many levels");
         }
-        leftType = pt->indirection() - deref == 0
-                 ? pt->getBaseType()
-                 : PtrType::get(pt->getBaseType(), pt->indirection() - deref);
+        leftType = pt->dereference(deref);
         if (!leftType->isInstantiable()) {
             THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + leftType->toString());
         }
     }
     
-    // right hand side
+    // do type casting
+    // this can throw if incompatible types
     ast->right->accept(this);
-    auto rightType = ast->right->type;
-    
-    // check for incompatible pointer type assignments
-    if (leftType->isPointer()) {
-        if (!rightType->isPointer()) {
-            THROW_EXCEPTION(string("Assigning a non pointer to a pointer: ") + rightType->toString());
-        }
-        if (!rightType->IsAnyPtr() && !leftType->IsAnyPtr() && !leftType->compare(rightType)) {
-            THROW_EXCEPTION(string("Mismatching pointer types: ") + leftType->toString() + " and " + rightType->toString());
-        }
-    }
-    
-    // coerce
     coerce(ast->right, leftType);
 }
 
@@ -384,6 +395,37 @@ void SemanticAnalyser::visit(AstIfStmt * ast)
         }
         ast->falseBlock->accept(this);
     }
+}
+
+
+//
+// AstForStmt
+void SemanticAnalyser::visit(AstForStmt * ast)
+{
+    // new scope
+    SCOPED_GUARD(m_table);
+    m_table = new SymbolTable(m_table);
+    
+    // expr = initializer
+    ast->stmt->accept(this);
+    Type * type = nullptr;
+    if (ast->stmt->is(Ast::VarDecl)) {
+        type = static_cast<AstVarDecl *>(ast->stmt.get())->symbol->type();
+    } else if (ast->stmt->is(Ast::AssignStmt)) {
+        type = static_cast<AstAssignStmt *>(ast->stmt.get())->left->type;
+    }
+    
+    // TP end condition. cast
+    expression(ast->end, type);
+    
+    // step ?
+    if (ast->step) {
+        expression(ast->step, type);
+    }
+    
+    // the body
+    ast->block->symbolTable = m_table;
+    ast->block->accept(this);
 }
 
 

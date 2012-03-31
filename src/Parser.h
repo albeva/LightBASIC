@@ -55,6 +55,7 @@ namespace lbc {
         AstAssignStmt * assignStmt();
         AstCallStmt * callStmt();
         AstIfStmt * ifStmt();
+        AstForStmt * forStmt();
         AstCallExpr * callExpr();
         AstExpression * expression();
         AstReturnStmt * returnStmt();

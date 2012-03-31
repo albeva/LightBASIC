@@ -202,10 +202,17 @@ string PtrType::toString()
 /**
  * dereference to hold pointer
  */
-Type * PtrType::dereference() const
+Type * PtrType::dereference(int levels) const
 {
-    if (indirection() == 1) return getBaseType();
-    return PtrType::get(getBaseType(), indirection() - 1);
+    assert(levels > 0);
+    assert(levels <= indirection());
+    
+    int n = indirection() - levels;
+    if (n == 0) {
+        return getBaseType();
+    } else {
+        return PtrType::get(getBaseType(), n);
+    }
 }
 
 

@@ -19,7 +19,7 @@ do
     echo "$red\c"
     ../lbc $file -o $output
     echo "$reset\c"
-	if [ $? = 0 ]; then
+    if [ -e $output ]; then
         echo "$red\c"
         ./$output | FileCheck $file
         echo "$reset\c"

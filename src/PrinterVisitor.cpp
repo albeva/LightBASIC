@@ -11,7 +11,11 @@ using namespace lbc;
 
 //
 // create the printer
-PrinterVisitor::PrinterVisitor() : m_indent(0), m_elseIf(false) {}
+PrinterVisitor::PrinterVisitor()
+:   m_indent(0),
+    m_elseIf(false),
+    m_doInline(false)
+{}
 
 
 //
@@ -27,11 +31,16 @@ string PrinterVisitor::indent(int change)
 // AstAssignStmt
 void PrinterVisitor::visit(AstAssignStmt * ast)
 {
-    std::cout << indent();
+    // indent
+    if (!m_doInline) std::cout << indent();
+    
+    // left = right
     if (ast->left) ast->left->accept(this);
     std::cout << " = ";
     if (ast->right) ast->right->accept(this);
-    std::cout << std::endl;
+    
+    // \n
+    if (!m_doInline) std::cout << std::endl;
 }
 
 
@@ -89,6 +98,42 @@ void PrinterVisitor::visit(AstIfStmt * ast)
 
 
 //
+// AstForStmt
+void PrinterVisitor::visit(AstForStmt * ast)
+{   
+    // for
+    std::cout << indent() << "FOR ";
+    
+    // lhs = expr
+    if (ast->stmt) {
+        SCOPED_GUARD(m_doInline);
+        m_doInline = true;
+        ast->stmt->accept(this);
+    }
+    
+    // to expr
+    std::cout << " TO ";
+    if (ast->end) ast->end->accept(this);
+    
+    // [ step expr ]
+    if (ast->step) {
+        std::cout << " STEP ";
+        ast->step->accept(this);
+    }
+    
+    // \n
+    std::cout << '\n';
+    if (ast->block) {
+        SCOPED_GUARD(m_indent);
+        m_indent++;
+        ast->block->accept(this);
+    }
+    // Next
+    std::cout << indent() << "NEXT\n";
+}
+
+
+//
 // AstDeclaration
 void PrinterVisitor::visit(AstDeclaration * ast)
 {
@@ -100,8 +145,11 @@ void PrinterVisitor::visit(AstDeclaration * ast)
 // AstVarDecl
 void PrinterVisitor::visit(AstVarDecl * ast)
 {
+    // indent
+    if (!m_doInline) std::cout << indent();
+    // DIM
     if (ast->typeExpr) {
-        std::cout << indent() << "DIM ";
+        std::cout << "DIM ";
         if (ast->id) ast->id->accept(this);
         std::cout << " AS ";
         if (ast->typeExpr) ast->typeExpr->accept(this);
@@ -109,16 +157,18 @@ void PrinterVisitor::visit(AstVarDecl * ast)
             std::cout << " = ";
             ast->expr->accept(this);
         }
-        std::cout << std::endl;
-    } else {
-        std::cout << indent() << "VAR ";
+    }
+    // VAR
+    else {
+        std::cout << "VAR ";
         if (ast->id) ast->id->accept(this);
         if (ast->expr) {
             std::cout << " = ";
             ast->expr->accept(this);
         }
-        std::cout << std::endl;
     }
+    // \n
+    if (!m_doInline) std::cout << std::endl;
 }
 
 

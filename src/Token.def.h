@@ -34,6 +34,8 @@
     _( Assign,          "="     ) \
     _( Equal,           "="     ) \
     _( NotEqual,        "<>"    ) \
+    _( LessThanEqual,   "<="    ) \
+    _( GreaterThanEqual,">="    ) \
     _( AddressOf,       "&"     ) \
     _( Dereference,     "*"     ) \
     _( Ellipsis,        "..."   )
@@ -57,7 +59,13 @@
     _( Any,             "ANY"       ) \
     _( If,              "IF"        ) \
     _( Then,            "THEN"      ) \
-    _( Else,            "ELSE"      )
+    _( Else,            "ELSE"      ) \
+    _( For,             "FOR"       ) \
+    _( To,              "TO"        ) \
+    _( Step,            "STEP"      ) \
+    _( Next,            "NEXT"      ) \
+    _( Continue,        "CONTINUE"  ) \
+    _( Exit,            "EXIT"      )
 
 //
 // Types define the type keywords

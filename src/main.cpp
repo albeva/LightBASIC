@@ -53,6 +53,9 @@ int main(int argc, const char * argv[])
         for (auto & file : ctx->get(Context::Source)) {
             auto ast = parser->parse(make_shared<SourceFile>(file));
             if (ast) {
+//                // print
+//                ast->accept(new PrinterVisitor());
+                
                 // analyse
                 ast->accept(semantic.get());
                 

@@ -313,7 +313,7 @@ namespace lbc {
     
     
     /**
-     * If statement
+     * IF statement
      */
     struct AstIfStmt : AstStatement
     {
@@ -329,6 +329,23 @@ namespace lbc {
         DECLARE_AST(IfStmt);
     };
     
+    
+    /**
+     * FOR statement
+     */
+    struct AstForStmt : AstStatement
+    {
+        // create
+        AstForStmt(AstStatement * stmt = nullptr, AstExpression * end = nullptr, AstExpression * step = nullptr, AstStmtList * block = nullptr);
+        // AstVarDeclStmt | AstAssignStmt
+        unique_ptr<AstStatement> stmt;
+        // id begin, end and step expressions
+        unique_ptr<AstExpression> end, step;
+        //the body
+        unique_ptr<AstStmtList> block;
+        // content node
+        DECLARE_AST(ForStmt);
+    };
     
     
     //--------------------------------------------------------------------------

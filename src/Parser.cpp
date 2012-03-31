@@ -116,6 +116,7 @@ AstStmtList * Parser::statementList()
         switch(m_token->type()) {
             case TokenType::End:
             case TokenType::Else:
+            case TokenType::Next:
                 return ast;
             default: {
                 auto stmt = statement();
@@ -135,6 +136,7 @@ AstStmtList * Parser::statementList()
  *              | FuncCallExpr
  *              | ReturnStmt
  *              | IfStmt
+ *              | ForStmt
  */
 AstStatement * Parser::statement()
 {
@@ -163,6 +165,9 @@ AstStatement * Parser::statement()
             break;
         case TokenType::If:
             stmt = ifStmt();
+            break;
+        case TokenType::For:
+            stmt = forStmt();
             break;
         default:
             THROW_EXCEPTION(string("Invalid input. Expected statement. Found: ") + m_token->name());
@@ -292,6 +297,49 @@ AstIfStmt * Parser::ifStmt()
     
     // done
     return new AstIfStmt(expr, trueBlock, falseBlock);
+}
+
+
+/**
+ * ForStmt  = "FOR" ( VariableDecl | AssignStmt ) "TO" Expression [ "STEP" Expression ] \n
+ *                StmtList
+ *            "NEXT"
+ */
+AstForStmt * Parser::forStmt()
+{
+    // "FOR"
+    expect(TokenType::For);
+    
+    // ( VariableDecl | AssignStmt )
+    AstStatement * stmt = nullptr;
+    if (match(TokenType::Dim) || match(TokenType::Var)) {
+        auto dim = variableDecl();
+        if (!dim->expr) {
+            THROW_EXCEPTION("Expect expression");
+        }
+        stmt = dim;
+    } else {
+        stmt = assignStmt();
+    }
+    
+    // "TO" expression
+    expect(TokenType::To);
+    auto end = expression();
+    
+    // ["STEP" expression]
+    auto step = accept(TokenType::Step) ? expression() : nullptr;
+    
+    // end of line
+    expect(TokenType::EndOfLine);
+    
+    // StmtList
+    auto block = statementList();
+    
+    // "NEXT"
+    expect(TokenType::Next);
+    
+    // done
+    return new AstForStmt(stmt, end, step, block);
 }
 
 

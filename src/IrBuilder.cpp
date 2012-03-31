@@ -22,7 +22,7 @@ IrBuilder::IrBuilder()
     m_table(nullptr),
     m_function(nullptr),
     m_block(nullptr),
-    m_endIfBlock(nullptr),
+    m_edgeBlock(nullptr),
     m_value(nullptr),
     m_isElseIf(false)
 {
@@ -37,7 +37,7 @@ void IrBuilder::visit(AstProgram * ast)
     m_module = nullptr;
     m_function = nullptr;
     m_block = nullptr;
-    m_endIfBlock = nullptr;
+    m_edgeBlock = nullptr;
     m_value = nullptr;
     m_table = nullptr;
     m_isElseIf = false;
@@ -260,12 +260,14 @@ void IrBuilder::visit(AstVarDecl * ast)
             constant,
             id
         );
+        m_value = sym->value ;
     } else {
         sym->value = new llvm::AllocaInst(llType, id, m_block);
         if (ast->expr) {
             ast->expr->accept(this);
             new llvm::StoreInst(m_value, sym->value, m_block);
         }
+        m_value = sym->value;
     }
 }
 
@@ -273,24 +275,21 @@ void IrBuilder::visit(AstVarDecl * ast)
 //
 // AstAssignStmt
 void IrBuilder::visit(AstAssignStmt * ast)
-{
-    // left value
-    llvm::Value * dst = nullptr;
+{    
+    // right hand expression
+    ast->right->accept(this);
+    auto src = m_value;
     
     // dereference ?
     if (ast->left->is(Ast::DereferenceExpr)) {
         static_cast<AstDereferenceExpr *>(ast->left.get())->expr->accept(this);
-        dst = m_value;
     } else {
-        dst = m_table->get(static_cast<AstIdentExpr *>(ast->left.get())->token->lexeme())->value;
+        m_value = m_table->get(static_cast<AstIdentExpr *>(ast->left.get())->token->lexeme())->value;
         m_lastId = static_cast<AstIdentExpr *>(ast->left.get())->token->lexeme();
     }
     
-    // right hand expression
-    ast->right->accept(this);
-    
     // store nstr
-    new llvm::StoreInst(m_value, dst, m_block);
+    new llvm::StoreInst(src, m_value, m_block);
 }
 
 
@@ -313,6 +312,7 @@ void IrBuilder::visit(AstDereferenceExpr * ast)
 }
 
 
+
 //
 //
 void IrBuilder::visit(AstBinaryExpr * ast)
@@ -323,27 +323,12 @@ void IrBuilder::visit(AstBinaryExpr * ast)
     // right
     ast->rhs->accept(this);
     auto right = m_value;
-    // resulting type
     
     // integer types
-    if (ast->lhs->type->isIntegral() || ast->lhs->type->isPointer()) {
-        llvm::CmpInst::Predicate pred;
-        auto local = ast->token->type();
-        if (local == TokenType::Equal)          pred = llvm::CmpInst::Predicate::ICMP_EQ;
-        else if (local == TokenType::NotEqual)  pred = llvm::CmpInst::Predicate::ICMP_NE;
-        
-        m_value = new llvm::ICmpInst(*m_block, pred, left, right, "");
-    }
-    // fp types
-    else if (ast->lhs->type->isFloatingPoint())
-    {
-        llvm::CmpInst::Predicate pred;
-        auto local = ast->token->type();
-        if (local == TokenType::Equal)          pred = llvm::CmpInst::Predicate::FCMP_OEQ;
-        else if (local == TokenType::NotEqual)  pred = llvm::CmpInst::Predicate::FCMP_UNE;
-        
-        m_value = new llvm::FCmpInst(*m_block, pred, left, right, "");
-    }
+    auto type = ast->lhs->type;
+    
+    // generate the instruction
+    m_value = emitBinaryExpr(left, right, ast->token->type(), type);
     
     // cast i1 to i8
     // get cast opcode
@@ -366,6 +351,47 @@ void IrBuilder::visit(AstCastExpr * ast)
     ast->expr->accept(this);
     auto src = ast->expr->type;
     auto dst = ast->type;
+    m_value = emitCastExpr(m_value, src, dst);
+}
+
+
+
+/**
+ * emit binary expression instruction
+ */
+llvm::Value * IrBuilder::emitBinaryExpr(llvm::Value * left, llvm::Value * right, TokenType op, Type * type)
+{
+    if (type->isIntegral() || type->isPointer()) {
+        auto isgned = type->isSignedIntegral();
+        llvm::CmpInst::Predicate pred;
+        if (op == TokenType::Equal)                  pred = llvm::CmpInst::Predicate::ICMP_EQ;
+        else if (op == TokenType::NotEqual)          pred = llvm::CmpInst::Predicate::ICMP_NE;
+        else if (op == TokenType::LessThanEqual)     pred = isgned ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
+        else if (op == TokenType::GreaterThanEqual)  pred = isgned ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
+        
+        return new llvm::ICmpInst(*m_block, pred, left, right, "");
+    }
+    // fp types
+    else if (type->isFloatingPoint())
+    {
+        llvm::CmpInst::Predicate pred;
+        if (op == TokenType::Equal)                  pred = llvm::CmpInst::Predicate::FCMP_OEQ;
+        else if (op == TokenType::NotEqual)          pred = llvm::CmpInst::Predicate::FCMP_UNE;
+        else if (op == TokenType::LessThanEqual)     pred = llvm::CmpInst::Predicate::FCMP_OLE;
+        else if (op == TokenType::GreaterThanEqual)  pred = llvm::CmpInst::Predicate::FCMP_OGE;
+        
+       return new llvm::FCmpInst(*m_block, pred, left, right, "");
+    }
+    
+    THROW_EXCEPTION("Invalid types");
+}
+
+
+/**
+ * Emit cast instruction
+ */
+llvm::Value * IrBuilder::emitCastExpr(llvm::Value * value, Type * src, Type * dst)
+{
     bool srcSigned = src->isSignedIntegral();
     
     // if target is boolean
@@ -373,30 +399,32 @@ void IrBuilder::visit(AstCastExpr * ast)
     if (dst->isBoolean()) {
         if (src->isIntegral()) {
             auto const_int = llvm::ConstantInt::get(src->llvm(), 0);
-            m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_int, "");
+            value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, value, const_int, "");
             srcSigned = false;
         } else if (src->isFloatingPoint()) {
             auto const_fp = llvm::ConstantFP::get(src->llvm(), 0);
-            m_value = new llvm::FCmpInst(*m_block, llvm::ICmpInst::FCMP_UNE, m_value, const_fp, "");
+            value = new llvm::FCmpInst(*m_block, llvm::ICmpInst::FCMP_UNE, value, const_fp, "");
             srcSigned = false;
         } else if (src->isPointer()) {
             auto const_null = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(src->llvm()));
-            m_value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, m_value, const_null, "");
+            value = new llvm::ICmpInst(*m_block, llvm::ICmpInst::ICMP_NE, value, const_null, "");
             srcSigned = false;
         }
     }
     
     // get cast opcode
     auto opcode = llvm::CastInst::getCastOpcode(
-        m_value,
+        value,
         srcSigned,
         dst->llvm(),
         dst->isSignedIntegral()
     );
     
     // create cast instruction
-    m_value = llvm::CastInst::Create(opcode, m_value, dst->llvm(), "", m_block);
+    return llvm::CastInst::Create(opcode, value, dst->llvm(), "", m_block);
 }
+
+
 
 
 //
@@ -444,7 +472,7 @@ void IrBuilder::visit(AstCallStmt * ast)
 void IrBuilder::visit(AstIfStmt * ast)
 {
     m_lastId = "";
-    SCOPED_GUARD(m_endIfBlock);
+    SCOPED_GUARD(m_edgeBlock);
     SCOPED_GUARD(m_isElseIf);
     
     // expression
@@ -454,27 +482,25 @@ void IrBuilder::visit(AstIfStmt * ast)
     m_value = new llvm::TruncInst(m_value, llvm::Type::getInt1Ty(m_module->getContext()), "", m_block);
     
     // true block
-    llvm::BasicBlock * trueBlock = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_endIfBlock);
-    
-    // else block
-    llvm::BasicBlock * falseBlock = ast->falseBlock
-                                  ? llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_endIfBlock)
-                                  : nullptr;
+    auto trueBlock  = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_edgeBlock);
+    auto falseBlock = ast->falseBlock
+                    ? llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_edgeBlock)
+                    : nullptr;
     // end block
     if (m_isElseIf) {
         m_isElseIf = false;
     } else {
-        m_endIfBlock = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_endIfBlock);
+        m_edgeBlock = llvm::BasicBlock::Create(m_module->getContext(), "", m_function, m_edgeBlock);
     }
     
     // create branch instruction
-    llvm::BranchInst::Create(trueBlock, falseBlock ? falseBlock : m_endIfBlock, m_value, m_block);
+    llvm::BranchInst::Create(trueBlock, falseBlock ? falseBlock : m_edgeBlock, m_value, m_block);
     
     // process true block
     m_block = trueBlock;
     ast->trueBlock->accept(this);
     if (!m_block->getTerminator()) {
-        llvm::BranchInst::Create(m_endIfBlock, m_block);
+        llvm::BranchInst::Create(m_edgeBlock, m_block);
     }
     
     // process falseBlock
@@ -483,15 +509,80 @@ void IrBuilder::visit(AstIfStmt * ast)
         m_block = falseBlock;
         ast->falseBlock->accept(this);
         if (!m_isElseIf && !m_block->getTerminator()) {
-            llvm::BranchInst::Create(m_endIfBlock, m_block);
+            llvm::BranchInst::Create(m_edgeBlock, m_block);
         }
     }
     
     // set end block as the new block
-    if (!m_isElseIf) m_block = m_endIfBlock;
+    if (!m_isElseIf) m_block = m_edgeBlock;
 }
 
 
+//
+// AstForStmt
+void IrBuilder::visit(AstForStmt * ast)
+{
+    SCOPED_GUARD(m_edgeBlock);
+    SCOPED_GUARD(m_table);
+    m_table = ast->block->symbolTable;
+    
+    // blocks
+    auto for_head = llvm::BasicBlock::Create(m_module->getContext(), "for_head", m_function, m_edgeBlock);
+    auto for_body = llvm::BasicBlock::Create(m_module->getContext(), "for_body", m_function, m_edgeBlock);
+    auto for_foot = llvm::BasicBlock::Create(m_module->getContext(), "for_foot", m_function, m_edgeBlock);
+    auto for_exit = llvm::BasicBlock::Create(m_module->getContext(), "for_exit", m_function, m_edgeBlock);
+    
+    // initialize the variable
+    ast->stmt->accept(this);
+    auto alloc = m_value;
+    // jump to head
+    llvm::BranchInst::Create(for_head, m_block);
+    m_block = for_head;
+    m_edgeBlock = for_body;
+    
+    // load the var
+    auto value = new llvm::LoadInst(alloc, "", m_block);
+
+    // load the end
+    ast->end->accept(this);
+    auto end = m_value;
+    auto type = ast->end->type; // should get from the value !
+
+    // compare
+    m_value = emitBinaryExpr(value, end, TokenType::LessThanEqual, type);
+    llvm::BranchInst::Create(for_body, for_exit, m_value, m_block);
+    m_block = for_body;
+    m_edgeBlock = for_foot;
+    
+    // the body
+    ast->block->accept(this);
+    if (!m_block->getTerminator()) {
+        llvm::BranchInst::Create(for_foot, m_block);
+    }
+    m_block = for_foot;
+    m_edgeBlock = for_exit;
+    
+    // the footer
+    if (ast->step) {
+        ast->step->accept(this);
+    } else {
+        if (type->isIntegral()) {
+            m_value = llvm::ConstantInt::get(type->llvm(), 1, type->isSignedIntegral());
+        } else if (type->isFloatingPoint()) {
+            m_value = llvm::ConstantFP::get(type->llvm(), 1.0);
+        } else {
+            THROW_EXCEPTION(string("Unsupported type in FOR: ") + type->toString());
+        }
+    }
+    
+    // ADD instruction
+    m_value = llvm::BinaryOperator::Create(llvm::Instruction::Add, value, m_value, "", m_block);
+    new llvm::StoreInst(m_value, alloc, m_block);
+    llvm::BranchInst::Create(for_head, m_block);
+    
+    // done
+    m_block = for_exit;
+}
 
 
 

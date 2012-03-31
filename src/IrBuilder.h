@@ -22,6 +22,8 @@ namespace lbc {
     
     // the symbol table
     class SymbolTable;
+    class Type;
+    enum class TokenType : int;
 
     /**
      * Generate the llvm structure
@@ -85,10 +87,20 @@ namespace lbc {
         // AstIfStmt
         virtual void visit(AstIfStmt * ast);
         
+        // AstForStmt
+        virtual void visit(AstForStmt * ast);
+        
+        
+        // emit binary instruction
+        llvm::Value * emitBinaryExpr(llvm::Value * left, llvm::Value * right, TokenType op, Type * type);
+        
+        // emit cast instruction
+        llvm::Value * emitCastExpr(llvm::Value * value, Type * from, Type * to);
+        
     private:
         llvm::Module * m_module;
         llvm::Function * m_function;
-        llvm::BasicBlock * m_block, * m_endIfBlock;
+        llvm::BasicBlock * m_block, * m_edgeBlock;
         llvm::Value * m_value;
         SymbolTable * m_table;
         bool m_isElseIf;

@@ -21,7 +21,8 @@
     _( AssignStmt )         \
     _( ReturnStmt )         \
     _( CallStmt )           \
-    _( IfStmt )
+    _( IfStmt )             \
+    _( ForStmt )
 
 //
 // declarations. These nodes can have attributes
