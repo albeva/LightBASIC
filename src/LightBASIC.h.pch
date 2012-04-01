@@ -28,6 +28,7 @@
 
 // llvm
 #include "stdint.h"
+#include <llvm/Config/config.h>
 #include "llvm/DerivedTypes.h"
 #include "llvm/LLVMContext.h"
 #include "llvm/Module.h"

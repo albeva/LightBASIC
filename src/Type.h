@@ -147,7 +147,7 @@ namespace lbc {
         virtual bool equal(Type * ) const;
         
         // get pointer size
-        virtual int getSizeInBits() const { return 64; }
+        virtual int getSizeInBits() const;
         
         // get indirection level
         int indirection() const { return m_level; }

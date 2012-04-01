@@ -7,6 +7,8 @@
 //
 #include "Type.h"
 #include "Token.h"
+#include "Context.h"
+
 using namespace lbc;
 
 //static unordered_map<TokenType,     Type * > _primitives;
@@ -166,6 +168,18 @@ PtrType * PtrType::getAnyPtr()
  * clean up
  */
 PtrType::~PtrType() {}
+
+
+/**
+ * Get pointer size
+ */
+int PtrType::getSizeInBits() const
+{
+    auto & ctx = Context::getGlobalContext();
+    if (ctx.arch() == Architecture::X86_32) return 32;
+    else if (ctx.arch() == Architecture::X86_64) return 64;
+    THROW_EXCEPTION("Invalid architecture");
+}
 
 
 /**

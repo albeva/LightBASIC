@@ -29,7 +29,7 @@ namespace lbc {
     struct Parser : NonCopyable
     {
         // create new parser object
-        Parser(const shared_ptr<Context> & ctx);
+        Parser(Context & ctx);
         
         // parse and return AstProgram
         AstProgram * parse(const shared_ptr<Source> & source);
@@ -74,11 +74,11 @@ namespace lbc {
         void move();
         
         // tokens
-        shared_ptr<Context>   m_ctx;
-        Token               * m_token;
-        Token               * m_next;
-        Lexer               * m_lexer;
-        bool                  m_expectAssign;
+        Context     & m_ctx;
+        Token       * m_token;
+        Token       * m_next;
+        Lexer       * m_lexer;
+        bool        m_expectAssign;
     };
     
 }

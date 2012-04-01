@@ -24,7 +24,7 @@ namespace lbc {
     public:
         
         // create
-        Emitter(const shared_ptr<Context> & ctx);
+        Emitter(Context & ctx);
         
         // destroy
         virtual ~Emitter();
@@ -36,8 +36,25 @@ namespace lbc {
         void generate();
         
     private:
+        
+        // tools
+        enum class Tool {
+            LlvmOpt,            // LLVM optimizer
+            LlvmLlc,            // LLVM assembler (native code generator)
+            Ld                  // System linker
+        };
+        
         // compiler state context
-        shared_ptr<Context> m_context;
+        Context & m_ctx;
+        
+        // emit targets
+        void emitExecutable();
+        void emitLibrary();
+        void emitObjOrAsm();
+        void emitLlvm();
+        
+        // get tool path
+        string getTool(Tool tool);
         
         // llvm modules
         vector<unique_ptr<llvm::Module>> m_modules;

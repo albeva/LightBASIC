@@ -20,7 +20,7 @@ using namespace lbc;
 /**
  * Create the parser object
  */
-Parser::Parser(const shared_ptr<Context> & ctx)
+Parser::Parser(Context & ctx)
 : m_ctx(ctx), m_token(nullptr), m_next(nullptr), m_lexer(nullptr), m_expectAssign(false)
 {
 }

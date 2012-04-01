@@ -12,6 +12,7 @@
 #include "Type.h"
 #include "Symbol.h"
 #include "SymbolTable.h"
+#include "Context.h"
 
 
 #define LOG_VAR(var)    std::cout << #var << " = " << (var) << " : " << __FUNCTION__ << "(" << __LINE__ << ")\n";
@@ -22,12 +23,13 @@ using namespace lbc;
 
 //
 // create new one
-SemanticAnalyser::SemanticAnalyser()
+SemanticAnalyser::SemanticAnalyser(Context & ctx)
 :   RecursiveAstVisitor(true),
     m_table(nullptr),
     m_symbol(nullptr),
     m_type(nullptr),
-    m_callStmt(false)
+    m_callStmt(false),
+    m_ctx(ctx)
 {
 }
 

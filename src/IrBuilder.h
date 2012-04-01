@@ -23,6 +23,7 @@ namespace lbc {
     // the symbol table
     class SymbolTable;
     class Type;
+    class Context;
     enum class TokenType : int;
 
     /**
@@ -31,7 +32,7 @@ namespace lbc {
     struct IrBuilder : RecursiveAstVisitor
     {
         // create
-        IrBuilder();
+        IrBuilder(Context & ctx);
         
         // get the generated module
         llvm::Module * getModule() const { return m_module; }
@@ -106,6 +107,7 @@ namespace lbc {
         bool m_isElseIf;
         string m_lastId;
         unordered_map<string, llvm::Value *> m_stringLiterals;
+        Context & m_ctx;
     };
     
 }

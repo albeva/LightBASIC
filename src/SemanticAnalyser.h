@@ -16,6 +16,7 @@ namespace lbc {
     class SymbolTable;
     class Symbol;
     class Type;
+    class Context;
     
     /**
      * cast policy
@@ -34,7 +35,7 @@ namespace lbc {
      */
     struct SemanticAnalyser : RecursiveAstVisitor
     {
-        SemanticAnalyser();
+        SemanticAnalyser(Context & ctx);
         
         // process the expression and if provided cast it to the given type
         void expression(unique_ptr<AstExpression> & ast, Type * cast = nullptr, CastPolicy policy = CastPolicy::Strict);
@@ -110,6 +111,8 @@ namespace lbc {
         string m_id;
         // is callstmt ?
         bool m_callStmt;
+        // context
+        Context & m_ctx;
     };
 
 }
