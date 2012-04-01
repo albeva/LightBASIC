@@ -368,6 +368,8 @@ AstReturnStmt * Parser::returnStmt()
  *            | False
  *            | Null
  *            | "(" Expression ")"
+ *            | Comparison
+ *            | Mod
  *
  * for the moment use hackish way to add
  * a binary expression.
@@ -440,7 +442,13 @@ AstExpression * Parser::expression()
             case TokenType::Assign:
                 m_token->type(TokenType::Equal);
                 // fall through!
-            case TokenType::NotEqual: {
+            case TokenType::Modulus:
+            case TokenType::NotEqual:
+            case TokenType::GreaterThan:
+            case TokenType::GreaterThanEqual:
+            case TokenType::LessThan:
+            case TokenType::LessThanEqual:
+            {
                 auto op = m_token;
                 move();
                 expr = new AstBinaryExpr(op, expr, expression());

@@ -463,61 +463,76 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
     ast->rhs->accept(this);
     auto right = ast->rhs->type;
     
-    // int -> 
-    if (left->isIntegral()) {
-        // -> int
-        if (right->isIntegral()) {
-            if (left->getSizeInBits() > right->getSizeInBits()) {
-                coerce(ast->rhs, left);
-            } else if (left->getSizeInBits() < right->getSizeInBits()) {
-                coerce(ast->lhs, right);
-            }
+    if (ast->token->type() == TokenType::Modulus) {
+        if (!left->isIntegral() || !right->isIntegral()) {
+            THROW_EXCEPTION(string("Invalid operand to binary expression(") + left->toString() + ", " + right->toString() + ")");
         }
-        // -> fp
-        else if (right->isFloatingPoint()) {
-            coerce(ast->lhs, right);
-        }
-        // -> ptr
-        else {
-            THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
-        }
-    }
-    // fp ->
-    else if (left->isFloatingPoint()) {
-        // -> int
-        if (right->isIntegral()) {
+        if (left->getSizeInBits() > right->getSizeInBits()) {
             coerce(ast->rhs, left);
+            ast->type = left;
+        } else if (left->getSizeInBits() < right->getSizeInBits()) {
+            coerce(ast->lhs, right);
+            ast->type = right;
+        } else {
+            ast->type = left;
         }
-        // -> fp
-        else if (right->isFloatingPoint()) {
-            if (left->getSizeInBits() > right->getSizeInBits()) {
-                coerce(ast->rhs, left);
-            } else if (left->getSizeInBits() < right->getSizeInBits()) {
+    } else {
+        // int -> 
+        if (left->isIntegral()) {
+            // -> int
+            if (right->isIntegral()) {
+                if (left->getSizeInBits() > right->getSizeInBits()) {
+                    coerce(ast->rhs, left);
+                } else if (left->getSizeInBits() < right->getSizeInBits()) {
+                    coerce(ast->lhs, right);
+                }
+            }
+            // -> fp
+            else if (right->isFloatingPoint()) {
                 coerce(ast->lhs, right);
             }
-        }
-        // ->ptr
-        else {
-            THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
-        }
-    }
-    // ptr
-    else if (left->isPointer()) {
-        if (right->isPointer()) {
-            if (left->IsAnyPtr() && !right->IsAnyPtr()) {
-                coerce(ast->lhs, right);
-            } else if (!left->IsAnyPtr() && right->IsAnyPtr()) {
-                coerce(ast->rhs, left);
-            } else if (!right->compare(left)) {
+            // -> ptr
+            else {
                 THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
             }
-        } else {
-            THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
         }
+        // fp ->
+        else if (left->isFloatingPoint()) {
+            // -> int
+            if (right->isIntegral()) {
+                coerce(ast->rhs, left);
+            }
+            // -> fp
+            else if (right->isFloatingPoint()) {
+                if (left->getSizeInBits() > right->getSizeInBits()) {
+                    coerce(ast->rhs, left);
+                } else if (left->getSizeInBits() < right->getSizeInBits()) {
+                    coerce(ast->lhs, right);
+                }
+            }
+            // ->ptr
+            else {
+                THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+            }
+        }
+        // ptr
+        else if (left->isPointer()) {
+            if (right->isPointer()) {
+                if (left->IsAnyPtr() && !right->IsAnyPtr()) {
+                    coerce(ast->lhs, right);
+                } else if (!left->IsAnyPtr() && right->IsAnyPtr()) {
+                    coerce(ast->rhs, left);
+                } else if (!right->compare(left)) {
+                    THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+                }
+            } else {
+                THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+            }
+        }
+        
+        // result of logical comparison
+        ast->type = PrimitiveType::get(TokenType::Bool);
     }
-    
-    // result of logical comparison
-    ast->type = PrimitiveType::get(TokenType::Bool);
 }
 
 

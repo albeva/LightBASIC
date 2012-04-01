@@ -36,9 +36,12 @@
     _( NotEqual,        "<>"    ) \
     _( LessThanEqual,   "<="    ) \
     _( GreaterThanEqual,">="    ) \
+    _( LessThan,        "<"     ) \
+    _( GreaterThan,     ">"     ) \
     _( AddressOf,       "&"     ) \
     _( Dereference,     "*"     ) \
-    _( Ellipsis,        "..."   )
+    _( Ellipsis,        "..."   ) \
+    _( Modulus,         "MOD"   )
 
 //
 // KEYWORD defines keyword tokens

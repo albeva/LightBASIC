@@ -330,17 +330,20 @@ void IrBuilder::visit(AstBinaryExpr * ast)
     // generate the instruction
     m_value = emitBinaryExpr(left, right, ast->token->type(), type);
     
-    // cast i1 to i8
-    // get cast opcode
-    auto opcode = llvm::CastInst::getCastOpcode(
-        m_value,
-        false,
-        ast->type->llvm(),
-        false
-    );
-    
-    // create cast instruction
-    m_value = llvm::CastInst::Create(opcode, m_value, ast->type->llvm(), "", m_block);
+    // expand to 8bit if is boolean and int1
+    if (m_value->getType()->isIntegerTy(1)) {
+        // cast i1 to i8
+        // get cast opcode
+        auto opcode = llvm::CastInst::getCastOpcode(
+            m_value,
+            false,
+            ast->type->llvm(),
+            false
+        );
+        
+        // create cast instruction
+        m_value = llvm::CastInst::Create(opcode, m_value, ast->type->llvm(), "", m_block);
+    }
 }
 
 
@@ -361,28 +364,41 @@ void IrBuilder::visit(AstCastExpr * ast)
  */
 llvm::Value * IrBuilder::emitBinaryExpr(llvm::Value * left, llvm::Value * right, TokenType op, Type * type)
 {
-    if (type->isIntegral() || type->isPointer()) {
-        auto isgned = type->isSignedIntegral();
-        llvm::CmpInst::Predicate pred;
-        if (op == TokenType::Equal)                  pred = llvm::CmpInst::Predicate::ICMP_EQ;
-        else if (op == TokenType::NotEqual)          pred = llvm::CmpInst::Predicate::ICMP_NE;
-        else if (op == TokenType::LessThanEqual)     pred = isgned ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
-        else if (op == TokenType::GreaterThanEqual)  pred = isgned ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
-        
-        return new llvm::ICmpInst(*m_block, pred, left, right, "");
+    if (op == TokenType::Modulus) {
+        llvm::Instruction::BinaryOps instr;
+        if (type->isSignedIntegral()) {
+            instr = llvm::Instruction::SRem;
+        } else {
+            instr = llvm::Instruction::URem;
+        }
+        return llvm::BinaryOperator::Create(instr, left, right, "", m_block);        
+    } else {
+        if (type->isIntegral() || type->isPointer()) {
+            auto isgned = type->isSignedIntegral();
+            llvm::CmpInst::Predicate pred;
+            if (op == TokenType::Equal)                 pred = llvm::CmpInst::Predicate::ICMP_EQ;
+            else if (op == TokenType::NotEqual)         pred = llvm::CmpInst::Predicate::ICMP_NE;
+            else if (op == TokenType::LessThanEqual)    pred = isgned ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
+            else if (op == TokenType::GreaterThanEqual) pred = isgned ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
+            else if (op == TokenType::LessThan)         pred = isgned ? llvm::CmpInst::Predicate::ICMP_SLT : llvm::CmpInst::Predicate::ICMP_ULT;
+            else if (op == TokenType::GreaterThan)      pred = isgned ? llvm::CmpInst::Predicate::ICMP_SGT : llvm::CmpInst::Predicate::ICMP_UGT;            
+            
+            return new llvm::ICmpInst(*m_block, pred, left, right, "");
+        }
+        // fp types
+        else if (type->isFloatingPoint())
+        {
+            llvm::CmpInst::Predicate pred;
+            if (op == TokenType::Equal)                 pred = llvm::CmpInst::Predicate::FCMP_OEQ;
+            else if (op == TokenType::NotEqual)         pred = llvm::CmpInst::Predicate::FCMP_UNE;
+            else if (op == TokenType::LessThanEqual)    pred = llvm::CmpInst::Predicate::FCMP_OLE;
+            else if (op == TokenType::GreaterThanEqual) pred = llvm::CmpInst::Predicate::FCMP_OGE;
+            else if (op == TokenType::LessThan)         pred = llvm::CmpInst::Predicate::FCMP_OLT;
+            else if (op == TokenType::GreaterThan)      pred = llvm::CmpInst::Predicate::FCMP_OGT;
+            
+           return new llvm::FCmpInst(*m_block, pred, left, right, "");
+        }
     }
-    // fp types
-    else if (type->isFloatingPoint())
-    {
-        llvm::CmpInst::Predicate pred;
-        if (op == TokenType::Equal)                  pred = llvm::CmpInst::Predicate::FCMP_OEQ;
-        else if (op == TokenType::NotEqual)          pred = llvm::CmpInst::Predicate::FCMP_UNE;
-        else if (op == TokenType::LessThanEqual)     pred = llvm::CmpInst::Predicate::FCMP_OLE;
-        else if (op == TokenType::GreaterThanEqual)  pred = llvm::CmpInst::Predicate::FCMP_OGE;
-        
-       return new llvm::FCmpInst(*m_block, pred, left, right, "");
-    }
-    
     THROW_EXCEPTION("Invalid types");
 }
 

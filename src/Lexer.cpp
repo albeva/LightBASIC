@@ -204,8 +204,8 @@ Token * Lexer::next()
         
         // 3 char operators
         #define IMPL_TOKENS(ID, STR, ...)                       \
-            if (sizeof(STR) == 4 && STR[0] == ch)               \
-                if (STR[1] == nextCh && STR[2] == m_input[1]) { \
+            if (sizeof(STR) == 4 && STR[0] == toupper(ch))      \
+                if (STR[1] == toupper(nextCh) && STR[2] == toupper(m_input[1])) { \
                     m_input++; m_input++; m_col += 2;           \
                     return MakeToken(TokenType::ID, STR);       \
                 }
@@ -214,8 +214,8 @@ Token * Lexer::next()
         
         // 2 char operators
         #define IMPL_TOKENS(ID, STR, ...)                       \
-            if (sizeof(STR) == 3 && STR[0] == ch)               \
-                if (STR[1] == nextCh) {                         \
+            if (sizeof(STR) == 3 && STR[0] == toupper(ch))      \
+                if (STR[1] == toupper(nextCh)) {                \
                     m_input++; m_col++;                         \
                     return MakeToken(TokenType::ID, STR);       \
                 }
