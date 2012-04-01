@@ -13,28 +13,53 @@ Todo for Milestone 3
 [✓] make parenthesis optional for FuncStmt
     printf "hello %s\n", "world"
 [ ] Overhaul the type system
-[ ] Support building for 32bit and 64bit
+[✓] Support building for 32bit and 64bit
 [✓] Move internal type conversion to llvm into Type class
 [✓] Add easy way to add testcases to check compiler output
 [✓] Add subs
+[✓] Add generic command line options
+    [✓] --help      Display available options
+    [✓] --version   Show version information
+    [✓] -v          Show verbose output
+    [✓] -o <file>   Write output to <file>
+    [✓] -O<number>  Set optimization level to <number>
+    [✓] -m32        Generate 32bit i386 code
+    [✓] -m64        Generate 64bit x86-64 code
+    [✓] -S          Only compile. Emit assembly files
+    [✓] -c          Compile and assemble. Emit object files
+    [✓] -llvm       Emit llvm files
 
 
 Todo for Milestone 4
 ======================
 [ ] Add calling convention info to FunctionType
 [ ] add name mangling to Type
-[ ] Implement compile driver and standard commandline arguments
 [ ] Implement proper error messages (lex, parse, sem. linking)
 [ ] Function pointers
 [ ] assignment expressions outside function bodies
 [ ] Implement EXIT (for) keyword
 [ ] Implement CONTINUE (for) keyword
+[ ] Implement DO ... LOOP construct
 [ ] Improve FOR
     [ ] Support negative STEP (decrement)
 
 
 Future. M5 ?
 ==============
+[ ] Implement Expression parser
+    [ ] Addition
+    [ ] Subtraction
+    [ ] Multiplication
+    [ ] Division
+    [ ] Modulus
+    [ ] Logical And
+    [ ] Logical Or
+    [ ] Not
+    [ ] Xor
+    [ ] POW ^
+    [ ] Bitwise And &
+    [ ] Bitwise Or |
+    [ ] Comparisons
 [ ] Add char type
     Need to think about this and figure it out how it should work,
     what's its underlying datatype, character encoding, etc... 

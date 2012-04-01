@@ -143,7 +143,7 @@ void showHelp()
         "OPTIONS:\n"
         "  --help\t"        "Display available options\n"
         "  --version\t"     "Show version information\n"
-        "  -v\t\t"          "Show commands to run and use verbose outpu\n"
+        "  -v\t\t"          "Show verbose output\n"
         "  -o <file>\t"     "Write output to <file>\n"
         "  -O<number>\t"    "Set optimization level to <number>\n"
         "  -m32\t\t"        "Generate 32bit i386 code\n"
