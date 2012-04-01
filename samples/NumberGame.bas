@@ -20,8 +20,8 @@ Sub main
     srand time(null)
     
     '' the secret number
-    var secret = rand() mod 100
-    var answer = 0
+    Var secret = rand() Mod 100
+    Var answer = 0
     
     '' show help
     printf "Guess a number between 1 and 100. 0 to exit. You have 25 tries\n"
@@ -30,7 +30,7 @@ Sub main
     For Var i = 1 To 25
         printf "Attempt %d: ", i
         scanf "%d", &answer
-        if answer = 0 Then
+        If answer = 0 Then
             Return
         Else If answer = secret Then
             printf "Correct\n"
@@ -44,4 +44,4 @@ Sub main
     
     '' too bad
     printf "Game Over. Correct number was %d\n", secret
-End sub
+End Sub
