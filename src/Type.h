@@ -60,7 +60,7 @@ namespace lbc {
         bool compare(Type * ) const;
         
         // return base type
-        Type *  getBaseType() const { return m_baseType; }
+        Type * getBaseType() const { return m_baseType; }
         
         // get type kind
         TypeKind kind() const { return m_kind; }

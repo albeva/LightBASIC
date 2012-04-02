@@ -9,7 +9,7 @@
 using namespace lbc;
 
 // destructor
-AstVisitor::~AstVisitor() {}
+AstVisitor::~AstVisitor() = default;
 
 // implement the methods
 #define DECL_AST(C) \

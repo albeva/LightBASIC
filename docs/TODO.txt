@@ -2,7 +2,7 @@ Todo for Milestone 3
 ======================
 [✓] Add Any Ptr
 [✓] Add Null
-[✓] initalize apon declatation
+[✓] initialize upon declaration
     Dim i As Integer = 10
 [✓] add Var that deducts the type from right hand expression
     Var i = 10
@@ -15,7 +15,7 @@ Todo for Milestone 3
 [ ] Overhaul the type system
 [✓] Support building for 32bit and 64bit
 [✓] Move internal type conversion to llvm into Type class
-[✓] Add easy way to add testcases to check compiler output
+[✓] Add easy way to add test cases to check compiler output
 [✓] Add subs
 [✓] Add generic command line options
     [✓] --help      Display available options
@@ -32,6 +32,13 @@ Todo for Milestone 3
 
 Todo for Milestone 4
 ======================
+[ ] Adopt a coding standard for c++ source
+    - http://llvm.org/docs/CodingStandards.html
+      o This is really nice one. Especially since already using llvm. Few minor
+        annoyances with this one is that it likes to CamelCase variables with
+        capital first letter...
+[ ] create bootstrap and make scripts for compiling lbc on other
+    systems and compilers. Or use some alternative build system? scons ?
 [ ] Add calling convention info to FunctionType
 [ ] add name mangling to Type
 [ ] Implement proper error messages (lex, parse, sem. linking)
@@ -42,6 +49,7 @@ Todo for Milestone 4
 [ ] Implement DO ... LOOP construct
 [ ] Improve FOR
     [ ] Support negative STEP (decrement)
+    [ ] Optimize for simple cases
 
 
 Future. M5 ?
@@ -117,7 +125,7 @@ Todo for Milestone 2
 
 Todo for Milestone 2
 ======================
-Simple fullscale compiler
+Simple full scale compiler
 * reads input from input files
 * compiles to llvm assembly
 * links the final executable

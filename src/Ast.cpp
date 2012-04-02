@@ -30,6 +30,12 @@ AST_CONTENT_NODES(IMPL_AST)
 
 
 /**
+ * destroy root node
+ */
+AstRoot::~AstRoot() = default;
+
+
+/**
  * print out the ast node source using PrinterVisitor
  */
 void AstRoot::dump()

@@ -45,11 +45,11 @@ namespace lbc {
      */
     struct AstRoot : NonCopyable
     {
+        // virtual destructor
+        virtual ~AstRoot();
+        
         // visitor pattern
         virtual void accept(AstVisitor * visitor) = 0;
-        
-        // virtual destructor
-        virtual ~AstRoot() = default;
         
         // is of type?
         virtual bool is(Ast ast) const = 0;
