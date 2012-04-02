@@ -23,12 +23,12 @@ SourceFile::SourceFile(const FS::path & path) : Source(path.string())
 
     // get lenght
     stream.seekg(0, ios::end);
-    size_t size = (size_t)stream.tellg();
+    streamsize size = (streamsize)stream.tellg();
     stream.seekg (0, ios::beg);
     
     // the buffer
-    m_data = new char[size + 1];
-    stream.read(m_data, size);
+    m_data = new CharT[size + 1];
+    stream.read((char *)m_data, size);
     stream.close();
     m_data[size] = '\0';
 }

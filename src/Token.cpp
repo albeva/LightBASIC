@@ -13,14 +13,14 @@ using namespace lbc;
 
 // define array of token names
 static string _tokenNames[] = {
-    #define IMPL_TOKENS(ID, NAME, ...) NAME,
+    #define IMPL_TOKENS(ID, NAME) NAME, 
     ALL_TOKENS(IMPL_TOKENS)
     #undef IMPL_TOKENS
 };
 
 // keyword lookup
 static unordered_map<std::string, TokenType> _tokenTypes = boost::assign::map_list_of
-    #define IMPL_TOKENS(ID, NAME, ...) (NAME, TokenType::ID)
+    #define IMPL_TOKENS(ID, NAME) (NAME, TokenType::ID)
     ALL_TOKENS(IMPL_TOKENS)
     #undef IMPL_TOKENS
 ;

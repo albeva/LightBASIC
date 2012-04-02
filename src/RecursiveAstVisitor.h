@@ -17,6 +17,8 @@ namespace lbc {
      */
     struct RecursiveAstVisitor : AstVisitor
     {
+        using AstVisitor::visit;
+        
         // create
         RecursiveAstVisitor(bool debug = false) : AstVisitor(debug) {}
         
@@ -32,8 +34,6 @@ namespace lbc {
         virtual void visit(AstAttributeList * ast);
         // AstAttribParamList
         virtual void visit(AstAttribParamList * ast);
-        
-        private:
         
     };
 

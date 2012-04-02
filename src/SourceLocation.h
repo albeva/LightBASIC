@@ -18,8 +18,8 @@ namespace lbc {
     struct SourceLocation
     {
         /// create Source Reference
-        SourceLocation(unsigned int line, unsigned short column, unsigned short length)
-        : line(line), column(column), length(length)
+        SourceLocation(unsigned int ln, unsigned short col, unsigned short len)
+        : line(ln), column(col), length(len)
         {}
         
         // copy contructor

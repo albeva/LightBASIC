@@ -15,7 +15,7 @@ using namespace lbc;
 static unordered_map<Type *,        unordered_map<int, PtrType *>> _ptrTypes;
 
 static PrimitiveType _primitives[] = {
-    #define P(ID, STR, SIZE, F, ...) \
+    #define P(ID, STR, SIZE, F) \
         PrimitiveType((Type::TypeKind)(F | Type::Primitive), SIZE),
     PRIMITIVE_TYPES(P)
     #undef P
@@ -61,7 +61,7 @@ bool Type::compare(Type *type) const
 /**
  * create basic type
  */
-PrimitiveType::PrimitiveType(TypeKind kind, int size)
+PrimitiveType::PrimitiveType(TypeKind kind, unsigned size)
 : Type(nullptr, kind, true), m_size(size)
 {}
 
@@ -97,7 +97,7 @@ bool PrimitiveType::equal(Type *type) const
  */
 string PrimitiveType::toString()
 {
-    for (int i = 0; i < sizeof(_primitives); i++) {
+    for (size_t i = 0; i < sizeof(_primitives); i++) {
         if (&_primitives[i] == this) {
             TokenType idx = (TokenType)(i + (int)TokenType::Byte);
             #define F(ID, STR, ...) if (idx == TokenType::ID) return STR;
@@ -173,12 +173,13 @@ PtrType::~PtrType() {}
 /**
  * Get pointer size
  */
-int PtrType::getSizeInBits() const
+unsigned PtrType::getSizeInBits() const
 {
     auto & ctx = Context::getGlobalContext();
     if (ctx.arch() == Architecture::X86_32) return 32;
     else if (ctx.arch() == Architecture::X86_64) return 64;
     THROW_EXCEPTION("Invalid architecture");
+    return 0;
 }
 
 
@@ -255,9 +256,23 @@ llvm::Type * PtrType::genLlvmType()
 /**
  * create function type
  */
-FunctionType::FunctionType(Type *result, bool vararg)
-: Type(result, TypeKind::Function, false), vararg(vararg)
+FunctionType::FunctionType(Type *result, bool va)
+: Type(result, TypeKind::Function, false), vararg(va)
 {}
+
+
+/**
+ * Get size of the function type (size of the pointer)
+ */
+unsigned FunctionType::getSizeInBits() const
+{
+    auto & ctx = Context::getGlobalContext();
+    if (ctx.arch() == Architecture::X86_32) return 32;
+    else if (ctx.arch() == Architecture::X86_64) return 64;
+    THROW_EXCEPTION("Invalid architecture");
+    return 0;
+}
+
 
 
 /**
@@ -316,12 +331,12 @@ string FunctionType::toString()
  */
 llvm::Type * FunctionType::genLlvmType()
 {
-    std::vector<llvm::Type*> params;
-    for (auto p : this->params) {
-        params.push_back(p->llvm());
+    std::vector<llvm::Type*> pv;
+    for (auto p : params) {
+        pv.push_back(p->llvm());
     }
     llvm::Type * res = result() ? result()->llvm() : llvm::Type::getVoidTy(llvm::getGlobalContext());
-    return llvm::FunctionType::get(res, params, vararg);
+    return llvm::FunctionType::get(res, pv, vararg);
 }
 
 

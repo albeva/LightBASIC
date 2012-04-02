@@ -411,6 +411,7 @@ llvm::Value * IrBuilder::emitBinaryExpr(llvm::Value * left, llvm::Value * right,
         }
     }
     THROW_EXCEPTION("Invalid types");
+    return nullptr;
 }
 
 

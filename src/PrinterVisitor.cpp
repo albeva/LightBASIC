@@ -23,7 +23,7 @@ PrinterVisitor::PrinterVisitor()
 string PrinterVisitor::indent(int change)
 {
     m_indent += change;
-    return string(m_indent * 4, ' ');
+    return string((size_t)(m_indent * 4), ' ');
 }
 
 
@@ -135,7 +135,7 @@ void PrinterVisitor::visit(AstForStmt * ast)
 
 //
 // AstDeclaration
-void PrinterVisitor::visit(AstDeclaration * ast)
+void PrinterVisitor::visit(AstDeclaration *)
 {
     std::cout << "SHOULD NEVER GET HERE!";
 }

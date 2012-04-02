@@ -31,5 +31,15 @@
 //
 // User facing types (keywords)
 #define KEYWORD_TYPES(_) \
-    PRIMITIVE_TYPES(_)
+    _( Byte,        "BYTE"      ) \
+    _( UByte,       "UBYTE"     ) \
+    _( Short,       "SHORT"     ) \
+    _( UShort,      "USHORT"    ) \
+    _( Integer,     "INTEGER"   ) \
+    _( UInteger,    "UINTEGER"  ) \
+    _( LongInt,     "LONGINT"   ) \
+    _( ULongInt,    "ULONGINT"  ) \
+    _( Single,      "SINGLE"    ) \
+    _( Double,      "DOUBLE"    ) \
+    _( Bool,        "BOOL"      )
 

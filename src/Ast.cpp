@@ -19,7 +19,7 @@ using namespace lbc;
 // * pool allocation
 // * virtual destructor so that unique_ptr can work
 // * virtual visitor method
-#define IMPL_AST(C, ...) \
+#define IMPL_AST(C) \
     static boost::pool<> _pool##C(sizeof(Ast##C)); \
     void * Ast##C::operator new(size_t) { return _pool##C.malloc(); } \
     void Ast##C::operator delete(void * addr) { _pool##C.free(addr); } \
@@ -41,11 +41,11 @@ void AstRoot::dump()
 
 
 // AstProgram
-AstProgram::AstProgram(const string & name) : name(name) {}
+AstProgram::AstProgram(const string & n) : name(n) {}
 
 
 // AstDeclaration
-AstDeclaration::AstDeclaration(AstAttributeList * attribs) : attribs(attribs), symbol(nullptr) {}
+AstDeclaration::AstDeclaration(AstAttributeList * attrs) : attribs(attrs), symbol(nullptr) {}
 
 
 // AstAttributeList
@@ -53,7 +53,7 @@ AstAttributeList::AstAttributeList() {}
 
 
 // AstAttribute
-AstAttribute::AstAttribute(AstIdentExpr * id, AstAttribParamList * params) : id(id), params(params) {}
+AstAttribute::AstAttribute(AstIdentExpr * ID, AstAttribParamList * p) : id(ID), params(p) {}
 
 
 // AstAttribParamList
@@ -61,17 +61,17 @@ AstAttribParamList::AstAttribParamList() {}
 
 
 // AstVarDecl
-AstVarDecl::AstVarDecl(AstIdentExpr * id, AstTypeExpr * typeExpr, AstExpression * expr)
-: id(id), typeExpr(typeExpr), expr(expr) {}
+AstVarDecl::AstVarDecl(AstIdentExpr * ID, AstTypeExpr * typ, AstExpression * e)
+: id(ID), typeExpr(typ), expr(e) {}
 
 
 // AstFunctionDecl
-AstFunctionDecl::AstFunctionDecl(AstFuncSignature * signature) : signature(signature) {}
+AstFunctionDecl::AstFunctionDecl(AstFuncSignature * sig) : signature(sig) {}
 
 
 // AstFuncSignature
-AstFuncSignature::AstFuncSignature(AstIdentExpr * id, AstFuncParamList * params, AstTypeExpr * typeExpr, bool vararg)
-: id(id), params(params), typeExpr(typeExpr), vararg(vararg) {}
+AstFuncSignature::AstFuncSignature(AstIdentExpr * ID, AstFuncParamList * p, AstTypeExpr * typ, bool va)
+: id(ID), params(p), typeExpr(typ), vararg(va) {}
 
 
 // AstFuncParamList
@@ -79,11 +79,13 @@ AstFuncParamList::AstFuncParamList() {}
 
 
 // AstFuncParam
-AstFuncParam::AstFuncParam(AstIdentExpr * id, AstTypeExpr * typeExpr) : id(id), typeExpr(typeExpr) {}
+AstFuncParam::AstFuncParam(AstIdentExpr * ID, AstTypeExpr * typ)
+: id(ID), typeExpr(typ) {}
 
 
 // AstFunctionStmt
-AstFunctionStmt::AstFunctionStmt(AstFuncSignature * signature, AstStmtList * stmts) : signature(signature), stmts(stmts) {}
+AstFunctionStmt::AstFunctionStmt(AstFuncSignature * sig, AstStmtList * s)
+: signature(sig), stmts(s) {}
 
 
 // AstStmtList
@@ -91,25 +93,25 @@ AstStmtList::AstStmtList() : symbolTable(nullptr) {}
 
 
 // AstAssignStmt
-AstAssignStmt::AstAssignStmt(AstExpression * left, AstExpression * right) : left(left), right(right) {}
+AstAssignStmt::AstAssignStmt(AstExpression * l, AstExpression * r) : left(l), right(r) {}
 
 
 // AstReturnStmt
-AstReturnStmt::AstReturnStmt(AstExpression * expr) : expr(expr) {}
+AstReturnStmt::AstReturnStmt(AstExpression * e) : expr(e) {}
 
 
 // AstCallStmt
-AstCallStmt::AstCallStmt(AstCallExpr * expr) : expr(expr) {}
+AstCallStmt::AstCallStmt(AstCallExpr * e) : expr(e) {}
 
 
 // AstIfStmt
-AstIfStmt::AstIfStmt(AstExpression * expr, AstStatement * trueBlock, AstStatement * falseBlock)
-: expr(expr), trueBlock(trueBlock), falseBlock(falseBlock) {}
+AstIfStmt::AstIfStmt(AstExpression * e, AstStatement * t, AstStatement * f)
+: expr(e), trueBlock(t), falseBlock(f) {}
 
 
 // AstForStmt
-AstForStmt::AstForStmt(AstStatement * stmt, AstExpression * end, AstExpression * step, AstStmtList * block)
-: stmt(stmt), end(end), step(step), block(block) {}
+AstForStmt::AstForStmt(AstStatement * s, AstExpression * e, AstExpression * st, AstStmtList * b)
+: stmt(s), end(e), step(st), block(b) {}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Expressions
@@ -121,32 +123,32 @@ AstExpression::AstExpression() : type(nullptr) {}
 
 
 // AstCastExpr
-AstCastExpr::AstCastExpr(AstExpression * expr, AstTypeExpr * typeExpr) : expr(expr), typeExpr(typeExpr) {}
+AstCastExpr::AstCastExpr(AstExpression * e, AstTypeExpr * t) : expr(e), typeExpr(t) {}
 
 
 // AstAddressOfExpr
-AstAddressOfExpr::AstAddressOfExpr(AstIdentExpr * id) : id(id) {}
+AstAddressOfExpr::AstAddressOfExpr(AstIdentExpr * ID) : id(ID) {}
 
 
 // AstDereferenceExpr
-AstDereferenceExpr::AstDereferenceExpr(AstExpression * expr) : expr(expr) {}
+AstDereferenceExpr::AstDereferenceExpr(AstExpression * e) : expr(e) {}
 
 
 // AstIdentExpr
-AstIdentExpr::AstIdentExpr(Token * token) : token(token) {}
+AstIdentExpr::AstIdentExpr(Token * t) : token(t) {}
 
 
 // AstLiteralExpr
-AstLiteralExpr::AstLiteralExpr(Token * token) : token(token) {}
+AstLiteralExpr::AstLiteralExpr(Token * t) : token(t) {}
 
 
 // BinaryExpr
-AstBinaryExpr::AstBinaryExpr(Token * op, AstExpression * lhs, AstExpression * rhs)
-: token(op), lhs(lhs), rhs(rhs) {}
+AstBinaryExpr::AstBinaryExpr(Token * op, AstExpression * l, AstExpression * r)
+: token(op), lhs(l), rhs(r) {}
 
 
 // AstCallExpr
-AstCallExpr::AstCallExpr(AstIdentExpr * id, AstFuncArgList * args) : id(id), args(args) {}
+AstCallExpr::AstCallExpr(AstIdentExpr * ID, AstFuncArgList * a) : id(ID), args(a) {}
 
 
 // AstFuncArgList
@@ -154,4 +156,5 @@ AstFuncArgList::AstFuncArgList() {}
 
 
 // AstTypeExpr
-AstTypeExpr::AstTypeExpr(Token * token, int level) : token(token), level(level) {}
+AstTypeExpr::AstTypeExpr(Token * t, int l)
+: token(t), level(l) {}

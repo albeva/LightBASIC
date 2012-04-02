@@ -80,7 +80,7 @@ namespace lbc {
         // symbol table
         shared_ptr<SymbolTable> symbolTable;
         // content node
-        DECLARE_AST(Program);
+        DECLARE_AST(Program)
     };
 
 
@@ -101,7 +101,7 @@ namespace lbc {
         // declaration symbol. Does not own the symbol!
         Symbol * symbol;
         // content node
-        DECLARE_AST(Declaration);
+        DECLARE_AST(Declaration)
     };
     
     
@@ -115,7 +115,7 @@ namespace lbc {
         // hold list of attributes
         vector<unique_ptr<AstAttribute>> attribs;
         // content node
-        DECLARE_AST(AttributeList);
+        DECLARE_AST(AttributeList)
     };
     
     
@@ -131,7 +131,7 @@ namespace lbc {
         // attribute params
         unique_ptr<AstAttribParamList> params;
         // content node
-        DECLARE_AST(Attribute);
+        DECLARE_AST(Attribute)
     };
     
     
@@ -145,7 +145,7 @@ namespace lbc {
         // attribute params
         vector<unique_ptr<AstLiteralExpr>> params;
         // content node
-        DECLARE_AST(AttribParamList);
+        DECLARE_AST(AttribParamList)
     };
     
     
@@ -163,7 +163,7 @@ namespace lbc {
         // initalizer expression
         unique_ptr<AstExpression> expr;
         // content node
-        DECLARE_AST(VarDecl);
+        DECLARE_AST(VarDecl)
     };
     
     
@@ -177,7 +177,7 @@ namespace lbc {
         // function signature
         unique_ptr<AstFuncSignature> signature;
         // content node
-        DECLARE_AST(FunctionDecl);
+        DECLARE_AST(FunctionDecl)
     };
     
     
@@ -197,7 +197,7 @@ namespace lbc {
         // flags
         int vararg:1;
         // content node
-        DECLARE_AST(FuncSignature);
+        DECLARE_AST(FuncSignature)
     };
     
     
@@ -211,7 +211,7 @@ namespace lbc {
         // list of function parameters
         vector<unique_ptr<AstFuncParam>> params;
         // content node
-        DECLARE_AST(FuncParamList);
+        DECLARE_AST(FuncParamList)
     };
     
     
@@ -227,7 +227,7 @@ namespace lbc {
         // variable type
         unique_ptr<AstTypeExpr> typeExpr;
         // content node
-        DECLARE_AST(FuncParam);
+        DECLARE_AST(FuncParam)
     };
     
     
@@ -243,7 +243,7 @@ namespace lbc {
         // function body
         unique_ptr<AstStmtList> stmts;
         // content node
-        DECLARE_AST(FunctionStmt);
+        DECLARE_AST(FunctionStmt)
     };
     
     
@@ -264,7 +264,7 @@ namespace lbc {
         // associated symbol table. Does not own!
         SymbolTable * symbolTable;
         // content node
-        DECLARE_AST(StmtList);
+        DECLARE_AST(StmtList)
     };
     
     
@@ -280,7 +280,7 @@ namespace lbc {
         // the expression
         unique_ptr<AstExpression> right;
         // content node
-        DECLARE_AST(AssignStmt);
+        DECLARE_AST(AssignStmt)
     };
     
     
@@ -294,7 +294,7 @@ namespace lbc {
         // the expression
         unique_ptr<AstExpression> expr;
         // content node
-        DECLARE_AST(ReturnStmt);
+        DECLARE_AST(ReturnStmt)
     };
     
     
@@ -308,7 +308,7 @@ namespace lbc {
         // the call expression
         unique_ptr<AstCallExpr> expr;
         // content node
-        DECLARE_AST(CallStmt);
+        DECLARE_AST(CallStmt)
     };
     
     
@@ -326,7 +326,7 @@ namespace lbc {
         // else
         unique_ptr<AstStatement> falseBlock;
         // content node
-        DECLARE_AST(IfStmt);
+        DECLARE_AST(IfStmt)
     };
     
     
@@ -344,7 +344,7 @@ namespace lbc {
         //the body
         unique_ptr<AstStmtList> block;
         // content node
-        DECLARE_AST(ForStmt);
+        DECLARE_AST(ForStmt)
     };
     
     
@@ -364,7 +364,7 @@ namespace lbc {
         // expression type. Does not own!
         Type * type;
         // content node
-        DECLARE_AST(Expression);
+        DECLARE_AST(Expression)
     };
     
     
@@ -380,7 +380,7 @@ namespace lbc {
         // type expession
         unique_ptr<AstTypeExpr> typeExpr;
         // content node
-        DECLARE_AST(CastExpr);
+        DECLARE_AST(CastExpr)
     };
     
     
@@ -394,7 +394,7 @@ namespace lbc {
         // child expression
         unique_ptr<AstIdentExpr> id;
         // content node
-        DECLARE_AST(AddressOfExpr);
+        DECLARE_AST(AddressOfExpr)
     };
     
     
@@ -408,7 +408,7 @@ namespace lbc {
         // child expression
         unique_ptr<AstExpression> expr;
         // content node
-        DECLARE_AST(DereferenceExpr);
+        DECLARE_AST(DereferenceExpr)
     };
     
     
@@ -422,7 +422,7 @@ namespace lbc {
         // the id token
         unique_ptr<Token> token;
         // content node
-        DECLARE_AST(IdentExpr);
+        DECLARE_AST(IdentExpr)
     };
     
     
@@ -438,7 +438,7 @@ namespace lbc {
         // the value token
         unique_ptr<Token> token;
         // content node
-        DECLARE_AST(LiteralExpr);
+        DECLARE_AST(LiteralExpr)
     };
     
     
@@ -454,7 +454,7 @@ namespace lbc {
         // lhs, rhs
         unique_ptr<AstExpression> lhs, rhs;
         // content node
-        DECLARE_AST(BinaryExpr);
+        DECLARE_AST(BinaryExpr)
     };
     
     
@@ -470,7 +470,7 @@ namespace lbc {
         // parameters
         unique_ptr<AstFuncArgList> args;
         // content node
-        DECLARE_AST(CallExpr);
+        DECLARE_AST(CallExpr)
     };
     
     
@@ -484,7 +484,7 @@ namespace lbc {
         // list of arguments
         vector<unique_ptr<AstExpression>> args;
         // content node
-        DECLARE_AST(FuncArgList);
+        DECLARE_AST(FuncArgList)
     };
     
     
@@ -504,7 +504,7 @@ namespace lbc {
         // dereference level
         int level;
         // content node
-        DECLARE_AST(TypeExpr);
+        DECLARE_AST(TypeExpr)
     };
     
 }

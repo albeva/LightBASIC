@@ -35,6 +35,9 @@ namespace lbc {
      */
     struct SemanticAnalyser : RecursiveAstVisitor
     {
+        using RecursiveAstVisitor::visit;
+        
+        // create
         SemanticAnalyser(Context & ctx);
         
         // process the expression and if provided cast it to the given type

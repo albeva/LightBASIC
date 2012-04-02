@@ -13,7 +13,7 @@ using namespace lbc;
 /// Create instance
 SourceString::SourceString(const string & content, const string & name) : Source(name)
 {
-    m_data = new char[content.size() + 1];
+    m_data = new CharT[content.size() + 1];
     copy(content.begin(), content.end(), m_data);
     m_data[content.size()] = '\0';
 }

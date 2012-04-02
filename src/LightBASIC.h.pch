@@ -76,18 +76,18 @@ namespace lbc {
     template<typename T> struct ScopeGuard : NonCopyable{
 
         // create
-        ScopeGuard(T & value) : target(value), value(value)
+        ScopeGuard(T & value) : m_target(value), m_value(value)
         {
         }
 
         // restore
         ~ScopeGuard() {
-            target = value;
+            m_target = m_value;
         }
 
         // members
-        T & target;
-        T   value;
+        T & m_target;
+        T   m_value;
     };
 
     #define CONCATENATE_DETAIL(x, y) x##y

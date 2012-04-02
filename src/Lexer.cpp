@@ -27,7 +27,7 @@ enum {
 // Statically initialize CharInfo table based on ASCII character set
 // Reference: FreeBSD 7.2 /usr/share/misc/ascii
 // copied from clang source
-static const unsigned char CharInfo[256] =
+static const char CharInfo[256] =
 {
     // 0 NUL         1 SOH         2 STX         3 ETX
     // 4 EOT         5 ENQ         6 ACK         7 BEL
@@ -99,7 +99,7 @@ static const unsigned char CharInfo[256] =
 /**
  * Is part of identifier
  */
-static inline bool IsIdentifierBody(unsigned char ch)
+static inline bool IsIdentifierBody(char ch)
 {
     return (CharInfo[ch] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) ? true : false;
 }
@@ -108,7 +108,7 @@ static inline bool IsIdentifierBody(unsigned char ch)
 /**
  * is line or a file end?
  */
-static inline bool IsLineOrFileEnd(unsigned char ch)
+static inline bool IsLineOrFileEnd(char ch)
 {
     return ch == '\n' || ch == '\0';
 }
@@ -133,7 +133,9 @@ Lexer::Lexer(const shared_ptr<Source> & src)
  */
 Token * Lexer::next()
 {
-    unsigned char ch, nextCh, info;
+    Source::CharT ch, nextCh;
+    char info;
+    
     while((ch = *m_input) != '\0') {
         m_input++;
         m_col++;
@@ -203,7 +205,7 @@ Token * Lexer::next()
             return number();
         
         // 3 char operators
-        #define IMPL_TOKENS(ID, STR, ...)                       \
+        #define IMPL_TOKENS(ID, STR)                       \
             if (sizeof(STR) == 4 && STR[0] == toupper(ch))      \
                 if (STR[1] == toupper(nextCh) && STR[2] == toupper(m_input[1])) { \
                     m_input++; m_input++; m_col += 2;           \
@@ -213,7 +215,7 @@ Token * Lexer::next()
         #undef IMPL_TOKENS
         
         // 2 char operators
-        #define IMPL_TOKENS(ID, STR, ...)                       \
+        #define IMPL_TOKENS(ID, STR)                       \
             if (sizeof(STR) == 3 && STR[0] == toupper(ch))      \
                 if (STR[1] == toupper(nextCh)) {                \
                     m_input++; m_col++;                         \
@@ -223,7 +225,7 @@ Token * Lexer::next()
         #undef IMPL_TOKENS
         
         // 1 char operators
-        #define IMPL_TOKENS(ID, STR, ...)                       \
+        #define IMPL_TOKENS(ID, STR)                       \
             if (sizeof(STR) == 2 && STR[0] == ch)               \
                 return MakeToken(TokenType::ID, STR);
         TKN_OPERATOR(IMPL_TOKENS)
@@ -413,7 +415,7 @@ Token * Lexer::string()
  */
 Token * Lexer::MakeToken(TokenType type, int len)
 {
-    return new Token(type, SourceLocation(m_line, m_col, len));
+    return new Token(type, SourceLocation(m_line, m_col, (unsigned short)len));
 }
 
 
@@ -422,5 +424,5 @@ Token * Lexer::MakeToken(TokenType type, int len)
  */
 Token * Lexer::MakeToken(TokenType type, const std::string & lexeme, int len)
 {
-    return new Token(type, SourceLocation(m_line, m_col, len == -1 ? lexeme.length() : len), lexeme);
+    return new Token(type, SourceLocation(m_line, m_col, (unsigned short)(len == -1 ? (unsigned short)lexeme.length() : len)), lexeme);
 }

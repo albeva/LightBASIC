@@ -239,7 +239,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
             if (m_table->exists(paramId)) {
                 THROW_EXCEPTION(string("Duplicate defintion of ") + paramId);
             }
-            auto sym = new Symbol(paramId, funcType->params[i++], param.get(), nullptr);
+            auto sym = new Symbol(paramId, funcType->params[(size_t)(i++)], param.get(), nullptr);
             m_table->add(sym);
             param->symbol = sym;
         }
@@ -573,7 +573,7 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
         else if (!type->vararg && type->params.size() != ast->args->args.size()) {
             THROW_EXCEPTION("Argument count mismatch");
         }
-        int i = 0;
+        size_t i = 0;
         for(auto & arg : ast->args->args) {
             auto cast = type->params.size() > i ? type->params[i++] : nullptr;
             expression(arg, cast);

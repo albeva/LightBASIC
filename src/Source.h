@@ -231,7 +231,7 @@ namespace lbc {
     protected:
         
         /// pointer to character array
-        char * m_data;
+        CharT * m_data;
         
     private:
         typedef uint32_t OffsetType;

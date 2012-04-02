@@ -17,59 +17,59 @@ namespace lbc {
      */
     struct PrinterVisitor : RecursiveAstVisitor
     {
-        PrinterVisitor();
+        using RecursiveAstVisitor::visit;
         
-        // indent by number of spaces
-        string ndent(int change);
+        // create
+        PrinterVisitor();
 
         // AstAssignStmt
-        void visit(AstAssignStmt * ast);
+        virtual void visit(AstAssignStmt * ast);
         // AstReturnStmt
-        void visit(AstReturnStmt * ast);
+        virtual void visit(AstReturnStmt * ast);
         // AstCallStmt
-        void visit(AstCallStmt * ast);
+        virtual void visit(AstCallStmt * ast);
         // AstIfStmt
-        void visit(AstIfStmt * ast);
+        virtual void visit(AstIfStmt * ast);
         // AstForStmt
-        void visit(AstForStmt * ast);
+        virtual void visit(AstForStmt * ast);
         // AstDeclaration
-        void visit(AstDeclaration * ast);
+        virtual void visit(AstDeclaration * ast);
         // AstVarDecl
-        void visit(AstVarDecl * ast);
+        virtual void visit(AstVarDecl * ast);
         // AstFunctionDecl
-        void visit(AstFunctionDecl * ast);
+        virtual void visit(AstFunctionDecl * ast);
         // AstFuncSignature
-        void visit(AstFuncSignature * ast);
+        virtual void visit(AstFuncSignature * ast);
         // AstFunctionStmt
-        void visit(AstFunctionStmt * ast);
+        virtual void visit(AstFunctionStmt * ast);
         // AstCastExpr
-        void visit(AstCastExpr * ast);
+        virtual void visit(AstCastExpr * ast);
         // AstAddressOfExpr
-        void visit(AstAddressOfExpr * ast);
+        virtual void visit(AstAddressOfExpr * ast);
         // AstDereferenceExpr
-        void visit(AstDereferenceExpr * ast);        
+        virtual void visit(AstDereferenceExpr * ast);        
         // AstIdentExpr
-        void visit(AstIdentExpr * ast);
+        virtual void visit(AstIdentExpr * ast);
         // AstLiteralExpr
-        void visit(AstLiteralExpr * ast);
+        virtual void visit(AstLiteralExpr * ast);
         // AstBinaryExpr
-        void visit(AstBinaryExpr * ast);
+        virtual void visit(AstBinaryExpr * ast);
         // AstCallExpr
-        void visit(AstCallExpr * ast);
+        virtual void visit(AstCallExpr * ast);
         // AstAttributeList
-        void visit(AstAttributeList * ast);
+        virtual void visit(AstAttributeList * ast);
         // AstAttribParamList
-        void visit(AstAttribParamList * ast);
+        virtual void visit(AstAttribParamList * ast);
         // AstAttribute
-        void visit(AstAttribute * ast);
+        virtual void visit(AstAttribute * ast);
         // AstTypeExpr
-        void visit(AstTypeExpr * ast);
+        virtual void visit(AstTypeExpr * ast);
         // AstFuncParamList
-        void visit(AstFuncParamList * ast);
+        virtual void visit(AstFuncParamList * ast);
         // AstFuncParam
-        void visit(AstFuncParam * ast);
+        virtual void visit(AstFuncParam * ast);
         // AstFuncArgList
-        void visit(AstFuncArgList * ast);
+        virtual void visit(AstFuncArgList * ast);
         
     private:
         int m_indent;

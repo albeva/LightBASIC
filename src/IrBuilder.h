@@ -31,6 +31,8 @@ namespace lbc {
      */
     struct IrBuilder : RecursiveAstVisitor
     {
+        using RecursiveAstVisitor::visit;
+        
         // create
         IrBuilder(Context & ctx);
         

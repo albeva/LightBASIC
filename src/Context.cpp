@@ -13,14 +13,18 @@ using namespace lbc;
 #define LBC_DEF_OPT_LVL     (OptimizationLevel::O3)
 #define LBC_DEF_EMIT_TYP    (EmitType::Executable)
 
+// global context
+static Context * _globalContext = nullptr;
 
 /**
  * Get global context object
  */
 Context & Context::getGlobalContext()
 {
-    static Context _globalContext;
-    return _globalContext;
+    if (_globalContext == nullptr) {
+        _globalContext = new Context();
+    }
+    return *_globalContext;
 }
 
 
@@ -181,8 +185,8 @@ FS::path Context::resolveDir(const FS::path & dir) const
     
     // if nor absolute then check against registered global directories
     if (!path.is_absolute()) {
-        for (auto dir : m_resources[(int)ResourceType::GlobalPath]) {
-            FS::path tmp = dir / path;
+        for (auto d : m_resources[(int)ResourceType::GlobalPath]) {
+            FS::path tmp = d / path;
             if (FS::is_directory(tmp)) {
                 return tmp.normalize();
             }
@@ -193,6 +197,7 @@ FS::path Context::resolveDir(const FS::path & dir) const
     
     // not found
     THROW_EXCEPTION("Directory '" + dir.string() + "' not found" );
+    return "";
 }
 
 
@@ -223,4 +228,5 @@ FS::path Context::resolveFile(const FS::path & file, ResourceType type) const
     
     // not found
     THROW_EXCEPTION("File '" + file.string() + "' not found");
+    return "";
 }

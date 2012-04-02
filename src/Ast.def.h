@@ -93,6 +93,6 @@
 
 //
 // forward declare all AST nodes
-#define __AST_DECLARE_CLASS(C, ...) class Ast##C;
+#define __AST_DECLARE_CLASS(C) class Ast##C;
 #define AST_DECLARE_CLASSES() \
     AST_ALL_NODES(__AST_DECLARE_CLASS)

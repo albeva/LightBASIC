@@ -66,7 +66,7 @@ namespace lbc {
         TypeKind kind() const { return m_kind; }
         
         // get size
-        virtual int getSizeInBits() const { return 0; }
+        virtual unsigned getSizeInBits() const { return 0; }
         
         // get string representation of the type
         virtual string toString() = 0;
@@ -107,7 +107,7 @@ namespace lbc {
         static Type * get(TokenType type);
         
         // create
-        PrimitiveType(TypeKind kind, int size);
+        PrimitiveType(TypeKind kind, unsigned size);
         
         // cleanup
         virtual ~PrimitiveType();
@@ -116,7 +116,7 @@ namespace lbc {
         virtual bool equal(Type *) const;
         
         // get the size
-        virtual int getSizeInBits() const { return m_size; }
+        virtual unsigned getSizeInBits() const { return m_size; }
         
         // get string representation
         virtual string toString();
@@ -125,7 +125,7 @@ namespace lbc {
         virtual llvm::Type * genLlvmType();
         
     private:
-        int m_size;
+        unsigned m_size;
     };
     
     
@@ -147,7 +147,7 @@ namespace lbc {
         virtual bool equal(Type * ) const;
         
         // get pointer size
-        virtual int getSizeInBits() const;
+        virtual unsigned getSizeInBits() const;
         
         // get indirection level
         int indirection() const { return m_level; }
@@ -190,7 +190,7 @@ namespace lbc {
         void result(Type * type) { m_baseType = type; }
         
         // get pointer size
-        virtual int getSizeInBits() const { return 64; }
+        virtual unsigned getSizeInBits() const;
         
         // get string representation
         virtual string toString();
