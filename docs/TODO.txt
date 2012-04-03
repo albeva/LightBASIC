@@ -1,55 +1,52 @@
-Todo for Milestone 3
-======================
-[✓] Add Any Ptr
-[✓] Add Null
-[✓] initialize upon declaration
-    Dim i As Integer = 10
-[✓] add Var that deducts the type from right hand expression
-    Var i = 10
-[✓] Add For
-    For i = 0 to 10 [ step Expression ]
-        StmtList
-    Next
-[✓] make parenthesis optional for FuncStmt
-    printf "hello %s\n", "world"
-[ ] Overhaul the type system
-[✓] Support building for 32bit and 64bit
-[✓] Move internal type conversion to llvm into Type class
-[✓] Add easy way to add test cases to check compiler output
-[✓] Add subs
-[✓] Add generic command line options
-    [✓] --help      Display available options
-    [✓] --version   Show version information
-    [✓] -v          Show verbose output
-    [✓] -o <file>   Write output to <file>
-    [✓] -O<number>  Set optimization level to <number>
-    [✓] -m32        Generate 32bit i386 code
-    [✓] -m64        Generate 64bit x86-64 code
-    [✓] -S          Only compile. Emit assembly files
-    [✓] -c          Compile and assemble. Emit object files
-    [✓] -llvm       Emit llvm files
-
-
 Todo for Milestone 4
 ======================
 [ ] Adopt a coding standard for c++ source
     - http://llvm.org/docs/CodingStandards.html
-      o This is really nice one. Especially since already using llvm. Few minor
-        annoyances with this one is that it likes to CamelCase variables with
+      o This is really nice one. Especially since already using llvm. Minor
+        annoyance with this one is that it likes to CamelCase variables with
         capital first letter...
-[ ] create bootstrap and make scripts for compiling lbc on other
-    systems and compilers. Or use some alternative build system? scons ?
-[ ] Add calling convention info to FunctionType
-[ ] add name mangling to Type
-[ ] Implement proper error messages (lex, parse, sem. linking)
-[ ] Function pointers
+    - Investigate others
+    [ ] Put info on the website
+[ ] Generate source code documentation
+[ ] Implement unit tests for the compiler itself (boost test)
+[ ] create proper bootstrap and make scripts
+[ ] Implement build bot on the lightbasic.com
+    [ ] Update local copy whenever github repo is updated
+    [ ] Run the compiler unit tests.
+        [ ] Show results on the site
+    [ ] Compile the source.
+        [ ] Show results on the site
+    [ ] Run the success and fail tests.
+        [ ] Show results on the site
+    [ ] Make preparations for hosting nightly builds (cross compile)
+        [ ] osx
+        [ ] windows
+        [ ] ubuntu
+[ ] Implement proper error messages
+    [ ] Lexer    - invalid characters, invalid numbers, ...
+    [ ] Parser   - missing braces, mismatching keywords, unbalanced scopes, ...
+    [ ] Semantic - type errors, undeclared variables, ...
+    [ ] misc     - missing files, invalid input, ...
+[ ] Implement sub/function pointers
 [ ] assignment expressions outside function bodies
-[ ] Implement EXIT (for) keyword
-[ ] Implement CONTINUE (for) keyword
 [ ] Implement DO ... LOOP construct
+    [ ] DO ... LOOP
+    [ ] DO UNTIL expr ... LOOP
+    [ ] DO WHILE expr ... LOOP
+    [ ] DO ... LOOP UNTIL expr
+    [ ] DO ... LOOP WHILE expr
+[ ] Implement EXIT keyword
+    [ ] EXIT
+    [ ] EXIT DO
+    [ ] EXIT FOR
+[ ] Implement CONTINUE keyword
+    [ ] CONTINUE
+    [ ] CONTINUE DO 
+    [ ] CONTINUE FOR
 [ ] Improve FOR
     [ ] Support negative STEP (decrement)
     [ ] Optimize for simple cases
+        [ ] increment / decrement constant STEP expression
 
 
 Future. M5 ?
@@ -68,6 +65,10 @@ Future. M5 ?
     [ ] Bitwise And &
     [ ] Bitwise Or |
     [ ] Comparisons
+    [ ] add pointer indexing. 0 based
+        Dim argv As Byte Ptr Ptr
+        Dim arg As Byte Ptr
+        arg = argv[1]
 [ ] Add char type
     Need to think about this and figure it out how it should work,
     what's its underlying datatype, character encoding, etc... 
@@ -78,13 +79,41 @@ Future. M5 ?
     [ ] allow assigning integer literals to Char type
     [ ] allow assigning array of integer values to Char array
         Dim hello As Char[] = [72, 101, 108, 108, 111, 0]
-[ ] add pointer indexing. 0 based
-    Dim argv As Byte Ptr Ptr
-    Dim arg As Byte Ptr
-    arg = argv[1]
 
 
 ===============================================================================
+
+Todo for Milestone 3
+======================
+[✓] Add Any Ptr
+[✓] Add Null
+[✓] initialize upon declaration
+    Dim i As Integer = 10
+[✓] add Var that deducts the type from right hand expression
+    Var i = 10
+[✓] Add For
+    For i = 0 to 10 [ step Expression ]
+        StmtList
+    Next
+[✓] make parenthesis optional for FuncStmt
+    printf "hello %s\n", "world"
+[✓] Improve the type system
+[✓] Support building for 32bit and 64bit
+[✓] Move internal type conversion to llvm into Type class
+[✓] Add easy way to add test cases to check compiler output
+[✓] Add subs
+[✓] Add generic command line options
+    [✓] --help      Display available options
+    [✓] --version   Show version information
+    [✓] -v          Show verbose output
+    [✓] -o <file>   Write output to <file>
+    [✓] -O<number>  Set optimization level to <number>
+    [✓] -m32        Generate 32bit i386 code
+    [✓] -m64        Generate 64bit x86-64 code
+    [✓] -S          Only compile. Emit assembly files
+    [✓] -c          Compile and assemble. Emit object files
+    [✓] -llvm       Emit llvm files
+
 
 Todo for Milestone 2
 ======================
@@ -123,7 +152,7 @@ Todo for Milestone 2
     [✓] produce binary
 
 
-Todo for Milestone 2
+Todo for Milestone 1
 ======================
 Simple full scale compiler
 * reads input from input files
