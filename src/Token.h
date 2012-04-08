@@ -18,6 +18,7 @@ namespace lbc {
         #define IMPL_TOKENS(id, ...) id,
         ALL_TOKENS(IMPL_TOKENS)
         #undef IMPL_TOKENS
+        _LAST
     };
     
     /**

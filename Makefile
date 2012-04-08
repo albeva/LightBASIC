@@ -4,39 +4,50 @@
 
 # Build type
 BUILD			:= release
-ARCH			:= x86_64
 TOOLSET			:= clang
 # compiler and linker flags
-CXX				:= clang++
-CXXFLAGS		:= -Wall -Werror -pedantic -Os -std=c++11 -stdlib=libc++ \
-				-arch $(ARCH) -MMD
-LDFLAGS			:= -arch $(ARCH) -stdlib=libc++
+CXXFLAGS		:= -Wall -Werror -pedantic -Os -MMD
+LDFLAGS			:= -L/usr/local/lib
 # boost flags
-BOOST_LDFLAGS	:= -lboost_filesystem -lboost_system
+BOOST_LDFLAGS	:= -lboost_system -lboost_filesystem
 LDFLAGS			:= $(LDFLAGS) $(BOOST_LDFLAGS)
 # llvm flags
 LLVM_LIBS		:= core bitwriter
 LLVM_CXXFLAGS	:= $(shell llvm-config --cxxflags)
 LLVM_LDFLAGS	:= $(shell llvm-config --ldflags) \
 				$(shell llvm-config --libs $(LLVM_LIBS))
-CXXFLAGS		:= $(CXXFLAGS) $(LLVM_CXXFLAGS)
+CXXFLAGS		:= $(CXXFLAGS) $(LLVM_CXXFLAGS) -fexceptions
 LDFLAGS			:= $(LDFLAGS) $(LLVM_LDFLAGS)
 # input, output
 TARGET			:= bin/$(BUILD)/lbc
 OBJDIR			:= obj/$(BUILD)
 SOURCES			:= $(wildcard src/*.cpp)
 OBJECTS			:= $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
-PCH				:= $(OBJDIR)/pch.gch
 DEPS			:= $(patsubst src/%.cpp,$(OBJDIR)/%.d,$(SOURCES)) \
 				$(OBJDIR)/pch.d
 
-#include our project dependecy files
--include $(DEPS)
+# deal with different compilers
+# clang
+ifeq ($(TOOLSET),clang)
+	CXX				:= clang++
+	LD				:= $(CXX)
+	CXXFLAGS		:= $(CXXFLAGS) -std=c++11 -stdlib=libc++
+	LDFLAGS			:= $(LDFLAGS) -stdlib=libc++
+	PCH				:= $(OBJDIR)/pch.hpp.gch
+	PCHFLAGS		:= -include-pch $(PCH)
+else ifeq ($(TOOLSET),gcc)
+	CXX				:= g++
+	LD				:= $(CXX)
+	CXXFLAGS		:= $(CXXFLAGS) -std=gnu++0x
+	LDFLAGS         := $(LDFLAGS) -ldl
+	PCH				:= src/pch.hpp.gch
+	PCHFLAGS		:= -include src/pch.hpp
+endif
 
 # disable checking for files
-.PHONY: all clean
+.PHONY: all clean test
 
-# the final
+# default target. Make the binary
 all: $(TARGET)
 
 # cleanup
@@ -44,16 +55,25 @@ clean:
 	rm -f $(OBJECTS)
 	rm -f $(DEPS)
 	rm -f $(PCH)
+	rm -f $(TARGET)
+
+# Run the testcases
+test: $(TARGET)
+	cp -R tests bin/$(BUILD)/
+	cd bin/$(BUILD)/tests; ./run.sh
+
+#include our project dependecy files
+-include $(DEPS)
 
 # link
 $(TARGET): $(PCH) $(OBJECTS)
-	$(CXX) $(LDFLAGS) $(OBJECTS) -o $@
+	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 
 # precompiled header
 $(PCH): src/pch.hpp
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # compile .cpp to .o
 $(OBJDIR)/%.o: src/%.cpp
-	$(CXX) $(CXXFLAGS) -include-pch $(PCH) -c $< -o $@
+	$(CXX) $(CXXFLAGS) $(PCHFLAGS) -c -o $@ $<
 

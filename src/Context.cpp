@@ -32,7 +32,8 @@ Context & Context::getGlobalContext()
  * Initialize the context
  */
 Context::Context()
-:   m_arch(LBC_DEF_ARCH),
+:   m_verbose(false),
+    m_arch(LBC_DEF_ARCH),
     m_optLevel(LBC_DEF_OPT_LVL),
     m_emit(LBC_DEF_EMIT_TYP)
 {
@@ -123,31 +124,39 @@ Context & Context::add(const FS::path & path, ResourceType type)
             break;
         case ResourceType::Library:
         {   
-            // bool dynlib  = path.extension() == ".dylib";
-            // bool stlib   = dynlib || path.extension() == ".a";
-            // bool libpref = path.filename().string().substr(0, 3) == "lib";
+            bool dynlib  = path.extension() == ".dylib";
+            bool stlib   = dynlib || path.extension() == ".a";
+            bool libpref = path.filename().string().substr(0, 3) == "lib";
             FS::path search = path;
             while (true) {
-                // try {
-                    // resolveFile(search, ResourceType::LibraryPath);
+                try {
+                    resolveFile(search, ResourceType::LibraryPath);
                     source = path;
-                    // break;
-                // } catch (Exception e) {
-                    // if (!dynlib) {
-                        // search.replace_extension(".dylib");
-                        // dynlib = true;
-                        // continue;
-                    // } else if (!libpref) {
-                        // search = path.parent_path() / (std::string("lib") + search.filename().string());
-                        // libpref = true;
-                        // continue;
-                    // } else if (!stlib) {
-                        // search.replace_extension(".a");
-                        // stlib = true;
-                    // } else {
-                        // throw e;
-                    // }
-                // }
+                    break;
+                } catch (Exception e) {
+                    if (!dynlib) {
+#ifdef __linux__
+						search.replace_extension(".so");
+#else
+	#ifdef __APPLE__
+            			search.replace_extension(".dylib");
+	#else
+		#error "Unsupported system"
+	#endif
+#endif
+                        dynlib = true;
+                        continue;
+                    } else if (!libpref) {
+                        search = path.parent_path() / (std::string("lib") + search.filename().string());
+                        libpref = true;
+                        continue;
+                    } else if (!stlib) {
+                        search.replace_extension(".a");
+                        stlib = true;
+                    } else {
+                        throw e;
+                    }
+                }
             }
             break;
         }

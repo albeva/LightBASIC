@@ -1,0 +1,5 @@
+g++ -L/usr/local/lib \
+    -lpthread -ldl -lm -lboost_system -lboost_filesystem -lLLVMBitWriter -lLLVMCore -lLLVMSupport \
+    -o bin/release/lbc \
+    obj/release/Ast.o obj/release/AstVisitor.o obj/release/Context.o obj/release/Emitter.o obj/release/IrBuilder.o obj/release/Lexer.o obj/release/main.o obj/release/Parser.o obj/release/PrinterVisitor.o obj/release/RecursiveAstVisitor.o obj/release/SemanticAnalyser.o obj/release/Source.o obj/release/SourceFile.o obj/release/SourceString.o obj/release/Symbol.o obj/release/SymbolTable.o obj/release/Token.o obj/release/Type.o
+

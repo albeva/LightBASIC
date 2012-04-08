@@ -24,8 +24,7 @@ namespace lbc {
     
     #define STRINGIFY_IMPL(v) #v
     #define STRINGIFY(v) STRINGIFY_IMPL(v)
-    // #define THROW_EXCEPTION(_msg) throw Exception(std::string(_msg) + ". \n" + __FILE__ + "(" + STRINGIFY(__LINE__) + ")\n" + __PRETTY_FUNCTION__);
-    #define THROW_EXCEPTION(_msg)
+    #define THROW_EXCEPTION(_msg) throw Exception(std::string(_msg) + ". \n" + __FILE__ + "(" + STRINGIFY(__LINE__) + ")\n" + __PRETTY_FUNCTION__);
     
     /**
      * NonCopyable c++11 style

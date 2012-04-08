@@ -48,6 +48,16 @@ void IrBuilder::visit(AstProgram * ast)
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
     
     // set stuff
+#ifdef __linux__
+    if (m_ctx.arch() == Architecture::X86_32) {
+        // m_module->setDataLayout("e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:128:128-n8:16:32-S128");
+        // m_module->setTargetTriple("i386-apple-macosx10.7.3");
+    } else if (m_ctx.arch() == Architecture::X86_64) {
+        // m_module->setDataLayout("e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128");
+     	// m_module->setTargetTriple("x86_64-apple-macosx10.7.3");
+    }	
+#else
+	#ifdef __APPLE__
     if (m_ctx.arch() == Architecture::X86_32) {
         m_module->setDataLayout("e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:128:128-n8:16:32-S128");
         m_module->setTargetTriple("i386-apple-macosx10.7.3");
@@ -55,6 +65,10 @@ void IrBuilder::visit(AstProgram * ast)
         m_module->setDataLayout("e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128");
         m_module->setTargetTriple("x86_64-apple-macosx10.7.3");
     }
+	#else
+		#error "Unsupported system"
+	#endif
+#endif
     
     // symbol table
     m_table = ast->symbolTable.get();
@@ -255,13 +269,15 @@ void IrBuilder::visit(AstVarDecl * ast)
     auto llType = sym->type()->llvm();
     // if m_block is null then is a global variable
     if (m_block == nullptr) {
-        llvm::Constant * constant;
+        llvm::Constant * constant = nullptr;
         if (llType->isPointerTy()) {
             constant = llvm::ConstantPointerNull::get(llvm::cast<llvm::PointerType>(llType));
         } else if (llType->isIntegerTy()) {
             constant = llvm::ConstantInt::get(llType, 0, false);
         } else if (llType->isFloatingPointTy()) {
             constant = llvm::ConstantFP::get(llType, 0);
+        } else {
+            return; // TODO raise error!
         }
         sym->value = new llvm::GlobalVariable(
             *m_module,
@@ -393,7 +409,9 @@ llvm::Value * IrBuilder::emitBinaryExpr(llvm::Value * left, llvm::Value * right,
             else if (op == TokenType::GreaterThanEqual) pred = isgned ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
             else if (op == TokenType::LessThan)         pred = isgned ? llvm::CmpInst::Predicate::ICMP_SLT : llvm::CmpInst::Predicate::ICMP_ULT;
             else if (op == TokenType::GreaterThan)      pred = isgned ? llvm::CmpInst::Predicate::ICMP_SGT : llvm::CmpInst::Predicate::ICMP_UGT;            
-            
+            else {
+                return nullptr;
+            }
             return new llvm::ICmpInst(*m_block, pred, left, right, "");
         }
         // fp types
@@ -406,7 +424,9 @@ llvm::Value * IrBuilder::emitBinaryExpr(llvm::Value * left, llvm::Value * right,
             else if (op == TokenType::GreaterThanEqual) pred = llvm::CmpInst::Predicate::FCMP_OGE;
             else if (op == TokenType::LessThan)         pred = llvm::CmpInst::Predicate::FCMP_OLT;
             else if (op == TokenType::GreaterThan)      pred = llvm::CmpInst::Predicate::FCMP_OGT;
-            
+            else {
+                return nullptr;
+            }
            return new llvm::FCmpInst(*m_block, pred, left, right, "");
         }
     }

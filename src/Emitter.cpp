@@ -99,8 +99,20 @@ void Emitter::emitExecutable()
         link_cmd << " -l" << lib;
     }
     
-    // for macos
-    link_cmd << " -macosx_version_min 10.6.0";
+    // platform specific
+#ifdef __linux__
+	link_cmd << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+			 << " /usr/lib/x86_64-linux-gnu/crt1.o"
+			 << " /usr/lib/x86_64-linux-gnu/crti.o"
+			 << " /usr/lib/x86_64-linux-gnu/crtn.o"
+			 ;
+#else
+	#ifdef __APPLE__
+    	link_cmd << " -macosx_version_min 10.6.0";
+	#else
+		#error "Unsupported system"
+	#endif
+#endif
     
     // the output
     link_cmd << " -o " << m_ctx.output();
@@ -115,13 +127,9 @@ void Emitter::emitExecutable()
     }
     
     // do the thing
-    ::system(link_cmd.str().c_str());
-    ::system(rm_cmd.str().c_str());
-    
-    // show info
-    if (m_ctx.verbose()) {
-        std::cout << link_cmd.str() << '\n';
-    }
+    if (m_ctx.verbose()) std::cout << link_cmd.str() << '\n';
+    if (::system(link_cmd.str().c_str())) return;
+    if (::system(rm_cmd.str().c_str())) return;
 }
 
 
@@ -191,17 +199,15 @@ void Emitter::emitObjOrAsm()
                 asmPath.replace_extension(".o");
             }
             s << llc_cmd.str() << " -o " << asmPath << " " << path;
-            ::system(s.str().c_str());
-            
-            // info
             if (verbose) std::cout << s.str() << '\n';
+            if (::system(s.str().c_str())) return;
         }
         
         // delete tmp file
         {
             std::stringstream s;
             s << "rm " << path;
-            ::system(s.str().c_str());
+            if (::system(s.str().c_str())) return;
         }
     }
 }
@@ -238,7 +244,7 @@ void Emitter::emitLlvm()
         if (optimize.length()) {
             std::stringstream s;
             s << optimize << path << " -o " << path;
-            ::system(s.str().c_str());
+            if (::system(s.str().c_str())) return;
         }
         
         // info
@@ -262,3 +268,4 @@ std::string Emitter::getTool(Tool tool)
     }
     return "";
 }
+

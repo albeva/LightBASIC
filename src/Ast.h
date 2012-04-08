@@ -12,7 +12,7 @@
 namespace lbc {
     
     // forward declare Ast classes
-    AST_DECLARE_CLASSES();
+    AST_DECLARE_CLASSES()
     
     // forward declare the visitor
     class AstVisitor;
@@ -25,6 +25,7 @@ namespace lbc {
     enum class Ast : int {
         #define ENUM_AST_CLASSES(ID) ID,
         AST_ALL_NODES(ENUM_AST_CLASSES)
+        _LAST
     };
     
     //

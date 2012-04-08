@@ -21,7 +21,7 @@ namespace lbc {
     enum class TokenType : int;
 
     // forward declare Ast nodes
-    AST_DECLARE_CLASSES();
+    AST_DECLARE_CLASSES()
     
     /**
      * This class parses the tokens into AST

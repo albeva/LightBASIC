@@ -125,7 +125,7 @@ namespace lbc {
         mutable FS::path m_output;
         
         // verbose build?
-        bool m_verbose = false;
+        bool m_verbose;
         
         // build for architecture
         Architecture m_arch;
@@ -133,4 +133,5 @@ namespace lbc {
         EmitType m_emit;
     };
 
-}; // lbc namespace
+} // lbc namespace
+
