@@ -4,14 +4,18 @@
 
 # Build type
 BUILD			:= release
-ifeq ($(OSTYPE),linx-gnu)
+OS				:= $(shell uname)
+ifeq ($(OS),Linux)
+	# Linux specifics
 	TOOLSET			:= gcc
-else
+	LDFLAGS			:= $(LDFLAGS)
+else ifeq ($(OS),Darwin)
+	# OSX specifics
 	TOOLSET			:= clang
 endif
 # compiler and linker flags
-CXXFLAGS		:= -Wall -Werror -pedantic -Os -MMD
-LDFLAGS			:= -L/usr/local/lib
+CXXFLAGS		:= $(CXXFLAGS) -Wall -Werror -pedantic -Os -MMD
+LDFLAGS			:= $(LDFLAGS) -L/usr/local/lib
 # boost flags
 BOOST_LDFLAGS	:= -lboost_system -lboost_filesystem
 LDFLAGS			:= $(LDFLAGS) $(BOOST_LDFLAGS)
@@ -32,7 +36,6 @@ DEPS			:= $(patsubst src/%.cpp,$(OBJDIR)/%.d,$(SOURCES)) \
 				$(OBJDIR)/pch.d
 
 # deal with different compilers
-# clang
 ifeq ($(TOOLSET),clang)
 	CXX				:= clang++
 	LD				:= $(CXX)
