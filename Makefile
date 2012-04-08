@@ -3,15 +3,15 @@
 #
 
 # Build type
-BUILD			:= release
-OS			:= $(shell uname)
+BUILD		:= release
+OS		:= $(shell uname)
 ifeq ($(OS),Linux)
 	# Linux specifics
-	TOOLSET			:= gcc
-	LDFLAGS			:= $(LDFLAGS)
+	TOOLSET		:= gcc
+	LDFLAGS		:= $(LDFLAGS)
 else ifeq ($(OS),Darwin)
 	# OSX specifics
-	TOOLSET			:= clang
+	TOOLSET		:= clang
 endif
 # compiler and linker flags
 CXXFLAGS	:= $(CXXFLAGS) -Wall -Werror -pedantic -Os -MMD
