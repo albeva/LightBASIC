@@ -29,7 +29,7 @@ void showVersion();
 // the main entry point
 int main(int argc, const char * argv[])
 {
-    // try {
+    try {
         // create the context
         auto & ctx = Context::getGlobalContext();
         // add current path to the global paths list
@@ -131,10 +131,10 @@ int main(int argc, const char * argv[])
         }
         // generate the output
         emitter->generate();
-    // } catch (Exception e) {
-        // std::cout << "Error: " << e.what() << std::endl;
-        // return EXIT_FAILURE;
-    // }
+    } catch (Exception e) {
+        std::cout << "Error: " << e.what() << std::endl;
+        return EXIT_FAILURE;
+    }
     return EXIT_SUCCESS;
 }
 

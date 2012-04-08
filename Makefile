@@ -19,7 +19,8 @@ LLVM_LDFLAGS	:= $(shell llvm-config --ldflags) \
 CXXFLAGS		:= $(CXXFLAGS) $(LLVM_CXXFLAGS) -fexceptions
 LDFLAGS			:= $(LDFLAGS) $(LLVM_LDFLAGS)
 # input, output
-TARGET			:= bin/$(BUILD)/lbc
+TARGET_DIR		:= bin/$(BUILD)
+TARGET			:= $(TARGET_DIR)/lbc
 OBJDIR			:= obj/$(BUILD)
 SOURCES			:= $(wildcard src/*.cpp)
 OBJECTS			:= $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
@@ -45,7 +46,7 @@ else ifeq ($(TOOLSET),gcc)
 endif
 
 # disable checking for files
-.PHONY: all clean test
+.PHONY: all clean test init-paths
 
 # default target. Make the binary
 all: $(TARGET)
@@ -62,11 +63,16 @@ test: $(TARGET)
 	cp -R tests bin/$(BUILD)/
 	cd bin/$(BUILD)/tests; ./run.sh
 
+# Create folders
+init-paths:
+	mkdir -p $(OBJDIR)
+	mkdir -p $(TARGET_DIR)
+
 #include our project dependecy files
 -include $(DEPS)
 
 # link
-$(TARGET): $(PCH) $(OBJECTS)
+$(TARGET): init-paths $(PCH) $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 
 # precompiled header
