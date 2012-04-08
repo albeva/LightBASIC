@@ -5,8 +5,9 @@
 # Build type
 BUILD			:= release
 ARCH			:= x86_64
+TOOLSET			:= clang
 # compiler and linker flags
-CXX				:= c++
+CXX				:= clang++
 CXXFLAGS		:= -Wall -Werror -pedantic -Os -std=c++11 -stdlib=libc++ \
 				-arch $(ARCH) -MMD
 LDFLAGS			:= -arch $(ARCH) -stdlib=libc++
