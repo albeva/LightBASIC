@@ -1,4 +1,7 @@
 .DS_Store
+bin/
+obj/
+*~
 DerivedData/
 build/
 llvm.xcconfig
