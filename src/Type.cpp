@@ -11,8 +11,8 @@
 
 using namespace lbc;
 
-//static unordered_map<TokenType,     Type * > _primitives;
-static unordered_map<Type *,        unordered_map<int, PtrType *>> _ptrTypes;
+//static std::unordered_map<TokenType,     Type * > _primitives;
+static std::unordered_map<Type *,        std::unordered_map<int, PtrType *>> _ptrTypes;
 
 static PrimitiveType _primitives[] = {
     #define P(ID, STR, SIZE, F) \
@@ -78,7 +78,7 @@ PrimitiveType::~PrimitiveType() {}
 Type * PrimitiveType::get(TokenType type)
 {    
     auto idx = (int)type - (int)TokenType::Byte;
-    assert(idx >= 0 && idx < sizeof(_primitives) && "Invalid index. Something wrong with the tokentype");
+    assert(idx >= 0 && idx < (int)sizeof(_primitives) && "Invalid index. Something wrong with the tokentype");
     return &_primitives[idx];
 }
 
@@ -95,7 +95,7 @@ bool PrimitiveType::equal(Type *type) const
 /**
  * get type as string
  */
-string PrimitiveType::toString()
+std::string PrimitiveType::toString()
 {
     for (size_t i = 0; i < sizeof(_primitives); i++) {
         if (&_primitives[i] == this) {
@@ -205,9 +205,9 @@ bool PtrType::equal(Type *type) const
 /**
  * to string
  */
-string PtrType::toString()
+std::string PtrType::toString()
 {
-    string result = getBaseType()->toString();
+    std::string result = getBaseType()->toString();
     for (int i = 0; i < indirection(); i++)
         result += " ptr";
     return result;
@@ -313,9 +313,9 @@ FunctionType::~FunctionType() {}
 /**
  * to string
  */
-string FunctionType::toString()
+std::string FunctionType::toString()
 {
-    string result =  "FUNCTION (";
+    std::string result =  "FUNCTION (";
     bool first = true;
     for(auto & t : params) {
         if (first) first = false;

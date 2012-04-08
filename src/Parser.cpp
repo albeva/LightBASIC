@@ -30,7 +30,7 @@ Parser::Parser(Context & ctx)
  * Parse the input and return the Ast tree
  * Program = { Declaration }
  */
-AstProgram * Parser::parse(const shared_ptr<Source> & source)
+AstProgram * Parser::parse(const std::shared_ptr<Source> & source)
 {
     m_token = nullptr;
     m_next = nullptr;
@@ -45,7 +45,7 @@ AstProgram * Parser::parse(const shared_ptr<Source> & source)
     
     // { DeclList }
     while (!match(TokenType::EndOfFile)) {
-        ast->decls.push_back(unique_ptr<AstDeclaration>(declaration()));
+        ast->decls.push_back(std::unique_ptr<AstDeclaration>(declaration()));
         expect(TokenType::EndOfLine);
     }
     
@@ -89,7 +89,7 @@ AstDeclaration * Parser::declaration()
             decl = functionStmt();
             break;
         default:
-            THROW_EXCEPTION(string("Invalid input. Expected declaration. Found: ") + m_token->name());
+            THROW_EXCEPTION(std::string("Invalid input. Expected declaration. Found: ") + m_token->name());
             break;
     }
     
@@ -120,7 +120,7 @@ AstStmtList * Parser::statementList()
                 return ast;
             default: {
                 auto stmt = statement();
-                if (stmt) ast->stmts.push_back(unique_ptr<AstStatement>(stmt));
+                if (stmt) ast->stmts.push_back(std::unique_ptr<AstStatement>(stmt));
                 expect(TokenType::EndOfLine);
             }
         }
@@ -170,7 +170,7 @@ AstStatement * Parser::statement()
             stmt = forStmt();
             break;
         default:
-            THROW_EXCEPTION(string("Invalid input. Expected statement. Found: ") + m_token->name());
+            THROW_EXCEPTION(std::string("Invalid input. Expected statement. Found: ") + m_token->name());
             break;
     }
     
@@ -227,7 +227,7 @@ AstCallStmt * Parser::callStmt()
     auto args = new AstFuncArgList();
     
     // get 1st argument
-    args->args.push_back(unique_ptr<AstExpression>(expression()));
+    args->args.push_back(std::unique_ptr<AstExpression>(expression()));
     
     // is it arg list enclosed in ( and )
     // or are the braces part of the expression?
@@ -237,7 +237,7 @@ AstCallStmt * Parser::callStmt()
     
     // rest of the arguments
     while (accept(TokenType::Comma)) {
-        args->args.push_back(unique_ptr<AstExpression>(expression()));
+        args->args.push_back(std::unique_ptr<AstExpression>(expression()));
     }
     
     // expect a closing ) ?
@@ -432,7 +432,7 @@ AstExpression * Parser::expression()
                 expect(TokenType::ParenClose);
                 break;
             default:
-                THROW_EXCEPTION(string("Invalid input. Expected expression. Found: ") + m_token->name());
+                THROW_EXCEPTION(std::string("Invalid input. Expected expression. Found: ") + m_token->name());
         }
     }
     
@@ -495,7 +495,7 @@ AstFuncArgList * Parser::funcArgList()
     
     do {
         auto arg = expression();
-        if (arg) ast->args.push_back(unique_ptr<AstExpression>(arg));
+        if (arg) ast->args.push_back(std::unique_ptr<AstExpression>(arg));
     } while (accept(TokenType::Comma));
     
     return ast;
@@ -604,7 +604,7 @@ AstFuncParamList * Parser::funcParamList()
     do {
         if (match(TokenType::Ellipsis)) break;
         auto param = funcParam();
-        if (param != nullptr) ast->params.push_back(unique_ptr<AstFuncParam>(param));
+        if (param != nullptr) ast->params.push_back(std::unique_ptr<AstFuncParam>(param));
     } while (accept(TokenType::Comma));
     
     return ast;
@@ -697,7 +697,7 @@ AstAttributeList * Parser::attributesList()
     do {
         auto attrib = attribute();
         if (attrib != nullptr) {
-            list->attribs.push_back(unique_ptr<AstAttribute>(attrib));
+            list->attribs.push_back(std::unique_ptr<AstAttribute>(attrib));
         }
     } while (accept(TokenType::Comma));
     
@@ -727,7 +727,7 @@ AstAttribute * Parser::attribute()
     // "=" AttribParam
     else if (accept(TokenType::Assign)) {
         auto params = new AstAttribParamList();
-        params->params.push_back(unique_ptr<AstLiteralExpr>(attribParam()));
+        params->params.push_back(std::unique_ptr<AstLiteralExpr>(attribParam()));
         attr->params.reset(params);
     }
     
@@ -744,7 +744,7 @@ AstAttribParamList * Parser::attribParamList()
     do {
         auto param = attribParam();
         if (param) {
-            params->params.push_back(unique_ptr<AstLiteralExpr>(param));
+            params->params.push_back(std::unique_ptr<AstLiteralExpr>(param));
         }
     } while(accept(TokenType::Comma));
     return params;

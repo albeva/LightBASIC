@@ -42,7 +42,7 @@ Context::Context()
 /**
  * generate a string from current compiler options
  */
-string Context::toString() const
+std::string Context::toString() const
 {
     std::stringstream s;
     
@@ -57,7 +57,7 @@ string Context::toString() const
     
     // emit type
     bool showOutput = emit() == EmitType::Executable || emit() == EmitType::Library;
-    string e = getEmitType(emit());
+    std::string e = getEmitType(emit());
     if (e.length()) s << " " << e;
     
     // output
@@ -123,37 +123,39 @@ Context & Context::add(const FS::path & path, ResourceType type)
             break;
         case ResourceType::Library:
         {   
-            bool dynlib  = path.extension() == ".dylib";
-            bool stlib   = dynlib || path.extension() == ".a";
-            bool libpref = path.filename().string().substr(0, 3) == "lib";
+            // bool dynlib  = path.extension() == ".dylib";
+            // bool stlib   = dynlib || path.extension() == ".a";
+            // bool libpref = path.filename().string().substr(0, 3) == "lib";
             FS::path search = path;
             while (true) {
-                try {
-                    resolveFile(search, ResourceType::LibraryPath);
+                // try {
+                    // resolveFile(search, ResourceType::LibraryPath);
                     source = path;
-                    break;
-                } catch (Exception e) {
-                    if (!dynlib) {
-                        search.replace_extension(".dylib");
-                        dynlib = true;
-                        continue;
-                    } else if (!libpref) {
-                        search = path.parent_path() / (string("lib") + search.filename().string());
-                        libpref = true;
-                        continue;
-                    } else if (!stlib) {
-                        search.replace_extension(".a");
-                        stlib = true;
-                    } else {
-                        throw e;
-                    }
-                }
+                    // break;
+                // } catch (Exception e) {
+                    // if (!dynlib) {
+                        // search.replace_extension(".dylib");
+                        // dynlib = true;
+                        // continue;
+                    // } else if (!libpref) {
+                        // search = path.parent_path() / (std::string("lib") + search.filename().string());
+                        // libpref = true;
+                        // continue;
+                    // } else if (!stlib) {
+                        // search.replace_extension(".a");
+                        // stlib = true;
+                    // } else {
+                        // throw e;
+                    // }
+                // }
             }
             break;
         }
         default:
+        {
             THROW_EXCEPTION("Invalid ResourceType");
             break;
+        }
     }
     
     // add to the container

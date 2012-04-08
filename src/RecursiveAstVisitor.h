@@ -15,8 +15,10 @@ namespace lbc {
      * recursievly visit nodes. Statements, declarations
      * and program
      */
-    struct RecursiveAstVisitor : AstVisitor
+    class RecursiveAstVisitor : public AstVisitor
     {
+    public:
+        
         using AstVisitor::visit;
         
         // create

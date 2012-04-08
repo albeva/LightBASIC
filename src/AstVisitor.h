@@ -17,8 +17,10 @@ namespace lbc {
     /**
      * ast tree visitor base class
      */
-    struct AstVisitor
+    class AstVisitor
     {
+    public:
+        
         // create new visitor
         AstVisitor(bool debug = false) : m_debug(debug) {}
         

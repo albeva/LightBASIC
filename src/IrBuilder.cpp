@@ -20,11 +20,11 @@ using namespace lbc;
 // create
 IrBuilder::IrBuilder(Context & ctx)
 :   m_module(nullptr),
-    m_table(nullptr),
     m_function(nullptr),
     m_block(nullptr),
     m_edgeBlock(nullptr),
     m_value(nullptr),
+    m_table(nullptr),
     m_isElseIf(false),
     m_ctx(ctx)
 {
@@ -92,7 +92,7 @@ void IrBuilder::visit(AstStmtList * ast)
 void IrBuilder::visit(AstFuncSignature * ast)
 {
     // the id
-    const string & id = ast->id->token->lexeme();
+    const std::string & id = ast->id->token->lexeme();
     Symbol * sym = m_table->get(id);
     
     // get the function
@@ -100,7 +100,7 @@ void IrBuilder::visit(AstFuncSignature * ast)
         assert(!m_module->getFunction(id));
         // get the symbol
         auto llvmType = sym->type()->llvm();
-        string alias = sym->alias();
+        std::string alias = sym->alias();
         if (id == "MAIN") alias = "main";
         // create llvm function
         m_function = llvm::Function::Create(
@@ -183,7 +183,7 @@ void IrBuilder::visit(AstReturnStmt * ast)
 // AstLiteralExpr
 void IrBuilder::visit(AstLiteralExpr * ast)
 {
-    const string & lexeme = ast->token->lexeme();
+    const std::string & lexeme = ast->token->lexeme();
     auto & context = m_module->getContext();
     const auto & token = ast->token;
     
@@ -199,7 +199,7 @@ void IrBuilder::visit(AstLiteralExpr * ast)
                 arrType,
                 true,
                 llvm::GlobalValue::PrivateLinkage,
-                llvm::ConstantArray::get(context, lexeme, true),
+                llvm::ConstantDataArray::getString(context, lexeme, true),
                 ".str"
             );
             global->setAlignment(1);
@@ -248,7 +248,7 @@ void IrBuilder::visit(AstLiteralExpr * ast)
 // AstVarDecl
 void IrBuilder::visit(AstVarDecl * ast)
 {
-    const string & id = ast->id->token->lexeme();
+    const std::string & id = ast->id->token->lexeme();
     m_lastId = id;
     
     auto sym = m_table->get(id);
@@ -308,7 +308,7 @@ void IrBuilder::visit(AstAssignStmt * ast)
 // AstAddressOfExpr
 void IrBuilder::visit(AstAddressOfExpr * ast)
 {
-    const string & id = ast->id->token->lexeme();
+    const std::string & id = ast->id->token->lexeme();
     m_value = m_table->get(id)->value;
     m_lastId = id;
 }
@@ -460,10 +460,10 @@ llvm::Value * IrBuilder::emitCastExpr(llvm::Value * value, Type * src, Type * ds
 void IrBuilder::visit(AstCallExpr * ast)
 {
     
-    const string & id = ast->id->token->lexeme();
+    const std::string & id = ast->id->token->lexeme();
     auto sym = m_table->get(id);
     
-    vector<llvm::Value *> args;
+    std::vector<llvm::Value *> args;
     if (ast->args) {
         SCOPED_GUARD(m_lastId);
         for (auto & arg : ast->args->args) {
@@ -480,7 +480,7 @@ void IrBuilder::visit(AstCallExpr * ast)
 // AstIdentExpr
 void IrBuilder::visit(AstIdentExpr * ast)
 {
-    const string & id = ast->token->lexeme();
+    const std::string & id = ast->token->lexeme();
     m_value = new llvm::LoadInst(m_table->get(id)->value, "", m_block);
     m_lastId = id;
 }
@@ -599,7 +599,7 @@ void IrBuilder::visit(AstForStmt * ast)
         } else if (type->isFloatingPoint()) {
             m_value = llvm::ConstantFP::get(type->llvm(), 1.0);
         } else {
-            THROW_EXCEPTION(string("Unsupported type in FOR: ") + type->toString());
+            THROW_EXCEPTION(std::string("Unsupported type in FOR: ") + type->toString());
         }
     }
     

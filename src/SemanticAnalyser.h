@@ -33,18 +33,19 @@ namespace lbc {
      * Perform semantic analyses on the Ast tree
      * and build symbol table along the way
      */
-    struct SemanticAnalyser : RecursiveAstVisitor
+    class SemanticAnalyser : public RecursiveAstVisitor
     {
+    public:
         using RecursiveAstVisitor::visit;
         
         // create
         SemanticAnalyser(Context & ctx);
         
         // process the expression and if provided cast it to the given type
-        void expression(unique_ptr<AstExpression> & ast, Type * cast = nullptr, CastPolicy policy = CastPolicy::Strict);
+        void expression(std::unique_ptr<AstExpression> & ast, Type * cast = nullptr, CastPolicy policy = CastPolicy::Strict);
         
         // coerce expression to a type if needed
-        void coerce(unique_ptr<AstExpression> & ast, Type * type, CastPolicy policy = CastPolicy::Strict);
+        void coerce(std::unique_ptr<AstExpression> & ast, Type * type, CastPolicy policy = CastPolicy::Strict);
         
         // AstDeclList
         virtual void visit(AstProgram * ast);
@@ -111,7 +112,7 @@ namespace lbc {
         // current type
         Type * m_type;
         // symbol id
-        string m_id;
+        std::string m_id;
         // is callstmt ?
         bool m_callStmt;
         // context

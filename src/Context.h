@@ -10,7 +10,7 @@
 namespace lbc {
     
     // resource container
-    typedef vector<FS::path> ResourceContainer;
+    typedef std::vector<FS::path> ResourceContainer;
     
     // Types of resources
     enum class ResourceType {
@@ -27,7 +27,7 @@ namespace lbc {
         X86_32,
         X86_64
     };
-    static inline string getArchitecture(Architecture arch) {
+    static inline std::string getArchitecture(Architecture arch) {
         if (arch == Architecture::X86_32) return "-m32";
         else return "-m64";
     }
@@ -39,7 +39,7 @@ namespace lbc {
         O2,
         O3
     };
-    static inline string getOptimizationLevel(OptimizationLevel level) {
+    static inline std::string getOptimizationLevel(OptimizationLevel level) {
         if      (level == OptimizationLevel::O0) return "-O0";
         else if (level == OptimizationLevel::O1) return "-O1";
         else if (level == OptimizationLevel::O2) return "-O2";
@@ -54,7 +54,7 @@ namespace lbc {
         Asm,
         Llvm
     };
-    static inline string getEmitType(EmitType emit) {
+    static inline std::string getEmitType(EmitType emit) {
         if      (emit == EmitType::Executable)  return "";
         else if (emit == EmitType::Library)     return "";
         else if (emit == EmitType::Object)      return "-c";
@@ -104,7 +104,7 @@ namespace lbc {
         Context & emit(EmitType emit) { m_emit = emit; return *this; }
         
         // generate a string containing all current options
-        string toString() const;
+        std::string toString() const;
         
     private:
         

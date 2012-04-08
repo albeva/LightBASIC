@@ -26,13 +26,15 @@ namespace lbc {
     /**
      * This class parses the tokens into AST
      */
-    struct Parser : NonCopyable
+    class Parser : NonCopyable
     {
+    public:
+        
         // create new parser object
         Parser(Context & ctx);
         
         // parse and return AstProgram
-        AstProgram * parse(const shared_ptr<Source> & source);
+        AstProgram * parse(const std::shared_ptr<Source> & source);
         
     private:
         

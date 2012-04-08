@@ -15,8 +15,10 @@ namespace lbc {
     /**
      * Represent a source location
      */
-    struct SourceLocation
+    class SourceLocation
     {
+    public:
+        
         /// create Source Reference
         SourceLocation(unsigned int ln, unsigned short col, unsigned short len)
         : line(ln), column(col), length(len)

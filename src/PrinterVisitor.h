@@ -15,8 +15,9 @@ namespace lbc {
     /**
      * print out the Ast tree
      */
-    struct PrinterVisitor : RecursiveAstVisitor
+    class PrinterVisitor : public RecursiveAstVisitor
     {
+    public:
         using RecursiveAstVisitor::visit;
         
         // create
@@ -75,7 +76,7 @@ namespace lbc {
         int m_indent;
         bool m_elseIf;
         bool m_doInline;
-        string indent(int change = 0);
+        std::string indent(int change = 0);
     };
 
 }

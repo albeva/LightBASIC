@@ -20,7 +20,7 @@ namespace lbc {
         public:
         
         /// Create instance
-        SourceString(const string & content, const string & name = "");
+        SourceString(const std::string & content, const std::string & name = "");
         
         /// cleanup
         virtual ~SourceString();

@@ -17,10 +17,12 @@ namespace lbc {
     /**
      * This class deals with lexing the input into tokens
      */
-    struct Lexer : NonCopyable
+    class Lexer : NonCopyable
     {
+    public:
+        
         // create new lexer instance
-        Lexer(const shared_ptr<Source> & src);
+        Lexer(const std::shared_ptr<Source> & src);
         
         // get next token
         Token * next();
@@ -37,7 +39,7 @@ namespace lbc {
         Token * string();
         
         // the source
-        shared_ptr<Source> m_src;
+        std::shared_ptr<Source> m_src;
         Source::const_iterator m_input;
         
         // state info

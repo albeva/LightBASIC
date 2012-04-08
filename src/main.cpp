@@ -29,7 +29,7 @@ void showVersion();
 // the main entry point
 int main(int argc, const char * argv[])
 {
-    try {
+    // try {
         // create the context
         auto & ctx = Context::getGlobalContext();
         // add current path to the global paths list
@@ -37,7 +37,7 @@ int main(int argc, const char * argv[])
         // parse the cmd line arguments
         if (argc > 1) {
             for (int i = 1; i < argc; i++) {
-                string arg(argv[i]);
+                std::string arg(argv[i]);
                 if (arg == "-v") {
                     ctx.verbose(true);
                 } else if (arg == "-o") {
@@ -94,16 +94,16 @@ int main(int argc, const char * argv[])
         }
         
         // create the parser
-        auto parser = make_shared<Parser>(ctx);
+        auto parser = std::make_shared<Parser>(ctx);
         // semantic analyser
-        auto semantic = make_shared<SemanticAnalyser>(ctx);
+        auto semantic = std::make_shared<SemanticAnalyser>(ctx);
         // IR builder
-        auto builder = make_shared<IrBuilder>(ctx);
+        auto builder = std::make_shared<IrBuilder>(ctx);
         // create output emitter
-        auto emitter = make_shared<Emitter>(ctx);
+        auto emitter = std::make_shared<Emitter>(ctx);
         // process the files
         for (auto & file : ctx.get(ResourceType::Source)) {
-            auto ast = parser->parse(make_shared<SourceFile>(file));
+            auto ast = parser->parse(std::make_shared<SourceFile>(file));
             if (ast) {
                 // analyse
                 ast->accept(semantic.get());
@@ -122,10 +122,10 @@ int main(int argc, const char * argv[])
         }
         // generate the output
         emitter->generate();
-    } catch (Exception e) {
-        cout << "Error: " << e.what() << endl;
-        return EXIT_FAILURE;
-    }
+    // } catch (Exception e) {
+        // std::cout << "Error: " << e.what() << std::endl;
+        // return EXIT_FAILURE;
+    // }
     return EXIT_SUCCESS;
 }
 

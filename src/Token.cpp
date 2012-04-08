@@ -12,14 +12,14 @@
 using namespace lbc;
 
 // define array of token names
-static string _tokenNames[] = {
+static std::string _tokenNames[] = {
     #define IMPL_TOKENS(ID, NAME) NAME, 
     ALL_TOKENS(IMPL_TOKENS)
     #undef IMPL_TOKENS
 };
 
 // keyword lookup
-static unordered_map<std::string, TokenType> _tokenTypes = boost::assign::map_list_of
+static std::unordered_map<std::string, TokenType> _tokenTypes = boost::assign::map_list_of
     #define IMPL_TOKENS(ID, NAME) (NAME, TokenType::ID)
     ALL_TOKENS(IMPL_TOKENS)
     #undef IMPL_TOKENS
@@ -29,7 +29,7 @@ static unordered_map<std::string, TokenType> _tokenTypes = boost::assign::map_li
 /**
  * Get token type name
  */
-const string & Token::getTokenName(TokenType type)
+const std::string & Token::getTokenName(TokenType type)
 {
     return _tokenNames[(int)type];
 }
@@ -38,7 +38,7 @@ const string & Token::getTokenName(TokenType type)
 /**
  * get token type based on string
  */
-TokenType Token::getTokenType(const string & id, TokenType def)
+TokenType Token::getTokenType(const std::string & id, TokenType def)
 {
     auto iter = _tokenTypes.find(id);
     if (iter != _tokenTypes.end()) return iter->second;

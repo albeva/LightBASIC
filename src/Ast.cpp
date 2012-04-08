@@ -17,7 +17,7 @@ using namespace lbc;
 //
 // implement the Ast nodes
 // * pool allocation
-// * virtual destructor so that unique_ptr can work
+// * virtual destructor so that std::unique_ptr can work
 // * virtual visitor method
 #define IMPL_AST(C) \
     static boost::pool<> _pool##C(sizeof(Ast##C)); \
@@ -47,7 +47,7 @@ void AstRoot::dump()
 
 
 // AstProgram
-AstProgram::AstProgram(const string & n) : name(n) {}
+AstProgram::AstProgram(const std::string & n) : name(n) {}
 
 
 // AstDeclaration

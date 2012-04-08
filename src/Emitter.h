@@ -20,7 +20,8 @@ namespace lbc {
      * This class deals with combingin the llvm ir's and generating the
      * output executable or a library
      */
-    class Emitter : NonCopyable {
+    class Emitter : NonCopyable
+    {
     public:
         
         // create
@@ -54,10 +55,10 @@ namespace lbc {
         void emitLlvm();
         
         // get tool path
-        string getTool(Tool tool);
+        std::string getTool(Tool tool);
         
         // llvm modules
-        vector<unique_ptr<llvm::Module>> m_modules;
+        std::vector<std::unique_ptr<llvm::Module>> m_modules;
     };
     
 }

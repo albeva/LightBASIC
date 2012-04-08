@@ -20,10 +20,10 @@ PrinterVisitor::PrinterVisitor()
 
 //
 // indent by number of spaces
-string PrinterVisitor::indent(int change)
+std::string PrinterVisitor::indent(int change)
 {
     m_indent += change;
-    return string((size_t)(m_indent * 4), ' ');
+    return std::string((size_t)(m_indent * 4), ' ');
 }
 
 

@@ -22,8 +22,10 @@ namespace lbc {
     /**
      * Information about type
      */
-    struct Type // : NonCopyable
+    class Type
     {
+    public:
+        
         /**
          * Type kind.
          */
@@ -69,7 +71,7 @@ namespace lbc {
         virtual unsigned getSizeInBits() const { return 0; }
         
         // get string representation of the type
-        virtual string toString() = 0;
+        virtual std::string toString() = 0;
         
         // get llvm type representing this type
         llvm::Type * llvm() {
@@ -101,8 +103,10 @@ namespace lbc {
     /**
      * Primitive types
      */
-    struct PrimitiveType : Type
+    class PrimitiveType : public Type
     {
+    public:
+        
         // get pointer to a basic type
         static Type * get(TokenType type);
         
@@ -119,7 +123,7 @@ namespace lbc {
         virtual unsigned getSizeInBits() const { return m_size; }
         
         // get string representation
-        virtual string toString();
+        virtual std::string toString();
         
         // get llvm::Type representation
         virtual llvm::Type * genLlvmType();
@@ -132,8 +136,10 @@ namespace lbc {
     /**
      * pointer to a type
      */
-    struct PtrType : Type
+    class PtrType : public Type
     {
+    public:
+        
         // get shared pointer type instance
         static PtrType * get(Type *  base, int indirection);
         
@@ -156,7 +162,7 @@ namespace lbc {
         Type * dereference(int levels = 1) const;
         
         // get string representation
-        virtual string toString();
+        virtual std::string toString();
         
         // get llvm::Type representation
         virtual llvm::Type * genLlvmType();
@@ -172,8 +178,10 @@ namespace lbc {
     /**
      * Function type
      */
-    struct FunctionType : Type
+    class FunctionType : public Type
     {
+    public:
+        
         // create
         FunctionType(Type * result = nullptr, bool vararg = false);
         
@@ -193,7 +201,7 @@ namespace lbc {
         virtual unsigned getSizeInBits() const;
         
         // get string representation
-        virtual string toString();
+        virtual std::string toString();
         
         // get llvm::Type representation
         virtual llvm::Type * genLlvmType();
@@ -202,6 +210,6 @@ namespace lbc {
         bool vararg;
         
         // parameters
-        vector<Type * > params;
+        std::vector<Type * > params;
     };
 }

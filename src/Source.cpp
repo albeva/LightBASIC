@@ -12,20 +12,20 @@ using namespace lbc;
 
 // Get line as a string
 // line numbers start from 1
-string Source::getLine(unsigned int line)
+std::string Source::getLine(unsigned int line)
 {
     const CharT * start = getLinePtr(line);
     if (start == NULL) return "";
     const CharT * iter = start;
     while (*iter != '\n' && *iter != '\r' && *iter != '\0') iter++;
-    return string(start, iter);
+    return std::string(start, iter);
 }
 
 
 // get string
 // Should this be *safe* but slow lookup? Theoretically
 // location should be guaranteed to be valid within the source...
-string Source::getString(const SourceLocation & loc)
+std::string Source::getString(const SourceLocation & loc)
 {
     // get line
     const CharT * start = getLinePtr(loc.getLine());
@@ -47,7 +47,7 @@ string Source::getString(const SourceLocation & loc)
     }
     
     // done
-    return string(start, iter);
+    return std::string(start, iter);
 }
 
 

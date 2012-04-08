@@ -38,7 +38,7 @@ Emitter::~Emitter()
  */
 void Emitter::add(llvm::Module * module)
 {
-    m_modules.push_back(unique_ptr<llvm::Module>(module));
+    m_modules.push_back(std::unique_ptr<llvm::Module>(module));
 }
 
 
@@ -72,7 +72,7 @@ void Emitter::emitExecutable()
 {
     // generate .obj files
     emitObjOrAsm();
-    stringstream link_cmd, rm_cmd;
+    std::stringstream link_cmd, rm_cmd;
     
     // rm
     rm_cmd << "rm";
@@ -143,7 +143,7 @@ void Emitter::emitObjOrAsm()
     bool verbose = m_ctx.verbose();
     
     // the command
-    stringstream llc_cmd;
+    std::stringstream llc_cmd;
     llc_cmd << getTool(Tool::LlvmLlc);
     
     // output type
@@ -173,7 +173,7 @@ void Emitter::emitObjOrAsm()
         
         // write .bc files
         {
-            string errors;
+            std::string errors;
             llvm::raw_fd_ostream stream(path.c_str(), errors);
             if (errors.length()) {
                 THROW_EXCEPTION(errors);
@@ -183,7 +183,7 @@ void Emitter::emitObjOrAsm()
         
         // assemble
         {
-            stringstream s;
+            std::stringstream s;
             auto asmPath = path;
             if (m_ctx.emit() == EmitType::Asm) {
                 asmPath.replace_extension(".s");
@@ -199,7 +199,7 @@ void Emitter::emitObjOrAsm()
         
         // delete tmp file
         {
-            stringstream s;
+            std::stringstream s;
             s << "rm " << path;
             ::system(s.str().c_str());
         }
@@ -214,7 +214,7 @@ void Emitter::emitLlvm()
 {
     bool verbose = m_ctx.verbose();
     OptimizationLevel lvl = m_ctx.opt();
-    string optimize = "";
+    std::string optimize = "";
     if (lvl != OptimizationLevel::O0) {
         optimize = getTool(Tool::LlvmOpt) + " -S " + getOptimizationLevel(lvl) + " ";
     }
@@ -226,7 +226,7 @@ void Emitter::emitLlvm()
         
         // write .ll file
         {
-            string errors;
+            std::string errors;
             llvm::raw_fd_ostream stream(path.c_str(), errors);
             if (errors.length()) {
                 THROW_EXCEPTION(errors);
@@ -236,7 +236,7 @@ void Emitter::emitLlvm()
         
         // optimize
         if (optimize.length()) {
-            stringstream s;
+            std::stringstream s;
             s << optimize << path << " -o " << path;
             ::system(s.str().c_str());
         }
@@ -250,7 +250,7 @@ void Emitter::emitLlvm()
 /**
  * get tool path
  */
-string Emitter::getTool(Tool tool)
+std::string Emitter::getTool(Tool tool)
 {
     switch (tool) {
         case Tool::LlvmOpt:

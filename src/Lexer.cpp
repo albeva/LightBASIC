@@ -15,7 +15,7 @@ using namespace lbc;
 
 // character types
 // copied from clang source
-enum {
+enum : char {
     CHAR_HORZ_WS  = 0x01,  // ' ', '\t', '\f', '\v'.  Note, no '\0'
     CHAR_VERT_WS  = 0x02,  // '\r', '\n'
     CHAR_LETTER   = 0x04,  // a-z,A-Z
@@ -101,7 +101,7 @@ static const char CharInfo[256] =
  */
 static inline bool IsIdentifierBody(char ch)
 {
-    return (CharInfo[ch] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) ? true : false;
+    return (CharInfo[(int)ch] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) ? true : false;
 }
 
 
@@ -117,7 +117,7 @@ static inline bool IsLineOrFileEnd(char ch)
 /**
  * Create new lexer object
  */
-Lexer::Lexer(const shared_ptr<Source> & src)
+Lexer::Lexer(const std::shared_ptr<Source> & src)
 :   m_src(src),
     m_input(m_src->begin()),
     m_line(1),
@@ -139,7 +139,7 @@ Token * Lexer::next()
     while((ch = *m_input) != '\0') {
         m_input++;
         m_col++;
-        info = CharInfo[ch];
+        info = CharInfo[(int)ch];
         
         // skip spaces
         if (info & CHAR_HORZ_WS) continue;
@@ -177,7 +177,7 @@ Token * Lexer::next()
         }
         
         // statement continuation _
-        if (ch == '_' && (CharInfo[nextCh] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) == 0) {
+        if (ch == '_' && (CharInfo[(int)nextCh] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) == 0) {
             ch = *m_input++;
             while(!IsLineOrFileEnd(ch)) ch = *m_input++;
             // CR + LF
@@ -201,7 +201,7 @@ Token * Lexer::next()
         if (ch == '"') return string();
         
         // number
-        if ((info & CHAR_NUMBER) || ((ch == '-' || ch == '.') && CharInfo[nextCh] & CHAR_NUMBER))
+        if ((info & CHAR_NUMBER) || ((ch == '-' || ch == '.') && CharInfo[(int)nextCh] & CHAR_NUMBER))
             return number();
         
         // 3 char operators
@@ -326,7 +326,7 @@ Token * Lexer::number()
         if (*m_input == '.') {
             if (fp) THROW_EXCEPTION("invalid input");
             fp = true;
-        } else if ((CharInfo[(*m_input)] & CHAR_NUMBER) == 0) {
+        } else if ((CharInfo[(int)(*m_input)] & CHAR_NUMBER) == 0) {
             break;
         }
         m_input++;
@@ -343,7 +343,7 @@ Token * Lexer::number()
 
 
 /**
- * lex string literal
+ * lex std::string literal
  * simple literals. only escape supported is "", \" and \\
  */
 Token * Lexer::string()

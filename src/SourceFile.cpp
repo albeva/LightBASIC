@@ -15,16 +15,16 @@ using namespace lbc;
  */
 SourceFile::SourceFile(const FS::path & path) : Source(path.string())
 {
-    ifstream stream;
-    stream.open(getName().c_str(), ios::in | ios::binary);
+    std::ifstream stream;
+    stream.open(getName().c_str(), std::ios::in | std::ios::binary);
     if (!stream.good()) {
         THROW_EXCEPTION("Could not open '" + getName() + "'");
     }
 
     // get lenght
-    stream.seekg(0, ios::end);
-    streamsize size = (streamsize)stream.tellg();
-    stream.seekg (0, ios::beg);
+    stream.seekg(0, std::ios::end);
+    std::streamsize size = (std::streamsize)stream.tellg();
+    stream.seekg (0, std::ios::beg);
     
     // the buffer
     m_data = new CharT[size + 1];

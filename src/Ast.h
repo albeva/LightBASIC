@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 #pragma once
+
 #include "Ast.def.h"
 
 namespace lbc {
@@ -43,8 +44,10 @@ namespace lbc {
     /**
      * This is the base node for the AST tree
      */
-    struct AstRoot : NonCopyable
+    class AstRoot : NonCopyable
     {
+    public:
+        
         // virtual destructor
         virtual ~AstRoot();
         
@@ -62,7 +65,7 @@ namespace lbc {
     /**
      * base node for statements
      */
-    struct AstStatement : AstRoot
+    class AstStatement : public AstRoot
     {
     };
     
@@ -70,15 +73,18 @@ namespace lbc {
     /**
      * program root
      */
-    struct AstProgram : AstRoot {
+    class AstProgram : public AstRoot
+    {
+    public:
+        
         // create
-        AstProgram(const string & name);
+        AstProgram(const std::string & name);
         // program name
-        string name;
+        std::string name;
         // list of declaration lists
-        vector<unique_ptr<AstDeclaration>> decls;
+        std::vector<std::unique_ptr<AstDeclaration>> decls;
         // symbol table
-        shared_ptr<SymbolTable> symbolTable;
+        std::shared_ptr<SymbolTable> symbolTable;
         // content node
         DECLARE_AST(Program)
     };
@@ -92,12 +98,14 @@ namespace lbc {
     /**
      * Declaration
      */
-    struct AstDeclaration : AstStatement
+    class AstDeclaration : public AstStatement
     {
+    public:
+        
         // create
         AstDeclaration(AstAttributeList * attribs = nullptr);
         // attribs
-        unique_ptr<AstAttributeList> attribs;
+        std::unique_ptr<AstAttributeList> attribs;
         // declaration symbol. Does not own the symbol!
         Symbol * symbol;
         // content node
@@ -108,12 +116,14 @@ namespace lbc {
     /**
      * attribute list
      */
-    struct AstAttributeList : AstRoot
+    class AstAttributeList : public AstRoot
     {
+    public:
+        
         // create
         AstAttributeList();
         // hold list of attributes
-        vector<unique_ptr<AstAttribute>> attribs;
+        std::vector<std::unique_ptr<AstAttribute>> attribs;
         // content node
         DECLARE_AST(AttributeList)
     };
@@ -122,14 +132,16 @@ namespace lbc {
     /**
      * attribute node
      */
-    struct AstAttribute : AstRoot
+    class AstAttribute : public AstRoot
     {
+    public:
+        
         // create
         AstAttribute(AstIdentExpr * id = nullptr, AstAttribParamList * params = nullptr);
         // attribute id
-        unique_ptr<AstIdentExpr> id;
+        std::unique_ptr<AstIdentExpr> id;
         // attribute params
-        unique_ptr<AstAttribParamList> params;
+        std::unique_ptr<AstAttribParamList> params;
         // content node
         DECLARE_AST(Attribute)
     };
@@ -138,12 +150,14 @@ namespace lbc {
     /**
      * list of attribute parameters
      */
-    struct AstAttribParamList : AstRoot
+    class AstAttribParamList : public AstRoot
     {
+    public:
+        
         // create
         AstAttribParamList();
         // attribute params
-        vector<unique_ptr<AstLiteralExpr>> params;
+        std::vector<std::unique_ptr<AstLiteralExpr>> params;
         // content node
         DECLARE_AST(AttribParamList)
     };
@@ -152,16 +166,18 @@ namespace lbc {
     /**
      * variable declaration
      */
-    struct AstVarDecl : AstDeclaration
+    class AstVarDecl : public AstDeclaration
     {
+    public:
+        
         // create
         AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr, AstExpression * expr = nullptr);
         // variable id
-        unique_ptr<AstIdentExpr> id;
+        std::unique_ptr<AstIdentExpr> id;
         // variable type
-        unique_ptr<AstTypeExpr> typeExpr;
+        std::unique_ptr<AstTypeExpr> typeExpr;
         // initalizer expression
-        unique_ptr<AstExpression> expr;
+        std::unique_ptr<AstExpression> expr;
         // content node
         DECLARE_AST(VarDecl)
     };
@@ -170,12 +186,14 @@ namespace lbc {
     /**
      * function declaration
      */
-    struct AstFunctionDecl : AstDeclaration
+    class AstFunctionDecl : public AstDeclaration
     {
+    public:
+        
         // create
         AstFunctionDecl(AstFuncSignature * signature = nullptr);
         // function signature
-        unique_ptr<AstFuncSignature> signature;
+        std::unique_ptr<AstFuncSignature> signature;
         // content node
         DECLARE_AST(FunctionDecl)
     };
@@ -184,16 +202,18 @@ namespace lbc {
     /**
      * function signature part
      */
-    struct AstFuncSignature : AstRoot
+    class AstFuncSignature : public AstRoot
     {
+    public:
+        
         // create
         AstFuncSignature(AstIdentExpr * id = nullptr, AstFuncParamList * args = nullptr, AstTypeExpr * typeExpr = nullptr, bool vararg = false);
         // function id
-        unique_ptr<AstIdentExpr> id;
+        std::unique_ptr<AstIdentExpr> id;
         // function parameters
-        unique_ptr<AstFuncParamList> params;
+        std::unique_ptr<AstFuncParamList> params;
         // function type
-        unique_ptr<AstTypeExpr> typeExpr;
+        std::unique_ptr<AstTypeExpr> typeExpr;
         // flags
         int vararg:1;
         // content node
@@ -204,12 +224,14 @@ namespace lbc {
     /**
      * function parameter list
      */
-    struct AstFuncParamList : AstRoot
+    class AstFuncParamList : public AstRoot
     {
+    public:
+        
         // create
         AstFuncParamList();
         // list of function parameters
-        vector<unique_ptr<AstFuncParam>> params;
+        std::vector<std::unique_ptr<AstFuncParam>> params;
         // content node
         DECLARE_AST(FuncParamList)
     };
@@ -218,14 +240,16 @@ namespace lbc {
     /**
      * Function parameter
      */
-    struct AstFuncParam : AstDeclaration
+    class AstFuncParam : public AstDeclaration
     {
+    public:
+        
         // create
         AstFuncParam(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
         // variable id
-        unique_ptr<AstIdentExpr> id;
+        std::unique_ptr<AstIdentExpr> id;
         // variable type
-        unique_ptr<AstTypeExpr> typeExpr;
+        std::unique_ptr<AstTypeExpr> typeExpr;
         // content node
         DECLARE_AST(FuncParam)
     };
@@ -234,14 +258,16 @@ namespace lbc {
     /**
      * function implementation
      */
-    struct AstFunctionStmt : AstDeclaration
+    class AstFunctionStmt : public AstDeclaration
     {
+    public:
+        
         // create
         AstFunctionStmt(AstFuncSignature * signature = nullptr, AstStmtList * stmts = nullptr);
         // function signature
-        unique_ptr<AstFuncSignature> signature;
+        std::unique_ptr<AstFuncSignature> signature;
         // function body
-        unique_ptr<AstStmtList> stmts;
+        std::unique_ptr<AstStmtList> stmts;
         // content node
         DECLARE_AST(FunctionStmt)
     };
@@ -255,12 +281,14 @@ namespace lbc {
     /**
      * Root node representing whole program
      */
-    struct AstStmtList : AstStatement
+    class AstStmtList : public AstStatement
     {
+    public:
+        
         // create
         AstStmtList();
         // list of statements
-        vector<unique_ptr<AstStatement>> stmts;
+        std::vector<std::unique_ptr<AstStatement>> stmts;
         // associated symbol table. Does not own!
         SymbolTable * symbolTable;
         // content node
@@ -271,14 +299,16 @@ namespace lbc {
     /**
      * assigment statement
      */
-    struct AstAssignStmt : AstStatement
+    class AstAssignStmt : public AstStatement
     {
+    public:
+        
         // create 
         AstAssignStmt(AstExpression * left = nullptr, AstExpression * right = nullptr);
         // assignee id
-        unique_ptr<AstExpression> left;
+        std::unique_ptr<AstExpression> left;
         // the expression
-        unique_ptr<AstExpression> right;
+        std::unique_ptr<AstExpression> right;
         // content node
         DECLARE_AST(AssignStmt)
     };
@@ -287,12 +317,14 @@ namespace lbc {
     /**
      * RETURN statement
      */
-    struct AstReturnStmt : AstStatement
+    class AstReturnStmt : public AstStatement
     {
+    public:
+        
         // create
         AstReturnStmt(AstExpression * expr = nullptr);
         // the expression
-        unique_ptr<AstExpression> expr;
+        std::unique_ptr<AstExpression> expr;
         // content node
         DECLARE_AST(ReturnStmt)
     };
@@ -301,12 +333,14 @@ namespace lbc {
     /**
      * call statement. wrap the call expression
      */
-    struct AstCallStmt : AstStatement
+    class AstCallStmt : public AstStatement
     {
+    public:
+        
         // create
         AstCallStmt(AstCallExpr * expr = nullptr);
         // the call expression
-        unique_ptr<AstCallExpr> expr;
+        std::unique_ptr<AstCallExpr> expr;
         // content node
         DECLARE_AST(CallStmt)
     };
@@ -315,16 +349,18 @@ namespace lbc {
     /**
      * IF statement
      */
-    struct AstIfStmt : AstStatement
+    class AstIfStmt : public AstStatement
     {
+    public:
+        
         // create
         AstIfStmt(AstExpression * expr = nullptr, AstStatement * trueBlock = nullptr, AstStatement * falseBlock = nullptr);
         // expression
-        unique_ptr<AstExpression> expr;
+        std::unique_ptr<AstExpression> expr;
         // true branch
-        unique_ptr<AstStatement> trueBlock;
+        std::unique_ptr<AstStatement> trueBlock;
         // else
-        unique_ptr<AstStatement> falseBlock;
+        std::unique_ptr<AstStatement> falseBlock;
         // content node
         DECLARE_AST(IfStmt)
     };
@@ -333,16 +369,18 @@ namespace lbc {
     /**
      * FOR statement
      */
-    struct AstForStmt : AstStatement
+    class AstForStmt : public AstStatement
     {
+    public:
+        
         // create
         AstForStmt(AstStatement * stmt = nullptr, AstExpression * end = nullptr, AstExpression * step = nullptr, AstStmtList * block = nullptr);
         // AstVarDeclStmt | AstAssignStmt
-        unique_ptr<AstStatement> stmt;
+        std::unique_ptr<AstStatement> stmt;
         // id begin, end and step expressions
-        unique_ptr<AstExpression> end, step;
+        std::unique_ptr<AstExpression> end, step;
         //the body
-        unique_ptr<AstStmtList> block;
+        std::unique_ptr<AstStmtList> block;
         // content node
         DECLARE_AST(ForStmt)
     };
@@ -355,8 +393,10 @@ namespace lbc {
     /**
      * base node for expressions
      */
-    struct AstExpression : AstRoot
+    class AstExpression : public AstRoot
     {
+    public:
+        
         // create
         AstExpression();
         // is this a constant expression ?
@@ -371,14 +411,16 @@ namespace lbc {
     /**
      * cast expression. Target type is help in the Expression
      */
-    struct AstCastExpr : AstExpression
+    class AstCastExpr : public AstExpression
     {
+    public:
+        
         // create
         AstCastExpr(AstExpression * expr = nullptr, AstTypeExpr * typeExpr = nullptr);
         // sub expression
-        unique_ptr<AstExpression> expr;
+        std::unique_ptr<AstExpression> expr;
         // type expession
-        unique_ptr<AstTypeExpr> typeExpr;
+        std::unique_ptr<AstTypeExpr> typeExpr;
         // content node
         DECLARE_AST(CastExpr)
     };
@@ -387,12 +429,14 @@ namespace lbc {
     /**
      * Reference expression. Take address of &i
      */
-    struct AstAddressOfExpr : AstExpression
+    class AstAddressOfExpr : public AstExpression
     {
+    public:
+        
         // create
         AstAddressOfExpr(AstIdentExpr * id = nullptr);
         // child expression
-        unique_ptr<AstIdentExpr> id;
+        std::unique_ptr<AstIdentExpr> id;
         // content node
         DECLARE_AST(AddressOfExpr)
     };
@@ -401,12 +445,14 @@ namespace lbc {
     /**
      * Dereference expression. value of a pointer *i
      */
-    struct AstDereferenceExpr : AstExpression
+    class AstDereferenceExpr : public AstExpression
     {
+    public:
+        
         // create
         AstDereferenceExpr(AstExpression * expr = nullptr);
         // child expression
-        unique_ptr<AstExpression> expr;
+        std::unique_ptr<AstExpression> expr;
         // content node
         DECLARE_AST(DereferenceExpr)
     };
@@ -415,28 +461,32 @@ namespace lbc {
     /**
      * identifier node
      */
-    struct AstIdentExpr : AstExpression
+    class AstIdentExpr : public AstExpression
     {
+    public:
+        
         // create
         AstIdentExpr(Token * token = nullptr);
         // the id token
-        unique_ptr<Token> token;
+        std::unique_ptr<Token> token;
         // content node
         DECLARE_AST(IdentExpr)
     };
     
     
     /**
-     * base for literal expressions (string, number)
+     * base for literal expressions (std::string, number)
      */
-    struct AstLiteralExpr : AstExpression
+    class AstLiteralExpr : public AstExpression
     {
+    public:
+        
         // create
         AstLiteralExpr(Token * token = nullptr);
         // is const expression
         virtual bool isConstant() const { return true; }
         // the value token
-        unique_ptr<Token> token;
+        std::unique_ptr<Token> token;
         // content node
         DECLARE_AST(LiteralExpr)
     };
@@ -445,14 +495,16 @@ namespace lbc {
     /**
      * Binary expression
      */
-    struct AstBinaryExpr : AstExpression
+    class AstBinaryExpr : public AstExpression
     {
+    public:
+        
         // create
         AstBinaryExpr(Token * op = nullptr, AstExpression * lhs = nullptr, AstExpression * rhs = nullptr);
         // token.
-        unique_ptr<Token> token;
+        std::unique_ptr<Token> token;
         // lhs, rhs
-        unique_ptr<AstExpression> lhs, rhs;
+        std::unique_ptr<AstExpression> lhs, rhs;
         // content node
         DECLARE_AST(BinaryExpr)
     };
@@ -461,14 +513,16 @@ namespace lbc {
     /**
      * call expression
      */
-    struct AstCallExpr : AstExpression
+    class AstCallExpr : public AstExpression
     {
+    public:
+        
         // create
         AstCallExpr(AstIdentExpr * id = nullptr, AstFuncArgList * args = nullptr);
         // callee id
-        unique_ptr<AstIdentExpr> id;
+        std::unique_ptr<AstIdentExpr> id;
         // parameters
-        unique_ptr<AstFuncArgList> args;
+        std::unique_ptr<AstFuncArgList> args;
         // content node
         DECLARE_AST(CallExpr)
     };
@@ -477,12 +531,14 @@ namespace lbc {
     /**
      * function arguments
      */
-    struct AstFuncArgList : AstRoot
+    class AstFuncArgList : public AstRoot
     {
+    public:
+        
         // create
         AstFuncArgList();
         // list of arguments
-        vector<unique_ptr<AstExpression>> args;
+        std::vector<std::unique_ptr<AstExpression>> args;
         // content node
         DECLARE_AST(FuncArgList)
     };
@@ -495,12 +551,14 @@ namespace lbc {
     /**
      * type declarator
      */
-    struct AstTypeExpr : AstRoot
+    class AstTypeExpr : public AstRoot
     {
+    public:
+        
         // create
         AstTypeExpr(Token * token = nullptr, int level = 0);
         // type id
-        unique_ptr<Token> token;
+        std::unique_ptr<Token> token;
         // dereference level
         int level;
         // content node

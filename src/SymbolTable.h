@@ -15,10 +15,12 @@ namespace lbc {
     /**
      * Keep information about defined symbols (variables, functions, ...)
      */
-    struct SymbolTable : NonCopyable
+    class SymbolTable : NonCopyable
     {
+    public:
+        
         // the iterator
-        typedef unordered_map<string, Symbol *>::iterator iterator;
+        typedef std::unordered_map<std::string, Symbol *>::iterator iterator;
         
         // create new symbol table. Providing parent will inherit the scope
         SymbolTable(SymbolTable * parent = nullptr);
@@ -33,10 +35,10 @@ namespace lbc {
         void add(Symbol * type);
         
         // exists?
-        bool exists(const string & id, bool recursive = false);
+        bool exists(const std::string & id, bool recursive = false);
         
         // get
-        Symbol * get(const string & id, bool recursive = true);
+        Symbol * get(const std::string & id, bool recursive = true);
         
         // begin
         iterator begin() { return m_symbols.begin(); }
@@ -49,7 +51,7 @@ namespace lbc {
         SymbolTable * m_parent;
         
         // symbols
-        unordered_map<string, Symbol *> m_symbols;
+        std::unordered_map<std::string, Symbol *> m_symbols;
     };
 
 }

@@ -21,10 +21,11 @@ namespace lbc {
     /**
      * Symbol represents a single instance of a type (variables, functions, ...)
      */
-    struct Symbol : NonCopyable
+    class Symbol : NonCopyable
     {
+    public:
         // create new symbol
-        Symbol(const string & id, Type * type = nullptr,
+        Symbol(const std::string & id, Type * type = nullptr,
                AstDeclaration * decl = nullptr, AstDeclaration * impl = nullptr,
                SymbolTable * scope = nullptr);
         
@@ -32,11 +33,11 @@ namespace lbc {
         ~Symbol();
         
         // get id
-        const string & id() const { return m_id; }
+        const std::string & id() const { return m_id; }
         
         // alias
-        const string & alias() const { return m_alias.length() ? m_alias : m_id; }
-        void alias(const string & alias) { m_alias = alias; }
+        const std::string & alias() const { return m_alias.length() ? m_alias : m_id; }
+        void alias(const std::string & alias) { m_alias = alias; }
         
         // type
         Type * type() const { return m_type; }
@@ -63,7 +64,7 @@ namespace lbc {
         
     private:
         // id
-        string m_id, m_alias;
+        std::string m_id, m_alias;
         // symbol type
         Type * m_type;
         // symbol table this belongs to

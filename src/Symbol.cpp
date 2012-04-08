@@ -32,10 +32,14 @@ void Symbol::operator delete(void * addr)
 /**
  * Create new Symbol object
  */
-Symbol::Symbol(const string & id, Type * type, AstDeclaration * decl, AstDeclaration * impl, SymbolTable * scope)
-: m_id(id), m_type(type), m_decl(decl), m_impl(impl), value(nullptr), m_scope(scope)
+Symbol::Symbol(const std::string & id, Type * type, AstDeclaration * decl, AstDeclaration * impl, SymbolTable * scope)
+:   value(nullptr),
+    m_id(id),
+    m_type(type),
+    m_scope(scope),
+    m_decl(decl),
+    m_impl(impl)
 {
-    
 }
 
 

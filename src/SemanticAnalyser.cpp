@@ -38,7 +38,7 @@ SemanticAnalyser::SemanticAnalyser(Context & ctx)
  * Process the expression. If type coercion is required
  * then insert AstCastExpr node in front of current ast expression
  */
-void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast, Type * cast, CastPolicy policy)
+void SemanticAnalyser::expression(std::unique_ptr<AstExpression> & ast, Type * cast, CastPolicy policy)
 {
     // current symbol
     SCOPED_GUARD(m_id);
@@ -55,7 +55,7 @@ void SemanticAnalyser::expression(unique_ptr<AstExpression> & ast, Type * cast, 
 /**
  * coerce expression to a type if needed. Allow only "safe" implicit casts
  */
-void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type, CastPolicy policy)
+void SemanticAnalyser::coerce(std::unique_ptr<AstExpression> & ast, Type * type, CastPolicy policy)
 {
     if (!type->compare(ast->type)) {
         
@@ -69,13 +69,13 @@ void SemanticAnalyser::coerce(unique_ptr<AstExpression> & ast, Type * type, Cast
             // check for incompatible pointer type assignments
             if (leftType->isPointer()) {
                 if (!rightType->isPointer()) {
-                    THROW_EXCEPTION(string("Assigning a non pointer to a pointer: ") + rightType->toString());
+                    THROW_EXCEPTION(std::string("Assigning a non pointer to a pointer: ") + rightType->toString());
                 }
                 if (!rightType->IsAnyPtr() && !leftType->IsAnyPtr() && !leftType->compare(rightType)) {
-                    THROW_EXCEPTION(string("Mismatching pointer types: ") + leftType->toString() + " and " + rightType->toString());
+                    THROW_EXCEPTION(std::string("Mismatching pointer types: ") + leftType->toString() + " and " + rightType->toString());
                 }
             } else if (rightType->isPointer()) {
-                THROW_EXCEPTION(string("Invalid type conversion from ") + leftType->toString() + " to " + rightType->toString());
+                THROW_EXCEPTION(std::string("Invalid type conversion from ") + leftType->toString() + " to " + rightType->toString());
             }
         }
         
@@ -98,7 +98,7 @@ void SemanticAnalyser::visit(AstProgram * ast)
     m_callStmt = false;
     
     // create new scope
-    ast->symbolTable = make_shared<SymbolTable>(m_table);
+    ast->symbolTable = std::make_shared<SymbolTable>(m_table);
     m_table = ast->symbolTable.get();
     // visit all declarations
     for (auto & decl : ast->decls) decl->accept(this);
@@ -116,7 +116,7 @@ void SemanticAnalyser::visit(AstFunctionDecl * ast)
     
     // check if already exists
     if (m_symbol && m_symbol->scope() == m_table) {
-        THROW_EXCEPTION(string("Duplicate symbol: ") + m_symbol->id());
+        THROW_EXCEPTION(std::string("Duplicate symbol: ") + m_symbol->id());
     }
     
     // analyse the signature. This will create a type
@@ -182,7 +182,7 @@ void SemanticAnalyser::visit(AstTypeExpr * ast)
         // basic type
         m_type = PrimitiveType::get(kind);
         if (!m_type) {
-            THROW_EXCEPTION(string("Invalid type: ") + ast->token->name());
+            THROW_EXCEPTION(std::string("Invalid type: ") + ast->token->name());
         }
         // is it a pointer?
         if (ast->level) m_type = PtrType::get(m_type, ast->level);
@@ -199,7 +199,7 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     
     // already implemented?
     if (m_symbol && m_symbol->scope() == m_table && m_symbol->impl()) {
-        THROW_EXCEPTION(string("Type '") + m_symbol->id() + "' is already implemented");
+        THROW_EXCEPTION(std::string("Type '") + m_symbol->id() + "' is already implemented");
     }
     
     // process the signature
@@ -209,11 +209,11 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     // then check that types match.
     if (m_symbol) {
         if (!m_symbol->type()->compare(m_type)) {
-            THROW_EXCEPTION(string("Type mismatch between '") + m_symbol->id() + "' and '" + m_symbol->id());
+            THROW_EXCEPTION(std::string("Type mismatch between '") + m_symbol->id() + "' and '" + m_symbol->id());
         }
         m_symbol->impl(ast);
         if (ast->attribs) {
-            THROW_EXCEPTION(string("Duplicate attribute declarations"));
+            THROW_EXCEPTION(std::string("Duplicate attribute declarations"));
         }
     } else {
         m_symbol = new Symbol(m_id, m_type, ast, ast);
@@ -235,9 +235,9 @@ void SemanticAnalyser::visit(AstFunctionStmt * ast)
     if (ast->signature->params) {
         int i = 0;
         for(auto & param : ast->signature->params->params) {
-            const string & paramId = param->id->token->lexeme();
+            const std::string & paramId = param->id->token->lexeme();
             if (m_table->exists(paramId)) {
-                THROW_EXCEPTION(string("Duplicate defintion of ") + paramId);
+                THROW_EXCEPTION(std::string("Duplicate defintion of ") + paramId);
             }
             auto sym = new Symbol(paramId, funcType->params[(size_t)(i++)], param.get(), nullptr);
             m_table->add(sym);
@@ -264,7 +264,7 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
     
     // exists?
     if (m_symbol && m_symbol->scope() == m_table) {
-        THROW_EXCEPTION(string("Duplicate definition of ") + m_symbol->id());
+        THROW_EXCEPTION(std::string("Duplicate definition of ") + m_symbol->id());
     }
     
     // declared with DIM
@@ -274,7 +274,7 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
         
         // can this type be instantiated?
         if (!m_type->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
+            THROW_EXCEPTION(std::string("Cannot declare a variable with type ") + ast->typeExpr->token->lexeme());
         }
         
         // has an initalizer expression?
@@ -288,7 +288,7 @@ void SemanticAnalyser::visit(AstVarDecl * ast)
         m_type = ast->expr->type;
         // can this type be instantiated?
         if (!m_type->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot declare a variable of type ") + m_type->toString());
+            THROW_EXCEPTION(std::string("Cannot declare a variable of type ") + m_type->toString());
         }
     }
     
@@ -317,7 +317,7 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
     }
     
     // not identifier
-    string help;
+    std::string help;
     Type * leftType = nullptr;
     if (left->is(Ast::IdentExpr)) {
         // process
@@ -325,13 +325,13 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
         
         // check
         if (!m_symbol) {
-            THROW_EXCEPTION(string("Use of undeclared '") + m_id + "'");
+            THROW_EXCEPTION(std::string("Use of undeclared '") + m_id + "'");
         } else if (!m_symbol->type()->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot assign to '") + m_symbol->id() + "' of type " + m_symbol->type()->toString());
+            THROW_EXCEPTION(std::string("Cannot assign to '") + m_symbol->id() + "' of type " + m_symbol->type()->toString());
         }
         leftType = m_symbol->type();
         
-        help = string("identifier ") + m_symbol->id();
+        help = std::string("identifier ") + m_symbol->id();
     } else {
         left->accept(this);
         leftType = left->type;
@@ -345,11 +345,11 @@ void SemanticAnalyser::visit(AstAssignStmt * ast)
         }
         auto pt = static_cast<PtrType *>(leftType);
         if (pt->indirection() < deref) {
-            THROW_EXCEPTION(string("Dereferencing ") + help + " of type " + pt->toString() + " too many levels");
+            THROW_EXCEPTION(std::string("Dereferencing ") + help + " of type " + pt->toString() + " too many levels");
         }
         leftType = pt->dereference(deref);
         if (!leftType->isInstantiable()) {
-            THROW_EXCEPTION(string("Cannot assign to '") + help + "' of type " + leftType->toString());
+            THROW_EXCEPTION(std::string("Cannot assign to '") + help + "' of type " + leftType->toString());
         }
     }
     
@@ -437,7 +437,7 @@ void SemanticAnalyser::visit(AstAddressOfExpr * ast)
 {
     ast->id->accept(this);
     if (!m_symbol) {
-        THROW_EXCEPTION(string("Use of undeclared identifier ") + m_id);
+        THROW_EXCEPTION(std::string("Use of undeclared identifier ") + m_id);
     }
     ast->type = PtrType::get(ast->id->type, 1);
 }
@@ -467,7 +467,7 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
     
     if (ast->token->type() == TokenType::Modulus) {
         if (!left->isIntegral() || !right->isIntegral()) {
-            THROW_EXCEPTION(string("Invalid operand to binary expression(") + left->toString() + ", " + right->toString() + ")");
+            THROW_EXCEPTION(std::string("Invalid operand to binary expression(") + left->toString() + ", " + right->toString() + ")");
         }
         if (left->getSizeInBits() > right->getSizeInBits()) {
             coerce(ast->rhs, left);
@@ -495,7 +495,7 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
             }
             // -> ptr
             else {
-                THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+                THROW_EXCEPTION(std::string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
             }
         }
         // fp ->
@@ -514,7 +514,7 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
             }
             // ->ptr
             else {
-                THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+                THROW_EXCEPTION(std::string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
             }
         }
         // ptr
@@ -525,10 +525,10 @@ void SemanticAnalyser::visit(AstBinaryExpr * ast)
                 } else if (!left->IsAnyPtr() && right->IsAnyPtr()) {
                     coerce(ast->rhs, left);
                 } else if (!right->compare(left)) {
-                    THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+                    THROW_EXCEPTION(std::string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
                 }
             } else {
-                THROW_EXCEPTION(string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
+                THROW_EXCEPTION(std::string("Invalid type to binary expression(") + left->toString() + ", " + right->toString() + ")");
             }
         }
         
@@ -547,12 +547,12 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
     
     // find
     if (!m_symbol) {
-        THROW_EXCEPTION(string("Use of undeclared identifier '") + m_id + "'");
+        THROW_EXCEPTION(std::string("Use of undeclared identifier '") + m_id + "'");
     }
     
     // not a callable function?
     if (m_symbol->type()->kind() != Type::Function) {
-        THROW_EXCEPTION(string("Called identifier '") + m_symbol->id() + "' is not a function");
+        THROW_EXCEPTION(std::string("Called identifier '") + m_symbol->id() + "' is not a function");
     }
     
     // get function type
@@ -562,7 +562,7 @@ void SemanticAnalyser::visit(AstCallExpr * ast)
     if (m_callStmt) {
         m_callStmt = false;
     } else if (type->result() == nullptr) {
-        THROW_EXCEPTION(string("Cannot use SUB ") + m_id + " in an expression");
+        THROW_EXCEPTION(std::string("Cannot use SUB ") + m_id + " in an expression");
     }
     
     // check the parameter types against the argument types
@@ -652,7 +652,7 @@ void SemanticAnalyser::visit(AstReturnStmt * ast)
         }
         expression(ast->expr, funcType->result());
     } else if (ast->expr) {
-        THROW_EXCEPTION(string("Unexpected expression"));
+        THROW_EXCEPTION(std::string("Unexpected expression"));
     }
 }
 
@@ -661,7 +661,7 @@ void SemanticAnalyser::visit(AstReturnStmt * ast)
 // AstAttribute
 void SemanticAnalyser::visit(AstAttribute * ast)
 {
-    const string & id = ast->id->token->lexeme();
+    const std::string & id = ast->id->token->lexeme();
     if (id == "ALIAS") {
         if (!ast->params) 
             THROW_EXCEPTION("Alias expects a string value");

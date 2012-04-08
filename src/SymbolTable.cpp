@@ -45,7 +45,7 @@ void SymbolTable::add(Symbol * sym)
  * does teh symbol exist? If recursive then will check parent scope
  * and its parent. all the way to the root level
  */
-bool SymbolTable::exists(const string & id, bool recursive)
+bool SymbolTable::exists(const std::string & id, bool recursive)
 {
     if (m_symbols.find(id) != m_symbols.end()) return true;
     return recursive && m_parent != nullptr && m_parent->exists(id, true);
@@ -55,7 +55,7 @@ bool SymbolTable::exists(const string & id, bool recursive)
 /**
  * get symbol. will cache the result in local scope if found.
  */
-Symbol * SymbolTable::get(const string & id, bool recursive)
+Symbol * SymbolTable::get(const std::string & id, bool recursive)
 {
     // symbol exists?
     auto iter = m_symbols.find(id);

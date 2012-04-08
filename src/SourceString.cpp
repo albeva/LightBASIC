@@ -11,7 +11,7 @@ using namespace lbc;
 
 
 /// Create instance
-SourceString::SourceString(const string & content, const string & name) : Source(name)
+SourceString::SourceString(const std::string & content, const std::string & name) : Source(name)
 {
     m_data = new CharT[content.size() + 1];
     copy(content.begin(), content.end(), m_data);

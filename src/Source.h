@@ -15,7 +15,7 @@ namespace lbc {
     /**
      * Base class for Source providers (for exmaple SourceString and SourceFile)
      */
-    class Source : boost::noncopyable
+    class Source : NonCopyable
     {
     public:
         
@@ -25,8 +25,10 @@ namespace lbc {
         /**
          * Source iterator
          */
-        struct Iterator
+        class Iterator
         {
+        public:
+            
             // category
             typedef std::random_access_iterator_tag iterator_category;
             // type of the value
@@ -203,13 +205,13 @@ namespace lbc {
         friend class Iterator;
         
         /// Create instance of the Source
-        Source(const string & name) : m_name(name), m_data(nullptr) {}
+        Source(const std::string & name) : m_data(nullptr), m_name(name) {}
         
         /// Virtual destructor
         virtual ~Source() {}
         
         /// Get Source name
-        inline const string & getName() const { return m_name; }
+        inline const std::string & getName() const { return m_name; }
         
         /// begin iterator marker
         inline const_iterator begin() const {
@@ -223,10 +225,10 @@ namespace lbc {
         
         // Get line as a string
         // line numbers start from 1
-        string getLine(unsigned int line);
+        std::string getLine(unsigned int line);
         
         // get string
-        string getString(const SourceLocation & loc);
+        std::string getString(const SourceLocation & loc);
         
     protected:
         
@@ -253,8 +255,8 @@ namespace lbc {
         const CharT * getLinePtr(unsigned int line);
         
         /// source name (can be filename or just a tag)
-        string m_name;
-        vector<OffsetType> m_lineCache;
+        std::string m_name;
+        std::vector<OffsetType> m_lineCache;
     };
 
     

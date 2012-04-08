@@ -29,8 +29,9 @@ namespace lbc {
     /**
      * Generate the llvm structure
      */
-    struct IrBuilder : RecursiveAstVisitor
+    class IrBuilder : public RecursiveAstVisitor
     {
+    public:
         using RecursiveAstVisitor::visit;
         
         // create
@@ -107,8 +108,8 @@ namespace lbc {
         llvm::Value * m_value;
         SymbolTable * m_table;
         bool m_isElseIf;
-        string m_lastId;
-        unordered_map<string, llvm::Value *> m_stringLiterals;
+        std::string m_lastId;
+        std::unordered_map<std::string, llvm::Value *> m_stringLiterals;
         Context & m_ctx;
     };
     
