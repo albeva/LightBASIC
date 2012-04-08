@@ -2,6 +2,8 @@
 bin/
 obj/
 *~
+*.d
+*.gch
 DerivedData/
 build/
 llvm.xcconfig

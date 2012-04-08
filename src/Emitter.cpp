@@ -101,17 +101,17 @@ void Emitter::emitExecutable()
     
     // platform specific
 #ifdef __linux__
-	link_cmd << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
-			 << " /usr/lib/x86_64-linux-gnu/crt1.o"
-			 << " /usr/lib/x86_64-linux-gnu/crti.o"
-			 << " /usr/lib/x86_64-linux-gnu/crtn.o"
-			 ;
+    link_cmd << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+             << " /usr/lib/x86_64-linux-gnu/crt1.o"
+             << " /usr/lib/x86_64-linux-gnu/crti.o"
+             << " /usr/lib/x86_64-linux-gnu/crtn.o"
+             ;
 #else
-	#ifdef __APPLE__
-    	link_cmd << " -macosx_version_min 10.6.0";
-	#else
-		#error "Unsupported system"
-	#endif
+    #ifdef __APPLE__
+        link_cmd << " -macosx_version_min 10.6.0";
+    #else
+        #error "Unsupported system"
+    #endif
 #endif
     
     // the output
