@@ -52,6 +52,10 @@ else ifeq ($(TOOLSET),gcc)
 	PCHFLAGS	:= -include src/pch.hpp
 endif
 
+# create paths
+$(shell [ -d "$(OBJDIR)" ] || mkdir -p $(OBJDIR))
+$(shell [ -d "$(TARGET_DIR)" ] || mkdir -p $(TARGET_DIR))
+
 # disable checking for files
 .PHONY: all clean test init-paths
 
@@ -70,16 +74,11 @@ test: $(TARGET)
 	cp -R tests bin/$(BUILD)/
 	cd bin/$(BUILD)/tests; ./run.sh
 
-# Create folders
-init-paths:
-	mkdir -p $(OBJDIR)
-	mkdir -p $(TARGET_DIR)
-
 #include our project dependecy files
 -include $(DEPS)
 
 # link
-$(TARGET): init-paths $(PCH) $(OBJECTS)
+$(TARGET): $(PCH) $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 
 # precompiled header

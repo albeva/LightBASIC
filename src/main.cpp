@@ -90,8 +90,6 @@ int main(int argc, const char * argv[])
         if (ctx.emit() == EmitType::Executable) {
             ctx.add("/usr/lib",     ResourceType::LibraryPath);
 #ifdef __linux__
-            ctx.add("/usr/lib/x86_64-linux-gnu/", ResourceType::LibraryPath);
-            ctx.add("c",  ResourceType::Library);
 #else
     #ifdef __APPLE__
             ctx.add("System",       ResourceType::Library);

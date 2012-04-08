@@ -73,6 +73,7 @@ void Emitter::emitExecutable()
     // generate .obj files
     emitObjOrAsm();
     std::stringstream link_cmd, rm_cmd;
+    std::stringstream arhc, lib_paths, libs, objs, output; 
     
     // rm
     rm_cmd << "rm";
@@ -80,31 +81,66 @@ void Emitter::emitExecutable()
     // linker flags
     link_cmd << getTool(Tool::Ld);
     
-    // architecture
-    if (m_ctx.arch() == Architecture::X86_32) {
-        link_cmd << " -arch i386";
-    } else if (m_ctx.arch() == Architecture::X86_64) {
-        link_cmd << " -arch x86_64";
-    } else {
-        THROW_EXCEPTION("Unsuppoered architecture");
-    }
-    
     // library include paths
     for (auto & path : m_ctx.get(ResourceType::LibraryPath)) {
-        link_cmd << " -L" << path;
+        lib_paths << " -L" << path;
     }
     
     // libraries
     for (auto & lib : m_ctx.get(ResourceType::Library)) {
-        link_cmd << " -l" << lib;
+       libs <<  " -l" << lib;
+    }
+    
+    // the output
+    output << " -o " << m_ctx.output();
+    
+    // add object files
+    for (auto & module : m_modules) {
+        // get path
+        FS::path path(module->getModuleIdentifier());
+        path.replace_extension(".o");
+        objs << " " << path;
+        rm_cmd << " " << path;
     }
     
     // platform specific
 #ifdef __linux__
-    link_cmd << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
-             << " /usr/lib/x86_64-linux-gnu/crt1.o"
-             << " /usr/lib/x86_64-linux-gnu/crti.o"
-             << " /usr/lib/x86_64-linux-gnu/crtn.o"
+    link_cmd << " -z relro -hash-style=both --no-copy-dt-needed-entries" 
+             << " --build-id --eh-frame-hdr";
+    // architecture
+    std::string sys_lib;
+    std::string gcc_lib;
+    std::string usr_lib;
+    if (m_ctx.arch() == Architecture::X86_32) {
+        link_cmd << " -m elf32-i386"
+                 << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+                 ;
+        sys_lib = "/usr/lib/x86_64-linux-gnu";
+    } else if (m_ctx.arch() == Architecture::X86_64) {
+        link_cmd << " -m elf_x86_64"
+                 << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+                 ;
+        sys_lib = "/usr/lib/x86_64-linux-gnu";
+        gcc_lib = "/usr/lib/gcc/x86_64-linux-gnu/4.6.1";
+        usr_lib = "/lib64";
+    } else {
+        THROW_EXCEPTION("Unsuppoered architecture");
+    }
+    link_cmd << output.str()
+             << " " << sys_lib << "/crt1.o"
+             << " " << sys_lib << "/crti.o"
+             << " " << gcc_lib << "/crtbegin.o"
+             << " -L" << gcc_lib
+             << " -L" << usr_lib
+             << " -L /usr/lib"
+             << " -L" << sys_lib
+             << objs.str()
+             << " -lgcc"
+             << " --as-needed -lgcc_s"
+             << " --no-as-needed -lc"
+             << " -lgcc"
+             << " --no-as-needed " << gcc_lib << "/crtend.o"
+             << " " << sys_lib << "/crtn.o"
              ;
 #else
     #ifdef __APPLE__
@@ -113,18 +149,6 @@ void Emitter::emitExecutable()
         #error "Unsupported system"
     #endif
 #endif
-    
-    // the output
-    link_cmd << " -o " << m_ctx.output();
-    
-    // add object files
-    for (auto & module : m_modules) {
-        // get path
-        FS::path path(module->getModuleIdentifier());
-        path.replace_extension(".o");
-        link_cmd << " " << path;
-        rm_cmd << " " << path;
-    }
     
     // do the thing
     if (m_ctx.verbose()) std::cout << link_cmd.str() << '\n';
