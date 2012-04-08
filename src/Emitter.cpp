@@ -109,8 +109,6 @@ void Emitter::emitExecutable()
              << " --build-id --eh-frame-hdr";
     // architecture
     std::string sys_lib;
-    std::string gcc_lib;
-    std::string usr_lib;
     if (m_ctx.arch() == Architecture::X86_32) {
         link_cmd << " -m elf32-i386"
                  << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
@@ -121,25 +119,16 @@ void Emitter::emitExecutable()
                  << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
                  ;
         sys_lib = "/usr/lib/x86_64-linux-gnu";
-        gcc_lib = "/usr/lib/gcc/x86_64-linux-gnu/4.6.1";
-        usr_lib = "/lib64";
     } else {
         THROW_EXCEPTION("Unsuppoered architecture");
     }
     link_cmd << output.str()
-             << " " << sys_lib << "/crt1.o"
-             << " " << sys_lib << "/crti.o"
-             << " " << gcc_lib << "/crtbegin.o"
-             << " -L" << gcc_lib
-             << " -L" << usr_lib
              << " -L /usr/lib"
              << " -L" << sys_lib
+             << " " << sys_lib << "/crt1.o"
+             << " " << sys_lib << "/crti.o"
              << objs.str()
-             << " -lgcc"
-             << " --as-needed -lgcc_s"
              << " --no-as-needed -lc"
-             << " -lgcc"
-             << " --no-as-needed " << gcc_lib << "/crtend.o"
              << " " << sys_lib << "/crtn.o"
              ;
 #else
