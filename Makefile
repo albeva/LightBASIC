@@ -4,7 +4,11 @@
 
 # Build type
 BUILD			:= release
-TOOLSET			:= clang
+ifeq ($(OSTYPE),linx-gnu)
+	TOOLSET			:= gcc
+else
+	TOOLSET			:= clang
+endif
 # compiler and linker flags
 CXXFLAGS		:= -Wall -Werror -pedantic -Os -MMD
 LDFLAGS			:= -L/usr/local/lib
