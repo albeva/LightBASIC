@@ -4,7 +4,7 @@
 
 # Build type
 BUILD			:= release
-OS				:= $(shell uname)
+OS			:= $(shell uname)
 ifeq ($(OS),Linux)
 	# Linux specifics
 	TOOLSET			:= gcc
@@ -14,42 +14,42 @@ else ifeq ($(OS),Darwin)
 	TOOLSET			:= clang
 endif
 # compiler and linker flags
-CXXFLAGS		:= $(CXXFLAGS) -Wall -Werror -pedantic -Os -MMD
-LDFLAGS			:= $(LDFLAGS) -L/usr/local/lib
+CXXFLAGS	:= $(CXXFLAGS) -Wall -Werror -pedantic -Os -MMD
+LDFLAGS		:= $(LDFLAGS) -L/usr/local/lib
 # boost flags
 BOOST_LDFLAGS	:= -lboost_system -lboost_filesystem
-LDFLAGS			:= $(LDFLAGS) $(BOOST_LDFLAGS)
+LDFLAGS		:= $(LDFLAGS) $(BOOST_LDFLAGS)
 # llvm flags
-LLVM_LIBS		:= core bitwriter
+LLVM_LIBS	:= core bitwriter
 LLVM_CXXFLAGS	:= $(shell llvm-config --cxxflags)
 LLVM_LDFLAGS	:= $(shell llvm-config --ldflags) \
-				$(shell llvm-config --libs $(LLVM_LIBS))
-CXXFLAGS		:= $(CXXFLAGS) $(LLVM_CXXFLAGS) -fexceptions
-LDFLAGS			:= $(LDFLAGS) $(LLVM_LDFLAGS)
+		$(shell llvm-config --libs $(LLVM_LIBS))
+CXXFLAGS	:= $(CXXFLAGS) $(LLVM_CXXFLAGS) -fexceptions
+LDFLAGS		:= $(LDFLAGS) $(LLVM_LDFLAGS)
 # input, output
-TARGET_DIR		:= bin/$(BUILD)
-TARGET			:= $(TARGET_DIR)/lbc
-OBJDIR			:= obj/$(BUILD)
-SOURCES			:= $(wildcard src/*.cpp)
-OBJECTS			:= $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
-DEPS			:= $(patsubst src/%.cpp,$(OBJDIR)/%.d,$(SOURCES)) \
-				$(OBJDIR)/pch.d
+TARGET_DIR	:= bin/$(BUILD)
+TARGET		:= $(TARGET_DIR)/lbc
+OBJDIR		:= obj/$(BUILD)
+SOURCES		:= $(wildcard src/*.cpp)
+OBJECTS		:= $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
+DEPS		:= $(patsubst src/%.cpp,$(OBJDIR)/%.d,$(SOURCES)) \
+		$(OBJDIR)/pch.d
 
 # deal with different compilers
 ifeq ($(TOOLSET),clang)
-	CXX				:= clang++
-	LD				:= $(CXX)
-	CXXFLAGS		:= $(CXXFLAGS) -std=c++11 -stdlib=libc++
-	LDFLAGS			:= $(LDFLAGS) -stdlib=libc++
-	PCH				:= $(OBJDIR)/pch.hpp.gch
-	PCHFLAGS		:= -include-pch $(PCH)
+	CXX		:= clang++
+	LD		:= $(CXX)
+	CXXFLAGS	:= $(CXXFLAGS) -std=c++11 -stdlib=libc++
+	LDFLAGS		:= $(LDFLAGS) -stdlib=libc++
+	PCH		:= $(OBJDIR)/pch.hpp.gch
+	PCHFLAGS	:= -include-pch $(PCH)
 else ifeq ($(TOOLSET),gcc)
-	CXX				:= g++
-	LD				:= $(CXX)
-	CXXFLAGS		:= $(CXXFLAGS) -std=gnu++0x
-	LDFLAGS         := $(LDFLAGS) -ldl
-	PCH				:= src/pch.hpp.gch
-	PCHFLAGS		:= -include src/pch.hpp
+	CXX		:= g++
+	LD		:= $(CXX)
+	CXXFLAGS	:= $(CXXFLAGS) -std=gnu++0x
+	LDFLAGS		:= $(LDFLAGS) -ldl
+	PCH		:= src/pch.hpp.gch
+	PCHFLAGS	:= -include src/pch.hpp
 endif
 
 # disable checking for files
@@ -89,4 +89,3 @@ $(PCH): src/pch.hpp
 # compile .cpp to .o
 $(OBJDIR)/%.o: src/%.cpp
 	$(CXX) $(CXXFLAGS) $(PCHFLAGS) -c -o $@ $<
-
