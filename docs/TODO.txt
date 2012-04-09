@@ -9,7 +9,7 @@ Todo for Milestone 4
     [ ] Put info on the website
 [ ] Generate source code documentation
 [ ] Implement unit tests for the compiler itself (boost test)
-[ ] create proper bootstrap and make scripts
+[✓] create proper bootstrap and make scripts
 [ ] Implement build bot on the lightbasic.com
     [ ] Update local copy whenever github repo is updated
     [ ] Run the compiler unit tests.
@@ -21,7 +21,7 @@ Todo for Milestone 4
     [ ] Make preparations for hosting nightly builds (cross compile)
         [ ] osx
         [ ] windows
-        [ ] ubuntu
+        [✓] ubuntu
 [ ] Implement proper error messages
     [ ] Lexer    - invalid characters, invalid numbers, ...
     [ ] Parser   - missing braces, mismatching keywords, unbalanced scopes, ...
