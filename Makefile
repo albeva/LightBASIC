@@ -41,15 +41,15 @@ ifeq ($(TOOLSET),clang)
 	LD		:= $(CXX)
 	CXXFLAGS	:= $(CXXFLAGS) -std=c++11 -stdlib=libc++
 	LDFLAGS		:= $(LDFLAGS) -stdlib=libc++
-	PCH		:= $(OBJDIR)/pch.hpp.gch
+	PCH		:= $(OBJDIR)/pch.h.gch
 	PCHFLAGS	:= -include-pch $(PCH)
 else ifeq ($(TOOLSET),gcc)
 	CXX		:= g++
 	LD		:= $(CXX)
 	CXXFLAGS	:= $(CXXFLAGS) -std=gnu++0x
 	LDFLAGS		:= $(LDFLAGS) -ldl
-	PCH		:= src/pch.hpp.gch
-	PCHFLAGS	:= -include src/pch.hpp
+	PCH		:= src/pch.h.gch
+	PCHFLAGS	:= -include src/pch.h
 endif
 
 # create paths
@@ -78,13 +78,13 @@ test: $(TARGET)
 -include $(DEPS)
 
 # link
-$(TARGET): $(PCH) $(OBJECTS)
+$(TARGET): $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 
 # precompiled header
-$(PCH): src/pch.hpp
+$(PCH): src/pch.h
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # compile .cpp to .o
-$(OBJDIR)/%.o: src/%.cpp
+$(OBJDIR)/%.o: src/%.cpp | $(PCH)
 	$(CXX) $(CXXFLAGS) $(PCHFLAGS) -c -o $@ $<
