@@ -49,7 +49,7 @@ else ifeq ($(TOOLSET),gcc)
 	CXXFLAGS	:= $(CXXFLAGS) -std=gnu++0x
 	LDFLAGS		:= $(LDFLAGS) -ldl
 	PCH		:= src/$(PCH_FILE).gch
-	PCHFLAGS	:= -include src/$(PCH_FILE).hpp
+	PCHFLAGS	:= -include src/$(PCH_FILE)
 endif
 
 # create paths
