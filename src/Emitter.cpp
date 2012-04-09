@@ -104,7 +104,7 @@ void Emitter::emitExecutable()
     }
     
     // platform specific
-#ifdef __linux__
+#if defined __linux__
     // architecture
     std::string sys_path;
     if (m_ctx.arch() == Architecture::X86_32) {
@@ -129,12 +129,20 @@ void Emitter::emitExecutable()
              << " --no-as-needed -lc"
              << " " << sys_path << "/crtn.o"
              ;
+#elif defined __APPLE__
+    if (m_ctx.arch() == Architecture::X86_32) {
+        link_cmd << " -arch i386";
+    } else if (m_ctx.arch() == Architecture::X86_64) {
+        link_cmd << " -arch x86_64";
+    }
+    link_cmd << " -macosx_version_min 10.6.0"
+             << lib_paths.str()
+             << libs.str()
+             << output.str()
+             << objs.str()
+             ;
 #else
-    #ifdef __APPLE__
-        link_cmd << " -macosx_version_min 10.6.0";
-    #else
-        #error "Unsupported system"
-    #endif
+    #error Wrong platform
 #endif
     
     // do the thing

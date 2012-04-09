@@ -88,15 +88,17 @@ int main(int argc, const char * argv[])
         
         // emitting executable?
         if (ctx.emit() == EmitType::Executable) {
-#ifdef __linux__
-#else
-    #ifdef __APPLE__
+#if defined __linux__
+            // TODO add default libraries and objects to link here
+            //      on linux the order in wich crt1.o, crti.o and crtn.o are
+            //      added matters. So need some sort of priotiy queue
+            //      or something.
+#elif defined __APPLE__
             ctx.add("/usr/lib",     ResourceType::LibraryPath);
             ctx.add("System",       ResourceType::Library);
             ctx.add("crt1.10.6.o",  ResourceType::Library);
-    #else
-        #error "Unsupported system"
-    #endif
+#else
+    #error Unsupported system
 #endif
         }
         

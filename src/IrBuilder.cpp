@@ -48,7 +48,7 @@ void IrBuilder::visit(AstProgram * ast)
     m_module = new llvm::Module(ast->name, llvm::getGlobalContext());
     
     // set stuff
-#ifdef __linux__
+#if defined __linux__
     if (m_ctx.arch() == Architecture::X86_32) {
         m_module->setDataLayout("e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32");
         m_module->setTargetTriple("i386-pc-linux-gnu");
@@ -56,18 +56,16 @@ void IrBuilder::visit(AstProgram * ast)
         m_module->setDataLayout("e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64");
         m_module->setTargetTriple("x86_64-pc-linux-gnu");
     }    
-#else
-    #ifdef __APPLE__
+#elif defined __APPLE__
     if (m_ctx.arch() == Architecture::X86_32) {
         m_module->setDataLayout("e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:128:128-n8:16:32-S128");
-        m_module->setTargetTriple("i386-apple-macosx10.7.3");
+        m_module->setTargetTriple("i386-apple-macosx10.6");
     } else if (m_ctx.arch() == Architecture::X86_64) {
         m_module->setDataLayout("e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128");
-        m_module->setTargetTriple("x86_64-apple-macosx10.7.3");
+        m_module->setTargetTriple("x86_64-apple-macosx10.6");
     }
-    #else
-        #error "Unsupported system"
-    #endif
+#else
+    #error Unsupported system
 #endif
     
     // symbol table
