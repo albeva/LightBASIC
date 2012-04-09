@@ -34,22 +34,22 @@ SOURCES		:= $(wildcard src/*.cpp)
 OBJECTS		:= $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
 DEPS		:= $(patsubst src/%.cpp,$(OBJDIR)/%.d,$(SOURCES)) \
 		$(OBJDIR)/pch.d
-
+PCH_FILE	:= pch.hpp
 # deal with different compilers
 ifeq ($(TOOLSET),clang)
 	CXX		:= clang++
 	LD		:= $(CXX)
 	CXXFLAGS	:= $(CXXFLAGS) -std=c++11 -stdlib=libc++
 	LDFLAGS		:= $(LDFLAGS) -stdlib=libc++
-	PCH		:= $(OBJDIR)/pch.h.gch
+	PCH		:= $(OBJDIR)/$(PCH_FILE).gch
 	PCHFLAGS	:= -include-pch $(PCH)
 else ifeq ($(TOOLSET),gcc)
 	CXX		:= g++
 	LD		:= $(CXX)
 	CXXFLAGS	:= $(CXXFLAGS) -std=gnu++0x
 	LDFLAGS		:= $(LDFLAGS) -ldl
-	PCH		:= src/pch.h.gch
-	PCHFLAGS	:= -include src/pch.h
+	PCH		:= src/$(PCH_FILE).gch
+	PCHFLAGS	:= -include src/$(PCH_FILE).hpp
 endif
 
 # create paths
@@ -82,7 +82,7 @@ $(TARGET): $(OBJECTS)
 	$(LD) $(OBJECTS) $(LDFLAGS) -o $@
 
 # precompiled header
-$(PCH): src/pch.h
+$(PCH): src/$(PCH_FILE)
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 # compile .cpp to .o
