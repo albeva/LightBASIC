@@ -88,10 +88,10 @@ int main(int argc, const char * argv[])
         
         // emitting executable?
         if (ctx.emit() == EmitType::Executable) {
-            ctx.add("/usr/lib",     ResourceType::LibraryPath);
 #ifdef __linux__
 #else
     #ifdef __APPLE__
+            ctx.add("/usr/lib",     ResourceType::LibraryPath);
             ctx.add("System",       ResourceType::Library);
             ctx.add("crt1.10.6.o",  ResourceType::Library);
     #else

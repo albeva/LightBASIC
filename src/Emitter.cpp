@@ -105,31 +105,29 @@ void Emitter::emitExecutable()
     
     // platform specific
 #ifdef __linux__
-    link_cmd << " -z relro -hash-style=both --no-copy-dt-needed-entries" 
-             << " --build-id --eh-frame-hdr";
     // architecture
-    std::string sys_lib;
+    std::string sys_path;
     if (m_ctx.arch() == Architecture::X86_32) {
-        link_cmd << " -m elf32-i386"
-                 << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+        link_cmd << " -m elf_i386"
+                 << " -dynamic-linker /lib/ld-linux.so.2"
                  ;
-        sys_lib = "/usr/lib/x86_64-linux-gnu";
+        sys_path = "/usr/lib32";
     } else if (m_ctx.arch() == Architecture::X86_64) {
         link_cmd << " -m elf_x86_64"
                  << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
                  ;
-        sys_lib = "/usr/lib/x86_64-linux-gnu";
+        sys_path = "/usr/lib/x86_64-linux-gnu";
     } else {
         THROW_EXCEPTION("Unsuppoered architecture");
     }
     link_cmd << output.str()
              << " -L /usr/lib"
-             << " -L" << sys_lib
-             << " " << sys_lib << "/crt1.o"
-             << " " << sys_lib << "/crti.o"
+             << " -L" << sys_path
+             << " " << sys_path << "/crt1.o"
+             << " " << sys_path << "/crti.o"
              << objs.str()
              << " --no-as-needed -lc"
-             << " " << sys_lib << "/crtn.o"
+             << " " << sys_path << "/crtn.o"
              ;
 #else
     #ifdef __APPLE__
