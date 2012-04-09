@@ -135,14 +135,12 @@ Context & Context::add(const FS::path & path, ResourceType type)
                     break;
                 } catch (Exception e) {
                     if (!dynlib) {
-#ifdef __linux__
-						search.replace_extension(".so");
+#if defined __linux__
+                        search.replace_extension(".so");
+#elif defined __APPLE__
+                        search.replace_extension(".dylib");
 #else
-	#ifdef __APPLE__
-            			search.replace_extension(".dylib");
-	#else
-		#error "Unsupported system"
-	#endif
+    #error "Unsupported system"
 #endif
                         dynlib = true;
                         continue;

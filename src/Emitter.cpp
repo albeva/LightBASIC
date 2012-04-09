@@ -111,7 +111,13 @@ void Emitter::emitExecutable()
         link_cmd << " -m elf_i386"
                  << " -dynamic-linker /lib/ld-linux.so.2"
                  ;
-        sys_path = "/usr/lib32";
+        if (FS::is_directory("/usr/lib32")) {
+            sys_path = "/usr/lib32";
+        } else if (FS::is_directory("/usr/lib/i386-linux-gnu")) {
+            sys_path = "/usr/lib/i386-linux-gnu";
+        } else {
+            THROW_EXCEPTION("Path to crt_.o files not found");
+        }
     } else if (m_ctx.arch() == Architecture::X86_64) {
         link_cmd << " -m elf_x86_64"
                  << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
