@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <memory>
+#include <iostream>
 #include <fstream>
 #include <sstream>
 #include <iterator>
