@@ -32,7 +32,7 @@
 /* Begin PBXFileReference section */
 		362740ED1513DEC7005C8D97 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = TODO.txt; path = docs/TODO.txt; sourceTree = SOURCE_ROOT; };
 		36337CF21528C1CB00777D7A /* Version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Version.h; path = src/Version.h; sourceTree = SOURCE_ROOT; };
-		363CAD9715377A3700BAA115 /* MemoryPool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MemoryPool.h; sourceTree = SOURCE_ROOT; };
+		363CAD981537837400BAA115 /* MemoryPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemoryPool.h; path = src/MemoryPool.h; sourceTree = SOURCE_ROOT; };
 		364CB4BE1530DA6C00F06F03 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utils.h; path = src/Utils.h; sourceTree = SOURCE_ROOT; };
 		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
 		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
@@ -245,10 +245,10 @@
 		369056F6150388E700E2C917 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				363CAD981537837400BAA115 /* MemoryPool.h */,
 				36A16E12153194E0002F4A43 /* pch.hpp */,
 				364CB4BE1530DA6C00F06F03 /* Utils.h */,
 				36337CF21528C1CB00777D7A /* Version.h */,
-				363CAD9715377A3700BAA115 /* MemoryPool.h */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
