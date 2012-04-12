@@ -32,6 +32,7 @@
 /* Begin PBXFileReference section */
 		362740ED1513DEC7005C8D97 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = TODO.txt; path = docs/TODO.txt; sourceTree = SOURCE_ROOT; };
 		36337CF21528C1CB00777D7A /* Version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Version.h; path = src/Version.h; sourceTree = SOURCE_ROOT; };
+		363CAD9715377A3700BAA115 /* MemoryPool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MemoryPool.h; sourceTree = SOURCE_ROOT; };
 		364CB4BE1530DA6C00F06F03 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utils.h; path = src/Utils.h; sourceTree = SOURCE_ROOT; };
 		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
 		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
@@ -126,7 +127,7 @@
 				369056F4150388C100E2C917 /* Symbol table */,
 				369056ED1503884300E2C917 /* Code Generation */,
 				369056F5150388D400E2C917 /* Type */,
-				369056F6150388E700E2C917 /* Support Files */,
+				369056F6150388E700E2C917 /* Utils */,
 			);
 			name = src;
 			path = LightBASIC;
@@ -241,14 +242,15 @@
 			name = Type;
 			sourceTree = "<group>";
 		};
-		369056F6150388E700E2C917 /* Support Files */ = {
+		369056F6150388E700E2C917 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
 				36A16E12153194E0002F4A43 /* pch.hpp */,
 				364CB4BE1530DA6C00F06F03 /* Utils.h */,
 				36337CF21528C1CB00777D7A /* Version.h */,
+				363CAD9715377A3700BAA115 /* MemoryPool.h */,
 			);
-			name = "Support Files";
+			name = Utils;
 			sourceTree = "<group>";
 		};
 		369056F7150388FF00E2C917 /* docs */ = {

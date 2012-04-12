@@ -23,7 +23,6 @@
 #include <unordered_map>
 // boost libraries
 #include <boost/filesystem.hpp>
-#include <boost/pool/pool.hpp>
 #include <boost/algorithm/string/join.hpp>
 
 // llvm

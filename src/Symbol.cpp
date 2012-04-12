@@ -7,24 +7,24 @@
 //
 #include "Symbol.h"
 #include "SymbolTable.h"
+#include "MemoryPool.h"
 
 using namespace lbc;
 
 // Tokens memory pool
-static boost::pool<> _pool(sizeof(Symbol));
-
+static MemoryPool<Symbol> _pool;
 
 // allocate
 void * Symbol::operator new(size_t)
 {
-    return _pool.malloc();
+    return _pool.allocate();
 }
 
 
 // release
 void Symbol::operator delete(void * addr)
 {
-    _pool.free(addr);
+    _pool.deallocate(addr);
 }
 
 

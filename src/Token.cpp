@@ -9,6 +9,7 @@
 #include "Token.h"
 #include <boost/assign/std/map.hpp>
 #include <boost/assign/list_of.hpp>
+#include "MemoryPool.h"
 using namespace lbc;
 
 // define array of token names
@@ -47,19 +48,19 @@ TokenType Token::getTokenType(const std::string & id, TokenType def)
 
 
 // Tokens memory pool
-static boost::pool<> _pool(sizeof(Token));
+static MemoryPool<Token> _pool;
 
 
 // allocate
 void * Token::operator new(size_t)
 {
-    return _pool.malloc();
+    return _pool.allocate();
 }
 
 
 // release
 void Token::operator delete(void * addr)
 {
-    _pool.free(addr);
+    _pool.deallocate(addr);
 }
 

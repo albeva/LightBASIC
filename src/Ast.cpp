@@ -12,6 +12,7 @@
 #include "SymbolTable.h"
 #include "Type.h"
 #include "PrinterVisitor.h"
+#include "MemoryPool.h"
 using namespace lbc;
 
 //
@@ -20,9 +21,9 @@ using namespace lbc;
 // * virtual destructor so that std::unique_ptr can work
 // * virtual visitor method
 #define IMPL_AST(C) \
-    static boost::pool<> _pool##C(sizeof(Ast##C)); \
-    void * Ast##C::operator new(size_t) { return _pool##C.malloc(); } \
-    void Ast##C::operator delete(void * addr) { _pool##C.free(addr); } \
+    static MemoryPool<Ast##C> _pool##C; \
+    void * Ast##C::operator new(size_t) { return (void *)_pool##C.allocate(); } \
+    void Ast##C::operator delete(void * addr) { _pool##C.deallocate(addr); } \
     void Ast##C::accept(AstVisitor * visitor) { visitor->visit(this); } \
     Ast##C::~Ast##C() {}
 AST_CONTENT_NODES(IMPL_AST)
