@@ -17,6 +17,11 @@
 #include "Emitter.h"
 #include "Version.h"
 
+#include <llvm/Support/FileSystem.h>
+#include <llvm/Support/Path.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/MemoryBuffer.h>
+
 using namespace lbc;
 
 // show the help
@@ -29,6 +34,44 @@ void showVersion();
 // the main entry point
 int main(int argc, const char * argv[])
 {
+//    auto p = llvm::sys::Path::GetMainExecutable(argv[0], (void *)main);
+//    auto compiler_path = llvm::sys::path::parent_path(p.str());
+//    
+//    llvm::SourceMgr srcMgr;
+//    std::vector<std::string> paths;
+//    paths.push_back(compiler_path);
+//    srcMgr.setIncludeDirs(paths);
+//    
+//    std::string inc = "";
+//    auto ID = srcMgr.AddIncludeFile("samples/HelloWorld.bas", llvm::SMLoc(), inc);
+//    auto buffer = srcMgr.getMemoryBuffer(ID);
+//    std::cout << buffer->getBuffer().str() << '\n'; 
+//    
+//    std::cout << "ID = " << ID << '\n';
+//    
+//    return 0;
+    
+    
+////    // get compiler path
+////    auto p = llvm::sys::Path::GetMainExecutable(argv[0], (void *)main);
+////    auto compiler_path = llvm::sys::path::parent_path(p.str());
+//    
+//    // system paths
+//    std::vector<llvm::sys::Path> paths;
+//    llvm::sys::Path::GetSystemLibraryPaths(paths);
+//    for (auto & l : paths) {
+//        std::cout << l.str() << '\n';
+//    }
+//    
+//    std::string lsystem = "System";
+//    std::string crt0 = "crt1.10.6.o";
+//    std::cout << llvm::sys::Path::FindLibrary(crt0).str() << '\n';
+//    
+//    
+//    
+//    return 0;
+    
+    
     try {
         // create the context
         auto & ctx = Context::getGlobalContext();
@@ -77,9 +120,6 @@ int main(int argc, const char * argv[])
                 } else {
                     ctx.add(arg, ResourceType::Source);
                 }
-            }
-            if (ctx.verbose()) {
-//                std::cout << "lbc" << ctx.toString() << '\n';
             }
         } else {
             std::cout << "lbc: error: no input files\n";
