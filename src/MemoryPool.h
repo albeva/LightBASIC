@@ -35,14 +35,16 @@ public:
     /**
      * Allocate objct
      */
-    inline T * allocate() {
+    inline T * allocate()
+    {
         return m_recycler.Allocate(m_allocator);
     }
     
     /**
      * Deallocate
      */
-    inline void deallocate(void * obj) {
+    inline void deallocate(void * obj)
+    {
         m_recycler.Deallocate(m_allocator, obj);
     }
 };
