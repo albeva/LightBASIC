@@ -13,6 +13,7 @@
 #include "Type.h"
 #include "PrinterVisitor.h"
 #include "MemoryPool.h"
+#include <iostream>
 using namespace lbc;
 
 //

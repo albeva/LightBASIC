@@ -16,11 +16,14 @@
 #include "SourceFile.h"
 #include "Emitter.h"
 #include "Version.h"
+#include "Path.h"
 
-#include <llvm/Support/FileSystem.h>
-#include <llvm/Support/Path.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/Path.h>
+#include <llvm/ADT/Triple.h>
+
+#include <iostream>
 
 using namespace lbc;
 
@@ -30,53 +33,25 @@ void showHelp();
 // show compiler version info
 void showVersion();
 
+// get compiler path
+std::string getCompilerPath(const char * argv0);
+
+// get current path
+std::string getCurrentPath();
+
 
 // the main entry point
 int main(int argc, const char * argv[])
 {
-//    auto p = llvm::sys::Path::GetMainExecutable(argv[0], (void *)main);
-//    auto compiler_path = llvm::sys::path::parent_path(p.str());
-//    
-//    llvm::SourceMgr srcMgr;
-//    std::vector<std::string> paths;
-//    paths.push_back(compiler_path);
-//    srcMgr.setIncludeDirs(paths);
-//    
-//    std::string inc = "";
-//    auto ID = srcMgr.AddIncludeFile("samples/HelloWorld.bas", llvm::SMLoc(), inc);
-//    auto buffer = srcMgr.getMemoryBuffer(ID);
-//    std::cout << buffer->getBuffer().str() << '\n'; 
-//    
-//    std::cout << "ID = " << ID << '\n';
-//    
-//    return 0;
-    
-    
-////    // get compiler path
-////    auto p = llvm::sys::Path::GetMainExecutable(argv[0], (void *)main);
-////    auto compiler_path = llvm::sys::path::parent_path(p.str());
-//    
-//    // system paths
-//    std::vector<llvm::sys::Path> paths;
-//    llvm::sys::Path::GetSystemLibraryPaths(paths);
-//    for (auto & l : paths) {
-//        std::cout << l.str() << '\n';
-//    }
-//    
-//    std::string lsystem = "System";
-//    std::string crt0 = "crt1.10.6.o";
-//    std::cout << llvm::sys::Path::FindLibrary(crt0).str() << '\n';
-//    
-//    
-//    
-//    return 0;
-    
     
     try {
         // create the context
         auto & ctx = Context::getGlobalContext();
+        
         // add current path to the global paths list
-        ctx.add(FS::current_path(), ResourceType::GlobalPath);
+        ctx.add(getCurrentPath(), ResourceType::GlobalPath);
+        ctx.compiler(getCompilerPath(argv[0]));
+        
         // parse the cmd line arguments
         if (argc > 1) {
             for (int i = 1; i < argc; i++) {
@@ -88,12 +63,12 @@ int main(int argc, const char * argv[])
                         std::cout << "output name missing\n";
                         return EXIT_FAILURE;
                     }
-                    ctx.output(argv[i + 1]);
+                    ctx.output(Path(argv[i + 1]));
                     i++;
                 } else if (arg == "-m32") {
-                    ctx.arch(Architecture::X86_32);
+                    ctx.triple() = ctx.triple().get32BitArchVariant();
                 } else if (arg == "-m64") {
-                    ctx.arch(Architecture::X86_64);
+                    ctx.triple() = ctx.triple().get64BitArchVariant();
                 } else if (arg == "--help") {
                     showHelp();
                     return EXIT_SUCCESS;
@@ -126,22 +101,6 @@ int main(int argc, const char * argv[])
             return EXIT_FAILURE;
         }
         
-        // emitting executable?
-        if (ctx.emit() == EmitType::Executable) {
-#if defined __linux__
-            // TODO add default libraries and objects to link here
-            //      on linux the order in wich crt1.o, crti.o and crtn.o are
-            //      added matters. So need some sort of priotiy queue
-            //      or something.
-#elif defined __APPLE__
-            ctx.add("/usr/lib",     ResourceType::LibraryPath);
-            ctx.add("System",       ResourceType::Library);
-            ctx.add("crt1.10.6.o",  ResourceType::Library);
-#else
-    #error Unsupported system
-#endif
-        }
-        
         // create the parser
         auto parser = std::make_shared<Parser>(ctx);
         // semantic analyser
@@ -152,7 +111,7 @@ int main(int argc, const char * argv[])
         auto emitter = std::make_shared<Emitter>(ctx);
         // process the files
         for (auto & file : ctx.get(ResourceType::Source)) {
-            auto ast = parser->parse(std::make_shared<SourceFile>(file));
+            auto ast = parser->parse(std::make_shared<SourceFile>(file.absolute()));
             if (ast) {
                 // analyse
                 ast->accept(semantic.get());
@@ -214,6 +173,26 @@ void showVersion()
         "(c) Albert Varaksin 2012\n"
     ;
 }
+
+
+/**
+ * get current working directory
+ */
+std::string getCurrentPath()
+{
+    return llvm::sys::Path::GetCurrentDirectory().str();
+}
+
+/**
+ * Get the compiler path
+ */
+std::string getCompilerPath(const char * argv0)
+{
+    auto path = llvm::sys::Path::GetMainExecutable(argv0, (void*)getCompilerPath);
+    return llvm::sys::path::parent_path(path.str()).str();
+}
+
+
 
 
 

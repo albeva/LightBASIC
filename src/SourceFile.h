@@ -20,7 +20,7 @@ namespace lbc
         public:
         
         /// Create SourceFile instance
-        SourceFile(const FS::path & path);
+        SourceFile(const std::string & path);
         
         // destructor
         virtual ~SourceFile();

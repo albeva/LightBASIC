@@ -175,10 +175,10 @@ PtrType::~PtrType() {}
  */
 unsigned PtrType::getSizeInBits() const
 {
-    auto & ctx = Context::getGlobalContext();
-    if (ctx.arch() == Architecture::X86_32) return 32;
-    else if (ctx.arch() == Architecture::X86_64) return 64;
-    THROW_EXCEPTION("Invalid architecture");
+    auto & triple = Context::getGlobalContext().triple();
+    if (triple.isArch64Bit()) return 64;
+    else if (triple.isArch32Bit()) return 32;
+    else if (triple.isArch16Bit()) return 16;
     return 0;
 }
 
@@ -266,10 +266,10 @@ FunctionType::FunctionType(Type *result, bool va)
  */
 unsigned FunctionType::getSizeInBits() const
 {
-    auto & ctx = Context::getGlobalContext();
-    if (ctx.arch() == Architecture::X86_32) return 32;
-    else if (ctx.arch() == Architecture::X86_64) return 64;
-    THROW_EXCEPTION("Invalid architecture");
+    auto & triple = Context::getGlobalContext().triple();
+    if (triple.isArch64Bit()) return 64;
+    else if (triple.isArch32Bit()) return 32;
+    else if (triple.isArch16Bit()) return 16;
     return 0;
 }
 

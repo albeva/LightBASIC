@@ -7,6 +7,7 @@
 //
 #include "PrinterVisitor.h"
 #include "Token.h"
+#include <iostream>
 using namespace lbc;
 
 //

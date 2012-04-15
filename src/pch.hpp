@@ -6,34 +6,33 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 
-
-// use c++11 standard library for std::shared_ptr, hash maps, etc...
-#include <vector>
-#include <map>
-#include <stdexcept>
-#include <algorithm>
-#include <memory>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <iterator>
-#include <cctype>
-#include <string>
+// C
+#include <stdint.h>
 #include <inttypes.h>
+
+// c++11
+#include <algorithm>
+#include <cctype>
+#include <iterator>
+#include <memory>
+#include <stdexcept>
+#include <string>
+#include <sstream>
+#include <vector>
 #include <unordered_map>
-// boost libraries
-#include <boost/filesystem.hpp>
-#include <boost/algorithm/string/join.hpp>
 
 // llvm
-#include "stdint.h"
 #include <llvm/Config/config.h>
-#include "llvm/DerivedTypes.h"
-#include "llvm/LLVMContext.h"
-#include "llvm/Module.h"
-#include "llvm/Analysis/Verifier.h"
-#include "llvm/Support/IRBuilder.h"
+#include <llvm/ADT/SmallVector.h>
+#include <llvm/ADT/Triple.h>
+#include <llvm/Support/IRBuilder.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/DerivedTypes.h>
+#include <llvm/LLVMContext.h>
+#include <llvm/Module.h>
+#include <llvm/Analysis/Verifier.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 
+
+// lbc internal
 #include "Utils.h"

@@ -9,6 +9,8 @@ Todo for Milestone 4
     [ ] Put info on the website
 [ ] Generate source code documentation
 [ ] Implement unit tests for the compiler itself (boost test)
+[✓] Remove boost dependency
+    use llvm equivalent classes. Less dependencies, simpler build
 [✓] create proper bootstrap and make scripts
 [ ] Implement build bot on the lightbasic.com
     [ ] Update local copy whenever github repo is updated

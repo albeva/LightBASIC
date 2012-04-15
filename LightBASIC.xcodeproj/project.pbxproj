@@ -7,8 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */; };
-		365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 365077301504C9BB005061C9 /* libboost_system.dylib */; };
+		36268999153B1CFE00164F3D /* Path.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36268998153B1CFE00164F3D /* Path.cpp */; };
 		36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056BA1503881700E2C917 /* IrBuilder.cpp */; };
 		36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368378D4150901F7004C7BAB /* Emitter.cpp */; };
 		36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36779A091503A96D00369AFF /* AstVisitor.cpp */; };
@@ -30,12 +29,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		36268996153B1CF000164F3D /* Path.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Path.h; path = src/Path.h; sourceTree = SOURCE_ROOT; };
+		36268998153B1CFE00164F3D /* Path.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Path.cpp; path = src/Path.cpp; sourceTree = SOURCE_ROOT; };
 		362740ED1513DEC7005C8D97 /* TODO.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = TODO.txt; path = docs/TODO.txt; sourceTree = SOURCE_ROOT; };
 		36337CF21528C1CB00777D7A /* Version.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Version.h; path = src/Version.h; sourceTree = SOURCE_ROOT; };
 		363CAD981537837400BAA115 /* MemoryPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MemoryPool.h; path = src/MemoryPool.h; sourceTree = SOURCE_ROOT; };
 		364CB4BE1530DA6C00F06F03 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utils.h; path = src/Utils.h; sourceTree = SOURCE_ROOT; };
-		3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_filesystem.dylib; path = usr/local/lib/libboost_filesystem.dylib; sourceTree = SDKROOT; };
-		365077301504C9BB005061C9 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = usr/local/lib/libboost_system.dylib; sourceTree = SDKROOT; };
 		365F7A4C14F90D7A00553D98 /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
 		3675818C150255B50006E4B5 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36779A091503A96D00369AFF /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
@@ -86,8 +85,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				365077311504C9BB005061C9 /* libboost_filesystem.dylib in Frameworks */,
-				365077321504C9BB005061C9 /* libboost_system.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,6 +246,8 @@
 				36A16E12153194E0002F4A43 /* pch.hpp */,
 				364CB4BE1530DA6C00F06F03 /* Utils.h */,
 				36337CF21528C1CB00777D7A /* Version.h */,
+				36268996153B1CF000164F3D /* Path.h */,
+				36268998153B1CFE00164F3D /* Path.cpp */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -265,8 +264,6 @@
 		36A6E98314F923A900C3EEA1 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				3650772F1504C9BB005061C9 /* libboost_filesystem.dylib */,
-				365077301504C9BB005061C9 /* libboost_system.dylib */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -384,6 +381,7 @@
 				36779A0A1503A96D00369AFF /* AstVisitor.cpp in Sources */,
 				36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */,
 				36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */,
+				36268999153B1CFE00164F3D /* Path.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

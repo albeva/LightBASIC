@@ -10,9 +10,6 @@
 // some helpers
 namespace lbc {
     
-    // namespace shortcuts
-    namespace FS = boost::filesystem;
-    
     /**
      * Base class for exceptions
      */

@@ -6,11 +6,12 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 #pragma once
+#include "Path.h"
 
 namespace lbc {
     
     // resource container
-    typedef std::vector<FS::path> ResourceContainer;
+    typedef std::vector<Path> ResourceContainer;
     
     // Types of resources
     enum class ResourceType {
@@ -21,16 +22,6 @@ namespace lbc {
         LibraryPath,
         _Count
     };
-    
-    // Arhitecture
-    enum class Architecture {
-        X86_32,
-        X86_64
-    };
-    static inline std::string getArchitecture(Architecture arch) {
-        if (arch == Architecture::X86_32) return "-m32";
-        else return "-m64";
-    }
     
     // Optimization level
     enum class OptimizationLevel {
@@ -78,22 +69,22 @@ namespace lbc {
         static Context * create() { return new Context(); }
         
         // Add resource
-        Context & add(const FS::path & path, ResourceType type);
+        Context & add(const Path & path, ResourceType type);
         
         // get resources
         const ResourceContainer & get(ResourceType type) const;
         
         // output path
-        const FS::path & output() const;
-        Context & output(const FS::path & path);
+        const Path & output() const;
+        Context & output(const Path & path);
+        
+        // get / set compiler path
+        const Path & compiler() const { return m_compiler; }
+        Context & compiler(const Path & path) { m_compiler = path; return *this; }
         
         // verbose
         bool verbose() const { return m_verbose; }
         Context & verbose(bool verbose) { m_verbose = verbose; return *this; }
-        
-        // architecture
-        Architecture arch() const { return m_arch; }
-        Context & arch(Architecture arch) { m_arch = arch; return *this; }
         
         // optimization level
         OptimizationLevel opt() const { return m_optLevel; }
@@ -102,6 +93,10 @@ namespace lbc {
         // emit mode
         EmitType emit() const { return m_emit; }
         Context & emit(EmitType emit) { m_emit = emit; return *this; }
+        
+        // get / set triple
+        llvm::Triple & triple() { return m_triple; }
+        Context & triple(const llvm::Triple & t) { m_triple = t; return *this; }
         
         // generate a string containing all current options
         std::string toString() const;
@@ -112,25 +107,28 @@ namespace lbc {
         Context();
         
         /// Resolve directory path
-        FS::path resolveDir(const FS::path & path) const;
+        Path resolveDir(const Path & path) const;
         
         /// resolve resource path against the container
-        FS::path resolveFile(const FS::path & path, ResourceType type) const;
+        Path resolveFile(const Path & path, ResourceType type) const;
         
         /// array that contains the resources
         ResourceContainer m_resources[(int)ResourceType::_Count];
         
         // output path including filename
         // make it mutable for caching
-        mutable FS::path m_output;
+        mutable Path m_output;
+        
+        // compiler path
+        Path m_compiler;
         
         // verbose build?
         bool m_verbose;
         
         // build for architecture
-        Architecture m_arch;
-        OptimizationLevel m_optLevel;
-        EmitType m_emit;
+        llvm::Triple        m_triple;
+        OptimizationLevel   m_optLevel;
+        EmitType            m_emit;
     };
 
 } // lbc namespace

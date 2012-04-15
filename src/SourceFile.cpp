@@ -7,13 +7,14 @@
 //
 
 #include "SourceFile.h"
+#include <fstream>
 using namespace lbc;
 
 
 /**
  * Create instance of the SourceFile
  */
-SourceFile::SourceFile(const FS::path & path) : Source(path.string())
+SourceFile::SourceFile(const std::string & path) : Source(path)
 {
     std::ifstream stream;
     stream.open(getName().c_str(), std::ios::in | std::ios::binary);

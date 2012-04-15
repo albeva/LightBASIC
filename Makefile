@@ -16,9 +16,6 @@ endif
 # compiler and linker flags
 CXXFLAGS	:= $(CXXFLAGS) -Wall -Werror -pedantic -Wextra -Os -MMD
 LDFLAGS		:= $(LDFLAGS) -L/usr/local/lib
-# boost flags
-BOOST_LDFLAGS	:= -lboost_system -lboost_filesystem
-LDFLAGS		:= $(LDFLAGS) $(BOOST_LDFLAGS)
 # llvm flags
 LLVM_LIBS	:= core bitwriter
 LLVM_CXXFLAGS	:= $(shell llvm-config --cxxflags)

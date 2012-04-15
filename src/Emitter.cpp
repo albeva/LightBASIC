@@ -16,6 +16,8 @@
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 
+#include <iostream>
+
 using namespace lbc;
 
 
@@ -97,59 +99,56 @@ void Emitter::emitExecutable()
     // add object files
     for (auto & module : m_modules) {
         // get path
-        FS::path path(module->getModuleIdentifier());
-        path.replace_extension(".o");
+        Path path(module->getModuleIdentifier());
+        path.extension("o");
         objs << " " << path;
         rm_cmd << " " << path;
     }
     
     // platform specific
-#if defined __linux__
-    // architecture
-    std::string sys_path;
-    if (m_ctx.arch() == Architecture::X86_32) {
-        link_cmd << " -m elf_i386"
-                 << " -dynamic-linker /lib/ld-linux.so.2"
-                 ;
-        if (FS::is_directory("/usr/lib32")) {
-            sys_path = "/usr/lib32";
-        } else if (FS::is_directory("/usr/lib/i386-linux-gnu")) {
-            sys_path = "/usr/lib/i386-linux-gnu";
-        } else {
-            THROW_EXCEPTION("Path to crt_.o files not found");
+    auto & triple = m_ctx.triple();
+    if (triple.getOS() == llvm::Triple::Linux) {
+        // architecture
+        Path sys_path;
+        if (triple.isArch32Bit()) {
+            link_cmd << " -m elf_i386"
+                     << " -dynamic-linker /lib/ld-linux.so.2"
+                     ;
+            sys_path = "/usr/libr32";
+            if (!sys_path.isDirectory()) {
+                sys_path = "/usr/lib/i386-linux-gnu";
+                if (!sys_path.isDirectory()) {
+                    THROW_EXCEPTION("Something wrong");
+                }
+            }
+        } else if (triple.isArch64Bit()) {
+            link_cmd << " -m elf_x86_64"
+                     << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+                     ;
+            sys_path = "/usr/lib/x86_64-linux-gnu";
         }
-    } else if (m_ctx.arch() == Architecture::X86_64) {
-        link_cmd << " -m elf_x86_64"
-                 << " -dynamic-linker /lib64/ld-linux-x86-64.so.2"
+        link_cmd << output.str()
+                 << " -L /usr/lib"
+                 << " -L" << sys_path
+                 << " " << sys_path << "/crt1.o"
+                 << " " << sys_path << "/crti.o"
+                 << objs.str()
+                 << " --no-as-needed -lc"
+                 << " " << sys_path << "/crtn.o"
                  ;
-        sys_path = "/usr/lib/x86_64-linux-gnu";
-    } else {
-        THROW_EXCEPTION("Unsuppoered architecture");
+    } else if (triple.isMacOSX()) {
+        link_cmd << " -arch " << m_ctx.triple().getArchName().str();
+        link_cmd << " -macosx_version_min 10.6.0"
+                 << " -L/usr/lib"
+                 << " -lSystem -lcrt1.10.6.o"
+                 << lib_paths.str()
+                 << libs.str()
+                 << output.str()
+                 << objs.str()
+                 ;
+    } else if (triple.isOSWindows()) {
+        // TODO
     }
-    link_cmd << output.str()
-             << " -L /usr/lib"
-             << " -L" << sys_path
-             << " " << sys_path << "/crt1.o"
-             << " " << sys_path << "/crti.o"
-             << objs.str()
-             << " --no-as-needed -lc"
-             << " " << sys_path << "/crtn.o"
-             ;
-#elif defined __APPLE__
-    if (m_ctx.arch() == Architecture::X86_32) {
-        link_cmd << " -arch i386";
-    } else if (m_ctx.arch() == Architecture::X86_64) {
-        link_cmd << " -arch x86_64";
-    }
-    link_cmd << " -macosx_version_min 10.6.0"
-             << lib_paths.str()
-             << libs.str()
-             << output.str()
-             << objs.str()
-             ;
-#else
-    #error Wrong platform
-#endif
     
     // do the thing
     if (m_ctx.verbose()) std::cout << link_cmd.str() << '\n';
@@ -191,18 +190,19 @@ void Emitter::emitObjOrAsm()
     llc_cmd << " " << getOptimizationLevel(lvl);
     
     // architecture
-    if (m_ctx.arch() == Architecture::X86_32) {
-        llc_cmd << " -march=x86";
-    } else if (m_ctx.arch() == Architecture::X86_64) {
-        llc_cmd << " -march=x86-64";
+    auto & triple = m_ctx.triple();
+    if (triple.getArch() == llvm::Triple::x86) {
+        llc_cmd << " -march=" << "x86";
+    } else if (triple.getArch() == llvm::Triple::x86_64) {
+        llc_cmd << " -march=" << "x86-64";
     } else {
-        THROW_EXCEPTION("Unsuppoered architecture");
+        llc_cmd << " -march=" << triple.getArchName().str();
     }
     
     for (auto & module : m_modules) {
         // get path
-        FS::path path(module->getModuleIdentifier());
-        path.replace_extension(".bc");
+        Path path(module->getModuleIdentifier());
+        path.extension("bc");
         
         // write .bc files
         {
@@ -217,13 +217,13 @@ void Emitter::emitObjOrAsm()
         // assemble
         {
             std::stringstream s;
-            auto asmPath = path;
+            auto output = path;
             if (m_ctx.emit() == EmitType::Asm) {
-                asmPath.replace_extension(".s");
+                output.extension("s");
             } else {
-                asmPath.replace_extension(".o");
+                output.extension("o");
             }
-            s << llc_cmd.str() << " -o " << asmPath << " " << path;
+            s << llc_cmd.str() << " -o " << output << " " << path;
             if (verbose) std::cout << s.str() << '\n';
             if (::system(s.str().c_str())) return;
         }
@@ -252,8 +252,8 @@ void Emitter::emitLlvm()
     
     for (auto & module : m_modules) {
         // get path
-        FS::path path(module->getModuleIdentifier());
-        path.replace_extension(".ll");
+        Path path(module->getModuleIdentifier());
+        path.extension("ll");
         
         // write .ll file
         {

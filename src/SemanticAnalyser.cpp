@@ -14,6 +14,8 @@
 #include "SymbolTable.h"
 #include "Context.h"
 
+#include <iostream>
+
 
 #define LOG_VAR(var)    std::cout << #var << " = " << (var) << " : " << __FUNCTION__ << "(" << __LINE__ << ")\n";
 #define LOG(msg)        std::cout << msg << " : " << __FUNCTION__ << "(" << __LINE__ << ")\n";

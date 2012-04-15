@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 #include "AstVisitor.h"
+#include <iostream>
 using namespace lbc;
 
 // destructor
