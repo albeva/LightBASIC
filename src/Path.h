@@ -91,8 +91,8 @@ public:
      */
     Path & path(std::string p);
     Path & path(const Path & p) { return path(p.m_path); }
-    Path & operator = (const Path & p) { path(p.m_path); return *this; }
-    Path & operator = (const std::string & p) { path(p); return *this; }
+    Path & operator = (const Path & p) { return path(p.m_path); }
+    Path & operator = (const std::string & p) { return path(p); }
     
     /**
      * get absolute path
@@ -145,7 +145,8 @@ public:
      * test equality. This is simple string comparison and does
      * not compare if paths actually point to the same path
      */
-    friend bool operator == (const Path & lhs, const Path & rhs) {
+    friend bool operator == (const Path & lhs, const Path & rhs)
+    {
         return lhs.m_path == rhs.m_path;
     }
     

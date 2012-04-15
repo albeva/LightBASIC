@@ -38,16 +38,16 @@ namespace lbc {
      * value of a variable provided is restored apon
      * exiting the scope
      */
-    template<typename T> struct ScopeGuard : NonCopyable
+    template<typename T> struct ScopedGuard : NonCopyable
     {
         
         // create
-        ScopeGuard(T & value) : m_target(value), m_value(value)
+        ScopedGuard(T & value) : m_target(value), m_value(value)
         {
         }
         
         // restore
-        ~ScopeGuard() {
+        ~ScopedGuard() {
             m_target = m_value;
         }
         
@@ -59,5 +59,5 @@ namespace lbc {
     #define CONCATENATE_DETAIL(x, y) x##y
     #define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
     #define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
-    #define SCOPED_GUARD(V) ScopeGuard<decltype(V)> MAKE_UNIQUE(_tmp_guard) (V);
+    #define SCOPED_GUARD(V) ScopedGuard<decltype(V)> MAKE_UNIQUE(_tmp_guard) (V);
 }

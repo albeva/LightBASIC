@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 LightBASIC development team . All rights reserved.
 //
 
-#include <iostream>
 #include "Context.h"
 #include "Parser.h"
 #include "Ast.h"
@@ -18,10 +17,7 @@
 #include "Version.h"
 #include "Path.h"
 
-#include <llvm/Support/SourceMgr.h>
-#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/Path.h>
-#include <llvm/ADT/Triple.h>
 
 #include <iostream>
 

@@ -6,7 +6,9 @@
 //  Copyright (c) 2012 LightBASIC development team. All rights reserved.
 //
 #pragma once
+
 #include "Path.h"
+#include <llvm/ADT/Triple.h>
 
 namespace lbc {
     

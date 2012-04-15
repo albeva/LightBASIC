@@ -7,10 +7,10 @@
 //
 
 #include "Context.h"
-
-#include <iostream>
 #include <llvm/Support/Host.h>
 #include <llvm/Support/Path.h>
+#include <iostream>
+
 using namespace lbc;
 
 #define LBC_DEF_OPT_LVL     (OptimizationLevel::O3)

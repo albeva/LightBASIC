@@ -140,8 +140,8 @@ void Emitter::emitExecutable()
         link_cmd << " -arch " << m_ctx.triple().getArchName().str();
         link_cmd << " -macosx_version_min 10.6.0"
                  << " -L/usr/lib"
-                 << " -lSystem -lcrt1.10.6.o"
                  << lib_paths.str()
+                 << " -lSystem -lcrt1.10.6.o"
                  << libs.str()
                  << output.str()
                  << objs.str()
