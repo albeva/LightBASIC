@@ -188,7 +188,7 @@ std::string getCurrentPath()
  */
 std::string getCompilerPath(const char * argv0)
 {
-    auto path = llvm::sys::Path::GetMainExecutable(argv0, (void*)getCompilerPath);
+    auto path = llvm::sys::Path::GetMainExecutable(argv0, (void*)(intptr_t)getCompilerPath);
     return llvm::sys::path::parent_path(path.str()).str();
 }
 

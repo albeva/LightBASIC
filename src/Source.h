@@ -36,7 +36,7 @@ namespace lbc {
             // difference type
             typedef ptrdiff_t                       difference_type;
             // reference. BREAK iterator. no need for reference here in this context
-            typedef const CharT                     reference;
+            typedef CharT                     reference;
             // pointer
             typedef const CharT *                   pointer;
             // node
