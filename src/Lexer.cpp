@@ -8,9 +8,13 @@
 
 #include "Lexer.h"
 #include "Token.h"
-#include "Source.h"
-#include "SourceLocation.h"
+#include <llvm/Support/MemoryBuffer.h>
 using namespace lbc;
+
+// TODO: deal with *nix, windows mac line endings
+// TODO: try to get rid of backtracking with input itearor
+// TODO: Generate correct src location and range
+// TODO: implement invalid token, get rid of exceptions
 
 
 // character types
@@ -117,12 +121,12 @@ static inline bool IsLineOrFileEnd(char ch)
 /**
  * Create new lexer object
  */
-Lexer::Lexer(const std::shared_ptr<Source> & src)
-:   m_src(src),
-    m_input(m_src->begin()),
+Lexer::Lexer(const llvm::MemoryBuffer * buffer)
+:   m_src(buffer),
+    m_input(buffer->getBufferStart()),
+    m_tokenStart(nullptr),
     m_line(1),
     m_col(0),
-    m_tokenStart(0),
     m_hasStmt(false)
 {
 }
@@ -133,11 +137,12 @@ Lexer::Lexer(const std::shared_ptr<Source> & src)
  */
 Token * Lexer::next()
 {
-    Source::CharT ch, nextCh;
+    char ch, nextCh;
     char info;
     
-    while((ch = *m_input) != '\0') {
-        m_input++;
+    while(m_input != m_src->getBufferEnd()) {
+        m_tokenStart = m_input;
+        ch = *m_input++;
         m_col++;
         info = CharInfo[(int)ch];
         
@@ -151,7 +156,6 @@ Token * Lexer::next()
         if (ch == '\n') {
             if (m_hasStmt) {
                 m_hasStmt = false;
-                m_tokenStart = m_col;
                 Token * tkn = MakeToken(TokenType::EndOfLine);
                 m_line++;
                 m_col = 0;
@@ -192,7 +196,6 @@ Token * Lexer::next()
         
         // has a statement
         m_hasStmt = true;
-        m_tokenStart = m_col;
         
         // identifier
         if (info & CHAR_LETTER) return identifier();
@@ -238,9 +241,6 @@ Token * Lexer::next()
         invalid += ch;
         return MakeToken(TokenType::Invalid, invalid);
     }
-    
-    // end token mark
-    m_tokenStart = m_col + 1;
     
     // has a statement?
     if (m_hasStmt) {
@@ -292,7 +292,7 @@ void Lexer::multilineComment()
 Token * Lexer::identifier()
 {
     // strat point
-    Source::const_iterator begin = m_input;
+    auto begin = m_input;
     begin--;
     // read whil identifier char
     while (IsIdentifierBody(*m_input++));
@@ -317,14 +317,17 @@ Token * Lexer::identifier()
 Token * Lexer::number()
 {
     // strat point
-    Source::const_iterator begin = m_input;
+    auto begin = m_input;
     begin--;
     
     // read whil identifier char
-    bool fp = *begin == '.';
+    bool fp = *begin == '.', invalid = false;
     while (true) {
         if (*m_input == '.') {
-            if (fp) THROW_EXCEPTION("invalid input");
+            if (fp) {
+                invalid = true;
+                break;
+            }
             fp = true;
         } else if ((CharInfo[(int)(*m_input)] & CHAR_NUMBER) == 0) {
             break;
@@ -336,6 +339,11 @@ Token * Lexer::number()
     std::string number(begin, m_input);
     unsigned short length = (unsigned short)((m_input - begin) - 1);
     m_col += length;
+    
+    // invalid ?
+    if (invalid) {
+        return MakeToken(TokenType::Invalid, number);
+    }
     
     // make token
     return MakeToken(fp ? TokenType::FloatingPointLiteral : TokenType::IntegerLiteral, number);
@@ -349,7 +357,7 @@ Token * Lexer::number()
 Token * Lexer::string()
 {
     // skip 1st "
-    Source::const_iterator begin = m_input;
+    auto begin = m_input;
     std::string buffer;
     
     // read first
@@ -413,16 +421,16 @@ Token * Lexer::string()
 /**
  * Make token
  */
-Token * Lexer::MakeToken(TokenType type, int len)
+Token * Lexer::MakeToken(TokenType type, int)
 {
-    return new Token(type, SourceLocation(m_line, m_col, (unsigned short)len));
+    return new Token(type, llvm::SMLoc::getFromPointer(m_tokenStart));
 }
 
 
 /**
  * Make token
  */
-Token * Lexer::MakeToken(TokenType type, const std::string & lexeme, int len)
+Token * Lexer::MakeToken(TokenType type, const std::string & lexeme, int)
 {
-    return new Token(type, SourceLocation(m_line, m_col, (unsigned short)(len == -1 ? (unsigned short)lexeme.length() : len)), lexeme);
+    return new Token(type, llvm::SMLoc::getFromPointer(m_input), lexeme);
 }

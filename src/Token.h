@@ -7,7 +7,8 @@
 //
 #pragma once
 #include "Token.def.h"
-#include "SourceLocation.h"
+//#include "SourceLocation.h"
+#include <llvm/Support/SMLoc.h>
 
 namespace lbc {
     
@@ -36,7 +37,7 @@ namespace lbc {
         static TokenType getTokenType(const std::string & id, TokenType def = TokenType::Identifier);
         
         // create token type and lexeme
-        Token(TokenType type,  const SourceLocation & loc, const std::string & lexeme = "")
+        Token(TokenType type,  const llvm::SMLoc & loc, const std::string & lexeme = "")
             :  m_loc(loc), m_type(type), m_lexeme(lexeme) {}
         
         // get lexeme
@@ -46,7 +47,7 @@ namespace lbc {
         const std::string & name() const { return getTokenName(m_type); }
         
         // get location
-        const SourceLocation & location() const { return m_loc; }
+        const llvm::SMLoc & location() const { return m_loc; }
         
         // get type
         TokenType type() const { return m_type; }
@@ -59,7 +60,7 @@ namespace lbc {
         void operator delete(void *);
         
         private:
-        SourceLocation m_loc;
+        llvm::SMLoc m_loc;
         TokenType m_type;
         std::string m_lexeme;
     };

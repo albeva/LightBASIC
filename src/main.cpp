@@ -7,18 +7,11 @@
 //
 
 #include "Context.h"
-#include "Parser.h"
-#include "Ast.h"
-#include "PrinterVisitor.h"
-#include "SemanticAnalyser.h"
-#include "IrBuilder.h"
-#include "SourceFile.h"
-#include "Emitter.h"
+#include "Driver.h"
 #include "Version.h"
 #include "Path.h"
 
 #include <llvm/Support/Path.h>
-
 #include <iostream>
 
 using namespace lbc;
@@ -97,35 +90,10 @@ int main(int argc, const char * argv[])
             return EXIT_FAILURE;
         }
         
-        // create the parser
-        auto parser = std::make_shared<Parser>(ctx);
-        // semantic analyser
-        auto semantic = std::make_shared<SemanticAnalyser>(ctx);
-        // IR builder
-        auto builder = std::make_shared<IrBuilder>(ctx);
-        // create output emitter
-        auto emitter = std::make_shared<Emitter>(ctx);
-        // process the files
-        for (auto & file : ctx.get(ResourceType::Source)) {
-            auto ast = parser->parse(std::make_shared<SourceFile>(file.absolute()));
-            if (ast) {
-                // analyse
-                ast->accept(semantic.get());
-                
-                // generate llvm code
-                ast->accept(builder.get());
-                if (auto module = builder->getModule()) {
-                    emitter->add(module);
-                }
-                
-                // cleanup
-                delete ast;
-            } else {
-                std::cout << "NO AST\n";
-            }
-        }
-        // generate the output
-        emitter->generate();
+        // let the driver to deal with it now
+        Driver driver(ctx);
+        driver.drive();
+
     } catch (Exception e) {
         std::cout << "Error: " << e.what() << std::endl;
         return EXIT_FAILURE;

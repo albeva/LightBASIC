@@ -9,11 +9,12 @@
 
 #include "Path.h"
 #include <llvm/ADT/Triple.h>
+#include <llvm/Support/SourceMgr.h>
 
 namespace lbc {
     
     // resource container
-    typedef std::vector<Path> ResourceContainer;
+    typedef std::vector<std::string> ResourceContainer;
     
     // Types of resources
     enum class ResourceType {
@@ -67,6 +68,10 @@ namespace lbc {
         // get singleton object.
         static Context & getGlobalContext();
         
+        // Initialize the context after all
+        // options are set. Returns true if successful, false otherwise.
+        bool initialize();
+        
         // create new global context
         static Context * create() { return new Context(); }
         
@@ -100,6 +105,9 @@ namespace lbc {
         llvm::Triple & triple() { return m_triple; }
         Context & triple(const llvm::Triple & t) { m_triple = t; return *this; }
         
+        // get src mgr
+        llvm::SourceMgr & sourceMrg() { return m_sourceMgr; }
+        
         // generate a string containing all current options
         std::string toString() const;
         
@@ -129,6 +137,7 @@ namespace lbc {
         
         // build for architecture
         llvm::Triple        m_triple;
+        llvm::SourceMgr     m_sourceMgr;
         OptimizationLevel   m_optLevel;
         EmitType            m_emit;
     };

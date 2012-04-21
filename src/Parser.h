@@ -34,7 +34,7 @@ namespace lbc {
         Parser(Context & ctx);
         
         // parse and return AstProgram
-        AstProgram * parse(const std::shared_ptr<Source> & source);
+        AstProgram * parse(const std::string & file);
         
     private:
         

@@ -32,6 +32,18 @@ Context & Context::getGlobalContext()
 
 
 /**
+ * Initialzie the context. Return false if unsuccessful
+ * - initialize SourceMgr, check command line options, ...
+ */
+bool Context::initialize()
+{
+    // probably not needed because paths are absolute already anyway   
+    // m_sourceMgr.setIncludeDirs(get(ResourceType::SourcePath));
+    return true;
+}
+
+
+/**
  * Initialize the context
  */
 Context::Context()
@@ -117,8 +129,14 @@ Context & Context::add(const Path & path, ResourceType type)
     Path source;
     switch (type) {
         case ResourceType::GlobalPath:
-        case ResourceType::LibraryPath:
+            add(path, ResourceType::SourcePath);
+            add(path, ResourceType::LibraryPath);
+            return *this;
+            break;
         case ResourceType::SourcePath:
+            source = resolveDir(path);
+            break;
+        case ResourceType::LibraryPath:
             source = resolveDir(path);
             break;
         case ResourceType::Source:
@@ -138,7 +156,7 @@ Context & Context::add(const Path & path, ResourceType type)
     // add to the container
     ResourceContainer & rct = m_resources[(int)type];
     if (find(rct.begin(), rct.end(), source) == rct.end()) {
-        rct.push_back(source);
+        rct.push_back(source.str());
     }
 
     return *this;
@@ -186,14 +204,6 @@ Path Context::resolveFile(const Path & file, ResourceType type) const
     if (file.isRelative()) {
         // search the container
         for (auto & dir : m_resources[(int)type]) {
-            Path tmp(dir);
-            tmp.append(file);
-            if (tmp.exists() && tmp.isFile()) {
-                return tmp;
-            }
-        }
-        // search global container
-        for (auto & dir : m_resources[(int)ResourceType::GlobalPath]) {
             Path tmp(dir);
             tmp.append(file);
             if (tmp.exists() && tmp.isFile()) {

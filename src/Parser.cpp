@@ -8,12 +8,15 @@
 
 #include "Parser.h"
 #include "Context.h"
-#include "SourceFile.h"
 #include "Lexer.h"
 #include "Ast.h"
 #include "Token.h"
+#include <iostream>
 using namespace lbc;
 
+// TODO: remove exceptions. Raise error and infividual functions should return nullptr
+// TODO: handle invalid token
+// TODO: break the parser into seperate files
 
 #define expect(_tok) if (!accept(_tok)) THROW_EXCEPTION("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(_tok));
 
@@ -30,18 +33,26 @@ Parser::Parser(Context & ctx)
  * Parse the input and return the Ast tree
  * Program = { Declaration }
  */
-AstProgram * Parser::parse(const std::shared_ptr<Source> & source)
+AstProgram * Parser::parse(const std::string & file)
 {
     m_token = nullptr;
     m_next = nullptr;
     m_expectAssign = false;
     
     // init the lexer
-    m_lexer = new Lexer(source);
+    auto & srcMgr = m_ctx.sourceMrg();
+    std::string s = "";
+    auto ID = srcMgr.AddIncludeFile(file, llvm::SMLoc(), s);
+    if (ID == ~0U) {
+        // TODO: Raise an error
+        return nullptr;
+    }
+    
+    m_lexer = new Lexer(srcMgr.getMemoryBuffer(ID));
     move(); move();
     
     // resulting ast node
-    auto ast = new AstProgram(source->getName());
+    auto ast = new AstProgram(file);
     
     // { DeclList }
     while (!match(TokenType::EndOfFile)) {

@@ -19,13 +19,11 @@
 		369056E21503881700E2C917 /* PrinterVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C41503881700E2C917 /* PrinterVisitor.cpp */; };
 		369056E31503881700E2C917 /* RecursiveAstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C71503881700E2C917 /* RecursiveAstVisitor.cpp */; };
 		369056E41503881700E2C917 /* SemanticAnalyser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056C91503881700E2C917 /* SemanticAnalyser.cpp */; };
-		369056E51503881700E2C917 /* Source.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056CB1503881700E2C917 /* Source.cpp */; };
-		369056E61503881700E2C917 /* SourceFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056CD1503881700E2C917 /* SourceFile.cpp */; };
-		369056E71503881700E2C917 /* SourceString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D01503881700E2C917 /* SourceString.cpp */; };
 		369056E81503881700E2C917 /* Symbol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D21503881700E2C917 /* Symbol.cpp */; };
 		369056E91503881700E2C917 /* SymbolTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D41503881700E2C917 /* SymbolTable.cpp */; };
 		369056EA1503881700E2C917 /* Token.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D61503881700E2C917 /* Token.cpp */; };
 		369056EB1503881700E2C917 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 369056D91503881700E2C917 /* Type.cpp */; };
+		36CCB97F1542F937008ADF72 /* Driver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36CCB97E1542F937008ADF72 /* Driver.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,13 +58,6 @@
 		369056C81503881700E2C917 /* RecursiveAstVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RecursiveAstVisitor.h; path = src/RecursiveAstVisitor.h; sourceTree = SOURCE_ROOT; };
 		369056C91503881700E2C917 /* SemanticAnalyser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SemanticAnalyser.cpp; path = src/SemanticAnalyser.cpp; sourceTree = SOURCE_ROOT; };
 		369056CA1503881700E2C917 /* SemanticAnalyser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SemanticAnalyser.h; path = src/SemanticAnalyser.h; sourceTree = SOURCE_ROOT; };
-		369056CB1503881700E2C917 /* Source.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Source.cpp; path = src/Source.cpp; sourceTree = SOURCE_ROOT; };
-		369056CC1503881700E2C917 /* Source.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Source.h; path = src/Source.h; sourceTree = SOURCE_ROOT; };
-		369056CD1503881700E2C917 /* SourceFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourceFile.cpp; path = src/SourceFile.cpp; sourceTree = SOURCE_ROOT; };
-		369056CE1503881700E2C917 /* SourceFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceFile.h; path = src/SourceFile.h; sourceTree = SOURCE_ROOT; };
-		369056CF1503881700E2C917 /* SourceLocation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceLocation.h; path = src/SourceLocation.h; sourceTree = SOURCE_ROOT; };
-		369056D01503881700E2C917 /* SourceString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SourceString.cpp; path = src/SourceString.cpp; sourceTree = SOURCE_ROOT; };
-		369056D11503881700E2C917 /* SourceString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceString.h; path = src/SourceString.h; sourceTree = SOURCE_ROOT; };
 		369056D21503881700E2C917 /* Symbol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Symbol.cpp; path = src/Symbol.cpp; sourceTree = SOURCE_ROOT; };
 		369056D31503881700E2C917 /* Symbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Symbol.h; path = src/Symbol.h; sourceTree = SOURCE_ROOT; };
 		369056D41503881700E2C917 /* SymbolTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SymbolTable.cpp; path = src/SymbolTable.cpp; sourceTree = SOURCE_ROOT; };
@@ -78,6 +69,8 @@
 		369056DA1503881700E2C917 /* Type.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Type.def.h; path = src/Type.def.h; sourceTree = SOURCE_ROOT; };
 		369056DB1503881700E2C917 /* Type.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Type.h; path = src/Type.h; sourceTree = SOURCE_ROOT; };
 		36A16E12153194E0002F4A43 /* pch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = pch.hpp; path = src/pch.hpp; sourceTree = SOURCE_ROOT; };
+		36CCB97D1542F885008ADF72 /* Driver.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Driver.h; path = src/Driver.h; sourceTree = SOURCE_ROOT; };
+		36CCB97E1542F937008ADF72 /* Driver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Driver.cpp; path = src/Driver.cpp; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -116,7 +109,7 @@
 			children = (
 				369056C11503881700E2C917 /* main.cpp */,
 				369056EE1503884F00E2C917 /* Context */,
-				369056F3150388A600E2C917 /* Input Source */,
+				36CCB9801542F979008ADF72 /* Driver */,
 				369056EF1503885A00E2C917 /* Lexer */,
 				369056F01503886600E2C917 /* Parser */,
 				369056EC1503883900E2C917 /* Ast */,
@@ -204,20 +197,6 @@
 			name = "Semantic Analyser";
 			sourceTree = "<group>";
 		};
-		369056F3150388A600E2C917 /* Input Source */ = {
-			isa = PBXGroup;
-			children = (
-				369056CF1503881700E2C917 /* SourceLocation.h */,
-				369056CC1503881700E2C917 /* Source.h */,
-				369056CB1503881700E2C917 /* Source.cpp */,
-				369056CE1503881700E2C917 /* SourceFile.h */,
-				369056CD1503881700E2C917 /* SourceFile.cpp */,
-				369056D11503881700E2C917 /* SourceString.h */,
-				369056D01503881700E2C917 /* SourceString.cpp */,
-			);
-			name = "Input Source";
-			sourceTree = "<group>";
-		};
 		369056F4150388C100E2C917 /* Symbol table */ = {
 			isa = PBXGroup;
 			children = (
@@ -266,6 +245,15 @@
 			children = (
 			);
 			name = Libraries;
+			sourceTree = "<group>";
+		};
+		36CCB9801542F979008ADF72 /* Driver */ = {
+			isa = PBXGroup;
+			children = (
+				36CCB97D1542F885008ADF72 /* Driver.h */,
+				36CCB97E1542F937008ADF72 /* Driver.cpp */,
+			);
+			name = Driver;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -371,9 +359,6 @@
 				369056E21503881700E2C917 /* PrinterVisitor.cpp in Sources */,
 				369056E31503881700E2C917 /* RecursiveAstVisitor.cpp in Sources */,
 				369056E41503881700E2C917 /* SemanticAnalyser.cpp in Sources */,
-				369056E51503881700E2C917 /* Source.cpp in Sources */,
-				369056E61503881700E2C917 /* SourceFile.cpp in Sources */,
-				369056E71503881700E2C917 /* SourceString.cpp in Sources */,
 				369056E81503881700E2C917 /* Symbol.cpp in Sources */,
 				369056E91503881700E2C917 /* SymbolTable.cpp in Sources */,
 				369056EA1503881700E2C917 /* Token.cpp in Sources */,
@@ -382,6 +367,7 @@
 				36682DC9150CF4E700E1038A /* IrBuilder.cpp in Sources */,
 				36682DCA150CFCBD00E1038A /* Emitter.cpp in Sources */,
 				36268999153B1CFE00164F3D /* Path.cpp in Sources */,
+				36CCB97F1542F937008ADF72 /* Driver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
