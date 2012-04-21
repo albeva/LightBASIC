@@ -14,10 +14,6 @@
 #include <iostream>
 using namespace lbc;
 
-// TODO: remove exceptions. Raise error and infividual functions should return nullptr
-// TODO: handle invalid token
-// TODO: break the parser into seperate files
-
 #define expect(_tok) if (!accept(_tok)) THROW_EXCEPTION("Unexpected token. Found " + m_token->lexeme() + ". Expected " + Token::getTokenName(_tok));
 
 /**

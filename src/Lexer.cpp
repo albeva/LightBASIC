@@ -11,11 +11,6 @@
 #include <llvm/Support/MemoryBuffer.h>
 using namespace lbc;
 
-// TODO: deal with *nix, windows mac line endings
-// TODO: try to get rid of backtracking with input itearor
-// TODO: Generate correct src location and range
-// TODO: implement invalid token, get rid of exceptions
-
 
 // character types
 // copied from clang source

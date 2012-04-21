@@ -1,5 +1,11 @@
 Todo for Milestone 4
 ======================
+[✓] Remove boost dependency. Boost is a great library, but the functionality
+    that lbc uses from it is all provided by llvm anyways. So no point in code
+    duplication. This also means simpler build and less dependencies
+[✓] Remove SourceXxx files and replace them with llvm provided equivalents.
+[✓] Add Driver class. It uses context to figure out what to do.
+[✓] Replace struct with class. Use struct for POD only
 [ ] Adopt a coding standard for c++ source
     - http://llvm.org/docs/CodingStandards.html
       o This is really nice one. Especially since already using llvm. Minor
@@ -7,23 +13,21 @@ Todo for Milestone 4
         capital first letter...
     - Investigate others
     [ ] Put info on the website
+[ ] Improve Parser
+    [ ] remove exceptions. Raise error and individual functions should return
+        nullptr
+    [ ] handle invalid token
+    [ ] break the parser into separate files
+[ ] Improve Lexer
+    [ ] deal with *nix, windows mac line endings
+    [ ] try to get rid of backtracking with input iterator
+    [ ] Generate correct src location and range
+    [ ] implement invalid token, get rid of exceptions
 [ ] Generate source code documentation
-[ ] Implement unit tests for the compiler itself (boost test)
+[ ] Implement unit tests for the compiler itself (boost test ?)
 [✓] Remove boost dependency
     use llvm equivalent classes. Less dependencies, simpler build
 [✓] create proper bootstrap and make scripts
-[ ] Implement build bot on the lightbasic.com
-    [ ] Update local copy whenever github repo is updated
-    [ ] Run the compiler unit tests.
-        [ ] Show results on the site
-    [ ] Compile the source.
-        [ ] Show results on the site
-    [ ] Run the success and fail tests.
-        [ ] Show results on the site
-    [ ] Make preparations for hosting nightly builds (cross compile)
-        [ ] osx
-        [ ] windows
-        [✓] ubuntu
 [ ] Implement proper error messages
     [ ] Lexer    - invalid characters, invalid numbers, ...
     [ ] Parser   - missing braces, mismatching keywords, unbalanced scopes, ...
@@ -53,6 +57,18 @@ Todo for Milestone 4
 
 Future. M5 ?
 ==============
+[ ] Implement build bot on the lightbasic.com
+    [ ] Update local copy whenever github repo is updated
+    [ ] Run the compiler unit tests.
+        [ ] Show results on the site
+    [ ] Compile the source.
+        [ ] Show results on the site
+    [ ] Run the success and fail tests.
+        [ ] Show results on the site
+    [ ] Make preparations for hosting nightly builds (cross compile)
+        [ ] osx
+        [ ] windows
+        [✓] ubuntu
 [ ] Implement Expression parser
     [ ] Addition
     [ ] Subtraction
