@@ -9,6 +9,7 @@
 #include "Lexer.h"
 #include "Token.h"
 #include <llvm/Support/MemoryBuffer.h>
+#include <iostream>
 using namespace lbc;
 
 
@@ -109,7 +110,7 @@ static inline bool IsIdentifierBody(char ch)
  */
 static inline bool IsLineOrFileEnd(char ch)
 {
-    return ch == '\n' || ch == '\0';
+    return ch == '\n' || ch == '\0' || ch == '\r';
 }
 
 
@@ -119,11 +120,82 @@ static inline bool IsLineOrFileEnd(char ch)
 Lexer::Lexer(const llvm::MemoryBuffer * buffer)
 :   m_src(buffer),
     m_input(buffer->getBufferStart()),
-    m_tokenStart(nullptr),
+    m_start(nullptr),
     m_line(1),
     m_col(0),
-    m_hasStmt(false)
+    m_hasStmt(false),
+    m_ownsSrc(false)
 {
+    m_nextCh = nextChar();
+}
+    
+
+/**
+ * create new lexer from a string
+ */
+Lexer::Lexer(const std::string buffer)
+:   Lexer(llvm::MemoryBuffer::getMemBuffer(buffer))
+{
+    m_ownsSrc = true;
+}
+
+
+/**
+ * Clean up
+ */
+Lexer::~Lexer()
+{
+    if (m_ownsSrc && m_src) delete m_src;
+}
+
+
+/**
+ * Gext next character. Do not advance the
+ * input except for line endings
+ */
+char Lexer::nextChar()
+{
+    // read the character from the input
+    char ch = m_input != m_src->getBufferEnd() ? *m_input : '\0';
+    
+    // LF : Multics, Unix and Unix-like systems (GNU/Linux, Mac OS X, FreeBSD,
+    //      AIX, Xenix, etc.), BeOS, Amiga, RISC OS and others.
+    // LF + CR : Acorn BBC and RISC OS spooled text output
+    if (ch == '\n') {
+        auto next = m_input + 1;
+        if (next != m_src->getBufferEnd() && *next == '\r') m_input = next;
+    }
+    // CR : Commodore 8-bit machines, Acorn BBC, TRS-80, Apple II family,
+    //      Mac OS up to version 9 and OS-9
+    // CR + LF : Microsoft Windows, DEC TOPS-10, RT-11 and most other early
+    //           non-Unix and non-IBM OSes,
+    //           CP/M, MP/M, DOS (MS-DOS, PC-DOS, etc.), Atari TOS, OS/2,
+    //           Symbian OS, Palm OS
+    else if (ch == '\r') {
+        auto next = m_input + 1;
+        if (next != m_src->getBufferEnd() && *next == '\n') m_input = next;
+        ch = '\n';
+    }
+    
+    // done
+    return ch;
+}
+
+/**
+ * Get next character from the buffer,
+ * advance the buffer by 1. Deal with different
+ * line endings
+ * CR is converted to LF internally for consistency
+ */
+bool Lexer::move()
+{
+    m_ch = m_nextCh;
+    if (m_ch == '\0') return false;
+    
+    m_input++;
+    m_nextCh = nextChar();
+    
+    return true;
 }
 
 
@@ -132,23 +204,18 @@ Lexer::Lexer(const llvm::MemoryBuffer * buffer)
  */
 Token * Lexer::next()
 {
-    char ch, nextCh;
     char info;
     
-    while(m_input != m_src->getBufferEnd()) {
-        m_tokenStart = m_input;
-        ch = *m_input++;
+    // loop while not end
+    for (m_start = m_input; move(); m_start = m_input) {
         m_col++;
-        info = CharInfo[(int)ch];
+        info = CharInfo[(int)m_ch];
         
         // skip spaces
         if (info & CHAR_HORZ_WS) continue;
         
-        nextCh = *m_input;
-        
-        
         // line endings
-        if (ch == '\n') {
+        if (m_ch == '\n') {
             if (m_hasStmt) {
                 m_hasStmt = false;
                 Token * tkn = MakeToken(TokenType::EndOfLine);
@@ -162,29 +229,24 @@ Token * Lexer::next()
         }
         
         // single line comment
-        if (ch == '\'') {
-            ch = *m_input++;
-            while(!IsLineOrFileEnd(ch)) ch = *m_input++;
-            m_input--; // TODO get rid of backtracking ?
+        if (m_ch == '\'') {
+            while (!IsLineOrFileEnd(m_nextCh) && move());
             continue;
         }
         
         // multline comments
-        if (ch == '/' && nextCh == '\'') {
+        if (m_ch == '/' && m_nextCh == '\'') {
             multilineComment();
             continue;
         }
         
         // statement continuation _
-        if (ch == '_' && (CharInfo[(int)nextCh] & (CHAR_LETTER | CHAR_NUMBER | CHAR_UNDER)) == 0) {
-            ch = *m_input++;
-            while(!IsLineOrFileEnd(ch)) ch = *m_input++;
-            // CR + LF
-            if (ch == '\n') {
+        if (m_ch == '_' && !IsIdentifierBody(m_nextCh)) {
+            move();
+            while (!IsLineOrFileEnd(m_ch) && move());
+            if (m_ch == '\n') {
                 m_line++;
                 m_col = 0;
-            } else if (ch == '\0') {
-                m_input--;
             }
             continue;
         }
@@ -196,35 +258,36 @@ Token * Lexer::next()
         if (info & CHAR_LETTER) return identifier();
         
         // string literal
-        if (ch == '"') return string();
+        if (m_ch == '"') return string();
         
         // number
-        if ((info & CHAR_NUMBER) || ((ch == '-' || ch == '.') && CharInfo[(int)nextCh] & CHAR_NUMBER))
+        if ((info & CHAR_NUMBER) || ((m_ch == '-' || m_ch == '.') && CharInfo[(int)m_nextCh] & CHAR_NUMBER))
             return number();
         
         // 3 char operators
-        #define IMPL_TOKENS(ID, STR)                       \
-            if (sizeof(STR) == 4 && STR[0] == toupper(ch))      \
-                if (STR[1] == toupper(nextCh) && STR[2] == toupper(m_input[1])) { \
-                    m_input++; m_input++; m_col += 2;           \
+        #define IMPL_TOKENS(ID, STR)                            \
+            if (sizeof(STR) == 4 && STR[0] == toupper(m_ch))    \
+                if (STR[1] == toupper(m_nextCh)                 \
+                    && STR[2] == toupper(m_input[1])) {         \
+                    move(); move(); m_col += 2;                 \
                     return MakeToken(TokenType::ID, STR);       \
                 }
         TKN_OPERATOR(IMPL_TOKENS)
         #undef IMPL_TOKENS
         
         // 2 char operators
-        #define IMPL_TOKENS(ID, STR)                       \
-            if (sizeof(STR) == 3 && STR[0] == toupper(ch))      \
-                if (STR[1] == toupper(nextCh)) {                \
-                    m_input++; m_col++;                         \
+        #define IMPL_TOKENS(ID, STR)                            \
+            if (sizeof(STR) == 3 && STR[0] == toupper(m_ch))    \
+                if (STR[1] == toupper(m_nextCh)) {              \
+                    move(); m_col++;                            \
                     return MakeToken(TokenType::ID, STR);       \
                 }
         TKN_OPERATOR(IMPL_TOKENS)
         #undef IMPL_TOKENS
         
         // 1 char operators
-        #define IMPL_TOKENS(ID, STR)                       \
-            if (sizeof(STR) == 2 && STR[0] == ch)               \
+        #define IMPL_TOKENS(ID, STR)                            \
+            if (sizeof(STR) == 2 && STR[0] == m_ch)             \
                 return MakeToken(TokenType::ID, STR);
         TKN_OPERATOR(IMPL_TOKENS)
         #undef IMPL_TOKENS
@@ -233,7 +296,7 @@ Token * Lexer::next()
         // invalid input
         // TODO read until end of garpabe and then return
         std::string invalid = "<invalid>";
-        invalid += ch;
+        invalid += m_ch;
         return MakeToken(TokenType::Invalid, invalid);
     }
     
@@ -252,27 +315,26 @@ Token * Lexer::next()
  */
 void Lexer::multilineComment()
 {
-    m_input++;
+    move();
     m_col++;
     int level = 1;
-    while (*m_input != '\0') {
-        char ch = *m_input++;
+    while (move()) {
         m_col++;
         // '/ close
-        if (ch == '\'' && *m_input == '/') {
-            m_input++;
+        if (m_ch == '\'' && m_nextCh == '/') {
+            move();
             m_col++;
             level--;
             if (level == 0) return;
         }
         // /' nested open
-        else if (ch == '/' && *m_input == '\'') {
-            m_input++;
+        else if (m_ch == '/' && m_nextCh == '\'') {
+            move();
             m_col++;
             level++;
         }
         // CR or LF line end
-        else if (ch == '\n') {
+        else if (m_ch == '\n') {
             m_col = 0;
             m_line++;
         }
@@ -286,22 +348,11 @@ void Lexer::multilineComment()
  */
 Token * Lexer::identifier()
 {
-    // strat point
-    auto begin = m_input;
-    begin--;
-    // read whil identifier char
-    while (IsIdentifierBody(*m_input++));
-    m_input--;
-    
-    // the id
+    while (IsIdentifierBody(m_nextCh) && move());
     std::string id;
-    std::transform(begin, m_input, std::back_inserter(id), (int(*)(int))std::toupper);
-    m_col += (unsigned short)((m_input - begin) - 1);
-    
-    // Get type. if is a keyword make only from TokenID
-    // as it will be faster string lookup from the keywords name lookup where its constant array access
-    TokenType type = Token::getTokenType(id, TokenType::Identifier);
-    return MakeToken(type, id);
+    std::transform(m_start, m_input, std::back_inserter(id), (int(*)(int))std::toupper);
+    m_col += (unsigned short)((m_input - m_start) - 1);
+    return MakeToken(Token::getTokenType(id, TokenType::Identifier), id);
 }
 
 
@@ -311,28 +362,25 @@ Token * Lexer::identifier()
  */
 Token * Lexer::number()
 {
-    // strat point
-    auto begin = m_input;
-    begin--;
     
     // read whil identifier char
-    bool fp = *begin == '.', invalid = false;
-    while (true) {
-        if (*m_input == '.') {
+    bool fp = *m_start == '.', invalid = false;
+    while (!IsLineOrFileEnd(m_nextCh)) {
+        if (m_nextCh == '.') {
             if (fp) {
                 invalid = true;
                 break;
             }
             fp = true;
-        } else if ((CharInfo[(int)(*m_input)] & CHAR_NUMBER) == 0) {
+        } else if ((CharInfo[(int)m_nextCh] & CHAR_NUMBER) == 0) {
             break;
         }
-        m_input++;
+        move();
     }
     
     // the id
-    std::string number(begin, m_input);
-    unsigned short length = (unsigned short)((m_input - begin) - 1);
+    std::string number(m_start, m_input);
+    unsigned short length = (unsigned short)((m_input - m_start) - 1);
     m_col += length;
     
     // invalid ?
@@ -352,24 +400,16 @@ Token * Lexer::number()
 Token * Lexer::string()
 {
     // skip 1st "
-    auto begin = m_input;
+    m_start = m_input;
     std::string buffer;
     
     // read first
-    char ch = *m_input++;
-    while (true) {
-        
-        // end of file or line
-        if (IsLineOrFileEnd(ch)) {
-            m_input--;
-            break;
-        }
+    while (!IsLineOrFileEnd(m_nextCh) && move()) {
         
         // "
-        if (ch == '"') {
-            if (*m_input == '"') {
-                ch = *(++m_input);
-                m_input++;
+        if (m_ch == '"') {
+            if (m_nextCh == '"') {
+                move();
                 buffer += '"';
                 continue;
             }
@@ -377,22 +417,18 @@ Token * Lexer::string()
         }
         
         // \ escape
-        if (ch == '\\') {
-            char nextCh = *m_input;
+        if (m_ch == '\\') {
             // \"
-            if (nextCh == '"' || nextCh == '\\') {
-                ch = *(++m_input);
-                m_input++;
-                buffer += nextCh;
+            if (m_nextCh == '"' || m_nextCh == '\\') {
+                move();
+                buffer += m_nextCh;
                 continue;
-            } else if (nextCh == 'n') {
-                ch = *(++m_input);
-                m_input++;
+            } else if (m_nextCh == 'n') {
+                move();
                 buffer += '\n';
                 continue;
-            } else if (nextCh == 't') {
-                ch = *(++m_input);
-                m_input++;
+            } else if (m_nextCh == 't') {
+                move();
                 buffer += '\t';
                 continue;
             } else {
@@ -400,12 +436,11 @@ Token * Lexer::string()
             }
         }
         
-        buffer += ch;
-        ch = *m_input++;
+        buffer += m_ch;
     }
     
     // fix column
-    unsigned short length = (unsigned short)(m_input - begin) + 1;
+    unsigned short length = (unsigned short)(m_input - m_start) + 1;
     m_col += length - 1;
     
     // return
@@ -418,7 +453,7 @@ Token * Lexer::string()
  */
 Token * Lexer::MakeToken(TokenType type, int)
 {
-    return new Token(type, llvm::SMLoc::getFromPointer(m_tokenStart));
+    return new Token(type, llvm::SMLoc::getFromPointer(m_start));
 }
 
 
@@ -427,5 +462,5 @@ Token * Lexer::MakeToken(TokenType type, int)
  */
 Token * Lexer::MakeToken(TokenType type, const std::string & lexeme, int)
 {
-    return new Token(type, llvm::SMLoc::getFromPointer(m_input), lexeme);
+    return new Token(type, llvm::SMLoc::getFromPointer(m_start), lexeme);
 }

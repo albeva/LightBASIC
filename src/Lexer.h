@@ -29,6 +29,8 @@ public:
     
     // create new lexer instance
     Lexer(const llvm::MemoryBuffer * buffer);
+    Lexer(const std::string buffer);
+    virtual ~Lexer();
     
     // get next token
     Token * next();
@@ -44,14 +46,20 @@ private:
     Token * number();
     Token * string();
     
+    // Move internally to the next character
+    bool move();
+    char nextChar();
+    
     // the source
     const llvm::MemoryBuffer * m_src;
-    const char * m_input, * m_tokenStart;
+    const char * m_input, * m_start;
+    char m_ch, m_nextCh;
     
     // state info
     unsigned int m_line;
     unsigned short m_col;
     bool m_hasStmt;
+    bool m_ownsSrc;
 };
 
 } // ~lbc namespace

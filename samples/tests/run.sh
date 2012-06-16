@@ -1,6 +1,7 @@
 red='\033[31m'
 green='\033[32m'
 reset='\033[0m'
+LBC=../../lbc
 
 #
 # test files that should succeed
@@ -17,7 +18,7 @@ do
     fi
     # compile
     echo "$red\c"
-    ../lbc $file -o $output
+    $LBC $file -o $output
     echo "$reset\c"
     if [ -e $output ]; then
         echo "$red\c"
@@ -40,7 +41,7 @@ do
         rm $output
     fi
     # try to compile. this must fail (lbc should return a non 0 result)
-    ../lbc $file -o $output > /dev/null
+    $LBC $file -o $output > /dev/null
     if [ $? = 0 ]; then
         echo "$file: ${red}Failed$reset. This file should not compile"
     else

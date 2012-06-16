@@ -6,13 +6,7 @@
 //  Copyright (c) 2012 Albert. All rights reserved.
 //
 
-#include <iostream>
-
-int main(int argc, const char * argv[])
-{
-
-    // insert code here...
-    std::cout << "Hello, World!\n";
-    return 0;
-}
-
+#define BOOST_TEST_MODULE LightBasic
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+#include <boost/test/unit_test.hpp>

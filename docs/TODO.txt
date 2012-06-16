@@ -6,28 +6,18 @@ Todo for Milestone 4
 [✓] Remove SourceXxx files and replace them with llvm provided equivalents.
 [✓] Add Driver class. It uses context to figure out what to do.
 [✓] Replace struct with class. Use struct for POD only
-[ ] Adopt a coding standard for c++ source
-    - http://llvm.org/docs/CodingStandards.html
-      o This is really nice one. Especially since already using llvm. Minor
-        annoyance with this one is that it likes to CamelCase variables with
-        capital first letter...
-    - Investigate others
-    [ ] Put info on the website
+[✓] Implement unit tests for the compiler
 [ ] Improve Parser
     [ ] remove exceptions. Raise error and individual functions should return
         nullptr
     [ ] handle invalid token
     [ ] break the parser into separate files
 [ ] Improve Lexer
-    [ ] deal with *nix, windows mac line endings
-    [ ] try to get rid of backtracking with input iterator
+    [✓] deal with *nix, windows mac line endings
+    [✓] Get rid of backtracking with input iterator
     [ ] Generate correct src location and range
-    [ ] implement invalid token, get rid of exceptions
-[ ] Generate source code documentation
-[ ] Implement unit tests for the compiler itself (boost test ?)
-[✓] Remove boost dependency
-    use llvm equivalent classes. Less dependencies, simpler build
-[✓] create proper bootstrap and make scripts
+    [✓] implement invalid token, get rid of exceptions
+[✓] create makefile
 [ ] Implement proper error messages
     [ ] Lexer    - invalid characters, invalid numbers, ...
     [ ] Parser   - missing braces, mismatching keywords, unbalanced scopes, ...
@@ -57,6 +47,7 @@ Todo for Milestone 4
 
 Future. M5 ?
 ==============
+[ ] Generate source code documentation
 [ ] Implement build bot on the lightbasic.com
     [ ] Update local copy whenever github repo is updated
     [ ] Run the compiler unit tests.

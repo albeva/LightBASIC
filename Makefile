@@ -67,8 +67,8 @@ clean:
 
 # Run the testcases
 test: $(TARGET)
-	cp -R tests bin/$(BUILD)/
-	cd bin/$(BUILD)/tests; ./run.sh
+	cp -R samples bin/$(BUILD)/
+	cd bin/$(BUILD)/samples/tests; ./run.sh
 
 #include our project dependecy files
 -include $(DEPS)
