@@ -56,13 +56,12 @@ void Driver::drive()
             if (auto module = irBuilder.getModule()) {
                 emitter.add(module);
             }
-            
             // cleanup
             delete ast;
         } else {
             successful = false;
         }
-    }
+    };
     // generate the output
     if (successful) {
         emitter.generate();

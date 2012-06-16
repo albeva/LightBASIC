@@ -32,7 +32,6 @@ std::string getCurrentPath();
 // the main entry point
 int main(int argc, const char * argv[])
 {
-    
     try {
         // create the context
         auto & ctx = Context::getGlobalContext();

@@ -8,7 +8,6 @@ OS		:= $(shell uname)
 ifeq ($(OS),Linux)
 	# Linux specifics
 	TOOLSET		:= gcc
-	LDFLAGS		:= $(LDFLAGS)
 else ifeq ($(OS),Darwin)
 	# OSX specifics
 	TOOLSET		:= clang

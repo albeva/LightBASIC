@@ -18,19 +18,11 @@ static std::string _tokenNames[] = {
 };
 
 // keyword lookup
-static std::unordered_map<std::string, TokenType> _tokenTypes;
-
-/**
- * Initialize the keywords map
- */
-static void initializeTokens()
-{
-    if (_tokenTypes.size() != 0) return;
-    
-#define IMPL_TOKENS(ID, NAME) _tokenTypes[NAME] = TokenType::ID;
+static std::unordered_map<std::string, TokenType> _tokenTypes = {
+    #define IMPL_TOKENS(ID, NAME) {NAME, TokenType::ID},
     ALL_TOKENS(IMPL_TOKENS)
-#undef IMPL_TOKENS
-}
+    #undef IMPL_TOKENS   
+};
 
 
 /**
@@ -47,8 +39,6 @@ const std::string & Token::getTokenName(TokenType type)
  */
 TokenType Token::getTokenType(const std::string & id, TokenType def)
 {
-    initializeTokens();
-    
     auto iter = _tokenTypes.find(id);
     if (iter != _tokenTypes.end()) return iter->second;
     return def;
