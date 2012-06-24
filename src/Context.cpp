@@ -132,7 +132,6 @@ Context & Context::add(const Path & path, ResourceType type)
             add(path, ResourceType::SourcePath);
             add(path, ResourceType::LibraryPath);
             return *this;
-            break;
         case ResourceType::SourcePath:
             source = resolveDir(path);
             break;
@@ -148,8 +147,8 @@ Context & Context::add(const Path & path, ResourceType type)
             break;
         default:
         {
-            THROW_EXCEPTION("Invalid ResourceType");
-            break;
+            // TODO raise error: invalid resource type
+            return *this;
         }
     }
     

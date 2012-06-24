@@ -118,7 +118,8 @@ void Emitter::emitExecutable()
             if (!sys_path.isDirectory()) {
                 sys_path = "/usr/lib/i386-linux-gnu";
                 if (!sys_path.isDirectory()) {
-                    THROW_EXCEPTION("Something wrong");
+                    // raise error: omething wrong;
+                    return;
                 }
             }
         } else if (triple.isArch64Bit()) {
@@ -162,7 +163,8 @@ void Emitter::emitExecutable()
  */
 void Emitter::emitLibrary()
 {
-    THROW_EXCEPTION("Emitting library is not implemented");
+    // Emitting library is not implemented
+    return ;
 }
 
 
@@ -209,7 +211,8 @@ void Emitter::emitObjOrAsm()
             std::string errors;
             llvm::raw_fd_ostream stream(path.c_str(), errors);
             if (errors.length()) {
-                THROW_EXCEPTION(errors);
+                // raise error: errors
+                return;
             }
             llvm::WriteBitcodeToFile(module.get(), stream);
         }
@@ -260,7 +263,8 @@ void Emitter::emitLlvm()
             std::string errors;
             llvm::raw_fd_ostream stream(path.c_str(), errors);
             if (errors.length()) {
-                THROW_EXCEPTION(errors);
+                // TODO raise error: errors
+                return;
             }
             module->print(stream, nullptr);
         }
@@ -291,6 +295,5 @@ std::string Emitter::getTool(Tool tool)
         case Tool::Ld:
             return "/usr/bin/ld";
     }
-    return "";
 }
 

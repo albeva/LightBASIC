@@ -623,7 +623,7 @@ void SemanticAnalyser::visit(AstLiteralExpr * ast)
             break;            
         default:
             THROW_EXCEPTION("Invalid type");
-            break;
+//            break;
     }
 }
 

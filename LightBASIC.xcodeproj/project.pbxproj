@@ -9,6 +9,22 @@
 /* Begin PBXBuildFile section */
 		364A146C158CC26200122A9A /* libboost_unit_test_framework.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 364A146B158CC26200122A9A /* libboost_unit_test_framework.dylib */; };
 		364A146F158CC2B500122A9A /* TestLexer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 364A146D158CC2B500122A9A /* TestLexer.cpp */; };
+		365CA8221595FC0300021215 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8211595FC0300021215 /* utils.cpp */; };
+		365CA8231595FC0300021215 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8211595FC0300021215 /* utils.cpp */; };
+		365CA8361597386600021215 /* ParseDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8351597386600021215 /* ParseDeclaration.cpp */; };
+		365CA8371597386600021215 /* ParseDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8351597386600021215 /* ParseDeclaration.cpp */; };
+		36A4298515973F27002CADF1 /* ParseAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298415973F27002CADF1 /* ParseAttributes.cpp */; };
+		36A4298615973F27002CADF1 /* ParseAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298415973F27002CADF1 /* ParseAttributes.cpp */; };
+		36A4298915974662002CADF1 /* ParseIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298815974662002CADF1 /* ParseIdentifier.cpp */; };
+		36A4298A15974662002CADF1 /* ParseIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298815974662002CADF1 /* ParseIdentifier.cpp */; };
+		36A4298C159776C3002CADF1 /* ParseDIM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298B159776C3002CADF1 /* ParseDIM.cpp */; };
+		36A4298D159776C3002CADF1 /* ParseDIM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298B159776C3002CADF1 /* ParseDIM.cpp */; };
+		36A4298F159776E4002CADF1 /* ParseVAR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298E159776E4002CADF1 /* ParseVAR.cpp */; };
+		36A42990159776E4002CADF1 /* ParseVAR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298E159776E4002CADF1 /* ParseVAR.cpp */; };
+		36A4299215977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */; };
+		36A4299315977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */; };
+		36A4299515977BA6002CADF1 /* ParseExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299415977BA6002CADF1 /* ParseExpression.cpp */; };
+		36A4299615977BA6002CADF1 /* ParseExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299415977BA6002CADF1 /* ParseExpression.cpp */; };
 		36B1923F158CBA470018496F /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36F0014A15894A5F00C9976F /* Ast.cpp */; };
 		36B19240158CBA470018496F /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36F0014B15894A5F00C9976F /* AstVisitor.cpp */; };
 		36B19241158CBA470018496F /* RecursiveAstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36F0015515894A5F00C9976F /* RecursiveAstVisitor.cpp */; };
@@ -71,6 +87,15 @@
 		361ACBE21589454600E384BD /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		364A146B158CC26200122A9A /* libboost_unit_test_framework.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_unit_test_framework.dylib; path = /usr/local/lib/libboost_unit_test_framework.dylib; sourceTree = "<absolute>"; };
 		364A146D158CC2B500122A9A /* TestLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestLexer.cpp; sourceTree = "<group>"; };
+		365CA8211595FC0300021215 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = src/utils.cpp; sourceTree = SOURCE_ROOT; };
+		365CA8351597386600021215 /* ParseDeclaration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDeclaration.cpp; path = src/ParseDeclaration.cpp; sourceTree = SOURCE_ROOT; };
+		365CA838159738D700021215 /* ParserShared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ParserShared.h; path = src/ParserShared.h; sourceTree = SOURCE_ROOT; };
+		36A4298415973F27002CADF1 /* ParseAttributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseAttributes.cpp; path = src/ParseAttributes.cpp; sourceTree = SOURCE_ROOT; };
+		36A4298815974662002CADF1 /* ParseIdentifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseIdentifier.cpp; path = src/ParseIdentifier.cpp; sourceTree = SOURCE_ROOT; };
+		36A4298B159776C3002CADF1 /* ParseDIM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDIM.cpp; path = src/ParseDIM.cpp; sourceTree = SOURCE_ROOT; };
+		36A4298E159776E4002CADF1 /* ParseVAR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseVAR.cpp; path = src/ParseVAR.cpp; sourceTree = SOURCE_ROOT; };
+		36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseTypeExpr.cpp; path = src/ParseTypeExpr.cpp; sourceTree = SOURCE_ROOT; };
+		36A4299415977BA6002CADF1 /* ParseExpression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseExpression.cpp; path = src/ParseExpression.cpp; sourceTree = SOURCE_ROOT; };
 		36B1922E158CB6220018496F /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = docs; sourceTree = "<group>"; };
 		36B1922F158CB6220018496F /* samples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = samples; sourceTree = "<group>"; };
 		36B19235158CB9FE0018496F /* test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -194,9 +219,9 @@
 		36F0018D15894BA300C9976F /* Ast */ = {
 			isa = PBXGroup;
 			children = (
-				36F0014A15894A5F00C9976F /* Ast.cpp */,
-				36F0015D15894A5F00C9976F /* Ast.h */,
 				36F0015C15894A5F00C9976F /* Ast.def.h */,
+				36F0015D15894A5F00C9976F /* Ast.h */,
+				36F0014A15894A5F00C9976F /* Ast.cpp */,
 				36F0018E15894BA900C9976F /* Visitor */,
 				36F0019515894CDF00C9976F /* Printer */,
 			);
@@ -229,8 +254,16 @@
 		36F0019015894C0800C9976F /* Parser */ = {
 			isa = PBXGroup;
 			children = (
-				36F0015215894A5F00C9976F /* Parser.cpp */,
+				365CA838159738D700021215 /* ParserShared.h */,
 				36F0016515894A5F00C9976F /* Parser.h */,
+				36F0015215894A5F00C9976F /* Parser.cpp */,
+				365CA8351597386600021215 /* ParseDeclaration.cpp */,
+				36A4298415973F27002CADF1 /* ParseAttributes.cpp */,
+				36A4298815974662002CADF1 /* ParseIdentifier.cpp */,
+				36A4298B159776C3002CADF1 /* ParseDIM.cpp */,
+				36A4298E159776E4002CADF1 /* ParseVAR.cpp */,
+				36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */,
+				36A4299415977BA6002CADF1 /* ParseExpression.cpp */,
 			);
 			name = Parser;
 			sourceTree = "<group>";
@@ -255,6 +288,7 @@
 				36F0017015894A5F00C9976F /* Utils.h */,
 				36F0016415894A5F00C9976F /* MemoryPool.h */,
 				36F0017115894A5F00C9976F /* Version.h */,
+				365CA8211595FC0300021215 /* utils.cpp */,
 			);
 			name = Utils;
 			sourceTree = "<group>";
@@ -341,7 +375,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0450;
-				ORGANIZATIONNAME = Albert;
+				ORGANIZATIONNAME = "LightBASIC development team";
 			};
 			buildConfigurationList = 361ACBCA1589448500E384BD /* Build configuration list for PBXProject "LightBASIC" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -412,6 +446,14 @@
 				36F0018015894A5F00C9976F /* SymbolTable.cpp in Sources */,
 				36F0018115894A5F00C9976F /* Token.cpp in Sources */,
 				36F0018215894A5F00C9976F /* Type.cpp in Sources */,
+				365CA8221595FC0300021215 /* utils.cpp in Sources */,
+				365CA8361597386600021215 /* ParseDeclaration.cpp in Sources */,
+				36A4298515973F27002CADF1 /* ParseAttributes.cpp in Sources */,
+				36A4298915974662002CADF1 /* ParseIdentifier.cpp in Sources */,
+				36A4298C159776C3002CADF1 /* ParseDIM.cpp in Sources */,
+				36A4298F159776E4002CADF1 /* ParseVAR.cpp in Sources */,
+				36A4299215977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */,
+				36A4299515977BA6002CADF1 /* ParseExpression.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,6 +479,14 @@
 				36B1924D158CBA470018496F /* Emitter.cpp in Sources */,
 				36B1924E158CBA470018496F /* Path.cpp in Sources */,
 				364A146F158CC2B500122A9A /* TestLexer.cpp in Sources */,
+				365CA8231595FC0300021215 /* utils.cpp in Sources */,
+				365CA8371597386600021215 /* ParseDeclaration.cpp in Sources */,
+				36A4298615973F27002CADF1 /* ParseAttributes.cpp in Sources */,
+				36A4298A15974662002CADF1 /* ParseIdentifier.cpp in Sources */,
+				36A4298D159776C3002CADF1 /* ParseDIM.cpp in Sources */,
+				36A42990159776E4002CADF1 /* ParseVAR.cpp in Sources */,
+				36A4299315977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */,
+				36A4299615977BA6002CADF1 /* ParseExpression.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

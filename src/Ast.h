@@ -68,6 +68,11 @@ namespace lbc {
      */
     class AstStatement : public AstRoot
     {
+    public:
+        
+        // create
+        AstStatement();
+        virtual ~AstStatement();
     };
     
     
@@ -138,7 +143,8 @@ namespace lbc {
     public:
         
         // create
-        AstAttribute(AstIdentExpr * id = nullptr, AstAttribParamList * params = nullptr);
+        AstAttribute(std::unique_ptr<AstIdentExpr> id = nullptr,
+                     std::unique_ptr<AstAttribParamList> params = nullptr);
         // attribute id
         std::unique_ptr<AstIdentExpr> id;
         // attribute params

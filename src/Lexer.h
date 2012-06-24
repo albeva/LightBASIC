@@ -29,7 +29,7 @@ public:
     
     // create new lexer instance
     Lexer(const llvm::MemoryBuffer * buffer);
-    Lexer(const std::string buffer);
+    Lexer(const std::string & buffer);
     virtual ~Lexer();
     
     // get next token

@@ -38,7 +38,7 @@ namespace lbc {
         
         // create token type and lexeme
         Token(TokenType type,  const llvm::SMLoc & loc, const std::string & lexeme = "")
-            :  m_loc(loc), m_type(type), m_lexeme(lexeme) {}
+            :  m_loc(loc), m_lexeme(lexeme), m_type(type) {}
         
         // get lexeme
         const std::string & lexeme() const { return m_lexeme; }
@@ -61,8 +61,8 @@ namespace lbc {
         
         private:
         llvm::SMLoc m_loc;
-        TokenType m_type;
         std::string m_lexeme;
+        TokenType m_type;
     };
     
 }

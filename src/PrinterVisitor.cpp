@@ -12,11 +12,13 @@ using namespace lbc;
 
 //
 // create the printer
-PrinterVisitor::PrinterVisitor()
+PrinterVisitor::PrinterVisitor(AstRoot * ast)
 :   m_indent(0),
     m_elseIf(false),
     m_doInline(false)
-{}
+{
+    if (ast) ast->accept(this);
+}
 
 
 //

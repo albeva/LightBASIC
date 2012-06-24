@@ -38,30 +38,54 @@ namespace lbc {
         
     private:
         
-        // program
-        AstDeclaration * declaration();
-        AstAttributeList * attributesList();
-        AstAttribParamList * attribParamList();
-        AstAttribute * attribute();
-        AstIdentExpr * identifier();
-        AstLiteralExpr * attribParam();
-        AstVarDecl * variableDecl(bool skipKw = false);
-        AstTypeExpr * typeExpr();
-        AstFunctionDecl * functionDecl();
-        AstFuncSignature * funcSignature();
-        AstFuncParamList * funcParamList();
-        AstFuncParam * funcParam();
-        AstFunctionStmt * functionStmt();
-        AstStmtList * statementList();
-        AstStatement * statement();
-        AstAssignStmt * assignStmt();
-        AstCallStmt * callStmt();
-        AstIfStmt * ifStmt();
-        AstForStmt * forStmt();
-        AstCallExpr * callExpr();
-        AstExpression * expression();
-        AstReturnStmt * returnStmt();
-        AstFuncArgList * funcArgList();
+        // top level declarations
+        std::unique_ptr<AstDeclaration> declaration();
+        
+        // attributes
+        std::unique_ptr<AstAttributeList>   attributes();
+        std::unique_ptr<AstAttribute>       attribute();
+        std::unique_ptr<AstAttribParamList> attribParamList();
+        std::unique_ptr<AstLiteralExpr>     attribParam();
+        
+        // identifier
+        std::unique_ptr<AstIdentExpr> identifier();
+        
+        // DIM keyword
+        std::unique_ptr<AstVarDecl> DIM();
+        
+        // VAR keyword
+        std::unique_ptr<AstVarDecl> VAR();
+        
+        // Type expression
+        std::unique_ptr<AstTypeExpr> typeExpr();
+        
+        // Expression
+        std::unique_ptr<AstExpression> expression();
+        
+//        // program
+//        AstDeclaration * declaration();
+//        AstAttributeList * attributesList();
+//        AstAttribParamList * attribParamList();
+//        AstAttribute * attribute();
+//        AstIdentExpr * identifier();
+//        AstLiteralExpr * attribParam();
+//        AstVarDecl * variableDecl(bool skipKw = false);
+//        AstTypeExpr * typeExpr();
+//        AstFunctionDecl * functionDecl();
+//        AstFuncSignature * funcSignature();
+//        AstFuncParamList * funcParamList();
+//        AstFuncParam * funcParam();
+//        AstFunctionStmt * functionStmt();
+//        AstStmtList * statementList();
+//        AstStatement * statement();
+//        AstAssignStmt * assignStmt();
+//        AstCallStmt * callStmt();
+//        AstIfStmt * ifStmt();
+//        AstForStmt * forStmt();
+//        AstCallExpr * callExpr();
+//        AstExpression * expression();
+//        AstReturnStmt * returnStmt();
+//        AstFuncArgList * funcArgList();
         
         // match current token
         bool match(TokenType type) const;
@@ -70,10 +94,13 @@ namespace lbc {
         bool accept(TokenType type);
         
         // expect a token. Throw an error if doesn't match
-//        void expect(TokenType type);
+        bool expect(TokenType type);
         
         // Move to the next one
         void move();
+        
+        // indicate if the is an error
+        bool hasError() const { return m_hasError; }
         
         // tokens
         Context     & m_ctx;
@@ -81,6 +108,7 @@ namespace lbc {
         Token       * m_next;
         Lexer       * m_lexer;
         bool        m_expectAssign;
+        bool        m_hasError;
     };
     
 }

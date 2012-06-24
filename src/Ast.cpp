@@ -36,6 +36,12 @@ AST_CONTENT_NODES(IMPL_AST)
  */
 AstRoot::~AstRoot() = default;
 
+/**
+ * AstStatement
+ */
+AstStatement::AstStatement() = default;
+AstStatement::~AstStatement() = default;
+
 
 /**
  * print out the ast node source using PrinterVisitor
@@ -61,7 +67,11 @@ AstAttributeList::AstAttributeList() {}
 
 
 // AstAttribute
-AstAttribute::AstAttribute(AstIdentExpr * ID, AstAttribParamList * p) : id(ID), params(p) {}
+AstAttribute::AstAttribute(std::unique_ptr<AstIdentExpr> id,
+                           std::unique_ptr<AstAttribParamList> params)
+: id(std::move(id)), params(std::move(params))
+{
+}
 
 
 // AstAttribParamList

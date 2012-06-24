@@ -133,8 +133,8 @@ Lexer::Lexer(const llvm::MemoryBuffer * buffer)
 /**
  * create new lexer from a string
  */
-Lexer::Lexer(const std::string buffer)
-:   Lexer(llvm::MemoryBuffer::getMemBuffer(buffer))
+Lexer::Lexer(const std::string & buffer)
+: Lexer(llvm::MemoryBuffer::getMemBuffer(buffer))
 {
     m_ownsSrc = true;
 }

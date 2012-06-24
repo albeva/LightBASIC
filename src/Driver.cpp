@@ -48,16 +48,17 @@ void Driver::drive()
     for (auto & file : m_ctx.get(ResourceType::Source)) {
         auto ast = parser.parse(file);
         if (ast) {
-            // analyse
-            ast->accept(&semantic);
-            
-            // generate llvm code
-            ast->accept(&irBuilder);
-            if (auto module = irBuilder.getModule()) {
-                emitter.add(module);
-            }
-            // cleanup
-            delete ast;
+            PrinterVisitor(ast);
+//            // analyse
+//            ast->accept(&semantic);
+//            
+//            // generate llvm code
+//            ast->accept(&irBuilder);
+//            if (auto module = irBuilder.getModule()) {
+//                emitter.add(module);
+//            }
+//            // cleanup
+//            delete ast;
         } else {
             successful = false;
         }

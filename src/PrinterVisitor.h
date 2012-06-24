@@ -21,7 +21,7 @@ namespace lbc {
         using RecursiveAstVisitor::visit;
         
         // create
-        PrinterVisitor();
+        PrinterVisitor(AstRoot * ast = nullptr);
 
         // AstAssignStmt
         virtual void visit(AstAssignStmt * ast);

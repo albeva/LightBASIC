@@ -28,8 +28,8 @@ static PrimitiveType _primitives[] = {
  */
 Type::Type(Type *base, TypeKind kind, bool instantiable)
 :   m_baseType(base),
-    m_kind((TypeKind)(kind | (instantiable ? TypeKind::Instantiable : 0))),
-    m_llvm(nullptr)
+    m_llvm(nullptr),
+    m_kind((TypeKind)(kind | (instantiable ? TypeKind::Instantiable : 0)))
 {
     
 }
@@ -237,7 +237,9 @@ Type * PtrType::dereference(int levels) const
 llvm::Type * PtrType::genLlvmType()
 {
     if (getBaseType()->isPointer()) {
-        THROW_EXCEPTION("IS pointer");
+        // IS pointer
+        // ????
+        return nullptr;
     }
     auto type = getBaseType()->llvm()->getPointerTo();
     int level = indirection() - 1;

@@ -6,28 +6,27 @@ EBNF
 ------
 Program         = { Declaration }
                 .
-Declaration     = [ "[" Attributes "]" ]
-                ( VariableDecl
+Declaration     = [ Attributes ]
+                ( DIM
+                | VAR
                 | FunctionDecl
                 | FunctionImpl
                 | SubImpl
                 )
                 .
-AttributeList   = Attribute { ","  Attribute }
+AttributeList   = "[" Attribute { ","  Attribute } "]"
                 .
-Attribute       = id [
-                    ( "=" AttribParam
-                    | "(" [ AttribParamList ] ")"
-                    )
-                ]
+Attribute       = id [ AttribParamList ]
                 .
-AttribParamList = AttribParam { "," AttribParam }
+AttribParamList = "=" AttribParam
+                | "(" AttribParam { "," AttribParam } ")"
                 .
 AttribParam     = IntegerLiteral
                 | StringLiteral
                 .
-VariableDecl    = "DIM" id "AS" TypeExpr [ "=" Expression ]
-                | "Var" id "=" Expression
+DIM             = "DIM" id "AS" TypeExpr [ "=" Expression ]
+                .
+VAR             = "VAR" id "=" Expression
                 .
 FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
                 .
@@ -51,7 +50,8 @@ SubImpl         = SubSignature
                 .
 StatementList   = { Statement }
                 .
-Statement       = VariableDecl
+Statement       = DIM
+                | VAR
                 | AssignStmt
                 | CallStmt
                 | ReturnStmt

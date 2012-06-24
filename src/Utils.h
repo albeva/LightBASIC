@@ -16,8 +16,20 @@ namespace lbc {
     struct Exception : public std::runtime_error
     {
         // Create new instance of Exception
-        explicit Exception(const std::string & message) : std::runtime_error(message) {}
+        explicit Exception(const std::string & message);
+        
+        virtual ~Exception();
     };
+    
+    /**
+     * make_unique is not currently in the standard, but is most likely
+     * to be added in the near future.
+     */
+    template<typename T, typename ...Args>
+    inline std::unique_ptr<T> make_unique(Args&& ...args)
+    {
+        return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+    }
     
     #define STRINGIFY_IMPL(v) #v
     #define STRINGIFY(v) STRINGIFY_IMPL(v)

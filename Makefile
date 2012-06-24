@@ -35,7 +35,15 @@ PCH_FILE	:= pch.hpp
 ifeq ($(TOOLSET),clang)
 	CXX		:= clang++
 	LD		:= $(CXX)
-	CXXFLAGS	:= $(CXXFLAGS) -std=c++11 -stdlib=libc++
+	CXXFLAGS	:= $(CXXFLAGS) -std=c++11 -stdlib=libc++ \
+			-Weverything \
+			-Wno-c++98-compat \
+			-Wno-c++98-compat-pedantic \
+			-Wno-global-constructors \
+			-Wno-exit-time-destructors \
+			-Wno-padded \
+			-Wno-switch-enum \
+			-Wno-unused-macros
 	LDFLAGS		:= $(LDFLAGS) -stdlib=libc++
 	PCH		:= $(OBJDIR)/$(PCH_FILE).gch
 	PCHFLAGS	:= -include-pch $(PCH)
@@ -53,7 +61,7 @@ $(shell [ -d "$(OBJDIR)" ] || mkdir -p $(OBJDIR))
 $(shell [ -d "$(TARGET_DIR)" ] || mkdir -p $(TARGET_DIR))
 
 # disable checking for files
-.PHONY: all clean test init-paths
+.PHONY: all clean test
 
 # default target. Make the binary
 all: $(TARGET)

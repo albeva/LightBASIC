@@ -92,11 +92,12 @@ namespace lbc {
         
     private:
         
+        // associated llvm type
+        llvm::Type * m_llvm;
+        
         // the kind of the token
         TypeKind m_kind;
         
-        // associated llvm type
-        llvm::Type * m_llvm;
     };
     
     
