@@ -48,14 +48,9 @@ AstProgram * Parser::parse(const std::string & file)
     
     // { DeclList }
     while (!match(TokenType::EndOfFile)) {
-        auto decl = declaration();
-        if (decl) {
-            ast->decls.push_back(std::move(decl));
-            expect(TokenType::EndOfLine);
-        } else {
-            // TODO implement error recovery.
-            return nullptr;
-        }
+        ast->decls.push_back(declaration());
+        if (hasError()) return nullptr;
+        EXPECT(TokenType::EndOfLine);
     }
     
     // clean up
@@ -65,6 +60,53 @@ AstProgram * Parser::parse(const std::string & file)
     // done
     return ast;
 }
+
+
+/**
+ * match the token
+ */
+bool Parser::match(TokenType type) const
+{
+    return m_token->type() == type;
+}
+
+
+/**
+ * Accept token of a type and move if matches
+ */
+bool Parser::accept(TokenType type)
+{
+    if (match(type)) {
+        move();
+        return true;
+    }
+    return false;
+}
+
+
+/**
+ * Expect token. Throw an error if doesn't match
+ */
+bool Parser::expect(TokenType type)
+{
+    if (!accept(type)) {
+            // TODO raise error message. Expect XXX found ZZZ
+        m_hasError = true;
+        return false;
+    }
+    return true;
+}
+
+
+/**
+ * mobe to the next token
+ */
+void Parser::move()
+{
+    m_token = m_next;
+    m_next = m_lexer->next();
+}
+
 
 //
 ///**
@@ -752,188 +794,4 @@ AstProgram * Parser::parse(const std::string & file)
 //    // done
 //    return new AstVarDecl(id, t, nullptr);
 //}
-//
-//
-///**
-// * TypeExpr = ("INTEGER" | "BYTE" | "ANY" "PTR") { "PTR" }
-// */
-//AstTypeExpr * Parser::typeExpr()
-//{
-//    AstTypeExpr * ast = nullptr;
-//    Token * tmp = m_token;
-//    #define EXPECT_TYPE(ID, ...) accept(TokenType::ID) ||
-//    if (KEYWORD_TYPES(EXPECT_TYPE) false) {
-//        int deref = 0;
-//        while (accept(TokenType::Ptr)) deref++;
-//        ast = new AstTypeExpr(tmp, deref);
-//    } else if (accept(TokenType::Any)) {
-//        if (!expect(TokenType::Ptr)) {
-//            // TODO raise error: expect ANY PTR
-//            return nullptr;
-//        }
-//        int deref = 1;
-//        while (accept(TokenType::Ptr)) deref++;
-//        ast = new AstTypeExpr(tmp, deref);        
-//    } else {
-//        // TODO raise error: expected type
-//        return nullptr;
-//    }
-//    return ast;
-//}
-//
-//
-///**
-// * Attributes = Attribute { ","  Attribute }
-// */
-//AstAttributeList * Parser::attributesList()
-//{
-//    auto list = new AstAttributeList();
-//    
-//    do {
-//        auto attrib = attribute();
-//        if (attrib != nullptr) {
-//            list->attribs.push_back(std::unique_ptr<AstAttribute>(attrib));
-//        }
-//    } while (accept(TokenType::Comma));
-//    
-//    return list;
-//}
-//
-//
-///**
-// * Attribute    = id [
-// *                  ( "=" AttribParam
-// *                  | "(" [ AttribParamList ] ")"
-// *                  )
-// *              ]
-// */
-//AstAttribute * Parser::attribute()
-//{
-//    // id
-//    auto id = identifier();
-//    if (!id) {
-//        // TODO raise error: expected identifier
-//        return nullptr;
-//    }
-//    auto attr = new AstAttribute(id);
-//    
-//    // "(" AttribParam { "," AttribParam } ")"
-//    if (accept(TokenType::ParenOpen)) {
-//        if (!accept(TokenType::ParenClose)) {
-//            auto params = attribParamList();
-//            if (!params) {
-//                // TODO raise error: expected attribute parameters
-//                return nullptr;
-//            }
-//            attr->params.reset(params);
-//            if (!expect(TokenType::ParenClose)) return nullptr;
-//        }
-//    }
-//    // "=" AttribParam
-//    else if (accept(TokenType::Assign)) {
-//        auto param = attribParam();
-//        if (!param) {
-//            // TODO raise error: attribute param expected
-//            return nullptr;
-//        }
-//        auto params = new AstAttribParamList();
-//        params->params.push_back(std::unique_ptr<AstLiteralExpr>(param));
-//        attr->params.reset(params);
-//    }
-//    
-//    return attr;
-//}
-//
-//
-///**
-// * AttribParamList = AttribParam { "," AttribParam }
-// */
-//AstAttribParamList * Parser::attribParamList()
-//{
-//    auto params = new AstAttribParamList();
-//    
-//    do {
-//        auto param = attribParam();
-//        if (!param) {
-//            // TODO raise error: attrib param expected
-//            return nullptr;
-//        }
-//        params->params.push_back(std::unique_ptr<AstLiteralExpr>(param));
-//    } while(accept(TokenType::Comma));
-//    
-//    return params;
-//}
-//
-//
-///**
-// * AttribParam  = IntegerLiteral
-// *              | StringLiteral
-// */
-//AstLiteralExpr * Parser::attribParam()
-//{
-//    auto tmp = m_token;
-//    if (accept(TokenType::StringLiteral) || accept(TokenType::IntegerLiteral)) {
-//        return new AstLiteralExpr(tmp);
-//    }
-//    // TODO raise error: expected integer or a string
-//    return nullptr;
-//}
-//
-//
-///**
-// * expect identifier
-// */
-//AstIdentExpr * Parser::identifier()
-//{
-//    Token * tmp = m_token;
-//    if (!expect(TokenType::Identifier)) {
-//        return nullptr;
-//    }
-//    return new AstIdentExpr(tmp);
-//}
 
-
-/**
- * match the token
- */
-bool Parser::match(TokenType type) const
-{
-    return m_token->type() == type;
-}
-
-
-/**
- * Accept token of a type and move if matches
- */
-bool Parser::accept(TokenType type)
-{
-    if (match(type)) {
-        move();
-        return true;
-    }
-    return false;
-}
-
-
-/**
- * Expect token. Throw an error if doesn't match
- */
-bool Parser::expect(TokenType type)
-{
-    if (!accept(type)) {
-        // TODO raise error message. Expect XXX found ZZZ
-        m_hasError = true;
-        return false;
-    }
-    return true;
-}
-
-
-/**
- * mobe to the next token
- */
-void Parser::move()
-{
-    m_token = m_next;
-    m_next = m_lexer->next();
-}
