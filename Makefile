@@ -29,7 +29,7 @@ OBJDIR		:= obj/$(BUILD)
 SOURCES		:= $(wildcard src/*.cpp)
 OBJECTS		:= $(patsubst src/%.cpp,$(OBJDIR)/%.o,$(SOURCES))
 DEPS		:= $(patsubst src/%.cpp,$(OBJDIR)/%.d,$(SOURCES)) \
-		$(OBJDIR)/pch.d
+		$(OBJDIR)/pch.hpp.d
 PCH_FILE	:= pch.hpp
 # deal with different compilers
 ifeq ($(TOOLSET),clang)

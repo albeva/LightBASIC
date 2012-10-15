@@ -48,7 +48,7 @@ void Driver::drive()
     for (auto & file : m_ctx.get(ResourceType::Source)) {
         auto ast = parser.parse(file);
         if (ast) {
-            PrinterVisitor(ast);
+            auto p = PrinterVisitor(ast);
 //            // analyse
 //            ast->accept(&semantic);
 //            

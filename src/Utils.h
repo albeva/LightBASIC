@@ -18,7 +18,7 @@ namespace lbc {
         // Create new instance of Exception
         explicit Exception(const std::string & message);
         
-        virtual ~Exception();
+        virtual ~Exception() throw();
     };
     
     /**

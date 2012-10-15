@@ -67,9 +67,9 @@ AstAttributeList::AstAttributeList() {}
 
 
 // AstAttribute
-AstAttribute::AstAttribute(std::unique_ptr<AstIdentExpr> id,
-                           std::unique_ptr<AstAttribParamList> params)
-: id(std::move(id)), params(std::move(params))
+AstAttribute::AstAttribute(std::unique_ptr<AstIdentExpr> _id,
+                           std::unique_ptr<AstAttribParamList> _params)
+: id(std::move(_id)), params(std::move(_params))
 {
 }
 
