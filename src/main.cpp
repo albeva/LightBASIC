@@ -106,23 +106,22 @@ int main(int argc, const char * argv[])
  */
 void showHelp()
 {
-    std::cout <<
-        "OVERVIEW: LightBASIC compiler\n"
-        "\n"
-        "USAGE lbc [options] <inputs>\n"
-        "\n"
-        "OPTIONS:\n"
-        "  --help\t"        "Display available options\n"
-        "  --version\t"     "Show version information\n"
-        "  -v\t\t"          "Show verbose output\n"
-        "  -o <file>\t"     "Write output to <file>\n"
-        "  -O<number>\t"    "Set optimization level to <number>\n"
-        "  -m32\t\t"        "Generate 32bit i386 code\n"
-        "  -m64\t\t"        "Generate 64bit x86-64 code\n"
-        "  -S\t\t"          "Only compile. Emit assembly files\n"
-        "  -c\t\t"          "Compile and assemble. Emit object files\n"
-        "  -llvm\t\t"       "Emit llvm files\n"
-    ;
+    std::cout << R"CMD(OVERVIEW: LightBASIC compiler
+    
+USAGE lbc [options] <inputs>
+    
+OPTIONS:
+    --help	Display available options
+    --version	Show version information
+    -v		Show verbose output
+    -o <file>	Write output to <file>
+    -O<number>	Set optimization level to <number>
+    -m32		Generate 32bit i386 code
+    -m64		Generate 64bit x86-64 code
+    -S		Only compile. Emit assembly files
+    -c		Compile and assemble. Emit object files
+    -llvm		Emit llvm files
+)CMD";
 }
 
 
