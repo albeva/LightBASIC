@@ -29,7 +29,13 @@ std::unique_ptr<AstDeclaration> Parser::declaration()
     // DIM | VAR | FunctionDecl | FunctionImpl
     switch (m_token->type()) {
         case TokenType::Dim:
-            decl = DIM();
+            decl = kwDim();
+            break;
+        case TokenType::Var:
+            decl = kwVar();
+            break;
+        case TokenType::Declare:
+            decl = kwDeclare();
             break;
         default:
             // TODO raise error. Expected declaration, found XXX

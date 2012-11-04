@@ -63,8 +63,8 @@ void Driver::drive()
             successful = false;
         }
     };
-    // generate the output
-    if (successful) {
-        emitter.generate();
-    }
+//    // generate the output
+//    if (successful) {
+//        emitter.generate();
+//    }
 }

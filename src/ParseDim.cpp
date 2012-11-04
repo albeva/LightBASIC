@@ -1,5 +1,5 @@
 //
-//  ParseVAR.cpp
+//  ParseDIM.cpp
 //  LightBASIC
 //
 //  Created by Albert on 24/06/2012.
@@ -9,13 +9,14 @@
 #include "ParserShared.h"
 using namespace lbc;
 
+
 /**
- * VAR = "VAR" id "=" Expression
+ * DIM = "DIM" id "AS" TypeExpr [ "=" Expression ]
  */
-std::unique_ptr<AstVarDecl> Parser::kwVar()
+std::unique_ptr<AstVarDecl> Parser::kwDim()
 {
     // "DIM"
-    EXPECT(TokenType::Var);
+    EXPECT(TokenType::Dim);
     
     auto decl = make_unique<AstVarDecl>();
     
@@ -23,13 +24,18 @@ std::unique_ptr<AstVarDecl> Parser::kwVar()
     decl->id = identifier();
     if (hasError()) return nullptr;
     
-    // "="
-    EXPECT(TokenType::Assign);
+    // "AS"
+    EXPECT(TokenType::As);
     
-    // Expression
-    decl->expr = expression();
+    // TypeExpr
+    decl->typeExpr = typeExpr();
     if (hasError()) return nullptr;
     
-    // done
+    // [ "=" Expression ]
+    if (accept(TokenType::Assign)) {
+        decl->expr = expression();
+        if (hasError()) return nullptr;
+    }
+    
     return decl;
 }

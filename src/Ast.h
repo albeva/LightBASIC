@@ -109,7 +109,7 @@ namespace lbc {
     public:
         
         // create
-        AstDeclaration(AstAttributeList * attribs = nullptr);
+        AstDeclaration(std::unique_ptr<AstAttributeList> attribs = nullptr);
         // attribs
         std::unique_ptr<AstAttributeList> attribs;
         // declaration symbol. Does not own the symbol!
@@ -178,7 +178,9 @@ namespace lbc {
     public:
         
         // create
-        AstVarDecl(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr, AstExpression * expr = nullptr);
+        AstVarDecl(std::unique_ptr<AstIdentExpr>  id = nullptr,
+                   std::unique_ptr<AstTypeExpr>   typeExpr = nullptr,
+                   std::unique_ptr<AstExpression> expr = nullptr);
         // variable id
         std::unique_ptr<AstIdentExpr> id;
         // variable type
@@ -198,7 +200,7 @@ namespace lbc {
     public:
         
         // create
-        AstFunctionDecl(AstFuncSignature * signature = nullptr);
+        AstFunctionDecl(std::unique_ptr<AstFuncSignature> signature = nullptr);
         // function signature
         std::unique_ptr<AstFuncSignature> signature;
         // content node
@@ -214,7 +216,10 @@ namespace lbc {
     public:
         
         // create
-        AstFuncSignature(AstIdentExpr * id = nullptr, AstFuncParamList * args = nullptr, AstTypeExpr * typeExpr = nullptr, bool vararg = false);
+        AstFuncSignature(std::unique_ptr<AstIdentExpr> id = nullptr,
+                         std::unique_ptr<AstFuncParamList> args = nullptr,
+                         std::unique_ptr<AstTypeExpr> typeExpr = nullptr,
+                         bool vararg = false);
         // function id
         std::unique_ptr<AstIdentExpr> id;
         // function parameters
@@ -252,7 +257,8 @@ namespace lbc {
     public:
         
         // create
-        AstFuncParam(AstIdentExpr * id = nullptr, AstTypeExpr * typeExpr = nullptr);
+        AstFuncParam(std::unique_ptr<AstIdentExpr> id = nullptr,
+                     std::unique_ptr<AstTypeExpr> typeExpr = nullptr);
         // variable id
         std::unique_ptr<AstIdentExpr> id;
         // variable type
@@ -270,7 +276,8 @@ namespace lbc {
     public:
         
         // create
-        AstFunctionStmt(AstFuncSignature * signature = nullptr, AstStmtList * stmts = nullptr);
+        AstFunctionStmt(std::unique_ptr<AstFuncSignature> signature = nullptr,
+                        std::unique_ptr<AstStmtList> stmts = nullptr);
         // function signature
         std::unique_ptr<AstFuncSignature> signature;
         // function body
@@ -311,7 +318,8 @@ namespace lbc {
     public:
         
         // create 
-        AstAssignStmt(AstExpression * left = nullptr, AstExpression * right = nullptr);
+        AstAssignStmt(std::unique_ptr<AstExpression> left = nullptr,
+                      std::unique_ptr<AstExpression> right = nullptr);
         // assignee id
         std::unique_ptr<AstExpression> left;
         // the expression
@@ -329,7 +337,7 @@ namespace lbc {
     public:
         
         // create
-        AstReturnStmt(AstExpression * expr = nullptr);
+        AstReturnStmt(std::unique_ptr<AstExpression> expr = nullptr);
         // the expression
         std::unique_ptr<AstExpression> expr;
         // content node
@@ -345,7 +353,7 @@ namespace lbc {
     public:
         
         // create
-        AstCallStmt(AstCallExpr * expr = nullptr);
+        AstCallStmt(std::unique_ptr<AstCallExpr> expr = nullptr);
         // the call expression
         std::unique_ptr<AstCallExpr> expr;
         // content node
@@ -361,7 +369,9 @@ namespace lbc {
     public:
         
         // create
-        AstIfStmt(AstExpression * expr = nullptr, AstStatement * trueBlock = nullptr, AstStatement * falseBlock = nullptr);
+        AstIfStmt(std::unique_ptr<AstExpression> expr = nullptr,
+                  std::unique_ptr<AstStatement> trueBlock = nullptr,
+                  std::unique_ptr<AstStatement> falseBlock = nullptr);
         // expression
         std::unique_ptr<AstExpression> expr;
         // true branch
@@ -381,7 +391,10 @@ namespace lbc {
     public:
         
         // create
-        AstForStmt(AstStatement * stmt = nullptr, AstExpression * end = nullptr, AstExpression * step = nullptr, AstStmtList * block = nullptr);
+        AstForStmt(std::unique_ptr<AstStatement> stmt = nullptr,
+                   std::unique_ptr<AstExpression> end = nullptr,
+                   std::unique_ptr<AstExpression> step = nullptr,
+                   std::unique_ptr<AstStmtList> block = nullptr);
         // AstVarDeclStmt | AstAssignStmt
         std::unique_ptr<AstStatement> stmt;
         // id begin, end and step expressions
@@ -423,7 +436,8 @@ namespace lbc {
     public:
         
         // create
-        AstCastExpr(AstExpression * expr = nullptr, AstTypeExpr * typeExpr = nullptr);
+        AstCastExpr(std::unique_ptr<AstExpression> expr = nullptr,
+                    std::unique_ptr<AstTypeExpr> typeExpr = nullptr);
         // sub expression
         std::unique_ptr<AstExpression> expr;
         // type expession
@@ -441,7 +455,7 @@ namespace lbc {
     public:
         
         // create
-        AstAddressOfExpr(AstIdentExpr * id = nullptr);
+        AstAddressOfExpr(std::unique_ptr<AstIdentExpr> id = nullptr);
         // child expression
         std::unique_ptr<AstIdentExpr> id;
         // content node
@@ -457,7 +471,7 @@ namespace lbc {
     public:
         
         // create
-        AstDereferenceExpr(AstExpression * expr = nullptr);
+        AstDereferenceExpr(std::unique_ptr<AstExpression> expr = nullptr);
         // child expression
         std::unique_ptr<AstExpression> expr;
         // content node
@@ -507,7 +521,9 @@ namespace lbc {
     public:
         
         // create
-        AstBinaryExpr(Token * op = nullptr, AstExpression * lhs = nullptr, AstExpression * rhs = nullptr);
+        AstBinaryExpr(Token * op = nullptr,
+                      std::unique_ptr<AstExpression> lhs = nullptr,
+                      std::unique_ptr<AstExpression> rhs = nullptr);
         // token.
         std::unique_ptr<Token> token;
         // lhs, rhs
@@ -525,7 +541,8 @@ namespace lbc {
     public:
         
         // create
-        AstCallExpr(AstIdentExpr * id = nullptr, AstFuncArgList * args = nullptr);
+        AstCallExpr(std::unique_ptr<AstIdentExpr> id = nullptr,
+                    std::unique_ptr<AstFuncArgList> args = nullptr);
         // callee id
         std::unique_ptr<AstIdentExpr> id;
         // parameters

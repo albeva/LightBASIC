@@ -59,7 +59,8 @@ AstProgram::AstProgram(const std::string & n) : name(n) {}
 
 
 // AstDeclaration
-AstDeclaration::AstDeclaration(AstAttributeList * attrs) : attribs(attrs), symbol(nullptr) {}
+AstDeclaration::AstDeclaration(std::unique_ptr<AstAttributeList> attrs) :
+attribs(std::move(attrs)), symbol(nullptr) {}
 
 
 // AstAttributeList
@@ -79,17 +80,23 @@ AstAttribParamList::AstAttribParamList() {}
 
 
 // AstVarDecl
-AstVarDecl::AstVarDecl(AstIdentExpr * ID, AstTypeExpr * typ, AstExpression * e)
-: id(ID), typeExpr(typ), expr(e) {}
+AstVarDecl::AstVarDecl(std::unique_ptr<AstIdentExpr> ID,
+                       std::unique_ptr<AstTypeExpr> typ,
+                       std::unique_ptr<AstExpression> e)
+: id(std::move(ID)), typeExpr(std::move(typ)), expr(std::move(e)) {}
 
 
 // AstFunctionDecl
-AstFunctionDecl::AstFunctionDecl(AstFuncSignature * sig) : signature(sig) {}
+AstFunctionDecl::AstFunctionDecl(std::unique_ptr<AstFuncSignature> sig)
+: signature(std::move(sig)) {}
 
 
 // AstFuncSignature
-AstFuncSignature::AstFuncSignature(AstIdentExpr * ID, AstFuncParamList * p, AstTypeExpr * typ, bool va)
-: id(ID), params(p), typeExpr(typ), vararg(va) {}
+AstFuncSignature::AstFuncSignature(std::unique_ptr<AstIdentExpr> ID,
+                                   std::unique_ptr<AstFuncParamList> p,
+                                   std::unique_ptr<AstTypeExpr> typ,
+                                   bool va)
+: id(std::move(ID)), params(std::move(p)), typeExpr(std::move(typ)), vararg(va) {}
 
 
 // AstFuncParamList
@@ -97,13 +104,15 @@ AstFuncParamList::AstFuncParamList() {}
 
 
 // AstFuncParam
-AstFuncParam::AstFuncParam(AstIdentExpr * ID, AstTypeExpr * typ)
-: id(ID), typeExpr(typ) {}
+AstFuncParam::AstFuncParam(std::unique_ptr<AstIdentExpr> ID,
+                           std::unique_ptr<AstTypeExpr> typ)
+: id(std::move(ID)), typeExpr(std::move(typ)) {}
 
 
 // AstFunctionStmt
-AstFunctionStmt::AstFunctionStmt(AstFuncSignature * sig, AstStmtList * s)
-: signature(sig), stmts(s) {}
+AstFunctionStmt::AstFunctionStmt(std::unique_ptr<AstFuncSignature> sig,
+                                 std::unique_ptr<AstStmtList> s)
+: signature(std::move(sig)), stmts(std::move(s)) {}
 
 
 // AstStmtList
@@ -111,25 +120,34 @@ AstStmtList::AstStmtList() : symbolTable(nullptr) {}
 
 
 // AstAssignStmt
-AstAssignStmt::AstAssignStmt(AstExpression * l, AstExpression * r) : left(l), right(r) {}
+AstAssignStmt::AstAssignStmt(std::unique_ptr<AstExpression> l,
+                             std::unique_ptr<AstExpression> r)
+: left(std::move(l)), right(std::move(r)) {}
 
 
 // AstReturnStmt
-AstReturnStmt::AstReturnStmt(AstExpression * e) : expr(e) {}
+AstReturnStmt::AstReturnStmt(std::unique_ptr<AstExpression> e)
+: expr(std::move(e)) {}
 
 
 // AstCallStmt
-AstCallStmt::AstCallStmt(AstCallExpr * e) : expr(e) {}
+AstCallStmt::AstCallStmt(std::unique_ptr<AstCallExpr> e)
+: expr(std::move(e)) {}
 
 
 // AstIfStmt
-AstIfStmt::AstIfStmt(AstExpression * e, AstStatement * t, AstStatement * f)
-: expr(e), trueBlock(t), falseBlock(f) {}
+AstIfStmt::AstIfStmt(std::unique_ptr<AstExpression> e,
+                     std::unique_ptr<AstStatement> t,
+                     std::unique_ptr<AstStatement> f)
+: expr(std::move(e)), trueBlock(std::move(t)), falseBlock(std::move(f)) {}
 
 
 // AstForStmt
-AstForStmt::AstForStmt(AstStatement * s, AstExpression * e, AstExpression * st, AstStmtList * b)
-: stmt(s), end(e), step(st), block(b) {}
+AstForStmt::AstForStmt(std::unique_ptr<AstStatement> s,
+                       std::unique_ptr<AstExpression> e,
+                       std::unique_ptr<AstExpression> st,
+                       std::unique_ptr<AstStmtList> b)
+: stmt(std::move(s)), end(std::move(e)), step(std::move(st)), block(std::move(b)) {}
 
 //----------------------------------------------------------------------------------------------------------------------
 // Expressions
@@ -141,32 +159,42 @@ AstExpression::AstExpression() : type(nullptr) {}
 
 
 // AstCastExpr
-AstCastExpr::AstCastExpr(AstExpression * e, AstTypeExpr * t) : expr(e), typeExpr(t) {}
+AstCastExpr::AstCastExpr(std::unique_ptr<AstExpression> e,
+                         std::unique_ptr<AstTypeExpr> t)
+: expr(std::move(e)), typeExpr(std::move(t)) {}
 
 
 // AstAddressOfExpr
-AstAddressOfExpr::AstAddressOfExpr(AstIdentExpr * ID) : id(ID) {}
+AstAddressOfExpr::AstAddressOfExpr(std::unique_ptr<AstIdentExpr> ID)
+: id(std::move(ID)) {}
 
 
 // AstDereferenceExpr
-AstDereferenceExpr::AstDereferenceExpr(AstExpression * e) : expr(e) {}
+AstDereferenceExpr::AstDereferenceExpr(std::unique_ptr<AstExpression> e)
+: expr(std::move(e)) {}
 
 
 // AstIdentExpr
-AstIdentExpr::AstIdentExpr(Token * t) : token(t) {}
+AstIdentExpr::AstIdentExpr(Token * t)
+: token(t) {}
 
 
 // AstLiteralExpr
-AstLiteralExpr::AstLiteralExpr(Token * t) : token(t) {}
+AstLiteralExpr::AstLiteralExpr(Token * t)
+: token(t) {}
 
 
 // BinaryExpr
-AstBinaryExpr::AstBinaryExpr(Token * op, AstExpression * l, AstExpression * r)
-: token(op), lhs(l), rhs(r) {}
+AstBinaryExpr::AstBinaryExpr(Token * op,
+                             std::unique_ptr<AstExpression> l,
+                             std::unique_ptr<AstExpression> r)
+: token(op), lhs(std::move(l)), rhs(std::move(r)) {}
 
 
 // AstCallExpr
-AstCallExpr::AstCallExpr(AstIdentExpr * ID, AstFuncArgList * a) : id(ID), args(a) {}
+AstCallExpr::AstCallExpr(std::unique_ptr<AstIdentExpr> ID,
+                         std::unique_ptr<AstFuncArgList> a)
+: id(std::move(ID)), args(std::move(a)) {}
 
 
 // AstFuncArgList

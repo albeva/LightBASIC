@@ -13,14 +13,16 @@
 		365CA8231595FC0300021215 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8211595FC0300021215 /* utils.cpp */; };
 		365CA8361597386600021215 /* ParseDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8351597386600021215 /* ParseDeclaration.cpp */; };
 		365CA8371597386600021215 /* ParseDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8351597386600021215 /* ParseDeclaration.cpp */; };
+		3682F4711646C26000ACC32B /* ParseDeclare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3682F4701646C26000ACC32B /* ParseDeclare.cpp */; };
+		3682F4721646C26000ACC32B /* ParseDeclare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3682F4701646C26000ACC32B /* ParseDeclare.cpp */; };
 		36A4298515973F27002CADF1 /* ParseAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298415973F27002CADF1 /* ParseAttributes.cpp */; };
 		36A4298615973F27002CADF1 /* ParseAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298415973F27002CADF1 /* ParseAttributes.cpp */; };
 		36A4298915974662002CADF1 /* ParseIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298815974662002CADF1 /* ParseIdentifier.cpp */; };
 		36A4298A15974662002CADF1 /* ParseIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298815974662002CADF1 /* ParseIdentifier.cpp */; };
-		36A4298C159776C3002CADF1 /* ParseDIM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298B159776C3002CADF1 /* ParseDIM.cpp */; };
-		36A4298D159776C3002CADF1 /* ParseDIM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298B159776C3002CADF1 /* ParseDIM.cpp */; };
-		36A4298F159776E4002CADF1 /* ParseVAR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298E159776E4002CADF1 /* ParseVAR.cpp */; };
-		36A42990159776E4002CADF1 /* ParseVAR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298E159776E4002CADF1 /* ParseVAR.cpp */; };
+		36A4298C159776C3002CADF1 /* ParseDim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298B159776C3002CADF1 /* ParseDim.cpp */; };
+		36A4298D159776C3002CADF1 /* ParseDim.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298B159776C3002CADF1 /* ParseDim.cpp */; };
+		36A4298F159776E4002CADF1 /* ParseVar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298E159776E4002CADF1 /* ParseVar.cpp */; };
+		36A42990159776E4002CADF1 /* ParseVar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298E159776E4002CADF1 /* ParseVar.cpp */; };
 		36A4299215977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */; };
 		36A4299315977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */; };
 		36A4299515977BA6002CADF1 /* ParseExpression.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4299415977BA6002CADF1 /* ParseExpression.cpp */; };
@@ -90,10 +92,11 @@
 		365CA8211595FC0300021215 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = src/utils.cpp; sourceTree = SOURCE_ROOT; };
 		365CA8351597386600021215 /* ParseDeclaration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDeclaration.cpp; path = src/ParseDeclaration.cpp; sourceTree = SOURCE_ROOT; };
 		365CA838159738D700021215 /* ParserShared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ParserShared.h; path = src/ParserShared.h; sourceTree = SOURCE_ROOT; };
+		3682F4701646C26000ACC32B /* ParseDeclare.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParseDeclare.cpp; sourceTree = SOURCE_ROOT; };
 		36A4298415973F27002CADF1 /* ParseAttributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseAttributes.cpp; path = src/ParseAttributes.cpp; sourceTree = SOURCE_ROOT; };
 		36A4298815974662002CADF1 /* ParseIdentifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseIdentifier.cpp; path = src/ParseIdentifier.cpp; sourceTree = SOURCE_ROOT; };
-		36A4298B159776C3002CADF1 /* ParseDIM.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDIM.cpp; path = src/ParseDIM.cpp; sourceTree = SOURCE_ROOT; };
-		36A4298E159776E4002CADF1 /* ParseVAR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseVAR.cpp; path = src/ParseVAR.cpp; sourceTree = SOURCE_ROOT; };
+		36A4298B159776C3002CADF1 /* ParseDim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDim.cpp; path = src/ParseDim.cpp; sourceTree = SOURCE_ROOT; };
+		36A4298E159776E4002CADF1 /* ParseVar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseVar.cpp; path = src/ParseVar.cpp; sourceTree = SOURCE_ROOT; };
 		36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseTypeExpr.cpp; path = src/ParseTypeExpr.cpp; sourceTree = SOURCE_ROOT; };
 		36A4299415977BA6002CADF1 /* ParseExpression.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseExpression.cpp; path = src/ParseExpression.cpp; sourceTree = SOURCE_ROOT; };
 		36B1922E158CB6220018496F /* docs */ = {isa = PBXFileReference; lastKnownFileType = folder; path = docs; sourceTree = "<group>"; };
@@ -258,10 +261,11 @@
 				36F0016515894A5F00C9976F /* Parser.h */,
 				36F0015215894A5F00C9976F /* Parser.cpp */,
 				365CA8351597386600021215 /* ParseDeclaration.cpp */,
+				36A4298B159776C3002CADF1 /* ParseDim.cpp */,
+				36A4298E159776E4002CADF1 /* ParseVar.cpp */,
+				3682F4701646C26000ACC32B /* ParseDeclare.cpp */,
 				36A4298415973F27002CADF1 /* ParseAttributes.cpp */,
 				36A4298815974662002CADF1 /* ParseIdentifier.cpp */,
-				36A4298B159776C3002CADF1 /* ParseDIM.cpp */,
-				36A4298E159776E4002CADF1 /* ParseVAR.cpp */,
 				36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */,
 				36A4299415977BA6002CADF1 /* ParseExpression.cpp */,
 			);
@@ -450,10 +454,11 @@
 				365CA8361597386600021215 /* ParseDeclaration.cpp in Sources */,
 				36A4298515973F27002CADF1 /* ParseAttributes.cpp in Sources */,
 				36A4298915974662002CADF1 /* ParseIdentifier.cpp in Sources */,
-				36A4298C159776C3002CADF1 /* ParseDIM.cpp in Sources */,
-				36A4298F159776E4002CADF1 /* ParseVAR.cpp in Sources */,
+				36A4298C159776C3002CADF1 /* ParseDim.cpp in Sources */,
+				36A4298F159776E4002CADF1 /* ParseVar.cpp in Sources */,
 				36A4299215977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */,
 				36A4299515977BA6002CADF1 /* ParseExpression.cpp in Sources */,
+				3682F4711646C26000ACC32B /* ParseDeclare.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -483,10 +488,11 @@
 				365CA8371597386600021215 /* ParseDeclaration.cpp in Sources */,
 				36A4298615973F27002CADF1 /* ParseAttributes.cpp in Sources */,
 				36A4298A15974662002CADF1 /* ParseIdentifier.cpp in Sources */,
-				36A4298D159776C3002CADF1 /* ParseDIM.cpp in Sources */,
-				36A42990159776E4002CADF1 /* ParseVAR.cpp in Sources */,
+				36A4298D159776C3002CADF1 /* ParseDim.cpp in Sources */,
+				36A42990159776E4002CADF1 /* ParseVar.cpp in Sources */,
 				36A4299315977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */,
 				36A4299615977BA6002CADF1 /* ParseExpression.cpp in Sources */,
+				3682F4721646C26000ACC32B /* ParseDeclare.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

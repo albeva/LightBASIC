@@ -40,6 +40,13 @@ namespace lbc {
         
         // top level declarations
         std::unique_ptr<AstDeclaration> declaration();
+        std::unique_ptr<AstVarDecl> kwDim();
+        std::unique_ptr<AstVarDecl> kwVar();
+        
+        std::unique_ptr<AstFunctionDecl> kwDeclare();
+        std::unique_ptr<AstFuncSignature> funcSignature();
+        std::unique_ptr<AstFuncParamList> funcParamList();
+        std::unique_ptr<AstFuncParam> funcParam();
         
         // attributes
         std::unique_ptr<AstAttributeList>   attributes();
@@ -49,12 +56,6 @@ namespace lbc {
         
         // identifier
         std::unique_ptr<AstIdentExpr> identifier();
-        
-        // DIM keyword
-        std::unique_ptr<AstVarDecl> DIM();
-        
-        // VAR keyword
-        std::unique_ptr<AstVarDecl> VAR();
         
         // Type expression
         std::unique_ptr<AstTypeExpr> typeExpr();

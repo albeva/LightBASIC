@@ -9,7 +9,7 @@ Program         = { Declaration }
 Declaration     = [ Attributes ]
                 ( DIM
                 | VAR
-                | FunctionDecl
+                | DECLARE
                 | FunctionImpl
                 | SubImpl
                 )
@@ -32,7 +32,7 @@ FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
                 .
 FuncSignature   = "FUNCTION" id [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
                 .
-SubSignature    = "SUB" [ "(" FuncParamList ")" ]
+SubSignature    = "SUB" id [ "(" FuncParamList ")" ]
                 .
 FuncParamList   = FuncParam { "," FuncParam }
                 .

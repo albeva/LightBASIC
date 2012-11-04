@@ -1,9 +1,10 @@
 [Alias = "_i"] _
-Dim i As Integer = 10
+Dim i As Integer
+' Var v = 10
 
 ' ' Declare printf
-' [Alias = "printf"] _
-' Declare Function printf(str As Byte Ptr, ...) As Integer
+[Alias = "printf"] _
+Declare Function printf(str As Byte Ptr, ...) As Integer
 ' 
 ' Function main() As Integer
 '     Dim b As Bool

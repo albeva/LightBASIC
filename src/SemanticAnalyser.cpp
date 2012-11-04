@@ -83,7 +83,7 @@ void SemanticAnalyser::coerce(std::unique_ptr<AstExpression> & ast, Type * type,
         
         // create cast expression and inject it into the ast tree
         auto expr = ast.release();
-        ast.reset(new AstCastExpr(expr));
+        ast.reset(new AstCastExpr(std::unique_ptr<AstExpression>(expr)));
         ast->type = type;
     }
 }
