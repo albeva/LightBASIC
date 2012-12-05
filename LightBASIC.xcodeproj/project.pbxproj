@@ -13,8 +13,7 @@
 		365CA8231595FC0300021215 /* utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8211595FC0300021215 /* utils.cpp */; };
 		365CA8361597386600021215 /* ParseDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8351597386600021215 /* ParseDeclaration.cpp */; };
 		365CA8371597386600021215 /* ParseDeclaration.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 365CA8351597386600021215 /* ParseDeclaration.cpp */; };
-		3682F4711646C26000ACC32B /* ParseDeclare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3682F4701646C26000ACC32B /* ParseDeclare.cpp */; };
-		3682F4721646C26000ACC32B /* ParseDeclare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3682F4701646C26000ACC32B /* ParseDeclare.cpp */; };
+		368A0647166FFFAB000D7CDF /* ParseDeclare.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 368A0646166FFFAB000D7CDF /* ParseDeclare.cpp */; };
 		36A4298515973F27002CADF1 /* ParseAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298415973F27002CADF1 /* ParseAttributes.cpp */; };
 		36A4298615973F27002CADF1 /* ParseAttributes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298415973F27002CADF1 /* ParseAttributes.cpp */; };
 		36A4298915974662002CADF1 /* ParseIdentifier.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 36A4298815974662002CADF1 /* ParseIdentifier.cpp */; };
@@ -92,7 +91,7 @@
 		365CA8211595FC0300021215 /* utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = utils.cpp; path = src/utils.cpp; sourceTree = SOURCE_ROOT; };
 		365CA8351597386600021215 /* ParseDeclaration.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDeclaration.cpp; path = src/ParseDeclaration.cpp; sourceTree = SOURCE_ROOT; };
 		365CA838159738D700021215 /* ParserShared.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ParserShared.h; path = src/ParserShared.h; sourceTree = SOURCE_ROOT; };
-		3682F4701646C26000ACC32B /* ParseDeclare.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParseDeclare.cpp; sourceTree = SOURCE_ROOT; };
+		368A0646166FFFAB000D7CDF /* ParseDeclare.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDeclare.cpp; path = src/ParseDeclare.cpp; sourceTree = SOURCE_ROOT; };
 		36A4298415973F27002CADF1 /* ParseAttributes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseAttributes.cpp; path = src/ParseAttributes.cpp; sourceTree = SOURCE_ROOT; };
 		36A4298815974662002CADF1 /* ParseIdentifier.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseIdentifier.cpp; path = src/ParseIdentifier.cpp; sourceTree = SOURCE_ROOT; };
 		36A4298B159776C3002CADF1 /* ParseDim.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParseDim.cpp; path = src/ParseDim.cpp; sourceTree = SOURCE_ROOT; };
@@ -263,7 +262,7 @@
 				365CA8351597386600021215 /* ParseDeclaration.cpp */,
 				36A4298B159776C3002CADF1 /* ParseDim.cpp */,
 				36A4298E159776E4002CADF1 /* ParseVar.cpp */,
-				3682F4701646C26000ACC32B /* ParseDeclare.cpp */,
+				368A0646166FFFAB000D7CDF /* ParseDeclare.cpp */,
 				36A4298415973F27002CADF1 /* ParseAttributes.cpp */,
 				36A4298815974662002CADF1 /* ParseIdentifier.cpp */,
 				36A4299115977ACE002CADF1 /* ParseTypeExpr.cpp */,
@@ -458,7 +457,7 @@
 				36A4298F159776E4002CADF1 /* ParseVar.cpp in Sources */,
 				36A4299215977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */,
 				36A4299515977BA6002CADF1 /* ParseExpression.cpp in Sources */,
-				3682F4711646C26000ACC32B /* ParseDeclare.cpp in Sources */,
+				368A0647166FFFAB000D7CDF /* ParseDeclare.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -492,7 +491,6 @@
 				36A42990159776E4002CADF1 /* ParseVar.cpp in Sources */,
 				36A4299315977ACE002CADF1 /* ParseTypeExpr.cpp in Sources */,
 				36A4299615977BA6002CADF1 /* ParseExpression.cpp in Sources */,
-				3682F4721646C26000ACC32B /* ParseDeclare.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
