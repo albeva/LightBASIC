@@ -84,7 +84,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		361944A8160A77B600659FF9 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		361ACBD01589448500E384BD /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
 		364A146B158CC26200122A9A /* libboost_unit_test_framework.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_unit_test_framework.dylib; path = /usr/local/lib/libboost_unit_test_framework.dylib; sourceTree = "<absolute>"; };
 		364A146D158CC2B500122A9A /* TestLexer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TestLexer.cpp; sourceTree = "<group>"; };
@@ -102,6 +101,7 @@
 		36B1922F158CB6220018496F /* samples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = samples; sourceTree = "<group>"; };
 		36B19235158CB9FE0018496F /* test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = test; sourceTree = BUILT_PRODUCTS_DIR; };
 		36B19238158CB9FE0018496F /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		36D88661164420540027D995 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		36F0014A15894A5F00C9976F /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Ast.cpp; path = src/Ast.cpp; sourceTree = SOURCE_ROOT; };
 		36F0014B15894A5F00C9976F /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AstVisitor.cpp; path = src/AstVisitor.cpp; sourceTree = SOURCE_ROOT; };
 		36F0014C15894A5F00C9976F /* Context.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Context.cpp; path = src/Context.cpp; sourceTree = SOURCE_ROOT; };
@@ -166,7 +166,7 @@
 		361ACBC51589448500E384BD = {
 			isa = PBXGroup;
 			children = (
-				361944A8160A77B600659FF9 /* llvm.xcconfig */,
+				36D88661164420540027D995 /* llvm.xcconfig */,
 				36B1922E158CB6220018496F /* docs */,
 				36B1922F158CB6220018496F /* samples */,
 				361ACBD31589448500E384BD /* src */,
@@ -499,7 +499,7 @@
 /* Begin XCBuildConfiguration section */
 		361ACBD81589448500E384BD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 361944A8160A77B600659FF9 /* llvm.xcconfig */;
+			baseConfigurationReference = 36D88661164420540027D995 /* llvm.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -533,7 +533,7 @@
 		};
 		361ACBD91589448500E384BD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 361944A8160A77B600659FF9 /* llvm.xcconfig */;
+			baseConfigurationReference = 36D88661164420540027D995 /* llvm.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
@@ -560,7 +560,6 @@
 		};
 		361ACBDB1589448500E384BD /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 361944A8160A77B600659FF9 /* llvm.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -568,7 +567,6 @@
 		};
 		361ACBDC1589448500E384BD /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 361944A8160A77B600659FF9 /* llvm.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -576,7 +574,6 @@
 		};
 		36B1923D158CB9FE0018496F /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 361944A8160A77B600659FF9 /* llvm.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -584,7 +581,6 @@
 		};
 		36B1923E158CB9FE0018496F /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 361944A8160A77B600659FF9 /* llvm.xcconfig */;
 			buildSettings = {
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
