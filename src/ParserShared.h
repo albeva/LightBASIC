@@ -12,8 +12,6 @@
 #include "Lexer.h"
 #include "Ast.h"
 #include "Token.h"
-#include "PrinterVisitor.h"
-#include <iostream>
 
 // Expect a token. If doesn't match, the expect will raise an error,
 // exit from the current function and return nullptr

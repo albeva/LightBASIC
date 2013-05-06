@@ -111,16 +111,16 @@ void showHelp()
 USAGE lbc [options] <inputs>
     
 OPTIONS:
-    --help	Display available options
-    --version	Show version information
-    -v		Show verbose output
-    -o <file>	Write output to <file>
-    -O<number>	Set optimization level to <number>
-    -m32		Generate 32bit i386 code
-    -m64		Generate 64bit x86-64 code
-    -S		Only compile. Emit assembly files
-    -c		Compile and assemble. Emit object files
-    -llvm		Emit llvm files
+    --help      Display available options
+    --version   Show version information
+    -v          Show verbose output
+    -o <file>   Write output to <file>
+    -O<number>  Set optimization level to <number>
+    -m32        Generate 32bit i386 code
+    -m64        Generate 64bit x86-64 code
+    -S          Only compile. Emit assembly files
+    -c          Compile and assemble. Emit object files
+    -llvm       Emit llvm files
 )CMD";
 }
 
