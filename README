@@ -2,13 +2,13 @@ LightBASIC is a simple toy compiler written in c++ using llvm and boost librarie
 
 http://lightbasic.com/
 
-' Declare puts from libc
-[Alias = "puts"] _
-DECLARE FUNCTION puts(str AS BYTE PTR) AS INTEGER
+    ' Declare puts from libc
+    [Alias = "puts"] _
+    DECLARE FUNCTION puts(str AS BYTE PTR) AS INTEGER
 
-' implement main function
-FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
-    DIM msg AS BYTE PTR
-    msg = "Hello World"
-    puts(msg)
-END FUNCTION
+    ' implement main function
+    FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
+        DIM msg AS BYTE PTR
+        msg = "Hello World"
+        puts(msg)
+    END FUNCTION
