@@ -5,12 +5,12 @@ http://lightbasic.com/
 ```VB
 ' Declare puts from libc
 [Alias = "puts"] _
-DECLARE FUNCTION puts(str AS BYTE PTR) AS INTEGER
+Declare Function puts(str As Byte Ptr) As Integer
 
 ' implement main function
-FUNCTION main(argc AS INTEGER, argv AS BYTE PTR PTR) AS INTEGER
-    DIM msg AS BYTE PTR
+Function main(argc AS Integer, argv AS Byte Ptr Ptr) AS Integer
+    Dim msg AS Byte Ptr
     msg = "Hello World"
     puts(msg)
-END FUNCTION
+End Function
 ```
