@@ -2,7 +2,7 @@ LightBASIC is a simple toy compiler written in c++ using llvm and boost librarie
 
 http://lightbasic.com/
 
-```VisualBasic
+```VB
 ' Declare puts from libc
 [Alias = "puts"] _
 DECLARE FUNCTION puts(str AS BYTE PTR) AS INTEGER
