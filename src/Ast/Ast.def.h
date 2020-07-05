@@ -4,15 +4,20 @@
 #pragma once
 
 #define AST_ROOT_NODES(_) \
-    _( AstRoot ) \
-    _( AstStmt ) \
-    _( AstExpr )
+    _( Root ) \
+    _( Stmt ) \
+    _( Expr ) \
+    _( Decl )
 
 // statements
 #define AST_STMT_NODES(_) \
+    _( Program    ) \
     _( StmtList   ) \
     _( AssignStmt ) \
     _( ExprStmt   )
+
+#define AST_DECL_NODES(_) \
+    _( VarDecl )
 
 // all expressions
 #define AST_EXPR_NODES(_) \
@@ -21,8 +26,9 @@
     _( LiteralExpr )
 
 // all nodes
-#define AST_CONTENT_NODES(_)    \
-    AST_STMT_NODES(_)       \
+#define AST_CONTENT_NODES(_) \
+    AST_STMT_NODES(_) \
+    AST_DECL_NODES(_) \
     AST_EXPR_NODES(_)
 
 // forward declare all AST nodes

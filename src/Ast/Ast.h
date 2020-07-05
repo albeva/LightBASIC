@@ -16,11 +16,14 @@ AST_FORWARD_DECLARE();
 enum class AstKind {
     #define KIND_ENUM(id, ...) id,
     Stmt,
-    AST_STMT_NODES(KIND_ENUM)
+        AST_STMT_NODES(KIND_ENUM)
+        Decl,
+            AST_DECL_NODES(KIND_ENUM)
+        DeclLast,
     StmtLast,
 
     Expr,
-    AST_EXPR_NODES(KIND_ENUM)
+        AST_EXPR_NODES(KIND_ENUM)
     ExprLast
     #undef KIND_ENUM
 };
@@ -59,19 +62,39 @@ public:
     }
 };
 
+class AstDecl: public AstStmt {
+public:
+    using AstStmt::AstStmt;
+
+    static bool classof(const AstRoot *ast) {
+        return ast->kind() >= AstKind::Decl &&
+               ast->kind() < AstKind::DeclLast;
+    }
+};
+
 #define DECLARE_AST(KIND, BASE) \
-    class Ast##KIND final: public Ast##BASE {       \
-    public:                                         \
-        using Base = Ast##BASE;                     \
-        Ast##KIND();                                \
-        virtual ~Ast##KIND();                       \
-        virtual void accept(AstVisitor* visitor);   \
-        static bool classof(const AstRoot* ast) {   \
-            return ast->kind() == AstKind::KIND;    \
+    class Ast##KIND final: public Ast##BASE {           \
+    public:                                             \
+        using Base = Ast##BASE;                         \
+        Ast##KIND();                                    \
+        virtual ~Ast##KIND();                           \
+        virtual void accept(AstVisitor* visitor);       \
+        static bool classof(const AstRoot* ast) {       \
+            return ast->kind() == AstKind::KIND;        \
+        }                                               \
+        inline static unique_ptr<Ast##KIND> create() {  \
+            return make_unique<Ast##KIND>();            \
         }
+
 #define DECLARE_END }; // class
 
+//----------------------------------------
 // Statements
+//----------------------------------------
+
+DECLARE_AST(Program, Stmt)
+    unique_ptr<AstStmt> body;
+DECLARE_END
 
 DECLARE_AST(StmtList, Stmt)
     vector<unique_ptr<AstStmt>> stmts;
@@ -86,7 +109,18 @@ DECLARE_AST(AssignStmt, Stmt)
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
+//----------------------------------------
+// Declarations
+//----------------------------------------
+
+DECLARE_AST(VarDecl, Decl)
+    unique_ptr<AstIdentExpr> id;
+    unique_ptr<AstExpr> expr;
+DECLARE_END
+
+//----------------------------------------
 // Expressions
+//----------------------------------------
 
 DECLARE_AST(IdentExpr, Expr)
     unique_ptr<Token> identifier;

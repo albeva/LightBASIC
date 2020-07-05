@@ -5,6 +5,8 @@
 #include "llvm/Support/CommandLine.h"
 #include "Parser/Parser.h"
 #include "Ast/Ast.h"
+#include "Ast/AstVisitor.h"
+#include "Ast/AstPrinter.h"
 
 namespace cl = llvm::cl;
 namespace fs = std::filesystem;
@@ -44,7 +46,13 @@ int main(int argc, char *argv[]) {
 
     // Lex the input
     Parser parser{srcMgr, ID};
-    auto ast = parser.parse();
+    if (auto ast = parser.parse()) {
+        AstPrinter printer;
+        ast->accept(&printer);
+    } else {
+        std::cerr << "Failed to parse the input" << std::endl;
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }
