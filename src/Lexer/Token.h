@@ -44,23 +44,15 @@ public:
     const string_view& description() const;
 
     bool isGeneral() const;
-
     bool isLiteral() const;
-
     bool isSymbol() const;
-
     bool isOperator() const;
-
     bool isKeyword() const;
 
     int getPrecedence() const;
-
     bool isBinary() const;
-
     bool isUnary() const;
-
     bool isLeftToRight() const;
-
     bool isRightToLeft() const;
 
     inline bool operator==(TokenKind rhs) const {

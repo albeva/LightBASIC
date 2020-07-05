@@ -9,9 +9,7 @@
 namespace lbc {
 
 class Token;
-
 class AstVisitor;
-
 AST_FORWARD_DECLARE();
 
 // Enumerate all possible ast nodes
@@ -32,11 +30,8 @@ enum class AstKind {
 class AstRoot : noncopyable {
 public:
     AstRoot(AstKind kind) : m_kind{kind} {}
-
     virtual ~AstRoot();
-
     AstKind kind() const { return m_kind; }
-
     virtual void accept(AstVisitor *visitor) = 0;
 
 private:
@@ -45,6 +40,7 @@ private:
 
 // Base class for all statements
 class AstStmt : public AstRoot {
+public:
     using AstRoot::AstRoot;
 
     static bool classof(const AstRoot *ast) {
@@ -55,6 +51,7 @@ class AstStmt : public AstRoot {
 
 // Base class for all expressions
 class AstExpr : public AstRoot {
+public:
     using AstRoot::AstRoot;
 
     static bool classof(const AstRoot *ast) {
@@ -77,17 +74,14 @@ class AstExpr : public AstRoot {
 // Statements
 
 DECLARE_AST(StmtList, Stmt)
-
-    std::vector<unique_ptr<AstStmt>> stmts;
+    vector<unique_ptr<AstStmt>> stmts;
 DECLARE_END
 
 DECLARE_AST(ExprStmt, Stmt)
-
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
 DECLARE_AST(AssignStmt, Stmt)
-
     unique_ptr<AstIdentExpr> id;
     unique_ptr<AstExpr> expr;
 DECLARE_END
@@ -95,18 +89,15 @@ DECLARE_END
 // Expressions
 
 DECLARE_AST(IdentExpr, Expr)
-
     unique_ptr<Token> identifier;
 DECLARE_END
 
 DECLARE_AST(CallExpr, Expr)
-
     unique_ptr<AstIdentExpr> ident;
-    std::vector<unique_ptr<AstExpr>> arguments;
+    vector<unique_ptr<AstExpr>> arguments;
 DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
-
     unique_ptr<Token> literal;
 DECLARE_END
 

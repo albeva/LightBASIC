@@ -4,7 +4,6 @@
 #include "Lexer.h"
 
 using namespace lbc;
-
 using llvm::isAlpha;
 
 static inline bool isWhiteSpace(char ch) {

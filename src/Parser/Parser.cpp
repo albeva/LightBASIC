@@ -25,9 +25,6 @@ unique_ptr<AstStmtList> Parser::parse() {
             move();
             continue;
         }
-
-        std::cout << m_token->lexeme() << '\n';
-
         move();
     }
 
