@@ -16,7 +16,8 @@ static inline llvm::SMLoc getLoc(const char *ptr) {
 Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
     : m_srcMgr{srcMgr},
       m_fileID{fileID},
-      m_buffer{srcMgr.getMemoryBuffer(fileID)} {
+      m_buffer{srcMgr.getMemoryBuffer(fileID)},
+      m_hasStmt{false} {
     assert(m_buffer != nullptr);
     m_input = m_buffer->getBufferStart();
     m_char = *m_input;
@@ -24,19 +25,36 @@ Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
 
 unique_ptr<Token> Lexer::next() {
     while (isValid()) {
+        // skip spaces
         if (isWhiteSpace(m_char)) {
             move();
             continue;
         }
 
+        // new line, emit statement if there is one
+        if (m_char == '\n') {
+            if (m_hasStmt) {
+                m_hasStmt = false;
+                return endOfStatement();
+            }
+            move();
+            continue;
+        }
+
+        // single line comments
+        if (m_char == '\'') {
+            singleLineComment();
+            continue;
+        }
+
+        // there is some parsable content. so set stmt to true
+        m_hasStmt = true;
+
+        // identifier
         if (isAlpha(m_char))
             return identifier();
 
         switch (m_char) {
-        case '\n':
-            return endOfLine();
-        case '\'':
-            return singleLineComment();
         case '_':
             if (isAlpha(peek())) {
                 return identifier();
@@ -77,8 +95,20 @@ unique_ptr<Token> Lexer::next() {
 
     return endOfFile();
 }
-
+/**
+ * If `m_hasStmt` is true then return `EndOfLine`
+ * before `EndOfFile`
+ */
 unique_ptr<Token> Lexer::endOfFile() {
+    if (m_hasStmt) {
+        m_hasStmt = false;
+        return Token::create(
+            TokenKind::EndOfStmt,
+            Token::description(TokenKind::EndOfStmt),
+            getLoc(m_buffer->getBufferEnd())
+        );
+    }
+
     return Token::create(
         TokenKind::EndOfFile,
         Token::description(TokenKind::EndOfFile),
@@ -86,10 +116,10 @@ unique_ptr<Token> Lexer::endOfFile() {
     );
 }
 
-unique_ptr<Token> Lexer::endOfLine() {
+unique_ptr<Token> Lexer::endOfStatement() {
     auto loc = getLoc(m_input);
     move();
-    return Token::create(TokenKind::EndOfLine, Token::description(TokenKind::EndOfLine), loc);
+    return Token::create(TokenKind::EndOfStmt, Token::description(TokenKind::EndOfStmt), loc);
 }
 
 unique_ptr<Token> Lexer::identifier() {
@@ -123,14 +153,10 @@ unique_ptr<Token> Lexer::invalid(const char *loc) {
     return Token::create(TokenKind::Invalid, {}, getLoc(loc));
 }
 
-unique_ptr<Token> Lexer::singleLineComment() {
+void Lexer::singleLineComment() {
     do {
         move();
-        if (m_char == '\n')
-            return endOfLine();
-    } while (isValid());
-
-    return endOfFile();
+    } while (isValid() && m_char != '\n');
 }
 
 void Lexer::move() {

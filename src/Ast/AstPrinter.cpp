@@ -17,7 +17,7 @@ void AstPrinter::visit(const AstStmtList *ast) {
 }
 
 void AstPrinter::visit(const AstAssignStmt *ast) {
-    ast->id->accept(this);
+    ast->ident->accept(this);
     std::cout << " = ";
     ast->expr->accept(this);
     std::cout << '\n';
@@ -30,14 +30,14 @@ void AstPrinter::visit(const AstExprStmt *ast) {
 
 void AstPrinter::visit(const AstVarDecl *ast) {
     std::cout << "VAR ";
-    ast->id->accept(this);
+    ast->ident->accept(this);
     std::cout << " = ";
     ast->expr->accept(this);
     std::cout << '\n';
 }
 
 void AstPrinter::visit(const AstIdentExpr *ast) {
-    std::cout << ast->identifier->lexeme();
+    std::cout << ast->token->lexeme();
 }
 
 void AstPrinter::visit(const AstCallExpr *ast) {
@@ -53,9 +53,9 @@ void AstPrinter::visit(const AstCallExpr *ast) {
 }
 
 void AstPrinter::visit(const AstLiteralExpr *ast) {
-    if (ast->literal->kind() == TokenKind::StringLiteral) {
-        std::cout << '"' << ast->literal->lexeme() << '"';
+    if (ast->token->kind() == TokenKind::StringLiteral) {
+        std::cout << '"' << ast->token->lexeme() << '"';
     } else {
-        std::cout << ast->literal->lexeme();
+        std::cout << ast->token->lexeme();
     }
 }

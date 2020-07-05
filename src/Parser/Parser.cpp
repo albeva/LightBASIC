@@ -16,83 +16,114 @@ Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
 
 Parser::~Parser() {}
 
-//----------------------------------------
-// Statements
-//----------------------------------------
-
-// program = stmtList .
+/**
+ * Program = stmtList .
+ */
 unique_ptr<AstProgram> Parser::parse() {
     auto program = AstProgram::create();
     program->body = stmtList();
     return program;
 }
 
-// stmtList = { stmt } .
+//----------------------------------------
+// Statements
+//----------------------------------------
+
+/**
+ * stmtList = { statement } .
+ */
 unique_ptr<AstStmtList> Parser::stmtList() {
     auto list = AstStmtList::create();
     while (isValid()) {
-        while (accept(TokenKind::EndOfLine));
-
-        if (auto s = stmt()) {
-            list->stmts.emplace_back(std::move(s));
-        } else {
-            error("Expected statement");
-        }
-
-        expect(TokenKind::EndOfLine);
+        list->stmts.emplace_back(statement());
+        expect(TokenKind::EndOfStmt);
     }
     return list;
 }
 
-// stmt = decl
-//      | callStmt
-//      .
-unique_ptr<AstStmt> Parser::stmt() {
+/**
+ * statement = VAR
+ *           | assignStmt
+ *           | callStmt
+ *           .
+ */
+unique_ptr<AstStmt> Parser::statement() {
     switch (m_token->kind()) {
     case TokenKind::Var:
         return kwVar();
     case TokenKind::Identifier:
         if (m_next && m_next->kind() == TokenKind::Assign) {
-            return assign();
+            return assignStmt();
         }
-
-        if (auto c = call(true)) {
-            auto es = AstExprStmt::create();
-            es->expr = std::move(c);
-            return es;
-        }
+        return callStmt();
     default:
-        return nullptr;
+        error("Expected statement");
     }
 }
 
-unique_ptr<AstAssignStmt> Parser::assign() {
-    return AstAssignStmt::create();
+/**
+ * assignStmt = ident '=' expression .
+ */
+unique_ptr<AstAssignStmt> Parser::assignStmt() {
+    auto ident = identifier();
+    expect(TokenKind::Assign);
+    auto expr = expression();
+
+    auto assign = AstAssignStmt::create();
+    assign->ident = std::move(ident);
+    assign->expr = std::move(expr);
+    return assign;
+}
+
+/**
+ * CallStmt = id
+ *          ( '(' ArgumentList ')'
+ *          | ArgumentList
+ *          )
+ *          .
+ */
+unique_ptr<AstExprStmt> Parser::callStmt() {
+    auto call = AstCallExpr::create();
+    call->ident = identifier();
+
+    bool parens = accept(TokenKind::ParenOpen) != nullptr;
+
+    call->arguments = expressionList();
+
+    if (parens) {
+        expect(TokenKind::ParenClose);
+    }
+
+    auto stmt = AstExprStmt::create();
+    stmt->expr = std::move(call);
+    return stmt;
 }
 
 //----------------------------------------
 // Declarations
 //----------------------------------------
 
-// var = ident "=" expr .
+/**
+ * var = identifier "=" expression .
+ */
 unique_ptr<AstVarDecl> Parser::kwVar() {
-    // ident
+    // identifier
     expect(TokenKind::Var);
-    auto id = ident();
+    auto id = identifier();
     if (!id)
         return nullptr;
 
     // "="
     expect(TokenKind::Assign);
 
-    // expr
-    auto e = expr();
-    if (!e)
+    // expression
+    auto expr = expression();
+    if (!expr)
         return nullptr;
 
     auto var = AstVarDecl::create();
-    var->id = std::move(id);
-    var->expr = std::move(e);
+    var->ident = std::move(id);
+    var->expr = std::move(expr);
     return var;
 }
 
@@ -100,59 +131,68 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
 // Expressions
 //----------------------------------------
 
-// expr = ident
-//      | literal
-//      | callExpr
-//      .
-unique_ptr<AstExpr> Parser::expr() {
+/**
+ * expression = literal
+ *            | identifier
+ *            | callExpr
+ *            .
+ */
+unique_ptr<AstExpr> Parser::expression() {
     // literal
     if (m_token->isLiteral()) {
         auto lit = AstLiteralExpr::create();
-        lit->literal = move();
+        lit->token = move();
         return lit;
     }
 
     if (*m_token == TokenKind::Identifier) {
-        return ident();
+        if (m_next && *m_next == TokenKind::ParenOpen) {
+            return callExpr();
+        }
+        return identifier();
     }
 
     error("Expected expression");
 }
 
-// ident = id .
-unique_ptr<AstIdentExpr> Parser::ident() {
+/**
+ * ident = identifier .
+ */
+unique_ptr<AstIdentExpr> Parser::identifier() {
     auto id = AstIdentExpr::create();
-    id->identifier = expect(TokenKind::Identifier);
+    id->token = expect(TokenKind::Identifier);
     return id;
 }
 
-// stmt: call = id argList .
-// expr: call = id "(" argList ")" .
-unique_ptr<AstCallExpr> Parser::call(bool stmt) {
+/**
+ * callExpr = identifier "(" argList ")" .
+ */
+unique_ptr<AstCallExpr> Parser::callExpr() {
     auto call = AstCallExpr::create();
-    call->ident = ident();
+    call->ident = identifier();
 
-    bool parens;
-    if (stmt) {
-        parens = accept(TokenKind::ParenOpen) != nullptr;
-    } else {
-        expect(TokenKind::ParenOpen);
-        parens = true;
-    }
+    expect(TokenKind::ParenOpen);
+    call->arguments = expressionList();
+    expect(TokenKind::ParenClose);
 
-    while (isValid() && !match(TokenKind::ParenClose) &&  !match(TokenKind::EndOfLine)) {
-        if (auto e = expr()) {
-            call->arguments.emplace_back(std::move(e));
+    return call;
+}
+
+/**
+ * Parse comma separated list of expressionds
+ */
+vector<unique_ptr<AstExpr>> Parser::expressionList() {
+    vector<unique_ptr<AstExpr>> exprs;
+
+    while (isValid() && !match(TokenKind::ParenClose) && !match(TokenKind::EndOfStmt)) {
+        if (auto e = expression()) {
+            exprs.emplace_back(std::move(e));
         } else {
             error("Expected expression");
         }
     }
 
-    if (parens) {
-        expect(TokenKind::ParenClose);
-    }
-
-    return call;
+    return exprs;
 }
 
 //----------------------------------------

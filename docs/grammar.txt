@@ -1,0 +1,102 @@
+EBNF
+----
+Program         = { Declaration }
+                .
+Declaration     = [ AttributeList ]
+                ( DIM
+                | VAR
+                | DECLARE
+                | FunctionImpl
+                | SubImpl
+                )
+                .
+AttributeList   = "[" Attribute { ","  Attribute } "]"
+                .
+Attribute       = ident [ AttribParamList ]
+                .
+AttribParamList = "=" AttribParam
+                | "(" AttribParam { "," AttribParam } ")"
+                .
+AttribParam     = IntegerLiteral
+                | StringLiteral
+                | BooleanLiteral
+                | NullLiteral
+                .
+DIM             = "DIM" ident "AS" TypeExpr [ "=" Expression ]
+                .
+VAR             = "VAR" ident "=" Expression
+                .
+FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
+                .
+FuncSignature   = "FUNCTION" ident [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
+                .
+SubSignature    = "SUB" ident [ "(" FuncParamList ")" ]
+                .
+FuncParamList   = FuncParam { "," FuncParam }
+                .
+FuncParam       = ident "AS" TypeExpr
+                .
+TypeExpr        = ("INTEGER" | "BYTE") { "PTR" }
+                .
+FunctionImpl    = FuncSignature
+                  StatementList
+                  "END" "FUNCTION"
+                .
+SubImpl         = SubSignature
+                  StatementList
+                  "END" "SUB"
+                .
+StatementList   = { Statement }
+                .
+Statement       = DIM
+                | VAR
+                | AssignStmt
+                | CallStmt
+                | ReturnStmt
+                | IfStmt
+                | ForStmt
+                .
+AssignStmt      = Expression "=" Expression
+                .
+CallStmt        = ident
+                ( "(" [ funcArgList ] ")"
+                | [ funcArgList ] )
+                .
+ReturnStmt      = "RETURN" [ Expression ]
+                .
+IfStmt          = "IF" Expression "THEN"
+                  StatementList
+                  { "ELSE" "IF" Expression "THEN"
+                    StatementList
+                  }
+                  [ "ELSE"
+                    StatementList
+                  ]
+                  "END" "IF"
+                .
+ForStmt         = "FOR" ( identifier [ "AS" TypeExpr] | "VAR" ident | Expression )
+                  "=" Expression "TO" Expression [ "STEP" Expression ]
+                  StatementList
+                  "NEXT"
+                .
+Expression      = IntegerLiteral
+                | FloatingPointLiteral
+                | StringLiteral
+                | CallExpr
+                | ident
+                | AddressOf
+                | Dereference
+                | BinaryExpression      (. this is broken. will use a expression parser anyway. so ebnf won't work .)
+                .
+BinaryExpression= Expression Op Expression
+                .
+CallExpr        = ident "(" [ funcArgList ] ")"
+                .
+funcArgList     = Expression { "," Expression }
+                .
+ReturnStmt      = "RETURN" Expression
+                .
+AddressOf       = "&" ident
+                .
+Dereference     = "*" Expression
+                .

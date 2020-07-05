@@ -23,11 +23,14 @@ public:
 private:
 
     unique_ptr<AstStmtList> stmtList();
-    unique_ptr<AstStmt> stmt();
-    unique_ptr<AstIdentExpr> ident();
-    unique_ptr<AstExpr> expr();
-    unique_ptr<AstAssignStmt> assign();
-    unique_ptr<AstCallExpr> call(bool stmt);
+    unique_ptr<AstStmt> statement();
+    unique_ptr<AstExpr> expression();
+    unique_ptr<AstIdentExpr> identifier();
+    unique_ptr<AstAssignStmt> assignStmt();
+
+    unique_ptr<AstExprStmt> callStmt();
+    unique_ptr<AstCallExpr> callExpr();
+    vector<unique_ptr<AstExpr>> expressionList();
 
     unique_ptr<AstVarDecl> kwVar();
 

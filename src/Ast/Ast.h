@@ -93,7 +93,7 @@ public:
 //----------------------------------------
 
 DECLARE_AST(Program, Stmt)
-    unique_ptr<AstStmt> body;
+    unique_ptr<AstStmtList> body;
 DECLARE_END
 
 DECLARE_AST(StmtList, Stmt)
@@ -105,7 +105,7 @@ DECLARE_AST(ExprStmt, Stmt)
 DECLARE_END
 
 DECLARE_AST(AssignStmt, Stmt)
-    unique_ptr<AstIdentExpr> id;
+    unique_ptr<AstIdentExpr> ident;
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
@@ -114,7 +114,7 @@ DECLARE_END
 //----------------------------------------
 
 DECLARE_AST(VarDecl, Decl)
-    unique_ptr<AstIdentExpr> id;
+    unique_ptr<AstIdentExpr> ident;
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
@@ -123,7 +123,7 @@ DECLARE_END
 //----------------------------------------
 
 DECLARE_AST(IdentExpr, Expr)
-    unique_ptr<Token> identifier;
+    unique_ptr<Token> token;
 DECLARE_END
 
 DECLARE_AST(CallExpr, Expr)
@@ -132,7 +132,7 @@ DECLARE_AST(CallExpr, Expr)
 DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
-    unique_ptr<Token> literal;
+    unique_ptr<Token> token;
 DECLARE_END
 
 #undef DECLARE_AST

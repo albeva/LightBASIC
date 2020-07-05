@@ -18,11 +18,11 @@ private:
     unique_ptr<Token> identifier();
     unique_ptr<Token> string();
     unique_ptr<Token> character(TokenKind kind);
-    unique_ptr<Token> endOfLine();
+    unique_ptr<Token> endOfStatement();
     unique_ptr<Token> endOfFile();
-    unique_ptr<Token> singleLineComment();
     unique_ptr<Token> invalid(const char *loc);
 
+    void singleLineComment();
     void move();
     bool isValid() const;
     char peek(int ahead = 1) const;
@@ -32,6 +32,7 @@ private:
     const llvm::MemoryBuffer *m_buffer;
     const char *m_input;
     char m_char;
+    bool m_hasStmt;
 };
 
 } // namespace lbc

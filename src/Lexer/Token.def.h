@@ -6,7 +6,7 @@
 #define TOKEN_GENERAL(_) \
     _( Invalid,    "Invalid"     ) \
     _( EndOfFile,  "End-Of-File" ) \
-    _( EndOfLine,  "End-Of-Line" ) \
+    _( EndOfStmt,  "End-Of-Stmt" ) \
     _( Identifier, "Identifier"  )
 
 // Literals
