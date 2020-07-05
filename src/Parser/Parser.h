@@ -4,14 +4,14 @@
 #pragma once
 
 #include "pch.h"
+#include "Ast.def.h"
 
 namespace lbc {
 
 class Lexer;
-
 class Token;
-
 enum class TokenKind;
+AST_FORWARD_DECLARE()
 
 class Parser final : noncopyable {
 public:
@@ -19,7 +19,7 @@ public:
 
     ~Parser();
 
-    void parse();
+    unique_ptr<AstStmtList> parse();
 
 private:
 

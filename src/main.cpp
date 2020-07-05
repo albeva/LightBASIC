@@ -4,6 +4,7 @@
 #include "pch.h"
 #include "llvm/Support/CommandLine.h"
 #include "Parser/Parser.h"
+#include "Parser/Ast.h"
 
 namespace cl = llvm::cl;
 namespace fs = std::filesystem;
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
 
     // Lex the input
     Parser parser{srcMgr, ID};
-    parser.parse();
+    auto ast = parser.parse();
 
     return EXIT_SUCCESS;
 }

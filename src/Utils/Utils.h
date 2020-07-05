@@ -7,8 +7,8 @@
 
 namespace lbc {
 
-    inline llvm::StringRef view_to_stringRef(const string_view& view) {
-        return llvm::StringRef(view.data(), view.size());
-    }
+inline llvm::StringRef view_to_stringRef(const string_view& view) {
+    return llvm::StringRef(view.data(), view.size());
+}
 
 }

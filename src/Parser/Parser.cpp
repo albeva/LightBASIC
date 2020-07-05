@@ -4,6 +4,7 @@
 #include "Parser.h"
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
+#include "Ast.h"
 
 using namespace lbc;
 
@@ -16,7 +17,9 @@ Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
 
 Parser::~Parser() {}
 
-void Parser::parse() {
+unique_ptr<AstStmtList> Parser::parse() {
+    auto list = make_unique<AstStmtList>();
+
     while (isValid()) {
         if (*m_token == TokenKind::EndOfLine) {
             move();
@@ -24,10 +27,11 @@ void Parser::parse() {
         }
 
         std::cout << m_token->lexeme() << '\n';
-        expect(TokenKind::Factorial);
 
         move();
     }
+
+    return list;
 }
 
 bool Parser::isValid() const {

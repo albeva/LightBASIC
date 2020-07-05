@@ -24,7 +24,12 @@ add_executable(lbc
         src/Utils/Utils.h
         src/Parser/Parser.cpp
         src/Parser/Parser.h
-        src/Lexer/Token.def.h src/Parser/Ast.cpp src/Parser/Ast.h)
+        src/Lexer/Token.def.h
+        src/Parser/Ast.cpp
+        src/Parser/Ast.h
+        src/Parser/AstVisitor.h
+        src/Parser/Ast.def.h
+        )
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)
 target_link_libraries(lbc ${llvm_libs})

@@ -63,11 +63,11 @@ public:
 
     bool isRightToLeft() const;
 
-    inline bool operator== (TokenKind rhs) const {
+    inline bool operator==(TokenKind rhs) const {
         return m_kind == rhs;
     }
 
-    inline bool operator!= (TokenKind rhs) const {
+    inline bool operator!=(TokenKind rhs) const {
         return m_kind != rhs;
     }
 
