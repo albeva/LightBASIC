@@ -1,9 +1,9 @@
 //
 // Created by Albert on 05/07/2020.
 //
-#include "Ast.h"
 #include "Lexer/Token.h"
 #include "AstVisitor.h"
+#include "Ast.h"
 using namespace lbc;
 
 AstRoot::~AstRoot() {}
