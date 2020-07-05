@@ -43,7 +43,7 @@ unique_ptr<Token> Lexer::next() {
 
         // single line comments
         if (m_char == '\'') {
-            singleLineComment();
+            skipUntilLineEnd();
             continue;
         }
 
@@ -56,10 +56,14 @@ unique_ptr<Token> Lexer::next() {
 
         switch (m_char) {
         case '_':
+            // part of identifier
             if (isAlpha(peek())) {
                 return identifier();
             }
-            break;
+            // part of line continuation
+            skipUntilLineEnd();
+            if (m_char == '\n') move();
+            continue;
         case '"':
             return string();
         case '=':
@@ -153,7 +157,7 @@ unique_ptr<Token> Lexer::invalid(const char *loc) {
     return Token::create(TokenKind::Invalid, {}, getLoc(loc));
 }
 
-void Lexer::singleLineComment() {
+void Lexer::skipUntilLineEnd() {
     do {
         move();
     } while (isValid() && m_char != '\n');

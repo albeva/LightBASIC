@@ -22,6 +22,8 @@ enum class AstKind {
         DeclLast,
     StmtLast,
 
+    AST_ATTRIB_NODES(KIND_ENUM)
+
     Expr,
         AST_EXPR_NODES(KIND_ENUM)
     ExprLast
@@ -70,6 +72,8 @@ public:
         return ast->kind() >= AstKind::Decl &&
                ast->kind() < AstKind::DeclLast;
     }
+
+    unique_ptr<AstAttributeList> attribs;
 };
 
 #define DECLARE_AST(KIND, BASE) \
@@ -107,6 +111,18 @@ DECLARE_END
 DECLARE_AST(AssignStmt, Stmt)
     unique_ptr<AstIdentExpr> ident;
     unique_ptr<AstExpr> expr;
+DECLARE_END
+
+//----------------------------------------
+// Attributes
+//----------------------------------------
+DECLARE_AST(AttributeList, Root)
+    vector<unique_ptr<AstAttribute>> attribs;
+DECLARE_END
+
+DECLARE_AST(Attribute, Root)
+    unique_ptr<AstIdentExpr> ident;
+    vector<unique_ptr<AstLiteralExpr>> arguments;
 DECLARE_END
 
 //----------------------------------------

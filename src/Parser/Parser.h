@@ -32,6 +32,12 @@ private:
     unique_ptr<AstCallExpr> callExpr();
     vector<unique_ptr<AstExpr>> expressionList();
 
+    unique_ptr<AstDecl> declaration();
+    unique_ptr<AstAttributeList> attributeList();
+    unique_ptr<AstAttribute> attribute();
+    unique_ptr<AstLiteralExpr> literalExpr();
+    vector<unique_ptr<AstLiteralExpr>> attributeArgumentList();
+
     unique_ptr<AstVarDecl> kwVar();
 
     // return true if has more content to parse

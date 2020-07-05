@@ -22,7 +22,7 @@ private:
     unique_ptr<Token> endOfFile();
     unique_ptr<Token> invalid(const char *loc);
 
-    void singleLineComment();
+    void skipUntilLineEnd();
     void move();
     bool isValid() const;
     char peek(int ahead = 1) const;

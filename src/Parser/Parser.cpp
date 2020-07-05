@@ -49,8 +49,9 @@ unique_ptr<AstStmtList> Parser::stmtList() {
  */
 unique_ptr<AstStmt> Parser::statement() {
     switch (m_token->kind()) {
+    case TokenKind::BracketOpen:
     case TokenKind::Var:
-        return kwVar();
+        return declaration();
     case TokenKind::Identifier:
         if (m_next && m_next->kind() == TokenKind::Assign) {
             return assignStmt();
@@ -104,6 +105,77 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
 //----------------------------------------
 
 /**
+ * Decl = [ '[' attributeList '] ]
+ *      ( VAR
+ *      )
+ *      .
+ */
+unique_ptr<AstDecl> Parser::declaration() {
+    unique_ptr<AstAttributeList> attribs = nullptr;
+    if (*m_token == TokenKind::BracketOpen) {
+        attribs = attributeList();
+    }
+
+    auto decl = kwVar();
+    decl->attribs = std::move(attribs);
+    return decl;
+}
+
+/**
+ *  attributeList = '[' Attribute { ','  Attribute } ']' .
+ */
+unique_ptr<AstAttributeList> Parser::attributeList() {
+    auto list = AstAttributeList::create();
+
+    expect(TokenKind::BracketOpen);
+    do {
+        list->attribs.emplace_back(attribute());
+    } while (accept(TokenKind::Comma));
+    expect(TokenKind::BracketClose);
+
+    return list;
+}
+
+/**
+ * attribute = "id" [AttributeArgList] .
+ */
+unique_ptr<AstAttribute> Parser::attribute() {
+    auto attrib = AstAttribute::create();
+    attrib->ident = identifier();
+
+    if (*m_token == TokenKind::Assign || *m_token == TokenKind::ParenOpen) {
+        attrib->arguments = attributeArgumentList();
+    }
+
+    return attrib;
+}
+
+/**
+ * AttributeArgList = '=' AttributeArgument
+ *                  | '(' [ AttributeArgument { ',' AttributeArgument } ] ')'
+ *                  .
+ * AttributeArgument = StringLiteral
+ *                   | NumberLiteral
+ *                   | BooleanLiteral
+ *                   | NullLiteral
+ *                   .
+ */
+vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
+    vector<unique_ptr<AstLiteralExpr>> args;
+    if (accept(TokenKind::Assign)) {
+        args.emplace_back(literalExpr());
+    } else if (accept(TokenKind::ParenOpen)) {
+        while (isValid() && *m_token != TokenKind::ParenClose) {
+            args.emplace_back(literalExpr());
+            if (!accept(TokenKind::Comma))
+                break;
+        }
+        expect(TokenKind::ParenClose);
+    }
+    return args;
+}
+
+/**
  * var = identifier "=" expression .
  */
 unique_ptr<AstVarDecl> Parser::kwVar() {
@@ -140,9 +212,7 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
 unique_ptr<AstExpr> Parser::expression() {
     // literal
     if (m_token->isLiteral()) {
-        auto lit = AstLiteralExpr::create();
-        lit->token = move();
-        return lit;
+        return literalExpr();
     }
 
     if (*m_token == TokenKind::Identifier) {
@@ -176,6 +246,16 @@ unique_ptr<AstCallExpr> Parser::callExpr() {
     expect(TokenKind::ParenClose);
 
     return call;
+}
+
+unique_ptr<AstLiteralExpr> Parser::literalExpr() {
+    if (m_token->isLiteral()) {
+        auto lit = AstLiteralExpr::create();
+        lit->token = move();
+        return lit;
+    } else {
+        error("Expected literal");
+    }
 }
 
 /**

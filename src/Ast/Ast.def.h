@@ -16,6 +16,12 @@
     _( AssignStmt ) \
     _( ExprStmt   )
 
+// ast nodes for attributes
+#define AST_ATTRIB_NODES(_) \
+    _( AttributeList )      \
+    _( Attribute )
+
+// declarations
 #define AST_DECL_NODES(_) \
     _( VarDecl )
 
@@ -27,8 +33,9 @@
 
 // all nodes
 #define AST_CONTENT_NODES(_) \
-    AST_STMT_NODES(_) \
-    AST_DECL_NODES(_) \
+    AST_STMT_NODES(_)   \
+    AST_DECL_NODES(_)   \
+    AST_ATTRIB_NODES(_) \
     AST_EXPR_NODES(_)
 
 // forward declare all AST nodes

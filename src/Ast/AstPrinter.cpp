@@ -10,6 +10,8 @@ void AstPrinter::visit(const AstProgram *ast) {
     ast->body->accept(this);
 }
 
+// Statements
+
 void AstPrinter::visit(const AstStmtList *ast) {
     for (const auto& stmt: ast->stmts) {
         stmt->accept(this);
@@ -28,13 +30,48 @@ void AstPrinter::visit(const AstExprStmt *ast) {
     std::cout << '\n';
 }
 
+// Attributes
+
+void AstPrinter::visit(const AstAttributeList *ast) {
+    std::cout << '[';
+    bool isFirst = true;
+    for (const auto& attr: ast->attribs) {
+        if (isFirst) isFirst = false;
+        else std::cout << ", ";
+        attr->accept(this);
+    }
+    std::cout << "] _" << '\n';
+}
+
+void AstPrinter::visit(const AstAttribute *ast) {
+    ast->ident->accept(this);
+    if (ast->arguments.size() == 1) {
+        std::cout << " = ";
+        ast->arguments[0]->accept(this);
+    } else if (ast->arguments.size() > 1) {
+        bool isFirst = true;
+        std::cout << "(";
+        for (const auto& arg: ast->arguments) {
+            if (isFirst) isFirst = false;
+            else std::cout << ", ";
+            arg->accept(this);
+        }
+        std::cout << ")";
+    }
+}
+
+// Declarations
+
 void AstPrinter::visit(const AstVarDecl *ast) {
+    if (ast->attribs) ast->attribs->accept(this);
     std::cout << "VAR ";
     ast->ident->accept(this);
     std::cout << " = ";
     ast->expr->accept(this);
     std::cout << '\n';
 }
+
+// Expressions
 
 void AstPrinter::visit(const AstIdentExpr *ast) {
     std::cout << ast->token->lexeme();
