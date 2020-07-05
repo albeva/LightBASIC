@@ -8,7 +8,7 @@ namespace lbc {
 
 AST_FORWARD_DECLARE()
 
-class AstVisitor {
+class AstVisitor: noncopyable {
 public:
     #define VIRTUAL_VISIT(KIND) virtual void visit(const Ast##KIND* ast) = 0;
     AST_CONTENT_NODES(VIRTUAL_VISIT)

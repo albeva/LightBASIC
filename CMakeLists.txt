@@ -11,7 +11,7 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 find_package(LLVM REQUIRED CONFIG)
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
-llvm_map_components_to_libnames(llvm_libs core support)
+llvm_map_components_to_libnames(llvm_libs core support bitwriter)
 
 # lbc
 add_executable(lbc
@@ -29,7 +29,7 @@ add_executable(lbc
         src/Ast/Ast.h
         src/Ast/AstVisitor.h
         src/Ast/Ast.def.h
-        src/Ast/AstPrinter.cpp src/Ast/AstPrinter.h)
+        src/Ast/AstPrinter.cpp src/Ast/AstPrinter.h src/Gen/CodeGen.cpp src/Gen/CodeGen.h)
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)
 target_link_libraries(lbc ${llvm_libs})

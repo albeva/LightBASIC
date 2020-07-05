@@ -7,6 +7,7 @@
 #include "Ast/Ast.h"
 #include "Ast/AstVisitor.h"
 #include "Ast/AstPrinter.h"
+#include "Gen/CodeGen.h"
 
 namespace cl = llvm::cl;
 namespace fs = std::filesystem;
@@ -47,8 +48,8 @@ int main(int argc, char *argv[]) {
     // Lex the input
     Parser parser{srcMgr, ID};
     if (auto ast = parser.parse()) {
-        AstPrinter printer;
-        ast->accept(&printer);
+        CodeGen gen;
+        ast->accept(&gen);
     } else {
         std::cerr << "Failed to parse the input" << std::endl;
         return EXIT_FAILURE;

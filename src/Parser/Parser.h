@@ -35,7 +35,7 @@ private:
     unique_ptr<AstDecl> declaration();
     unique_ptr<AstAttributeList> attributeList();
     unique_ptr<AstAttribute> attribute();
-    unique_ptr<AstLiteralExpr> literalExpr();
+    unique_ptr<AstLiteralExpr> literal();
     vector<unique_ptr<AstLiteralExpr>> attributeArgumentList();
 
     unique_ptr<AstVarDecl> kwVar();

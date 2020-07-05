@@ -151,22 +151,17 @@ unique_ptr<AstAttribute> Parser::attribute() {
 }
 
 /**
- * AttributeArgList = '=' AttributeArgument
- *                  | '(' [ AttributeArgument { ',' AttributeArgument } ] ')'
+ * AttributeArgList = '=' literal
+ *                  | '(' [ literalExpr { ',' literal } ] ')'
  *                  .
- * AttributeArgument = StringLiteral
- *                   | NumberLiteral
- *                   | BooleanLiteral
- *                   | NullLiteral
- *                   .
  */
 vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
     vector<unique_ptr<AstLiteralExpr>> args;
     if (accept(TokenKind::Assign)) {
-        args.emplace_back(literalExpr());
+        args.emplace_back(literal());
     } else if (accept(TokenKind::ParenOpen)) {
         while (isValid() && *m_token != TokenKind::ParenClose) {
-            args.emplace_back(literalExpr());
+            args.emplace_back(literal());
             if (!accept(TokenKind::Comma))
                 break;
         }
@@ -212,7 +207,7 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
 unique_ptr<AstExpr> Parser::expression() {
     // literal
     if (m_token->isLiteral()) {
-        return literalExpr();
+        return literal();
     }
 
     if (*m_token == TokenKind::Identifier) {
@@ -248,7 +243,7 @@ unique_ptr<AstCallExpr> Parser::callExpr() {
     return call;
 }
 
-unique_ptr<AstLiteralExpr> Parser::literalExpr() {
+unique_ptr<AstLiteralExpr> Parser::literal() {
     if (m_token->isLiteral()) {
         auto lit = AstLiteralExpr::create();
         lit->token = move();
