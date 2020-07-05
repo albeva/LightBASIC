@@ -2,7 +2,6 @@
 // Created by Albert on 05/07/2020.
 //
 #pragma once
-
 #include "Ast.def.h"
 
 namespace lbc {

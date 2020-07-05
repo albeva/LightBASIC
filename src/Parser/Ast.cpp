@@ -4,12 +4,12 @@
 #include "Ast.h"
 #include "Lexer/Token.h"
 #include "AstVisitor.h"
-
 using namespace lbc;
 
 AstRoot::~AstRoot() {}
 
 #define IMPLEMENT_AST(KIND) \
+    Ast##KIND::Ast##KIND() : Base{AstKind::KIND} {} \
     void Ast##KIND::accept(AstVisitor* visitor) {   \
         visitor->visit(this);                       \
     }                                               \

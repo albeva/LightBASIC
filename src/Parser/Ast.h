@@ -2,8 +2,7 @@
 // Created by Albert on 05/07/2020.
 //
 #pragma once
-
-#include "Lexer/Token.h"
+#include "pch.h"
 #include "Ast.def.h"
 
 namespace lbc {
@@ -63,7 +62,8 @@ public:
 #define DECLARE_AST(KIND, BASE) \
     class Ast##KIND final: public Ast##BASE {       \
     public:                                         \
-        Ast##KIND() : Ast##BASE{AstKind::KIND} {}   \
+        using Base = Ast##BASE;                     \
+        Ast##KIND();                                \
         virtual ~Ast##KIND();                       \
         virtual void accept(AstVisitor* visitor);   \
         static bool classof(const AstRoot* ast) {   \

@@ -2,7 +2,6 @@
 // Created by Albert on 03/07/2020.
 //
 #include "Lexer.h"
-
 using namespace lbc;
 using llvm::isAlpha;
 

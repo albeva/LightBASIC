@@ -4,7 +4,6 @@
 #include "Token.h"
 #include <unordered_map>
 #include <array>
-
 using namespace lbc;
 
 namespace {

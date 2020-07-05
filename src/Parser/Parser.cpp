@@ -5,7 +5,6 @@
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
 #include "Ast.h"
-
 using namespace lbc;
 
 Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
