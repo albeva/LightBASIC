@@ -3,7 +3,7 @@
 //
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
-#include "Ast.h"
+#include "Ast/Ast.h"
 #include "Parser.h"
 using namespace lbc;
 

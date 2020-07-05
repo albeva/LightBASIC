@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "pch.h"
-#include "Ast.def.h"
+#include "Ast/Ast.def.h"
 
 namespace lbc {
 

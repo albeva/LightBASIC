@@ -25,10 +25,10 @@ add_executable(lbc
         src/Parser/Parser.cpp
         src/Parser/Parser.h
         src/Lexer/Token.def.h
-        src/Parser/Ast.cpp
-        src/Parser/Ast.h
-        src/Parser/AstVisitor.h
-        src/Parser/Ast.def.h
+        src/Ast/Ast.cpp
+        src/Ast/Ast.h
+        src/Ast/AstVisitor.h
+        src/Ast/Ast.def.h
         )
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)

@@ -4,7 +4,7 @@
 #include "pch.h"
 #include "llvm/Support/CommandLine.h"
 #include "Parser/Parser.h"
-#include "Parser/Ast.h"
+#include "Ast/Ast.h"
 
 namespace cl = llvm::cl;
 namespace fs = std::filesystem;
