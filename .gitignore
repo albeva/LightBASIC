@@ -1,4 +1,14 @@
+# Global
 .DS_Store
+
+# Xcode User settings
+xcuserdata/
+
+# Xcode Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# 
 bin/
 obj/
 *~
@@ -6,6 +16,6 @@ obj/
 *.gch
 DerivedData/
 build/
-llvm.xcconfig
-xcuserdata/
-project.xcworkspace
+
+# Ignore clion
+.idea

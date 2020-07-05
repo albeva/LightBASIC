@@ -1,6 +1,4 @@
-LightBASIC is a simple toy compiler written in c++ using llvm and boost libraries. Its goal is simply to explore how compilers work internally and try out some ideas.
-
-http://lightbasic.com/
+LightBASIC is a simple toy compiler written in c++ using llvm and boost libraries. 
 
 ```VB
 ' Declare puts from libc
