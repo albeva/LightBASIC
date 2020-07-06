@@ -29,7 +29,14 @@ add_executable(lbc
         src/Ast/Ast.h
         src/Ast/AstVisitor.h
         src/Ast/Ast.def.h
-        src/Ast/AstPrinter.cpp src/Ast/AstPrinter.h src/Gen/CodeGen.cpp src/Gen/CodeGen.h)
+        src/Ast/AstPrinter.cpp
+        src/Ast/AstPrinter.h
+        src/Gen/CodeGen.cpp
+        src/Gen/CodeGen.h
+        src/Symbol/SymbolTable.cpp
+        src/Symbol/SymbolTable.h
+        src/Symbol/Symbol.cpp
+        src/Symbol/Symbol.h)
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)
 target_link_libraries(lbc ${llvm_libs})
