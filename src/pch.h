@@ -14,6 +14,7 @@
 #include <cassert>
 #include <unordered_map>
 #include <unordered_set>
+#include <functional>
 
 using std::string;
 using std::string_view;
@@ -44,6 +45,7 @@ using llvm::dyn_cast;
 
 // BOOST
 #include <boost/core/noncopyable.hpp>
+#include <boost/container_hash/hash.hpp>
 
 using boost::noncopyable;
 

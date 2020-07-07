@@ -22,6 +22,7 @@ Parser::~Parser() {}
 unique_ptr<AstProgram> Parser::parse() {
     auto program = AstProgram::create();
     program->body = stmtList();
+
     return program;
 }
 
