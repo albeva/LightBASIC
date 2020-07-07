@@ -48,8 +48,10 @@ int main(int argc, char *argv[]) {
     // Lex the input
     Parser parser{srcMgr, ID};
     if (auto ast = parser.parse()) {
-        CodeGen gen;
-        ast->accept(&gen);
+//        CodeGen gen;
+//        ast->accept(&gen);
+        AstPrinter printer;
+        ast->accept(&printer);
     } else {
         std::cerr << "Failed to parse the input" << std::endl;
         return EXIT_FAILURE;

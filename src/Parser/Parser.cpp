@@ -51,6 +51,7 @@ unique_ptr<AstStmt> Parser::statement() {
     switch (m_token->kind()) {
     case TokenKind::BracketOpen:
     case TokenKind::Var:
+    case TokenKind::Declare:
         return declaration();
     case TokenKind::Identifier:
         if (m_next && m_next->kind() == TokenKind::Assign) {
@@ -111,12 +112,24 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
  *      .
  */
 unique_ptr<AstDecl> Parser::declaration() {
+    unique_ptr<AstDecl> decl;
+
     unique_ptr<AstAttributeList> attribs = nullptr;
     if (*m_token == TokenKind::BracketOpen) {
         attribs = attributeList();
     }
 
-    auto decl = kwVar();
+    switch (m_token->kind()) {
+    case TokenKind::Var:
+        decl = kwVar();
+        break;
+    case TokenKind::Declare:
+        decl = kwDeclare();
+        break;
+    default:
+        error("Expected declaration");
+    }
+
     decl->attribs = std::move(attribs);
     return decl;
 }
@@ -171,27 +184,105 @@ vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
 }
 
 /**
- * var = identifier "=" expression .
+ * var = identifier
+ *     ( "=" expression
+ *     | "AS" TypeExpr [ "=" expression ]
+ *     ) .
  */
 unique_ptr<AstVarDecl> Parser::kwVar() {
-    // identifier
     expect(TokenKind::Var);
+
     auto id = identifier();
-    if (!id)
-        return nullptr;
 
-    // "="
-    expect(TokenKind::Assign);
+    unique_ptr<AstTypeExpr> type;
+    unique_ptr<AstExpr> expr;
 
-    // expression
-    auto expr = expression();
-    if (!expr)
-        return nullptr;
+    if (accept(TokenKind::As)) {
+        type = typeExpr();
+        if (accept(TokenKind::Assign)) {
+            expr = expression();
+        }
+    } else {
+        expect(TokenKind::Assign);
+        expr = expression();
+    }
 
     auto var = AstVarDecl::create();
     var->ident = std::move(id);
+    var->type = std::move(type);
     var->expr = std::move(expr);
     return var;
+}
+
+/**
+ * DeclFunc = "DECLARE"
+ *          ( "FUNCTION" id [ "(" ParamList ")" ] "AS" TypeExpr
+ *          | "SUB" id [ "(" ParamList ")" ]
+ *          ) .
+ */
+unique_ptr<AstDecl> Parser::kwDeclare() {
+    auto func = AstFuncDecl::create();
+    expect(TokenKind::Declare);
+
+    bool isFunc;
+    if (accept(TokenKind::Function)) {
+        isFunc = true;
+    } else {
+        isFunc = false;
+        expect(TokenKind::Sub);
+    }
+
+    func->ident = identifier();
+
+    if (accept(TokenKind::ParenOpen)) {
+        func->params = funcParams();
+        expect(TokenKind::ParenClose);
+    }
+
+    if (isFunc) {
+        expect(TokenKind::As);
+        func->type = typeExpr();
+    }
+
+    return func;
+}
+
+vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
+    vector<unique_ptr<AstFuncParamDecl>> params;
+    while (isValid() && *m_token != TokenKind::ParenClose) {
+        auto id = identifier();
+        expect(TokenKind::As);
+        auto type = typeExpr();
+
+        unique_ptr<AstExpr> expr;
+        if (accept(TokenKind::Assign)) {
+            expr = expression();
+        }
+
+        auto param = AstFuncParamDecl::create();
+        param->ident = std::move(id);
+        param->type = std::move(type);
+        param->expr = std::move(expr);
+        params.push_back(std::move(param));
+    }
+    return params;
+}
+
+//----------------------------------------
+// Types
+//----------------------------------------
+
+unique_ptr<AstTypeExpr> Parser::typeExpr() {
+    switch (m_token->kind()) {
+    case TokenKind::ZString:
+    case TokenKind::Integer: {
+        auto type = AstTypeExpr::create();
+        type->token = move();
+        return type;
+    }
+    default:
+        error("Expected type");
+    }
 }
 
 //----------------------------------------

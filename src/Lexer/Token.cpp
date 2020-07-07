@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <array>
 using namespace lbc;
+using std::unordered_set;
 
 namespace {
 
@@ -33,6 +34,8 @@ constexpr string_view kindToDescription[]{
 #undef IMPL_LITERAL
 };
 
+unordered_set<string> uppercasedIds;
+
 } // namespace
 
 const string_view& Token::description(TokenKind kind) {
@@ -42,15 +45,20 @@ const string_view& Token::description(TokenKind kind) {
 }
 
 unique_ptr<Token> Token::create(const string_view& lexeme, const llvm::SMLoc& loc) {
-    char uppercased[lexeme.size()];
-    std::transform(lexeme.cbegin(), lexeme.cend(), uppercased, llvm::toUpper);
+    // all identifiers in lb are upper cased
+    string uppercased;
+    std::transform(lexeme.cbegin(), lexeme.cend(), std::back_inserter(uppercased), llvm::toUpper);
 
+    // is there a matching keyword?
     auto iter = keywordsToKind.find(uppercased);
-    if (iter == keywordsToKind.end()) {
-        return Token::create(TokenKind::Identifier, lexeme, loc);
-    } else {
+    if (iter != keywordsToKind.end()) {
         return Token::create(iter->second, iter->first, loc);
     }
+
+    // tokens store string_view instances, therefore we need to keep
+    // actual string data around. Hence storing all identifiers in a set
+    auto entry = uppercasedIds.insert(std::move(uppercased));
+    return Token::create(TokenKind::Identifier, *entry.first, loc);
 }
 
 unique_ptr<Token> Token::create(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc) {
@@ -73,6 +81,9 @@ llvm::SMRange Token::range() const {
 }
 
 const string_view& Token::description() const {
+    if (m_kind == TokenKind::Identifier) {
+        return m_lexeme;
+    }
     auto index = static_cast<size_t>(m_kind);
     return kindToDescription[index];
 }

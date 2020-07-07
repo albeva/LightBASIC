@@ -39,6 +39,9 @@ private:
     vector<unique_ptr<AstLiteralExpr>> attributeArgumentList();
 
     unique_ptr<AstVarDecl> kwVar();
+    unique_ptr<AstDecl> kwDeclare();
+    vector<unique_ptr<AstFuncParamDecl>> funcParams();
+    unique_ptr<AstTypeExpr> typeExpr();
 
     // return true if has more content to parse
     bool isValid() const;

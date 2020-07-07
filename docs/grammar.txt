@@ -3,8 +3,7 @@ EBNF
 Program         = { Declaration }
                 .
 Declaration     = [ AttributeList ]
-                ( DIM
-                | VAR
+                ( VAR
                 | DECLARE
                 | FunctionImpl
                 | SubImpl
@@ -15,16 +14,14 @@ AttributeList   = "[" Attribute { ","  Attribute } "]"
 Attribute       = ident [ AttribParamList ]
                 .
 AttribParamList = "=" AttribParam
-                | "(" AttribParam { "," AttribParam } ")"
+                | "(" [ AttribParam { "," AttribParam } ] ")"
                 .
 AttribParam     = IntegerLiteral
                 | StringLiteral
                 | BooleanLiteral
                 | NullLiteral
                 .
-DIM             = "DIM" ident "AS" TypeExpr [ "=" Expression ]
-                .
-VAR             = "VAR" ident "=" Expression
+VAR             = "VAR" ident [ "AS" TypeExpr ] "=" Expression
                 .
 FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
                 .
@@ -36,7 +33,7 @@ FuncParamList   = FuncParam { "," FuncParam }
                 .
 FuncParam       = ident "AS" TypeExpr
                 .
-TypeExpr        = ("INTEGER" | "BYTE") { "PTR" }
+TypeExpr        = ("INTEGER" | "ZSTRING")
                 .
 FunctionImpl    = FuncSignature
                   StatementList

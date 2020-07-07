@@ -23,6 +23,7 @@ enum class AstKind {
     StmtLast,
 
     AST_ATTRIB_NODES(KIND_ENUM)
+    AST_TYPE_NODES(KIND_ENUM)
 
     Expr,
         AST_EXPR_NODES(KIND_ENUM)
@@ -131,7 +132,27 @@ DECLARE_END
 
 DECLARE_AST(VarDecl, Decl)
     unique_ptr<AstIdentExpr> ident;
+    unique_ptr<AstTypeExpr> type;
     unique_ptr<AstExpr> expr;
+DECLARE_END
+
+DECLARE_AST(FuncDecl, Decl)
+    unique_ptr<AstIdentExpr> ident;
+    vector<unique_ptr<AstFuncParamDecl>> params;
+    unique_ptr<AstTypeExpr> type;
+DECLARE_END
+
+DECLARE_AST(FuncParamDecl, Decl)
+    unique_ptr<AstIdentExpr> ident;
+    unique_ptr<AstTypeExpr> type;
+    unique_ptr<AstExpr> expr;
+DECLARE_END
+
+//----------------------------------------
+// Types
+//----------------------------------------
+DECLARE_AST(TypeExpr, Root)
+    unique_ptr<Token> token;
 DECLARE_END
 
 //----------------------------------------

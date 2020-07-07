@@ -23,7 +23,13 @@
 
 // declarations
 #define AST_DECL_NODES(_) \
-    _( VarDecl )
+    _( VarDecl )  \
+    _( FuncDecl ) \
+    _( FuncParamDecl )
+
+// Types
+#define AST_TYPE_NODES(_) \
+    _( TypeExpr )
 
 // all expressions
 #define AST_EXPR_NODES(_) \
@@ -36,6 +42,7 @@
     AST_STMT_NODES(_)   \
     AST_DECL_NODES(_)   \
     AST_ATTRIB_NODES(_) \
+    AST_TYPE_NODES(_)   \
     AST_EXPR_NODES(_)
 
 // forward declare all AST nodes

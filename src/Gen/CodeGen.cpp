@@ -104,6 +104,14 @@ void CodeGen::visit(const AstVarDecl *ast) {
     m_values[name] = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
 }
 
+void CodeGen::visit(const AstFuncDecl *ast) {
+    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+}
+
+void CodeGen::visit(const AstFuncParamDecl *ast) {
+    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+}
+
 void CodeGen::visit(const AstAttributeList *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
@@ -113,6 +121,10 @@ void CodeGen::visit(const AstAttribute *ast) {
 }
 
 void CodeGen::visit(const AstIdentExpr *ast) {
+    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+}
+
+void CodeGen::visit(const AstTypeExpr *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 

@@ -15,6 +15,7 @@ void AstPrinter::visit(const AstProgram *ast) {
 void AstPrinter::visit(const AstStmtList *ast) {
     for (const auto& stmt: ast->stmts) {
         stmt->accept(this);
+        std::cout << '\n';
     }
 }
 
@@ -22,12 +23,10 @@ void AstPrinter::visit(const AstAssignStmt *ast) {
     ast->ident->accept(this);
     std::cout << " = ";
     ast->expr->accept(this);
-    std::cout << '\n';
 }
 
 void AstPrinter::visit(const AstExprStmt *ast) {
     ast->expr->accept(this);
-    std::cout << '\n';
 }
 
 // Attributes
@@ -40,7 +39,7 @@ void AstPrinter::visit(const AstAttributeList *ast) {
         else std::cout << ", ";
         attr->accept(this);
     }
-    std::cout << "] _" << '\n';
+    std::cout << "]";
 }
 
 void AstPrinter::visit(const AstAttribute *ast) {
@@ -60,15 +59,74 @@ void AstPrinter::visit(const AstAttribute *ast) {
     }
 }
 
+void AstPrinter::visit(const AstTypeExpr *ast) {
+    std::cout << ast->token->lexeme();
+}
+
 // Declarations
 
 void AstPrinter::visit(const AstVarDecl *ast) {
-    if (ast->attribs) ast->attribs->accept(this);
+    if (ast->attribs) {
+        ast->attribs->accept(this);
+        std::cout << " _" << '\n';
+    }
+
     std::cout << "VAR ";
     ast->ident->accept(this);
-    std::cout << " = ";
-    ast->expr->accept(this);
-    std::cout << '\n';
+
+    if (ast->type) {
+        std::cout << " AS ";
+        ast->type->accept(this);
+    }
+
+    if (ast->expr) {
+        std::cout << " = ";
+        ast->expr->accept(this);
+    }
+}
+
+void AstPrinter::visit(const AstFuncDecl *ast) {
+    if (ast->attribs) {
+        ast->attribs->accept(this);
+        std::cout << " _" << '\n';
+    }
+
+    if (ast->type) {
+        std::cout << "FUNCTION ";
+    } else {
+        std::cout << "SUB ";
+    }
+    ast->ident->accept(this);
+
+    if (!ast->params.empty()) {
+        std::cout << "(";
+        bool isFirst = true;
+        for (const auto& param: ast->params) {
+            if (isFirst) isFirst = false;
+            else std::cout << ", ";
+            param->accept(this);
+        }
+        std::cout << ")";
+    }
+
+    if (ast->type) {
+        std::cout << " AS ";
+        ast->type->accept(this);
+    }
+}
+
+void AstPrinter::visit(const AstFuncParamDecl *ast) {
+    ast->ident->accept(this);
+
+    if (ast->type) {
+        std::cout << " AS ";
+        ast->type->accept(this);
+    }
+
+    if (ast->expr) {
+        std::cout << " = ";
+        ast->expr->accept(this);
+    }
 }
 
 // Expressions
