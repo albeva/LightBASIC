@@ -12,7 +12,7 @@ class Token;
 enum class TokenKind;
 AST_FORWARD_DECLARE()
 
-class Parser final : noncopyable {
+class Parser final {
 public:
     Parser(llvm::SourceMgr& srcMgr, unsigned int fileId);
 
@@ -30,17 +30,17 @@ private:
 
     unique_ptr<AstExprStmt> callStmt();
     unique_ptr<AstCallExpr> callExpr();
-    vector<unique_ptr<AstExpr>> expressionList();
+    std::vector<unique_ptr<AstExpr>> expressionList();
 
     unique_ptr<AstDecl> declaration();
     unique_ptr<AstAttributeList> attributeList();
     unique_ptr<AstAttribute> attribute();
     unique_ptr<AstLiteralExpr> literal();
-    vector<unique_ptr<AstLiteralExpr>> attributeArgumentList();
+    std::vector<unique_ptr<AstLiteralExpr>> attributeArgumentList();
 
     unique_ptr<AstVarDecl> kwVar();
     unique_ptr<AstDecl> kwDeclare();
-    vector<unique_ptr<AstFuncParamDecl>> funcParams();
+    std::vector<unique_ptr<AstFuncParamDecl>> funcParams();
     unique_ptr<AstTypeExpr> typeExpr();
 
     // return true if has more content to parse
@@ -66,9 +66,9 @@ private:
 
     llvm::SourceMgr& m_srcMgr;
     unsigned m_fileID;
-    std::unique_ptr<Lexer> m_lexer;
-    std::unique_ptr<Token> m_token;
-    std::unique_ptr<Token> m_next;
+    unique_ptr<Lexer> m_lexer;
+    unique_ptr<Token> m_token;
+    unique_ptr<Token> m_next;
 };
 
 } // namespace lbc

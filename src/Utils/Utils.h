@@ -11,6 +11,11 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
     return llvm::StringRef(view.data(), view.size());
 }
 
+#define NON_COPYABLE(Class) \
+    Class(const Class&) = delete;               \
+    Class& operator=(const Class&) = delete;    \
+    Class(Class&&) = delete;                    \
+    Class& operator=(Class&&) = delete;
 
 /**
  * Simple helper. Basically ensured that original
@@ -20,8 +25,10 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
 template<typename T, std::enable_if_t<
     std::is_trivially_copyable_v<T> &&
     std::is_trivially_assignable_v<T&, T>, int> = 0>
-struct ValueRestorer : noncopyable {
-    ValueRestorer(T& value): m_target{value}, m_value{value} {}
+struct ValueRestorer {
+    NON_COPYABLE(ValueRestorer)
+
+    explicit ValueRestorer(T& value): m_target{value}, m_value{value} {}
 
     // restore
     ~ValueRestorer() {
@@ -29,6 +36,7 @@ struct ValueRestorer : noncopyable {
     }
 
     // members
+private:
     T & m_target;
     T   m_value;
 };

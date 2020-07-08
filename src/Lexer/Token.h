@@ -13,7 +13,7 @@ enum class TokenKind {
 #undef IMPL_TOKENS
 };
 
-class Token final : noncopyable {
+class Token final {
 public:
     static unique_ptr<Token> create(const string_view& lexeme, const llvm::SMLoc& loc);
 

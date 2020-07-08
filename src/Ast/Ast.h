@@ -4,14 +4,12 @@
 #pragma once
 #include "pch.h"
 #include "Ast.def.h"
+#include "AstVisitor.h"
+#include "Lexer/Token.h"
+#include "Symbol/Symbol.h"
+#include "Symbol/SymbolTable.h"
 
 namespace lbc {
-
-class Token;
-class AstVisitor;
-class Symbol;
-class SymbolTable;
-AST_FORWARD_DECLARE();
 
 // Enumerate all possible ast nodes
 // This works with LLVM rtti system
@@ -34,11 +32,12 @@ enum class AstKind {
 };
 
 // Base class for all ast nodes
-class AstRoot : noncopyable {
+class AstRoot {
+    NON_COPYABLE(AstRoot)
 public:
-    AstRoot(AstKind kind) : m_kind{kind} {}
-    virtual ~AstRoot();
-    AstKind kind() const { return m_kind; }
+    explicit AstRoot(AstKind kind) : m_kind{kind} {}
+    virtual ~AstRoot() = default;
+    [[nodiscard]] AstKind kind() const { return m_kind; }
     virtual void accept(AstVisitor *visitor) = 0;
 
 private:
@@ -82,14 +81,14 @@ public:
 #define DECLARE_AST(KIND, BASE) \
     class Ast##KIND final: public Ast##BASE {           \
     public:                                             \
-        using Base = Ast##BASE;                         \
-        Ast##KIND();                                    \
-        virtual ~Ast##KIND();                           \
-        virtual void accept(AstVisitor* visitor);       \
+        Ast##KIND() : Ast##BASE{AstKind::KIND} {}       \
+        virtual void accept(AstVisitor* visitor) {      \
+            visitor->visit(this);                       \
+        }                                               \
         static bool classof(const AstRoot* ast) {       \
             return ast->kind() == AstKind::KIND;        \
         }                                               \
-        inline static unique_ptr<Ast##KIND> create() {  \
+        static unique_ptr<Ast##KIND> create() {         \
             return make_unique<Ast##KIND>();            \
         }
 
@@ -105,7 +104,7 @@ DECLARE_AST(Program, Stmt)
 DECLARE_END
 
 DECLARE_AST(StmtList, Stmt)
-    vector<unique_ptr<AstStmt>> stmts;
+    std::vector<unique_ptr<AstStmt>> stmts;
 DECLARE_END
 
 DECLARE_AST(ExprStmt, Stmt)
@@ -121,12 +120,12 @@ DECLARE_END
 // Attributes
 //----------------------------------------
 DECLARE_AST(AttributeList, Root)
-    vector<unique_ptr<AstAttribute>> attribs;
+    std::vector<unique_ptr<AstAttribute>> attribs;
 DECLARE_END
 
 DECLARE_AST(Attribute, Root)
     unique_ptr<AstIdentExpr> ident;
-    vector<unique_ptr<AstLiteralExpr>> arguments;
+    std::vector<unique_ptr<AstLiteralExpr>> arguments;
 DECLARE_END
 
 //----------------------------------------
@@ -141,7 +140,7 @@ DECLARE_END
 
 DECLARE_AST(FuncDecl, Decl)
     unique_ptr<AstIdentExpr> ident;
-    vector<unique_ptr<AstFuncParamDecl>> params;
+    std::vector<unique_ptr<AstFuncParamDecl>> params;
     unique_ptr<AstTypeExpr> type;
     unique_ptr<SymbolTable> symbolTable;
 DECLARE_END
@@ -168,7 +167,7 @@ DECLARE_END
 
 DECLARE_AST(CallExpr, Expr)
     unique_ptr<AstIdentExpr> ident;
-    vector<unique_ptr<AstExpr>> arguments;
+    std::vector<unique_ptr<AstExpr>> arguments;
 DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)

@@ -1,1 +1,5 @@
-Checks: '-*,clang-diagnostic-*,llvm-*,misc-*,-misc-unused-using-decls,-misc-unused-parameters,-misc-non-private-member-variables-in-classes'
+---
+Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvmlibc-callee-namespace'
+WarningsAsErrors: '*'
+HeaderFilterRegex: ''
+FormatStyle:     none

@@ -36,7 +36,7 @@ class TypeZString;
  *
  * It uses llvm custom rtti system
  */
-class TypeRoot: noncopyable {
+class TypeRoot {
 protected:
     TypeRoot(TypeKind kind) : m_kind{kind} {}
 
@@ -199,13 +199,13 @@ private:
  */
 class TypeFunction final: public TypeRoot {
 public:
-    TypeFunction(const TypeRoot* retType, vector<const TypeRoot*>&& paramTypes)
+    TypeFunction(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes)
     : TypeRoot{TypeKind::Function},
       m_retType{retType},
       m_paramTypes{std::move(paramTypes)}
     {}
 
-    static const TypeFunction* get(const TypeRoot* retType, vector<const TypeRoot*>&& paramTypes);
+    static const TypeFunction* get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes);
 
     static bool classof(const TypeRoot *type) {
         return type->kind() == TypeKind::Function;
@@ -214,11 +214,11 @@ public:
     virtual llvm::Type *llvm();
 
     const TypeRoot* retType() const { return m_retType; }
-    const vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
+    const std::vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
 
 private:
     const TypeRoot* m_retType;
-    const vector<const TypeRoot*> m_paramTypes;
+    const std::vector<const TypeRoot*> m_paramTypes;
 };
 
 /**

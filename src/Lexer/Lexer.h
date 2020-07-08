@@ -7,7 +7,7 @@
 
 namespace lbc {
 
-class Lexer final : noncopyable {
+class Lexer final {
 public:
     Lexer(llvm::SourceMgr& srcMgr, unsigned fileID);
 

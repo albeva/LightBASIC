@@ -56,7 +56,7 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
     }
 
     // parameters
-    vector<const TypeRoot*> paramTypes;
+    std::vector<const TypeRoot*> paramTypes;
     {
         RESTORE_ON_EXIT(m_table);
         ast->symbolTable = make_unique<SymbolTable>(nullptr);

@@ -18,10 +18,9 @@
 
 using std::string;
 using std::string_view;
-using std::make_unique;
 using std::unique_ptr;
-using std::vector;
-using namespace std::string_literals;
+using std::make_unique;
+using namespace std::literals::string_literals;
 
 // LLVM
 #include "llvm/Support/SourceMgr.h"
@@ -40,13 +39,7 @@ using namespace std::string_literals;
 #include "llvm/IR/Verifier.h"
 #include "llvm/IR/Value.h"
 
-using llvm::isa;
-using llvm::dyn_cast;
-
 // BOOST
-#include <boost/core/noncopyable.hpp>
-
-using boost::noncopyable;
 
 // APP
 #include "Utils/Utils.h"

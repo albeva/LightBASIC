@@ -35,8 +35,11 @@ void AstPrinter::visit(AstAttributeList *ast) {
     std::cout << '[';
     bool isFirst = true;
     for (const auto& attr: ast->attribs) {
-        if (isFirst) isFirst = false;
-        else std::cout << ", ";
+        if (isFirst) {
+            isFirst = false;
+        } else {
+            std::cout << ", ";
+        }
         attr->accept(this);
     }
     std::cout << "]";
@@ -51,8 +54,11 @@ void AstPrinter::visit(AstAttribute *ast) {
         bool isFirst = true;
         std::cout << "(";
         for (const auto& arg: ast->arguments) {
-            if (isFirst) isFirst = false;
-            else std::cout << ", ";
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                std::cout << ", ";
+            }
             arg->accept(this);
         }
         std::cout << ")";
@@ -102,8 +108,11 @@ void AstPrinter::visit(AstFuncDecl *ast) {
         std::cout << "(";
         bool isFirst = true;
         for (const auto& param: ast->params) {
-            if (isFirst) isFirst = false;
-            else std::cout << ", ";
+            if (isFirst) {
+                isFirst = false;
+            } else {
+                std::cout << ", ";
+            }
             param->accept(this);
         }
         std::cout << ")";
@@ -132,8 +141,12 @@ void AstPrinter::visit(AstCallExpr *ast) {
     std::cout << "(";
     bool isFirst = true;
     for (const auto& arg: ast->arguments) {
-        if (isFirst) isFirst = false;
-        else std::cout << ", ";
+        if (isFirst) {
+            isFirst = false;
+        } else {
+            std::cout << ", ";
+        }
+
         arg->accept(this);
     }
     std::cout << ")";

@@ -66,7 +66,7 @@ void CodeGen::visit(AstExprStmt *ast) {
 void CodeGen::visit(AstVarDecl *ast) {
     llvm::Constant* constant = nullptr;
     size_t length = 0;
-    if (const auto *expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+    if (const auto *expr = llvm::dyn_cast<AstLiteralExpr>(ast->expr.get())) {
         switch (expr->token->kind()) {
         case TokenKind::StringLiteral:
             constant = llvm::ConstantDataArray::getString(
@@ -134,9 +134,9 @@ void CodeGen::visit(AstCallExpr *ast) {
         error("Unknown function");
     }
 
-    vector<llvm::Value*> args;
+    std::vector<llvm::Value*> args;
     for (const auto& arg: ast->arguments) {
-        if (auto *id = dyn_cast<AstIdentExpr>(arg.get())) {
+        if (auto *id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
             auto iter = m_values.find(string(id->token->lexeme()));
             if (iter != m_values.end()) {
                 args.emplace_back(iter->second);
@@ -173,7 +173,7 @@ llvm::Function* CodeGen::getOrCreate(AstCallExpr* ast) {
             m_values[name] = fn;
             return fn;
         }
-        return dyn_cast<llvm::Function>(iter->second);
+        return llvm::dyn_cast<llvm::Function>(iter->second);
     }
     return nullptr;
 }

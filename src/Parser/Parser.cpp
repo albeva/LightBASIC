@@ -169,8 +169,8 @@ unique_ptr<AstAttribute> Parser::attribute() {
  *                  | '(' [ literalExpr { ',' literal } ] ')'
  *                  .
  */
-vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
-    vector<unique_ptr<AstLiteralExpr>> args;
+std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
+    std::vector<unique_ptr<AstLiteralExpr>> args;
     if (accept(TokenKind::Assign)) {
         args.emplace_back(literal());
     } else if (accept(TokenKind::ParenOpen)) {
@@ -252,8 +252,8 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
  *  ParamList = [ Param { "," Param } ] .
  *  Param = id "AS" TypeExpr .
  */
-vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
-    vector<unique_ptr<AstFuncParamDecl>> params;
+std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
+    std::vector<unique_ptr<AstFuncParamDecl>> params;
     while (isValid() && *m_token != TokenKind::ParenClose) {
         auto id = identifier();
         expect(TokenKind::As);
@@ -349,8 +349,8 @@ unique_ptr<AstLiteralExpr> Parser::literal() {
 /**
  * Parse comma separated list of expressionds
  */
-vector<unique_ptr<AstExpr>> Parser::expressionList() {
-    vector<unique_ptr<AstExpr>> exprs;
+std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
+    std::vector<unique_ptr<AstExpr>> exprs;
 
     while (isValid() && !match(TokenKind::ParenClose) && !match(TokenKind::EndOfStmt)) {
         if (auto e = expression()) {

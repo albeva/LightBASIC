@@ -129,7 +129,7 @@ llvm::Type *TypeFloatingPoint::llvm() {
 
 // Function
 
-const TypeFunction *TypeFunction::get(const TypeRoot* retType, vector<const TypeRoot*>&& paramTypes) {
+const TypeFunction *TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes) {
     for (const auto& ptr: declaredFunc) {
         if (ptr->retType() == retType && ptr->paramTypes() == paramTypes)
             return ptr.get();
