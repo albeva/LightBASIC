@@ -2,7 +2,7 @@
 // Created by Albert on 03/07/2020.
 //
 #pragma once
-#include "Symbol/Type.def.h"
+#include "Type/Type.def.h"
 
 // Generic tokens
 #define TOKEN_GENERAL(_) \

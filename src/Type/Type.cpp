@@ -58,7 +58,6 @@ llvm::Type *TypeAny::llvm() {
     return nullptr;
 }
 
-
 // Pointer
 
 const TypePointer *TypePointer::get(const TypeRoot *base) {
@@ -71,9 +70,7 @@ const TypePointer *TypePointer::get(const TypeRoot *base) {
             return ptr.get();
     }
 
-    auto *ty = new TypePointer{base};;
-    declaredPtrs.emplace_back(ty);
-    return ty;
+    return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
 }
 
 llvm::Type *TypePointer::llvm() {
@@ -93,19 +90,17 @@ llvm::Type *TypeBool::llvm() {
 // Integer
 
 const TypeInteger *TypeInteger::get(int bits, bool isSigned) {
-#define USE_TYPE(id, str, BITS, IS_SIGNED, kind) \
-    if (bits == BITS && isSigned == IS_SIGNED) return &id##Ty;
-    INTEGER_TYPES(USE_TYPE)
-#undef USE_TYPE
+    #define USE_TYPE(id, str, BITS, IS_SIGNED, kind) \
+        if (bits == BITS && isSigned == IS_SIGNED) return &id##Ty;
+        INTEGER_TYPES(USE_TYPE)
+    #undef USE_TYPE
 
     for (const auto& ptr: declaredInts) {
         if (ptr->bits() == bits && ptr->isSigned() == isSigned)
             return ptr.get();
     }
 
-    auto *ty = new TypeInteger{bits, isSigned};
-    declaredInts.emplace_back(ty);
-    return ty;
+    return declaredInts.emplace_back(make_unique<TypeInteger>(bits, isSigned)).get();
 }
 
 llvm::Type *TypeInteger::llvm() {
@@ -115,19 +110,17 @@ llvm::Type *TypeInteger::llvm() {
 // Floating Point
 
 const TypeFloatingPoint *TypeFloatingPoint::get(int bits) {
-#define USE_TYPE(id, str, BITS, kind) \
-    if (bits == BITS) return &id##Ty;
-    FLOATINGPOINT_TYPES(USE_TYPE)
-#undef USE_TYPE
+    #define USE_TYPE(id, str, BITS, kind) \
+        if (bits == BITS) return &id##Ty;
+        FLOATINGPOINT_TYPES(USE_TYPE)
+    #undef USE_TYPE
 
     for (const auto& ptr: declaredFPs) {
         if (ptr->bits() == bits)
             return ptr.get();
     }
 
-    auto *ty = new TypeFloatingPoint{bits};
-    declaredFPs.emplace_back(ty);
-    return ty;
+    return declaredFPs.emplace_back(make_unique<TypeFloatingPoint>(bits)).get();
 }
 
 llvm::Type *TypeFloatingPoint::llvm() {
@@ -142,9 +135,10 @@ const TypeFunction *TypeFunction::get(const TypeRoot* retType, vector<const Type
             return ptr.get();
     }
 
-    auto *ty = new TypeFunction{retType, std::move(paramTypes)};
-    declaredFunc.emplace_back(ty);
-    return ty;
+    return declaredFunc.emplace_back(make_unique<TypeFunction>(
+        retType,
+        std::move(paramTypes)
+    )).get();
 }
 
 llvm::Type *TypeFunction::llvm() {
