@@ -8,23 +8,23 @@
 //     ID        STR         Kind
 #define PRIMITIVE_TYPES(_) \
     _( Bool,     "BOOL",     Bool          ) \
-    _( ZStrring, "ZSTRING",  ZString       )
+    _( ZString,  "ZSTRING",  ZString       )
 
-//     ID        STR         Bits Signed Kind
+//     ID        STR         Kind,    Bits Signed
 #define INTEGER_TYPES(_) \
-    _( Byte,     "BYTE",     8,   true,  Integer       ) \
-    _( UByte,    "UBYTE",    8,   false, Integer       ) \
-    _( Short,    "SHORT",    16,  true,  Integer       ) \
-    _( UShort,   "USHORT",   16,  false, Integer       ) \
-    _( Integer,  "INTEGER",  32,  true,  Integer       ) \
-    _( UInteger, "UINTEGER", 32,  false, Integer       ) \
-    _( Long,     "LONG",     64,  true,  Integer       ) \
-    _( ULong,    "ULONG",    64,  false, Integer       )
+    _( Byte,     "BYTE",     Integer, 8,   true  ) \
+    _( UByte,    "UBYTE",    Integer, 8,   false ) \
+    _( Short,    "SHORT",    Integer, 16,  true  ) \
+    _( UShort,   "USHORT",   Integer, 16,  false ) \
+    _( Integer,  "INTEGER",  Integer, 32,  true  ) \
+    _( UInteger, "UINTEGER", Integer, 32,  false ) \
+    _( Long,     "LONG",     Integer, 64,  true  ) \
+    _( ULong,    "ULONG",    Integer, 64,  false )
 
 //     ID        STR         Bits Kind
 #define FLOATINGPOINT_TYPES(_) \
-    _( Single,   "SINGLE",   32,  FloatingPoint ) \
-    _( Double,   "DOUBLE",   64,  FloatingPoint )
+    _( Single,   "SINGLE",   FloatingPoint, 32 ) \
+    _( Double,   "DOUBLE",   FloatingPoint, 64 )
 
 #define ALL_TYPES(_) \
     PRIMITIVE_TYPES(_)     \

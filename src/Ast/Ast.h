@@ -9,6 +9,8 @@ namespace lbc {
 
 class Token;
 class AstVisitor;
+class Symbol;
+class SymbolTable;
 AST_FORWARD_DECLARE();
 
 // Enumerate all possible ast nodes
@@ -98,6 +100,7 @@ public:
 //----------------------------------------
 
 DECLARE_AST(Program, Stmt)
+    unique_ptr<SymbolTable> symbolTable;
     unique_ptr<AstStmtList> body;
 DECLARE_END
 
@@ -140,12 +143,12 @@ DECLARE_AST(FuncDecl, Decl)
     unique_ptr<AstIdentExpr> ident;
     vector<unique_ptr<AstFuncParamDecl>> params;
     unique_ptr<AstTypeExpr> type;
+    unique_ptr<SymbolTable> symbolTable;
 DECLARE_END
 
 DECLARE_AST(FuncParamDecl, Decl)
     unique_ptr<AstIdentExpr> ident;
     unique_ptr<AstTypeExpr> type;
-    unique_ptr<AstExpr> expr;
 DECLARE_END
 
 //----------------------------------------

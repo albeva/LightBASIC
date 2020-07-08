@@ -8,6 +8,7 @@
 #include "Ast/AstVisitor.h"
 #include "Ast/AstPrinter.h"
 #include "Gen/CodeGen.h"
+#include "Sem/SemanticAnalyzer.h"
 
 namespace cl = llvm::cl;
 namespace fs = std::filesystem;
@@ -48,10 +49,14 @@ int main(int argc, char *argv[]) {
     // Lex the input
     Parser parser{srcMgr, ID};
     if (auto ast = parser.parse()) {
-//        CodeGen gen;
-//        ast->accept(&gen);
-        AstPrinter printer;
-        ast->accept(&printer);
+//        AstPrinter printer;
+//        ast->accept(&printer);
+
+        SemanticAnalyzer sem;
+        ast->accept(&sem);
+
+        // CodeGen gen;
+        // ast->accept(&gen);
     } else {
         std::cerr << "Failed to parse the input" << std::endl;
         return EXIT_FAILURE;

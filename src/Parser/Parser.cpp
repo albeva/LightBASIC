@@ -248,6 +248,10 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
     return func;
 }
 
+/**
+ *  ParamList = [ Param { "," Param } ] .
+ *  Param = id "AS" TypeExpr .
+ */
 vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
     vector<unique_ptr<AstFuncParamDecl>> params;
     while (isValid() && *m_token != TokenKind::ParenClose) {
@@ -255,16 +259,13 @@ vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
         expect(TokenKind::As);
         auto type = typeExpr();
 
-        unique_ptr<AstExpr> expr;
-        if (accept(TokenKind::Assign)) {
-            expr = expression();
-        }
-
         auto param = AstFuncParamDecl::create();
         param->ident = std::move(id);
         param->type = std::move(type);
-        param->expr = std::move(expr);
         params.push_back(std::move(param));
+
+        if (!accept(TokenKind::Comma))
+            break;
     }
     return params;
 }

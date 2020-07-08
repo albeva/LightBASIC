@@ -57,8 +57,7 @@
     _( Step,     "STEP"     ) \
     _( Next,     "NEXT"     ) \
     _( Continue, "CONTINUE" ) \
-    _( Exit,     "EXIT"     ) \
-    _( ZString,  "ZSTRING"  )
+    _( Exit,     "EXIT"     )
 
 // All tokens combined
 #define ALL_TOKENS(_) \

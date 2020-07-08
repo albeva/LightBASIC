@@ -23,7 +23,7 @@ CodeGen::CodeGen()
 CodeGen::~CodeGen() {
 }
 
-void CodeGen::visit(const AstProgram *ast) {
+void CodeGen::visit(AstProgram *ast) {
     m_module = make_unique<llvm::Module>("app", m_context);
     m_module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
 
@@ -50,20 +50,20 @@ void CodeGen::visit(const AstProgram *ast) {
     printer->runOnModule(*m_module);
 }
 
-void CodeGen::visit(const AstStmtList *ast) {
+void CodeGen::visit(AstStmtList *ast) {
     for (const auto& stmt: ast->stmts)
         stmt->accept(this);
 }
 
-void CodeGen::visit(const AstAssignStmt *ast) {
+void CodeGen::visit(AstAssignStmt *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstExprStmt *ast) {
+void CodeGen::visit(AstExprStmt *ast) {
     ast->expr->accept(this);
 }
 
-void CodeGen::visit(const AstVarDecl *ast) {
+void CodeGen::visit(AstVarDecl *ast) {
     llvm::Constant* constant = nullptr;
     size_t length = 0;
     if (const auto *expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
@@ -104,31 +104,31 @@ void CodeGen::visit(const AstVarDecl *ast) {
     m_values[name] = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
 }
 
-void CodeGen::visit(const AstFuncDecl *ast) {
+void CodeGen::visit(AstFuncDecl *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstFuncParamDecl *ast) {
+void CodeGen::visit(AstFuncParamDecl *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstAttributeList *ast) {
+void CodeGen::visit(AstAttributeList *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstAttribute *ast) {
+void CodeGen::visit(AstAttribute *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstIdentExpr *ast) {
+void CodeGen::visit(AstIdentExpr *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstTypeExpr *ast) {
+void CodeGen::visit(AstTypeExpr *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(const AstCallExpr *ast) {
+void CodeGen::visit(AstCallExpr *ast) {
     auto *fn = getOrCreate(ast);
     if (fn == nullptr) {
         error("Unknown function");
@@ -152,7 +152,7 @@ void CodeGen::visit(const AstCallExpr *ast) {
     inst->setTailCall(false);
 }
 
-llvm::Function* CodeGen::getOrCreate(const AstCallExpr* ast) {
+llvm::Function* CodeGen::getOrCreate(AstCallExpr* ast) {
     auto name = string(ast->ident->token->lexeme());
     if (name == "print") {
         auto iter = m_values.find(name);
@@ -178,7 +178,7 @@ llvm::Function* CodeGen::getOrCreate(const AstCallExpr* ast) {
     return nullptr;
 }
 
-void CodeGen::visit(const AstLiteralExpr *ast) {
+void CodeGen::visit(AstLiteralExpr *ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 

@@ -13,13 +13,13 @@ public:
     CodeGen();
     ~CodeGen();
 
-    #define IMPL_VISITOR(NODE, ...) virtual void visit(const Ast##NODE* ast);
+    #define IMPL_VISITOR(NODE, ...) virtual void visit(Ast##NODE* ast);
     AST_CONTENT_NODES(IMPL_VISITOR)
     #undef IMPL_VISITOR
 
 private:
 
-    llvm::Function* getOrCreate(const AstCallExpr* ast);
+    llvm::Function* getOrCreate(AstCallExpr* ast);
 
     llvm::LLVMContext m_context;
     llvm::IRBuilder<> m_builder;

@@ -24,13 +24,13 @@ PRIMITIVE_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 // integers
-#define DEFINE_TYPE(id, str, bits, isSigned, kind) \
+#define DEFINE_TYPE(id, str, kind, bits, isSigned) \
     const Type##kind id##Ty{bits, isSigned};
 INTEGER_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 // Floating Points
-#define DEFINE_TYPE(id, str, bits, kind) \
+#define DEFINE_TYPE(id, str, kind, bits) \
     const Type##kind id##Ty{bits};
 FLOATINGPOINT_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
@@ -90,7 +90,7 @@ llvm::Type *TypeBool::llvm() {
 // Integer
 
 const TypeInteger *TypeInteger::get(int bits, bool isSigned) {
-    #define USE_TYPE(id, str, BITS, IS_SIGNED, kind) \
+    #define USE_TYPE(id, str, kind, BITS, IS_SIGNED) \
         if (bits == BITS && isSigned == IS_SIGNED) return &id##Ty;
         INTEGER_TYPES(USE_TYPE)
     #undef USE_TYPE
@@ -110,7 +110,7 @@ llvm::Type *TypeInteger::llvm() {
 // Floating Point
 
 const TypeFloatingPoint *TypeFloatingPoint::get(int bits) {
-    #define USE_TYPE(id, str, BITS, kind) \
+    #define USE_TYPE(id, str, kind, BITS) \
         if (bits == BITS) return &id##Ty;
         FLOATINGPOINT_TYPES(USE_TYPE)
     #undef USE_TYPE
@@ -147,7 +147,7 @@ llvm::Type *TypeFunction::llvm() {
 
 // ZString
 const TypeZString *TypeZString::get() {
-    return &ZStrringTy;
+    return &ZStringTy;
 }
 
 llvm::Type *TypeZString::llvm() {

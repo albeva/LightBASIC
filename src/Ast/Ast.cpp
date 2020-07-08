@@ -1,9 +1,11 @@
 //
 // Created by Albert on 05/07/2020.
 //
-#include "Lexer/Token.h"
-#include "AstVisitor.h"
 #include "Ast.h"
+#include "AstVisitor.h"
+#include "Lexer/Token.h"
+#include "Symbol/Symbol.h"
+#include "Symbol/SymbolTable.h"
 using namespace lbc;
 
 AstRoot::~AstRoot() {}

@@ -6,32 +6,32 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-void AstPrinter::visit(const AstProgram *ast) {
+void AstPrinter::visit(AstProgram *ast) {
     ast->body->accept(this);
 }
 
 // Statements
 
-void AstPrinter::visit(const AstStmtList *ast) {
+void AstPrinter::visit(AstStmtList *ast) {
     for (const auto& stmt: ast->stmts) {
         stmt->accept(this);
         std::cout << '\n';
     }
 }
 
-void AstPrinter::visit(const AstAssignStmt *ast) {
+void AstPrinter::visit(AstAssignStmt *ast) {
     ast->ident->accept(this);
     std::cout << " = ";
     ast->expr->accept(this);
 }
 
-void AstPrinter::visit(const AstExprStmt *ast) {
+void AstPrinter::visit(AstExprStmt *ast) {
     ast->expr->accept(this);
 }
 
 // Attributes
 
-void AstPrinter::visit(const AstAttributeList *ast) {
+void AstPrinter::visit(AstAttributeList *ast) {
     std::cout << '[';
     bool isFirst = true;
     for (const auto& attr: ast->attribs) {
@@ -42,7 +42,7 @@ void AstPrinter::visit(const AstAttributeList *ast) {
     std::cout << "]";
 }
 
-void AstPrinter::visit(const AstAttribute *ast) {
+void AstPrinter::visit(AstAttribute *ast) {
     ast->ident->accept(this);
     if (ast->arguments.size() == 1) {
         std::cout << " = ";
@@ -59,13 +59,13 @@ void AstPrinter::visit(const AstAttribute *ast) {
     }
 }
 
-void AstPrinter::visit(const AstTypeExpr *ast) {
+void AstPrinter::visit(AstTypeExpr *ast) {
     std::cout << ast->token->lexeme();
 }
 
 // Declarations
 
-void AstPrinter::visit(const AstVarDecl *ast) {
+void AstPrinter::visit(AstVarDecl *ast) {
     if (ast->attribs) {
         ast->attribs->accept(this);
         std::cout << " _" << '\n';
@@ -85,7 +85,7 @@ void AstPrinter::visit(const AstVarDecl *ast) {
     }
 }
 
-void AstPrinter::visit(const AstFuncDecl *ast) {
+void AstPrinter::visit(AstFuncDecl *ast) {
     if (ast->attribs) {
         ast->attribs->accept(this);
         std::cout << " _" << '\n';
@@ -115,27 +115,19 @@ void AstPrinter::visit(const AstFuncDecl *ast) {
     }
 }
 
-void AstPrinter::visit(const AstFuncParamDecl *ast) {
+void AstPrinter::visit(AstFuncParamDecl *ast) {
     ast->ident->accept(this);
-
-    if (ast->type) {
-        std::cout << " AS ";
-        ast->type->accept(this);
-    }
-
-    if (ast->expr) {
-        std::cout << " = ";
-        ast->expr->accept(this);
-    }
+    std::cout << " AS ";
+    ast->type->accept(this);
 }
 
 // Expressions
 
-void AstPrinter::visit(const AstIdentExpr *ast) {
+void AstPrinter::visit(AstIdentExpr *ast) {
     std::cout << ast->token->lexeme();
 }
 
-void AstPrinter::visit(const AstCallExpr *ast) {
+void AstPrinter::visit(AstCallExpr *ast) {
     ast->ident->accept(this);
     std::cout << "(";
     bool isFirst = true;
@@ -147,7 +139,7 @@ void AstPrinter::visit(const AstCallExpr *ast) {
     std::cout << ")";
 }
 
-void AstPrinter::visit(const AstLiteralExpr *ast) {
+void AstPrinter::visit(AstLiteralExpr *ast) {
     if (ast->token->kind() == TokenKind::StringLiteral) {
         std::cout << '"' << ast->token->lexeme() << '"';
     } else {
