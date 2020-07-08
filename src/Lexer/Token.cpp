@@ -22,6 +22,7 @@ const std::unordered_map<string_view, TokenKind> keywordsToKind{
     TOKEN_SYMBOLS(IMPL_LITERAL)
     TOKEN_OPERATORS(IMPL_LITERAL)
     TOKEN_KEYWORDS(IMPL_LITERAL)
+    ALL_TYPES(IMPL_LITERAL)
 #undef IMPL_LITERAL
 #define IMPL_KEYWORD_MAP(id, kw, map) { literals::Str##id, TokenKind::map },
     KEYWORD_TOKEN_MAP(IMPL_KEYWORD_MAP)

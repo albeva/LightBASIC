@@ -45,7 +45,6 @@ using llvm::dyn_cast;
 
 // BOOST
 #include <boost/core/noncopyable.hpp>
-#include <boost/container_hash/hash.hpp>
 
 using boost::noncopyable;
 

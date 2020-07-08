@@ -1,6 +1,8 @@
 //
 // Created by Albert on 03/07/2020.
 //
+#pragma once
+#include "Symbol/Type.def.h"
 
 // Generic tokens
 #define TOKEN_GENERAL(_) \
@@ -56,8 +58,7 @@
     _( Next,     "NEXT"     ) \
     _( Continue, "CONTINUE" ) \
     _( Exit,     "EXIT"     ) \
-    _( ZString,  "ZSTRING"  ) \
-    _( Integer,  "INTEGER"  )
+    _( ZString,  "ZSTRING"  )
 
 // All tokens combined
 #define ALL_TOKENS(_) \
@@ -65,7 +66,8 @@
     TOKEN_LITERALS(_)  \
     TOKEN_SYMBOLS(_)   \
     TOKEN_OPERATORS(_) \
-    TOKEN_KEYWORDS(_)
+    TOKEN_KEYWORDS(_) \
+    ALL_TYPES(_)
 
 // Keywords that map to specific tokens
 #define KEYWORD_TOKEN_MAP(_) \

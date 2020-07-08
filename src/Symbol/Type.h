@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "pch.h"
+#include "Type.def.h"
 
 namespace lbc {
 
@@ -37,15 +38,12 @@ class TypeZString;
  */
 class TypeRoot: noncopyable {
 protected:
-    TypeRoot(TypeKind kind, size_t hash)
-    : m_kind{kind},
-      m_hash{hash} {}
+    TypeRoot(TypeKind kind) : m_kind{kind} {}
 
 public:
     virtual ~TypeRoot();
 
     TypeKind kind() const { return m_kind; }
-    size_t hash() const { return m_hash; }
     virtual llvm::Type* llvm() = 0;
 
 protected:
@@ -53,7 +51,6 @@ protected:
 
 private:
     const TypeKind m_kind;
-    const size_t m_hash;
 };
 
 /**
@@ -62,7 +59,7 @@ private:
  */
 class TypeVoid final: public TypeRoot {
 public:
-    TypeVoid(size_t hash) : TypeRoot{TypeKind::Void, hash} {}
+    TypeVoid() : TypeRoot{TypeKind::Void} {}
     static const TypeVoid* get();
 
     static bool classof(const TypeRoot *type) {
@@ -78,7 +75,7 @@ public:
  */
 class TypeAny final: public TypeRoot {
 public:
-    TypeAny(size_t hash) : TypeRoot{TypeKind::Any, hash} {}
+    TypeAny() : TypeRoot{TypeKind::Any} {}
     static const TypeAny* get();
 
     static bool classof(const TypeRoot *type) {
@@ -93,8 +90,8 @@ public:
  */
 class TypePointer final: public TypeRoot {
 public:
-    TypePointer(size_t hash, const TypeRoot* base)
-    : TypeRoot{TypeKind::Pointer, hash}, m_base{base} {}
+    TypePointer(const TypeRoot* base)
+    : TypeRoot{TypeKind::Pointer}, m_base{base} {}
 
     static const TypePointer* get(const TypeRoot* base);
 
@@ -133,7 +130,7 @@ public:
  */
 class TypeBool final: public TypeNumber {
 public:
-    TypeBool(size_t hash) : TypeNumber{TypeKind::Bool, hash} {}
+    TypeBool() : TypeNumber{TypeKind::Bool} {}
 
     static const TypeBool* get();
 
@@ -152,8 +149,8 @@ public:
  */
 class TypeInteger final: public TypeNumber {
 public:
-    TypeInteger(size_t hash, int bits, bool isSigned)
-    : TypeNumber{TypeKind::Integer, hash},
+    TypeInteger(int bits, bool isSigned)
+    : TypeNumber{TypeKind::Integer},
       m_bits{ bits },
       m_isSigned{ isSigned } {}
 
@@ -178,8 +175,8 @@ private:
  */
 class TypeFloatingPoint final: public TypeNumber {
 public:
-    TypeFloatingPoint(size_t hash, int bits)
-    : TypeNumber{TypeKind::FloatingPoint, hash},
+    TypeFloatingPoint(int bits)
+    : TypeNumber{TypeKind::FloatingPoint},
       m_bits{bits} {}
 
     static const TypeFloatingPoint* get(int bits);
@@ -202,8 +199,8 @@ private:
  */
 class TypeFunction final: public TypeRoot {
 public:
-    TypeFunction(size_t hash, const TypeRoot* retType, vector<const TypeRoot*>&& paramTypes)
-    : TypeRoot{TypeKind::Function, hash},
+    TypeFunction(const TypeRoot* retType, vector<const TypeRoot*>&& paramTypes)
+    : TypeRoot{TypeKind::Function},
       m_retType{retType},
       m_paramTypes{std::move(paramTypes)}
     {}
@@ -230,7 +227,7 @@ private:
  */
 class TypeZString final: public TypeRoot {
 public:
-    TypeZString(size_t hash): TypeRoot{TypeKind::ZString, hash} {}
+    TypeZString(): TypeRoot{TypeKind::ZString} {}
 
     static const TypeZString* get();
 

@@ -38,7 +38,7 @@ add_executable(lbc
         src/Symbol/Symbol.cpp
         src/Symbol/Symbol.h
         src/Symbol/Type.cpp
-        src/Symbol/Type.h)
+        src/Symbol/Type.h src/Symbol/Type.def.h)
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)
 target_link_libraries(lbc ${llvm_libs})

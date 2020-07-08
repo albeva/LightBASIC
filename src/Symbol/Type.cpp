@@ -3,74 +3,37 @@
 //
 #include "Type.h"
 using namespace lbc;
-using boost::hash_combine;
 
 namespace {
 
-size_t voidHash() {
-    return std::hash<TypeKind>{}(TypeKind::Void);
-}
-
-size_t anyHash() {
-    return std::hash<TypeKind>{}(TypeKind::Any);
-}
-
-size_t pointerHash(const TypeRoot* base) {
-    size_t seed = 0;
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Pointer));
-    hash_combine(seed, base->hash());
-    return seed;
-}
-
-size_t boolHash() {
-    size_t seed = 0;
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Number));
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Bool));
-    return seed;
-}
-
-size_t integerHash(int bits, bool isSigned) {
-    size_t seed = 0;
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Number));
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Integer));
-    hash_combine(seed, bits);
-    hash_combine(seed, isSigned);
-    return seed;
-}
-
-size_t floatingPointHash(int bits) {
-    size_t seed = 0;
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Number));
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::FloatingPoint));
-    hash_combine(seed, bits);
-    return seed;
-}
-
-size_t functionHash(const TypeRoot* retTy, const vector<const TypeRoot*>& params) {
-    size_t seed = 0;
-    hash_combine(seed, std::hash<TypeKind>{}(TypeKind::Function));
-    hash_combine(seed, retTy->hash());
-    for (auto param: params) {
-        hash_combine(seed, param->hash());
-    }
-    return seed;
-}
-
-size_t zstringHash() {
-    return std::hash<TypeKind>{}(TypeKind::ZString);
-}
-
 // Declared declaredTypes.
-std::unordered_map<size_t, unique_ptr<TypeRoot>> declaredTypes;
+std::vector<unique_ptr<const TypeFunction>> declaredFunc;
+std::vector<unique_ptr<const TypePointer>> declaredPtrs;
+std::vector<unique_ptr<const TypeInteger>> declaredInts;
+std::vector<unique_ptr<const TypeFloatingPoint>> declaredFPs;
 
 // Commonly used types
-const TypeVoid    voidTy   { voidHash() };                          // VOID
-const TypeAny     anyTy    { anyHash() };                           // Any type
-const TypePointer anyPtrTy { pointerHash(&anyTy), &anyTy };         // Any Ptr / void*
-const TypeBool    boolTy   { boolHash() };                          // bool
-const TypeInteger intTy    { integerHash(32, true), 32, true };     // int
-const TypeInteger uintTy   { integerHash(32, false), 32, false };   // unsigned
-const TypeZString zstrTy   { zstringHash() };                       // zstring / char *
+const TypeVoid          voidTy;             // VOID
+const TypeAny           anyTy;              // Any type
+const TypePointer       anyPtrTy{ &anyTy }; // void*
+
+// primitives
+#define DEFINE_TYPE(id, str, kind) \
+    const Type##kind id##Ty;
+PRIMITIVE_TYPES(DEFINE_TYPE)
+#undef DEFINE_TYPE
+
+// integers
+#define DEFINE_TYPE(id, str, bits, isSigned, kind) \
+    const Type##kind id##Ty{bits, isSigned};
+INTEGER_TYPES(DEFINE_TYPE)
+#undef DEFINE_TYPE
+
+// Floating Points
+#define DEFINE_TYPE(id, str, bits, kind) \
+    const Type##kind id##Ty{bits};
+FLOATINGPOINT_TYPES(DEFINE_TYPE)
+#undef DEFINE_TYPE
 
 } // namespace
 
@@ -99,18 +62,17 @@ llvm::Type *TypeAny::llvm() {
 // Pointer
 
 const TypePointer *TypePointer::get(const TypeRoot *base) {
-    if (base->hash() == anyTy.hash()) {
+    if (base == &anyTy) {
         return &anyPtrTy;
     }
 
-    auto hash = pointerHash(base);
-    auto iter = declaredTypes.find(hash);
-    if (iter != declaredTypes.end()) {
-        return dyn_cast<TypePointer>(iter->second.get());
+    for (const auto& ptr: declaredPtrs) {
+        if (ptr->m_base == base)
+            return ptr.get();
     }
 
-    auto ty = new TypePointer{hash, base};
-    declaredTypes.emplace(hash, ty);
+    auto *ty = new TypePointer{base};;
+    declaredPtrs.emplace_back(ty);
     return ty;
 }
 
@@ -121,7 +83,7 @@ llvm::Type *TypePointer::llvm() {
 // Bool
 
 const TypeBool *TypeBool::get() {
-    return &boolTy;
+    return &BoolTy;
 }
 
 llvm::Type *TypeBool::llvm() {
@@ -131,19 +93,18 @@ llvm::Type *TypeBool::llvm() {
 // Integer
 
 const TypeInteger *TypeInteger::get(int bits, bool isSigned) {
-    if (bits == 32) {
-        if (isSigned) return &intTy;
-        return &uintTy;
+#define USE_TYPE(id, str, BITS, IS_SIGNED, kind) \
+    if (bits == BITS && isSigned == IS_SIGNED) return &id##Ty;
+    INTEGER_TYPES(USE_TYPE)
+#undef USE_TYPE
+
+    for (const auto& ptr: declaredInts) {
+        if (ptr->bits() == bits && ptr->isSigned() == isSigned)
+            return ptr.get();
     }
 
-    auto hash = integerHash(bits, isSigned);
-    auto iter = declaredTypes.find(hash);
-    if (iter != declaredTypes.end()) {
-        return dyn_cast<TypeInteger>(iter->second.get());
-    }
-
-    auto ty = new TypeInteger{hash, bits, isSigned};
-    declaredTypes.emplace(hash, ty);
+    auto *ty = new TypeInteger{bits, isSigned};
+    declaredInts.emplace_back(ty);
     return ty;
 }
 
@@ -154,14 +115,18 @@ llvm::Type *TypeInteger::llvm() {
 // Floating Point
 
 const TypeFloatingPoint *TypeFloatingPoint::get(int bits) {
-    auto hash = floatingPointHash(bits);
-    auto iter = declaredTypes.find(hash);
-    if (iter != declaredTypes.end()) {
-        return dyn_cast<TypeFloatingPoint>(iter->second.get());
+#define USE_TYPE(id, str, BITS, kind) \
+    if (bits == BITS) return &id##Ty;
+    FLOATINGPOINT_TYPES(USE_TYPE)
+#undef USE_TYPE
+
+    for (const auto& ptr: declaredFPs) {
+        if (ptr->bits() == bits)
+            return ptr.get();
     }
 
-    auto ty = new TypeFloatingPoint{hash, bits};
-    declaredTypes.emplace(hash, ty);
+    auto *ty = new TypeFloatingPoint{bits};
+    declaredFPs.emplace_back(ty);
     return ty;
 }
 
@@ -172,14 +137,13 @@ llvm::Type *TypeFloatingPoint::llvm() {
 // Function
 
 const TypeFunction *TypeFunction::get(const TypeRoot* retType, vector<const TypeRoot*>&& paramTypes) {
-    auto hash = functionHash(retType, paramTypes);
-    auto iter = declaredTypes.find(hash);
-    if (iter != declaredTypes.end()) {
-        return dyn_cast<TypeFunction>(iter->second.get());
+    for (const auto& ptr: declaredFunc) {
+        if (ptr->retType() == retType && ptr->paramTypes() == paramTypes)
+            return ptr.get();
     }
 
-    auto ty = new TypeFunction{hash, retType, std::move(paramTypes)};
-    declaredTypes.emplace(hash, ty);
+    auto *ty = new TypeFunction{retType, std::move(paramTypes)};
+    declaredFunc.emplace_back(ty);
     return ty;
 }
 
@@ -189,7 +153,7 @@ llvm::Type *TypeFunction::llvm() {
 
 // ZString
 const TypeZString *TypeZString::get() {
-    return &zstrTy;
+    return &ZStrringTy;
 }
 
 llvm::Type *TypeZString::llvm() {
