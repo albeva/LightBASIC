@@ -4,6 +4,7 @@
 #pragma once
 
 // STL
+#include <array>
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -15,6 +16,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <functional>
+#include <iterator>
 
 using std::string;
 using std::string_view;

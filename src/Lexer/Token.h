@@ -14,7 +14,10 @@ enum class TokenKind {
 };
 
 class Token final {
+    NON_COPYABLE(Token)
 public:
+    ~Token() = default;
+
     static unique_ptr<Token> create(const string_view& lexeme, const llvm::SMLoc& loc);
 
     static unique_ptr<Token> create(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc);
@@ -24,35 +27,33 @@ public:
     Token(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc)
         : m_kind{kind}, m_lexeme{lexeme}, m_loc{loc} {}
 
-    ~Token();
-
-    inline TokenKind kind() const {
+    [[nodiscard]] inline TokenKind kind() const {
         return m_kind;
     }
 
-    inline const string_view& lexeme() const {
+    [[nodiscard]] inline const string_view& lexeme() const {
         return m_lexeme;
     }
 
-    inline const llvm::SMLoc& loc() const {
+    [[nodiscard]] inline const llvm::SMLoc& loc() const {
         return m_loc;
     }
 
-    llvm::SMRange range() const;
+    [[nodiscard]] llvm::SMRange range() const;
 
-    const string_view& description() const;
+    [[nodiscard]] const string_view& description() const;
 
-    bool isGeneral() const;
-    bool isLiteral() const;
-    bool isSymbol() const;
-    bool isOperator() const;
-    bool isKeyword() const;
+    [[nodiscard]] bool isGeneral() const;
+    [[nodiscard]] bool isLiteral() const;
+    [[nodiscard]] bool isSymbol() const;
+    [[nodiscard]] bool isOperator() const;
+    [[nodiscard]] bool isKeyword() const;
 
-    int getPrecedence() const;
-    bool isBinary() const;
-    bool isUnary() const;
-    bool isLeftToRight() const;
-    bool isRightToLeft() const;
+    [[nodiscard]] int getPrecedence() const;
+    [[nodiscard]] bool isBinary() const;
+    [[nodiscard]] bool isUnary() const;
+    [[nodiscard]] bool isLeftToRight() const;
+    [[nodiscard]] bool isRightToLeft() const;
 
     inline bool operator==(TokenKind rhs) const {
         return m_kind == rhs;

@@ -29,20 +29,19 @@ const std::unordered_map<string_view, TokenKind> keywordsToKind{
 #undef IMPL_KEYWORD_MAP
 };
 
-constexpr string_view kindToDescription[]{
+constexpr std::array kindToDescription{
 #define IMPL_LITERAL(id, kw, ...) literals::Str##id,
     ALL_TOKENS(IMPL_LITERAL)
 #undef IMPL_LITERAL
 };
 
-unordered_set<string> uppercasedIds;
+unordered_set<string> uppercasedIds; // NOLINT
 
 } // namespace
 
 const string_view& Token::description(TokenKind kind) {
     auto index = static_cast<size_t>(kind);
-    assert(index < std::size(kindToDescription));
-    return kindToDescription[index];
+    return kindToDescription.at(index);
 }
 
 unique_ptr<Token> Token::create(const string_view& lexeme, const llvm::SMLoc& loc) {
@@ -66,18 +65,18 @@ unique_ptr<Token> Token::create(TokenKind kind, const string_view& lexeme, const
     return make_unique<Token>(kind, lexeme, loc);
 }
 
-Token::~Token() {}
 
 llvm::SMRange Token::range() const {
-    if (isGeneral())
+    if (isGeneral()) {
         return llvm::None;
+    }
 
     auto size = static_cast<ptrdiff_t>(m_lexeme.size());
     if (m_kind == TokenKind::StringLiteral) {
         size += 2;
     }
 
-    const auto *end = m_loc.getPointer() + size;
+    const auto *end = m_loc.getPointer() + size; // NOLINT
     return {m_loc, llvm::SMLoc::getFromPointer(end)};
 }
 
@@ -86,7 +85,7 @@ const string_view& Token::description() const {
         return m_lexeme;
     }
     auto index = static_cast<size_t>(m_kind);
-    return kindToDescription[index];
+    return kindToDescription.at(index);
 }
 
 bool Token::isGeneral() const {

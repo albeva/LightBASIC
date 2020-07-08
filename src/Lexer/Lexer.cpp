@@ -18,7 +18,6 @@ Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
       m_fileID{fileID},
       m_buffer{srcMgr.getMemoryBuffer(fileID)},
       m_hasStmt{false} {
-    assert(m_buffer != nullptr);
     m_input = m_buffer->getBufferStart();
     m_char = *m_input;
 }
@@ -51,8 +50,9 @@ unique_ptr<Token> Lexer::next() {
         m_hasStmt = true;
 
         // identifier
-        if (isAlpha(m_char))
+        if (isAlpha(m_char)) {
             return identifier();
+        }
 
         switch (m_char) {
         case '_':
@@ -62,7 +62,7 @@ unique_ptr<Token> Lexer::next() {
             }
             // part of line continuation
             skipUntilLineEnd();
-            if (m_char == '\n') move();
+            if (m_char == '\n') { move(); }
             continue;
         case '"':
             return string();
@@ -97,7 +97,7 @@ unique_ptr<Token> Lexer::next() {
         return invalid(m_input);
     }
 
-    return endOfFile();
+    return endOfFile(); // NOLINT
 }
 /**
  * If `m_hasStmt` is true then return `EndOfLine`
@@ -134,15 +134,17 @@ unique_ptr<Token> Lexer::identifier() {
 }
 
 unique_ptr<Token> Lexer::string() {
+    constexpr char visibleFrom = 32;
+    
     const auto *start = m_input;
     do {
         move();
         if (m_char == '"') {
             auto length = static_cast<string_view::size_type>(m_input - start - 1);
             move();
-            return Token::create(TokenKind::StringLiteral, {start + 1, length}, getLoc(start));
+            return Token::create(TokenKind::StringLiteral, {start + 1, length}, getLoc(start)); // NOLINT
         }
-    } while (m_char > 31);
+    } while (m_char >= visibleFrom);
 
     return invalid(start);
 }
@@ -164,7 +166,7 @@ void Lexer::skipUntilLineEnd() {
 }
 
 void Lexer::move() {
-    m_char = *++m_input;
+    m_char = *++m_input; // NOLINT
 }
 
 bool Lexer::isValid() const {
@@ -172,10 +174,9 @@ bool Lexer::isValid() const {
 }
 
 char Lexer::peek(int ahead) const {
-    const auto *next = m_input + ahead;
+    const auto *next = m_input + ahead; // NOLINT
     if (next < m_buffer->getBufferEnd()) {
         return *next;
-    } else {
-        return 0;
     }
+    return 0;
 }

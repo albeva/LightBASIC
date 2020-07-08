@@ -8,24 +8,25 @@
 namespace lbc {
 
 class Lexer final {
+    NON_COPYABLE(Lexer)
 public:
     Lexer(llvm::SourceMgr& srcMgr, unsigned fileID);
+    ~Lexer() = default;
 
-    unique_ptr<Token> next();
+    [[nodiscard]] unique_ptr<Token> next();
 
 private:
-
-    unique_ptr<Token> identifier();
-    unique_ptr<Token> string();
-    unique_ptr<Token> character(TokenKind kind);
-    unique_ptr<Token> endOfStatement();
-    unique_ptr<Token> endOfFile();
-    unique_ptr<Token> invalid(const char *loc);
+    [[nodiscard]] unique_ptr<Token> identifier();
+    [[nodiscard]] unique_ptr<Token> string();
+    [[nodiscard]] unique_ptr<Token> character(TokenKind kind);
+    [[nodiscard]] unique_ptr<Token> endOfStatement();
+    [[nodiscard]] unique_ptr<Token> endOfFile();
+    [[nodiscard]] static unique_ptr<Token> invalid(const char *loc);
 
     void skipUntilLineEnd();
     void move();
-    bool isValid() const;
-    char peek(int ahead = 1) const;
+    [[nodiscard]] bool isValid() const;
+    [[nodiscard]] char peek(int ahead = 1) const;
 
     llvm::SourceMgr& m_srcMgr;
     unsigned m_fileID;
