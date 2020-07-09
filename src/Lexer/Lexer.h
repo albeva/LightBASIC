@@ -3,9 +3,11 @@
 //
 #pragma once
 #include "pch.h"
-#include "Token.h"
 
 namespace lbc {
+
+class Token;
+enum class TokenKind;
 
 class Lexer final {
     NON_COPYABLE(Lexer)

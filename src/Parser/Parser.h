@@ -2,8 +2,8 @@
 // Created by Albert on 03/07/2020.
 //
 #pragma once
-#include "Ast/Ast.def.h"
 #include "pch.h"
+#include "Ast/Ast.def.h"
 
 namespace lbc {
 

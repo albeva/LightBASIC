@@ -2,6 +2,7 @@
 // Created by Albert on 03/07/2020.
 //
 #pragma once
+// do not include pch.h!
 
 #define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
 
@@ -46,4 +47,4 @@ private:
 #define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
 #define RESTORE_ON_EXIT(V) ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_){V};
 
-}
+} // namespace lbc

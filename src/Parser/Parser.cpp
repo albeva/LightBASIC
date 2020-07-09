@@ -1,10 +1,10 @@
 //
 // Created by Albert on 03/07/2020.
 //
+#include "Parser.h"
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
 #include "Ast/Ast.h"
-#include "Parser.h"
 using namespace lbc;
 
 Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)

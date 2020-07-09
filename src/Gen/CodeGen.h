@@ -5,7 +5,6 @@
 #include "pch.h"
 #include "Ast/AstVisitor.h"
 
-
 namespace lbc {
 
 class CodeGen final: public AstVisitor {

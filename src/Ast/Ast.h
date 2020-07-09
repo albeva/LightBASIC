@@ -4,12 +4,15 @@
 #pragma once
 #include "pch.h"
 #include "Ast.def.h"
-#include "AstVisitor.h"
-#include "Lexer/Token.h"
-#include "Symbol/Symbol.h"
-#include "Symbol/SymbolTable.h"
 
 namespace lbc {
+
+class AstVisitor;
+class Token;
+class Symbol;
+class SymbolTable;
+class TypeRoot;
+AST_FORWARD_DECLARE()
 
 // Enumerate all possible ast nodes
 // This works with LLVM rtti system
@@ -36,7 +39,7 @@ class AstRoot {
     NON_COPYABLE(AstRoot)
 public:
     explicit AstRoot(AstKind kind) : m_kind{kind} {}
-    virtual ~AstRoot() = default;
+    virtual ~AstRoot();
     [[nodiscard]] AstKind kind() const { return m_kind; }
     virtual void accept(AstVisitor *visitor) = 0;
 
@@ -79,17 +82,18 @@ public:
 };
 
 #define DECLARE_AST(KIND, BASE) \
-    class Ast##KIND final: public Ast##BASE {           \
-    public:                                             \
-        Ast##KIND() : Ast##BASE{AstKind::KIND} {}       \
-        virtual void accept(AstVisitor* visitor) {      \
-            visitor->visit(this);                       \
-        }                                               \
-        static bool classof(const AstRoot* ast) {       \
-            return ast->kind() == AstKind::KIND;        \
-        }                                               \
-        static unique_ptr<Ast##KIND> create() {         \
-            return make_unique<Ast##KIND>();            \
+    class Ast##KIND final: public Ast##BASE { \
+        NON_COPYABLE(Ast##KIND)                   \
+    public:                                       \
+        using Base = Ast##BASE;                   \
+        Ast##KIND();                              \
+        ~Ast##KIND();                             \
+        virtual void accept(AstVisitor* visitor); \
+        static bool classof(const AstRoot* ast) { \
+            return ast->kind() == AstKind::KIND;  \
+        }                                         \
+        static unique_ptr<Ast##KIND> create() {   \
+            return make_unique<Ast##KIND>();      \
         }
 
 #define DECLARE_END }; // class

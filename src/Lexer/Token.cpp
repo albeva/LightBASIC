@@ -2,9 +2,8 @@
 // Created by Albert on 03/07/2020.
 //
 #include "Token.h"
-#include <unordered_map>
-#include <array>
 using namespace lbc;
+
 using std::unordered_set;
 
 namespace {

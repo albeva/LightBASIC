@@ -71,6 +71,7 @@ public:
         return type->kind() == TypeKind::Void;
     }
 
+protected:
     [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 
@@ -87,6 +88,7 @@ public:
         return type->kind() == TypeKind::Any;
     }
 
+protected:
     [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 
@@ -104,9 +106,10 @@ public:
         return type->kind() == TypeKind::Pointer;
     }
 
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
     [[nodiscard]] const TypeRoot * base() const { return m_base; }
+
+protected:
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
 private:
     const TypeRoot* m_base;
@@ -143,10 +146,11 @@ public:
         return type->kind() == TypeKind::Bool;
     }
 
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
     [[nodiscard]] int bits() const final { return 1; }
     [[nodiscard]] bool isSigned() const final { return false; }
+
+protected:
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 
 /**
@@ -165,10 +169,11 @@ public:
         return type->kind() == TypeKind::Integer;
     }
 
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
     [[nodiscard]] int bits() const final { return m_bits; }
     [[nodiscard]] bool isSigned() const final { return m_isSigned; }
+
+protected:
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
 private:
     const int m_bits;
@@ -190,10 +195,11 @@ public:
         return type->kind() == TypeKind::FloatingPoint;
     }
 
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
     [[nodiscard]] int bits() const final { return m_bits; }
     [[nodiscard]] bool isSigned() const final { return false; }
+
+protected:
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
 private:
     const int m_bits;
@@ -216,10 +222,11 @@ public:
         return type->kind() == TypeKind::Function;
     }
 
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
     [[nodiscard]] const TypeRoot* retType() const { return m_retType; }
     [[nodiscard]] const std::vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
+
+protected:
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
 private:
     const TypeRoot* m_retType;
@@ -240,6 +247,7 @@ public:
         return type->kind() == TypeKind::ZString;
     }
 
+protected:
     [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 

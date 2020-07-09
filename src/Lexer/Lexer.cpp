@@ -2,7 +2,9 @@
 // Created by Albert on 03/07/2020.
 //
 #include "Lexer.h"
+#include "Token.h"
 using namespace lbc;
+
 using llvm::isAlpha;
 
 static inline bool isWhiteSpace(char ch) {
