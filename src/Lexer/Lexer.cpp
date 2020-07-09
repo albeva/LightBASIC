@@ -135,7 +135,7 @@ unique_ptr<Token> Lexer::identifier() {
 
 unique_ptr<Token> Lexer::string() {
     constexpr char visibleFrom = 32;
-    
+
     const auto *start = m_input;
     do {
         move();

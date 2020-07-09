@@ -5,4 +5,3 @@
 #include "Type/Type.h"
 using namespace lbc;
 
-Symbol::~Symbol() {}

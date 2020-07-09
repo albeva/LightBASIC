@@ -37,15 +37,13 @@ FLOATINGPOINT_TYPES(DEFINE_TYPE)
 
 } // namespace
 
-TypeRoot::~TypeRoot() {}
-
 // Void
 
 const TypeVoid *TypeVoid::get() {
     return &voidTy;
 }
 
-llvm::Type *TypeVoid::llvm() {
+llvm::Type *TypeVoid::genLlvmType() const {
     return nullptr;
 }
 
@@ -54,7 +52,7 @@ const TypeAny *TypeAny::get() {
     return &anyTy;
 }
 
-llvm::Type *TypeAny::llvm() {
+llvm::Type *TypeAny::genLlvmType() const {
     return nullptr;
 }
 
@@ -66,14 +64,15 @@ const TypePointer *TypePointer::get(const TypeRoot *base) {
     }
 
     for (const auto& ptr: declaredPtrs) {
-        if (ptr->m_base == base)
+        if (ptr->m_base == base) {
             return ptr.get();
+        }
     }
 
     return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
 }
 
-llvm::Type *TypePointer::llvm() {
+llvm::Type *TypePointer::genLlvmType() const {
     return nullptr;
 }
 
@@ -83,7 +82,7 @@ const TypeBool *TypeBool::get() {
     return &BoolTy;
 }
 
-llvm::Type *TypeBool::llvm() {
+llvm::Type *TypeBool::genLlvmType() const {
     return nullptr;
 }
 
@@ -96,14 +95,15 @@ const TypeInteger *TypeInteger::get(int bits, bool isSigned) {
     #undef USE_TYPE
 
     for (const auto& ptr: declaredInts) {
-        if (ptr->bits() == bits && ptr->isSigned() == isSigned)
+        if (ptr->bits() == bits && ptr->isSigned() == isSigned) {
             return ptr.get();
+        }
     }
 
     return declaredInts.emplace_back(make_unique<TypeInteger>(bits, isSigned)).get();
 }
 
-llvm::Type *TypeInteger::llvm() {
+llvm::Type *TypeInteger::genLlvmType() const {
     return nullptr;
 }
 
@@ -111,19 +111,20 @@ llvm::Type *TypeInteger::llvm() {
 
 const TypeFloatingPoint *TypeFloatingPoint::get(int bits) {
     #define USE_TYPE(id, str, kind, BITS) \
-        if (bits == BITS) return &id##Ty;
+        if (bits == BITS) { return &id##Ty; }
         FLOATINGPOINT_TYPES(USE_TYPE)
     #undef USE_TYPE
 
     for (const auto& ptr: declaredFPs) {
-        if (ptr->bits() == bits)
+        if (ptr->bits() == bits) {
             return ptr.get();
+        }
     }
 
     return declaredFPs.emplace_back(make_unique<TypeFloatingPoint>(bits)).get();
 }
 
-llvm::Type *TypeFloatingPoint::llvm() {
+llvm::Type *TypeFloatingPoint::genLlvmType() const {
     return nullptr;
 }
 
@@ -131,8 +132,9 @@ llvm::Type *TypeFloatingPoint::llvm() {
 
 const TypeFunction *TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes) {
     for (const auto& ptr: declaredFunc) {
-        if (ptr->retType() == retType && ptr->paramTypes() == paramTypes)
+        if (ptr->retType() == retType && ptr->paramTypes() == paramTypes) {
             return ptr.get();
+        }
     }
 
     return declaredFunc.emplace_back(make_unique<TypeFunction>(
@@ -141,7 +143,7 @@ const TypeFunction *TypeFunction::get(const TypeRoot* retType, std::vector<const
     )).get();
 }
 
-llvm::Type *TypeFunction::llvm() {
+llvm::Type *TypeFunction::genLlvmType() const {
     return nullptr;
 }
 
@@ -150,6 +152,6 @@ const TypeZString *TypeZString::get() {
     return &ZStringTy;
 }
 
-llvm::Type *TypeZString::llvm() {
+llvm::Type *TypeZString::genLlvmType() const {
     return nullptr;
 }

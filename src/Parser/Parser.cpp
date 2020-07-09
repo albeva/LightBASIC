@@ -14,7 +14,7 @@ Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
     m_next = m_lexer->next();
 }
 
-Parser::~Parser() {}
+Parser::~Parser() = default;
 
 /**
  * Program = stmtList .

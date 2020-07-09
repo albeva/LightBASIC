@@ -15,8 +15,8 @@ static void error(const string& message) {
     std::exit(EXIT_FAILURE);
 }
 
-SemanticAnalyzer::SemanticAnalyzer() {}
-SemanticAnalyzer::~SemanticAnalyzer() {}
+SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context)
+: m_context{context} {}
 
 void SemanticAnalyzer::visit(AstProgram *ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
@@ -26,8 +26,9 @@ void SemanticAnalyzer::visit(AstProgram *ast) {
 }
 
 void SemanticAnalyzer::visit(AstStmtList *ast) {
-    for (const auto& stmt: ast->stmts)
+    for (const auto& stmt: ast->stmts) {
         stmt->accept(this);
+    }
 }
 
 void SemanticAnalyzer::visit(AstAssignStmt *ast) {
@@ -57,6 +58,7 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
+    paramTypes.reserve(ast->params.size());
     {
         RESTORE_ON_EXIT(m_table);
         ast->symbolTable = make_unique<SymbolTable>(nullptr);
@@ -68,7 +70,7 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
     }
 
     // return type. subs don't have one so default to Void
-    const TypeRoot* retType;
+    const TypeRoot* retType = nullptr;
     if (ast->type) {
         ast->type->accept(this);
         retType = m_type;

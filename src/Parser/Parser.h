@@ -2,8 +2,8 @@
 // Created by Albert on 03/07/2020.
 //
 #pragma once
-#include "pch.h"
 #include "Ast/Ast.def.h"
+#include "pch.h"
 
 namespace lbc {
 
@@ -13,9 +13,9 @@ enum class TokenKind;
 AST_FORWARD_DECLARE()
 
 class Parser final {
+    NON_COPYABLE(Parser)
 public:
     Parser(llvm::SourceMgr& srcMgr, unsigned int fileId);
-
     ~Parser();
 
     unique_ptr<AstProgram> parse();
@@ -44,10 +44,10 @@ private:
     unique_ptr<AstTypeExpr> typeExpr();
 
     // return true if has more content to parse
-    bool isValid() const;
+    [[nodiscard]] bool isValid() const;
 
     // match current token against kind
-    bool match(TokenKind kind) const;
+    [[nodiscard]] bool match(TokenKind kind) const;
 
     // expect token to match, move to next token and return current
     // return nullptr otherwise

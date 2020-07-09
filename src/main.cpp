@@ -51,11 +51,12 @@ int main(int argc, char *argv[]) {
     if (auto ast = parser.parse()) {
 //        AstPrinter printer;
 //        ast->accept(&printer);
+        llvm::LLVMContext context;
 
-        SemanticAnalyzer sem;
+        SemanticAnalyzer sem(context);
         ast->accept(&sem);
 
-        // CodeGen gen;
+        // CodeGen gen(context);
         // ast->accept(&gen);
     } else {
         std::cerr << "Failed to parse the input" << std::endl;

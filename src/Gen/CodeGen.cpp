@@ -13,15 +13,8 @@ static void error(const string& message) {
     std::exit(EXIT_FAILURE);
 }
 
-CodeGen::CodeGen()
-: m_context{},
-  m_builder{m_context},
-  m_module{nullptr},
-  m_value{nullptr} {
-}
-
-CodeGen::~CodeGen() {
-}
+CodeGen::CodeGen(llvm::LLVMContext& context)
+: m_context{context}, m_builder{context} {}
 
 void CodeGen::visit(AstProgram *ast) {
     m_module = make_unique<llvm::Module>("app", m_context);
@@ -51,8 +44,9 @@ void CodeGen::visit(AstProgram *ast) {
 }
 
 void CodeGen::visit(AstStmtList *ast) {
-    for (const auto& stmt: ast->stmts)
+    for (const auto& stmt: ast->stmts) {
         stmt->accept(this);
+    }
 }
 
 void CodeGen::visit(AstAssignStmt *ast) {
@@ -65,7 +59,6 @@ void CodeGen::visit(AstExprStmt *ast) {
 
 void CodeGen::visit(AstVarDecl *ast) {
     llvm::Constant* constant = nullptr;
-    size_t length = 0;
     if (const auto *expr = llvm::dyn_cast<AstLiteralExpr>(ast->expr.get())) {
         switch (expr->token->kind()) {
         case TokenKind::StringLiteral:
@@ -74,7 +67,6 @@ void CodeGen::visit(AstVarDecl *ast) {
                 view_to_stringRef(expr->token->lexeme()),
                 true
             );
-            length = expr->token->lexeme().length();
             break;
         default:
             error("Unsupported expression type");
@@ -97,7 +89,7 @@ void CodeGen::visit(AstVarDecl *ast) {
     value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 
     llvm::Constant *zero_32 = llvm::Constant::getNullValue(llvm::IntegerType::getInt64Ty(m_context));
-    llvm::Constant *indices[] = {
+    std::array indices{
         zero_32,
         zero_32
     };
@@ -135,6 +127,7 @@ void CodeGen::visit(AstCallExpr *ast) {
     }
 
     std::vector<llvm::Value*> args;
+    args.reserve(ast->arguments.size());
     for (const auto& arg: ast->arguments) {
         if (auto *id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
             auto iter = m_values.find(string(id->token->lexeme()));

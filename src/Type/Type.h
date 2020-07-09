@@ -37,19 +37,24 @@ class TypeZString;
  * It uses llvm custom rtti system
  */
 class TypeRoot {
-protected:
-    TypeRoot(TypeKind kind) : m_kind{kind} {}
-
+    NON_COPYABLE(TypeRoot)
 public:
-    virtual ~TypeRoot();
+    virtual ~TypeRoot() = default;
 
-    TypeKind kind() const { return m_kind; }
-    virtual llvm::Type* llvm() = 0;
+    [[nodiscard]] TypeKind kind() const { return m_kind; }
+
+    [[nodiscard]] llvm::Type* llvmType() {
+        if (m_llvmType == nullptr) { m_llvmType = genLlvmType(); }
+        return m_llvmType;
+    }
 
 protected:
-    llvm::Type* m_llvm = nullptr;
+    explicit TypeRoot(TypeKind kind) : m_kind{kind} {}
+
+    [[nodiscard]] virtual llvm::Type* genLlvmType() const = 0;
 
 private:
+    llvm::Type* m_llvmType = nullptr;
     const TypeKind m_kind;
 };
 
@@ -66,7 +71,7 @@ public:
         return type->kind() == TypeKind::Void;
     }
 
-    virtual llvm::Type* llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 
 /**
@@ -82,7 +87,7 @@ public:
         return type->kind() == TypeKind::Any;
     }
 
-    virtual llvm::Type* llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 
 /**
@@ -90,7 +95,7 @@ public:
  */
 class TypePointer final: public TypeRoot {
 public:
-    TypePointer(const TypeRoot* base)
+    explicit TypePointer(const TypeRoot* base)
     : TypeRoot{TypeKind::Pointer}, m_base{base} {}
 
     static const TypePointer* get(const TypeRoot* base);
@@ -99,9 +104,9 @@ public:
         return type->kind() == TypeKind::Pointer;
     }
 
-    virtual llvm::Type* llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
-    const TypeRoot * base() const { return m_base; }
+    [[nodiscard]] const TypeRoot * base() const { return m_base; }
 
 private:
     const TypeRoot* m_base;
@@ -121,8 +126,8 @@ public:
                type->kind() < TypeKind::NumberLast;
     }
 
-    virtual int bits() const = 0;
-    virtual bool isSigned() const = 0;
+    [[nodiscard]] virtual int bits() const = 0;
+    [[nodiscard]] virtual bool isSigned() const = 0;
 };
 
 /**
@@ -138,10 +143,10 @@ public:
         return type->kind() == TypeKind::Bool;
     }
 
-    virtual llvm::Type *llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
-    virtual int bits() const { return 1; }
-    virtual bool isSigned() const { return false; }
+    [[nodiscard]] int bits() const final { return 1; }
+    [[nodiscard]] bool isSigned() const final { return false; }
 };
 
 /**
@@ -160,10 +165,10 @@ public:
         return type->kind() == TypeKind::Integer;
     }
 
-    virtual llvm::Type *llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
-    virtual int bits() const { return m_bits; }
-    virtual bool isSigned() const { return m_isSigned; }
+    [[nodiscard]] int bits() const final { return m_bits; }
+    [[nodiscard]] bool isSigned() const final { return m_isSigned; }
 
 private:
     const int m_bits;
@@ -175,7 +180,7 @@ private:
  */
 class TypeFloatingPoint final: public TypeNumber {
 public:
-    TypeFloatingPoint(int bits)
+    explicit TypeFloatingPoint(int bits)
     : TypeNumber{TypeKind::FloatingPoint},
       m_bits{bits} {}
 
@@ -185,10 +190,10 @@ public:
         return type->kind() == TypeKind::FloatingPoint;
     }
 
-    virtual llvm::Type *llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
-    virtual int bits() const { return m_bits; }
-    virtual bool isSigned() const { return false; }
+    [[nodiscard]] int bits() const final { return m_bits; }
+    [[nodiscard]] bool isSigned() const final { return false; }
 
 private:
     const int m_bits;
@@ -211,10 +216,10 @@ public:
         return type->kind() == TypeKind::Function;
     }
 
-    virtual llvm::Type *llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 
-    const TypeRoot* retType() const { return m_retType; }
-    const std::vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
+    [[nodiscard]] const TypeRoot* retType() const { return m_retType; }
+    [[nodiscard]] const std::vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
 
 private:
     const TypeRoot* m_retType;
@@ -235,7 +240,7 @@ public:
         return type->kind() == TypeKind::ZString;
     }
 
-    virtual llvm::Type *llvm();
+    [[nodiscard]] llvm::Type* genLlvmType() const final;
 };
 
 

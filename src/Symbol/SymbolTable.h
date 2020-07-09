@@ -9,22 +9,23 @@ namespace lbc {
 class Symbol;
 
 class SymbolTable final {
+    NON_COPYABLE(SymbolTable)
 public:
     using Storage = std::unordered_map<string_view, unique_ptr<Symbol>>;
     using iterator = Storage::iterator;
 
-    SymbolTable(SymbolTable * parent = nullptr);
-    ~SymbolTable();
+    explicit SymbolTable(SymbolTable * parent = nullptr): m_parent{parent} {}
+    ~SymbolTable() = default;
 
     iterator begin() { return m_symbols.begin(); }
     iterator end() { return m_symbols.end(); }
 
-    SymbolTable * parent() const { return m_parent; }
+    [[nodiscard]] SymbolTable * parent() const { return m_parent; }
 
     Symbol * insert(unique_ptr<Symbol>&& symbol);
 
-    bool exists(const string_view& name, bool recursive = false);
-    Symbol* find(const string_view& id, bool recursive = true);
+    [[nodiscard]] bool exists(const string_view& name, bool recursive = false) const;
+    [[nodiscard]] Symbol* find(const string_view& id, bool recursive = true) const;
 
 private:
     SymbolTable* m_parent;

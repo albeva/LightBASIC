@@ -27,18 +27,10 @@ public:
     Token(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc)
         : m_kind{kind}, m_lexeme{lexeme}, m_loc{loc} {}
 
-    [[nodiscard]] inline TokenKind kind() const {
-        return m_kind;
-    }
+    [[nodiscard]] inline TokenKind kind() const { return m_kind; }
+    [[nodiscard]] inline const string_view& lexeme() const { return m_lexeme; }
 
-    [[nodiscard]] inline const string_view& lexeme() const {
-        return m_lexeme;
-    }
-
-    [[nodiscard]] inline const llvm::SMLoc& loc() const {
-        return m_loc;
-    }
-
+    [[nodiscard]] inline const llvm::SMLoc& loc() const { return m_loc; }
     [[nodiscard]] llvm::SMRange range() const;
 
     [[nodiscard]] const string_view& description() const;
