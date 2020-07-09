@@ -29,7 +29,7 @@ template<typename T, std::enable_if_t<
 struct ValueRestorer {
     NON_COPYABLE(ValueRestorer)
 
-    explicit ValueRestorer(T& value): m_target{value}, m_value{value} {}
+    explicit ValueRestorer(T& value) : m_target{value}, m_value{value} {}
 
     // restore
     ~ValueRestorer() {
@@ -38,8 +38,8 @@ struct ValueRestorer {
 
     // members
 private:
-    T & m_target;
-    T   m_value;
+    T& m_target;
+    T m_value;
 };
 
 #define CONCATENATE_DETAIL(x, y) x##y

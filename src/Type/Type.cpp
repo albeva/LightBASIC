@@ -13,9 +13,9 @@ std::vector<unique_ptr<const TypeInteger>> declaredInts;
 std::vector<unique_ptr<const TypeFloatingPoint>> declaredFPs;
 
 // Commonly used types
-const TypeVoid          voidTy;             // VOID
-const TypeAny           anyTy;              // Any type
-const TypePointer       anyPtrTy{ &anyTy }; // void*
+const TypeVoid voidTy;              // VOID
+const TypeAny anyTy;                // Any type
+const TypePointer anyPtrTy{&anyTy}; // void*
 
 // primitives
 #define DEFINE_TYPE(id, str, kind) \
@@ -91,7 +91,7 @@ llvm::Type *TypeBool::genLlvmType() const {
 const TypeInteger *TypeInteger::get(int bits, bool isSigned) {
     #define USE_TYPE(id, str, kind, BITS, IS_SIGNED) \
         if (bits == BITS && isSigned == IS_SIGNED) return &id##Ty;
-        INTEGER_TYPES(USE_TYPE)
+    INTEGER_TYPES(USE_TYPE)
     #undef USE_TYPE
 
     for (const auto& ptr: declaredInts) {
@@ -112,7 +112,7 @@ llvm::Type *TypeInteger::genLlvmType() const {
 const TypeFloatingPoint *TypeFloatingPoint::get(int bits) {
     #define USE_TYPE(id, str, kind, BITS) \
         if (bits == BITS) { return &id##Ty; }
-        FLOATINGPOINT_TYPES(USE_TYPE)
+    FLOATINGPOINT_TYPES(USE_TYPE)
     #undef USE_TYPE
 
     for (const auto& ptr: declaredFPs) {
@@ -130,7 +130,7 @@ llvm::Type *TypeFloatingPoint::genLlvmType() const {
 
 // Function
 
-const TypeFunction *TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes) {
+const TypeFunction *TypeFunction::get(const TypeRoot *retType, std::vector<const TypeRoot *>&& paramTypes) {
     for (const auto& ptr: declaredFunc) {
         if (ptr->retType() == retType && ptr->paramTypes() == paramTypes) {
             return ptr.get();

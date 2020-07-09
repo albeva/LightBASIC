@@ -386,10 +386,10 @@ unique_ptr<Token> Parser::accept(TokenKind kind) {
 unique_ptr<Token> Parser::expect(TokenKind kind) {
     if (!match(kind)) {
         error(llvm::Twine("Expected '")
-            .concat(view_to_stringRef(Token::description(kind)))
-            .concat("' got '")
-            .concat(view_to_stringRef(m_token->description()))
-            .concat("'")
+                  .concat(view_to_stringRef(Token::description(kind)))
+                  .concat("' got '")
+                  .concat(view_to_stringRef(m_token->description()))
+                  .concat("'")
         );
     }
     return move();

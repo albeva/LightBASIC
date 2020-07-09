@@ -5,7 +5,7 @@
 #include "Symbol.h"
 using namespace lbc;
 
-Symbol* SymbolTable::insert(unique_ptr<Symbol>&& symbol) {
+Symbol *SymbolTable::insert(unique_ptr<Symbol>&& symbol) {
     return m_symbols.emplace(symbol->name(), std::move(symbol)).first->second.get();
 }
 

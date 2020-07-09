@@ -7,7 +7,7 @@
 
 namespace lbc {
 
-class CodeGen final: public AstVisitor {
+class CodeGen final : public AstVisitor {
 public:
     explicit CodeGen(llvm::LLVMContext& context);
 
@@ -16,14 +16,14 @@ public:
     #undef IMPL_VISITOR
 
 private:
-    llvm::Function* getOrCreate(AstCallExpr* ast);
+    llvm::Function *getOrCreate(AstCallExpr *ast);
 
     llvm::LLVMContext& m_context;
     llvm::IRBuilder<> m_builder;
     unique_ptr<llvm::Module> m_module;
-    llvm::Value* m_value = nullptr;
-    llvm::Function* m_function = nullptr;
-    llvm::BasicBlock* m_block = nullptr;
+    llvm::Value *m_value = nullptr;
+    llvm::Function *m_function = nullptr;
+    llvm::BasicBlock *m_block = nullptr;
     std::unordered_map<string, llvm::Value *> m_values;
 };
 

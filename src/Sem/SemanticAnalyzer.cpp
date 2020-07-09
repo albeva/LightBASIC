@@ -16,7 +16,7 @@ static void error(const string& message) {
 }
 
 SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context)
-: m_context{context} {}
+    : m_context{context} {}
 
 void SemanticAnalyzer::visit(AstProgram *ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
@@ -57,7 +57,7 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
     }
 
     // parameters
-    std::vector<const TypeRoot*> paramTypes;
+    std::vector<const TypeRoot *> paramTypes;
     paramTypes.reserve(ast->params.size());
     {
         RESTORE_ON_EXIT(m_table);
@@ -70,7 +70,7 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
     }
 
     // return type. subs don't have one so default to Void
-    const TypeRoot* retType = nullptr;
+    const TypeRoot *retType = nullptr;
     if (ast->type) {
         ast->type->accept(this);
         retType = m_type;
@@ -104,27 +104,28 @@ void SemanticAnalyzer::visit(AstAttribute *ast) {
 }
 
 void SemanticAnalyzer::visit(AstTypeExpr *ast) {
-    switch (ast->token->kind()) {
-        #define CASE_PRIMITIVE(id, str, kind, ...) case TokenKind::id: \
+    #define CASE_PRIMITIVE(id, str, kind, ...) case TokenKind::id: \
             m_type = Type##kind::get(); \
             return;
-        PRIMITIVE_TYPES(CASE_PRIMITIVE)
-        #undef TO_PRIMITIVE_TYPE
-
-        #define CASE_INTEGER(id, str, kind, bits, isSigned, ...) case TokenKind::id: \
+    #define CASE_INTEGER(id, str, kind, bits, isSigned, ...) case TokenKind::id: \
             m_type = Type##kind::get(bits, isSigned); \
             return;
-        INTEGER_TYPES(CASE_INTEGER)
-        #undef CASE_INTEGER
-
-        #define CASE_FLOATINGPOINT(id, str, kind, bits, ...) case TokenKind::id: \
+    #define CASE_FLOATINGPOINT(id, str, kind, bits, ...) case TokenKind::id: \
             m_type = Type##kind::get(bits); \
             return;
-        FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
-        #undef CASE_INTEGER
+
+    switch (ast->token->kind()) {
+    PRIMITIVE_TYPES(CASE_PRIMITIVE)
+    INTEGER_TYPES(CASE_INTEGER)
+    FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
     default:
         error("Unknown type "s + string(ast->token->lexeme()));
     }
+
+    #undef TO_PRIMITIVE_TYPE
+    #undef CASE_INTEGER
+    #undef CASE_INTEGER
+
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr *ast) {

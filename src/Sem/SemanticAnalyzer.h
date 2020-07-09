@@ -12,7 +12,7 @@ class Symbol;
 class SymbolTable;
 class TypeRoot;
 
-class SemanticAnalyzer final: public AstVisitor {
+class SemanticAnalyzer final : public AstVisitor {
 public:
     explicit SemanticAnalyzer(llvm::LLVMContext& context);
 
@@ -23,9 +23,9 @@ public:
 private:
     llvm::LLVMContext& m_context;
     string_view m_identifier;
-    SymbolTable* m_table = nullptr;
-    const TypeRoot* m_type = nullptr;
-    Symbol* m_symbol = nullptr;
+    SymbolTable *m_table = nullptr;
+    const TypeRoot *m_type = nullptr;
+    Symbol *m_symbol = nullptr;
 };
 
 } // namespace lbc

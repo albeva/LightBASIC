@@ -19,17 +19,17 @@ AST_FORWARD_DECLARE()
 enum class AstKind {
     #define KIND_ENUM(id, ...) id,
     Stmt,
-        AST_STMT_NODES(KIND_ENUM)
-        Decl,
-            AST_DECL_NODES(KIND_ENUM)
-        DeclLast,
+    AST_STMT_NODES(KIND_ENUM)
+    Decl,
+    AST_DECL_NODES(KIND_ENUM)
+    DeclLast,
     StmtLast,
 
     AST_ATTRIB_NODES(KIND_ENUM)
     AST_TYPE_NODES(KIND_ENUM)
 
     Expr,
-        AST_EXPR_NODES(KIND_ENUM)
+    AST_EXPR_NODES(KIND_ENUM)
     ExprLast
     #undef KIND_ENUM
 };
@@ -69,7 +69,7 @@ public:
     }
 };
 
-class AstDecl: public AstStmt {
+class AstDecl : public AstStmt {
 public:
     using AstStmt::AstStmt;
 

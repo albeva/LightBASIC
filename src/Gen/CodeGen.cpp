@@ -14,7 +14,7 @@ static void error(const string& message) {
 }
 
 CodeGen::CodeGen(llvm::LLVMContext& context)
-: m_context{context}, m_builder{context} {}
+    : m_context{context}, m_builder{context} {}
 
 void CodeGen::visit(AstProgram *ast) {
     m_module = make_unique<llvm::Module>("app", m_context);
@@ -58,7 +58,7 @@ void CodeGen::visit(AstExprStmt *ast) {
 }
 
 void CodeGen::visit(AstVarDecl *ast) {
-    llvm::Constant* constant = nullptr;
+    llvm::Constant *constant = nullptr;
     if (const auto *expr = llvm::dyn_cast<AstLiteralExpr>(ast->expr.get())) {
         switch (expr->token->kind()) {
         case TokenKind::StringLiteral:
@@ -126,7 +126,7 @@ void CodeGen::visit(AstCallExpr *ast) {
         error("Unknown function");
     }
 
-    std::vector<llvm::Value*> args;
+    std::vector<llvm::Value *> args;
     args.reserve(ast->arguments.size());
     for (const auto& arg: ast->arguments) {
         if (auto *id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
@@ -145,7 +145,7 @@ void CodeGen::visit(AstCallExpr *ast) {
     inst->setTailCall(false);
 }
 
-llvm::Function* CodeGen::getOrCreate(AstCallExpr* ast) {
+llvm::Function *CodeGen::getOrCreate(AstCallExpr *ast) {
     auto name = string(ast->ident->token->lexeme());
     if (name == "print") {
         auto iter = m_values.find(name);
