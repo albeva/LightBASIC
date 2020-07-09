@@ -95,7 +95,7 @@ public:
 
 #define DECLARE_END \
     }               \
-    ; // class
+    ;
 
 //----------------------------------------
 // Statements
@@ -103,7 +103,7 @@ public:
 
 DECLARE_AST(Program, Stmt)
     unique_ptr<SymbolTable> symbolTable;
-    unique_ptr<AstStmtList> body;
+    unique_ptr<AstStmtList> stmtList;
 DECLARE_END
 
 DECLARE_AST(StmtList, Stmt)
@@ -115,7 +115,7 @@ DECLARE_AST(ExprStmt, Stmt)
 DECLARE_END
 
 DECLARE_AST(AssignStmt, Stmt)
-    unique_ptr<AstIdentExpr> ident;
+    unique_ptr<AstIdentExpr> identExpr;
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
@@ -123,12 +123,14 @@ DECLARE_END
 // Attributes
 //----------------------------------------
 DECLARE_AST(AttributeList, Root)
+    [[nodiscard]] const Token* getStringLiteral(const string_view& key) const;
+
     std::vector<unique_ptr<AstAttribute>> attribs;
 DECLARE_END
 
 DECLARE_AST(Attribute, Root)
-    unique_ptr<AstIdentExpr> ident;
-    std::vector<unique_ptr<AstLiteralExpr>> arguments;
+    unique_ptr<AstIdentExpr> identExpr;
+    std::vector<unique_ptr<AstLiteralExpr>> argExprs;
 DECLARE_END
 
 //----------------------------------------
@@ -136,21 +138,27 @@ DECLARE_END
 //----------------------------------------
 
 DECLARE_AST(VarDecl, Decl)
-    unique_ptr<AstIdentExpr> ident;
-    unique_ptr<AstTypeExpr> type;
+    unique_ptr<AstIdentExpr> identExpr;
+    unique_ptr<AstTypeExpr> typeExpr;
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
 DECLARE_AST(FuncDecl, Decl)
-    unique_ptr<AstIdentExpr> ident;
-    std::vector<unique_ptr<AstFuncParamDecl>> params;
-    unique_ptr<AstTypeExpr> type;
+    // identifier
+    unique_ptr<AstIdentExpr> identExpr;
+    // declared parameters
+    std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
+    // declared typeExpr
+    unique_ptr<AstTypeExpr> retTypeExpr;
+    // scope symbol table for parameters
     unique_ptr<SymbolTable> symbolTable;
+    // symbol for this declaration
+    Symbol* symbol = nullptr;
 DECLARE_END
 
 DECLARE_AST(FuncParamDecl, Decl)
-    unique_ptr<AstIdentExpr> ident;
-    unique_ptr<AstTypeExpr> type;
+    unique_ptr<AstIdentExpr> identExpr;
+    unique_ptr<AstTypeExpr> typeExpr;
 DECLARE_END
 
 //----------------------------------------
@@ -158,6 +166,7 @@ DECLARE_END
 //----------------------------------------
 DECLARE_AST(TypeExpr, Root)
     unique_ptr<Token> token;
+    const TypeRoot* type = nullptr;
 DECLARE_END
 
 //----------------------------------------
@@ -169,12 +178,13 @@ DECLARE_AST(IdentExpr, Expr)
 DECLARE_END
 
 DECLARE_AST(CallExpr, Expr)
-    unique_ptr<AstIdentExpr> ident;
-    std::vector<unique_ptr<AstExpr>> arguments;
+    unique_ptr<AstIdentExpr> identExpr;
+    std::vector<unique_ptr<AstExpr>> argExprs;
 DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
     unique_ptr<Token> token;
+    const TypeRoot* type = nullptr;
 DECLARE_END
 
 #undef DECLARE_AST

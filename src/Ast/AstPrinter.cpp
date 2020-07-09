@@ -7,7 +7,7 @@
 using namespace lbc;
 
 void AstPrinter::visit(AstProgram* ast) {
-    ast->body->accept(this);
+    ast->stmtList->accept(this);
 }
 
 // Statements
@@ -20,7 +20,7 @@ void AstPrinter::visit(AstStmtList* ast) {
 }
 
 void AstPrinter::visit(AstAssignStmt* ast) {
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
     std::cout << " = ";
     ast->expr->accept(this);
 }
@@ -46,14 +46,14 @@ void AstPrinter::visit(AstAttributeList* ast) {
 }
 
 void AstPrinter::visit(AstAttribute* ast) {
-    ast->ident->accept(this);
-    if (ast->arguments.size() == 1) {
+    ast->identExpr->accept(this);
+    if (ast->argExprs.size() == 1) {
         std::cout << " = ";
-        ast->arguments[0]->accept(this);
-    } else if (ast->arguments.size() > 1) {
+        ast->argExprs[0]->accept(this);
+    } else if (ast->argExprs.size() > 1) {
         bool isFirst = true;
         std::cout << "(";
-        for (const auto& arg : ast->arguments) {
+        for (const auto& arg : ast->argExprs) {
             if (isFirst) {
                 isFirst = false;
             } else {
@@ -78,11 +78,11 @@ void AstPrinter::visit(AstVarDecl* ast) {
     }
 
     std::cout << "VAR ";
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
 
-    if (ast->type) {
+    if (ast->typeExpr) {
         std::cout << " AS ";
-        ast->type->accept(this);
+        ast->typeExpr->accept(this);
     }
 
     if (ast->expr) {
@@ -97,17 +97,17 @@ void AstPrinter::visit(AstFuncDecl* ast) {
         std::cout << " _" << '\n';
     }
 
-    if (ast->type) {
+    if (ast->retTypeExpr) {
         std::cout << "FUNCTION ";
     } else {
         std::cout << "SUB ";
     }
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
 
-    if (!ast->params.empty()) {
+    if (!ast->paramDecls.empty()) {
         std::cout << "(";
         bool isFirst = true;
-        for (const auto& param : ast->params) {
+        for (const auto& param : ast->paramDecls) {
             if (isFirst) {
                 isFirst = false;
             } else {
@@ -118,16 +118,16 @@ void AstPrinter::visit(AstFuncDecl* ast) {
         std::cout << ")";
     }
 
-    if (ast->type) {
+    if (ast->retTypeExpr) {
         std::cout << " AS ";
-        ast->type->accept(this);
+        ast->retTypeExpr->accept(this);
     }
 }
 
 void AstPrinter::visit(AstFuncParamDecl* ast) {
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
     std::cout << " AS ";
-    ast->type->accept(this);
+    ast->typeExpr->accept(this);
 }
 
 // Expressions
@@ -137,10 +137,10 @@ void AstPrinter::visit(AstIdentExpr* ast) {
 }
 
 void AstPrinter::visit(AstCallExpr* ast) {
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
     std::cout << "(";
     bool isFirst = true;
-    for (const auto& arg : ast->arguments) {
+    for (const auto& arg : ast->argExprs) {
         if (isFirst) {
             isFirst = false;
         } else {

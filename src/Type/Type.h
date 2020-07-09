@@ -8,9 +8,9 @@
 namespace lbc {
 
 enum class TypeKind {
-    Void,    // Void, lack of type
+    Void,    // Void, lack of typeExpr
     Any,     // any ptr, null
-    Pointer, // Ptr to another type
+    Pointer, // Ptr to another typeExpr
 
     Number,        // A number
     Bool,          // true / false
@@ -30,9 +30,10 @@ class TypeInteger;
 class TypeFloatingPoint;
 class TypeFunction;
 class TypeZString;
+enum class TokenKind;
 
 /**
- * Base type is root for all lb types
+ * Base typeExpr is root for all lb types
  *
  * It uses llvm custom rtti system
  */
@@ -50,6 +51,8 @@ public:
         return m_llvmType;
     }
 
+    static const TypeRoot* fromTokenKind(TokenKind kind);
+
 protected:
     explicit TypeRoot(TypeKind kind) : m_kind{ kind } {}
 
@@ -61,7 +64,7 @@ private:
 };
 
 /**
- * Void, lack of type. Cannot be used for C style `void*`
+ * Void, lack of typeExpr. Cannot be used for C style `void*`
  * Use `Any Ptr` for this
  */
 class TypeVoid final : public TypeRoot {
@@ -78,7 +81,7 @@ protected:
 };
 
 /**
- * Void, lack of type. Cannot be used for C style `void*`
+ * Void, lack of typeExpr. Cannot be used for C style `void*`
  * Use `Any Ptr` for this
  */
 class TypeAny final : public TypeRoot {
@@ -95,7 +98,7 @@ protected:
 };
 
 /**
- * Pointer to another type
+ * Pointer to another typeExpr
  */
 class TypePointer final : public TypeRoot {
 public:
@@ -207,7 +210,7 @@ private:
 };
 
 /**
- * Function type
+ * Function typeExpr
  */
 class TypeFunction final : public TypeRoot {
 public:

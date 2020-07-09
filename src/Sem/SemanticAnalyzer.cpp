@@ -21,11 +21,11 @@ void SemanticAnalyzer::visit(AstProgram* ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
     m_table = ast->symbolTable.get();
-    ast->body->accept(this);
+    ast->stmtList->accept(this);
 }
 
 void SemanticAnalyzer::visit(AstStmtList* ast) {
-    for (const auto& stmt : ast->stmts) {
+    for (auto& stmt : ast->stmts) {
         stmt->accept(this);
     }
 }
@@ -47,7 +47,7 @@ void SemanticAnalyzer::visit(AstVarDecl* ast) {
  */
 void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     // name
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
     auto name = m_identifier;
 
     // already declared?
@@ -57,21 +57,21 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
-    paramTypes.reserve(ast->params.size());
+    paramTypes.reserve(ast->paramDecls.size());
     {
         RESTORE_ON_EXIT(m_table);
         ast->symbolTable = make_unique<SymbolTable>(nullptr);
         m_table = ast->symbolTable.get();
-        for (auto& param : ast->params) {
+        for (auto& param : ast->paramDecls) {
             param->accept(this);
             paramTypes.emplace_back(m_type);
         }
     }
 
-    // return type. subs don't have one so default to Void
+    // return typeExpr. subs don't have one so default to Void
     const TypeRoot* retType = nullptr;
-    if (ast->type) {
-        ast->type->accept(this);
+    if (ast->retTypeExpr) {
+        ast->retTypeExpr->accept(this);
         retType = m_type;
     } else {
         retType = TypeVoid::get();
@@ -80,53 +80,43 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     // create function symbol
     m_type = TypeFunction::get(retType, std::move(paramTypes));
     m_symbol = m_table->insert(make_unique<Symbol>(name, m_type));
+    ast->symbol = m_symbol;
+
+    // alias?
+    if (ast->attribs) {
+        if (const auto* token = ast->attribs->getStringLiteral("ALIAS")) {
+            m_symbol->setAlias(token->lexeme());
+        }
+    }
 }
 
 void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
-    ast->ident->accept(this);
+    ast->identExpr->accept(this);
     auto name = m_identifier;
 
     if (m_table->exists(name)) {
         error("duplicate parameter "s + string(name));
     }
 
-    ast->type->accept(this);
+    ast->typeExpr->accept(this);
     m_symbol = m_table->insert(make_unique<Symbol>(name, m_type));
 }
 
 void SemanticAnalyzer::visit(AstAttributeList* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    for (auto& attrib: ast->attribs) {
+        attrib->accept(this);
+    }
 }
 
 void SemanticAnalyzer::visit(AstAttribute* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    for (auto& arg: ast->argExprs) {
+        arg->accept(this);
+    }
 }
 
 void SemanticAnalyzer::visit(AstTypeExpr* ast) {
-#define CASE_PRIMITIVE(id, str, kind, ...) \
-    case TokenKind::id:                    \
-        m_type = Type##kind::get();        \
-        return;
-#define CASE_INTEGER(id, str, kind, bits, isSigned, ...) \
-    case TokenKind::id:                                  \
-        m_type = Type##kind::get(bits, isSigned);        \
-        return;
-#define CASE_FLOATINGPOINT(id, str, kind, bits, ...) \
-    case TokenKind::id:                              \
-        m_type = Type##kind::get(bits);              \
-        return;
-
-    switch (ast->token->kind()) {
-        PRIMITIVE_TYPES(CASE_PRIMITIVE)
-        INTEGER_TYPES(CASE_INTEGER)
-        FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
-    default:
-        error("Unknown type "s + string(ast->token->lexeme()));
-    }
-
-#undef TO_PRIMITIVE_TYPE
-#undef CASE_INTEGER
-#undef CASE_INTEGER
+    m_type = TypeRoot::fromTokenKind(ast->token->kind());
+    ast->type = m_type;
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr* ast) {
@@ -138,5 +128,19 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) {
 }
 
 void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    switch (ast->token->kind()) {
+    case TokenKind::StringLiteral:
+        ast->type = TypeZString::get();
+        break;
+    case TokenKind::BooleanLiteral:
+        ast->type = TypeBool::get();
+        break;
+    case TokenKind::NullLiteral:
+        ast->type = TypePointer::get(TypeAny::get());
+        break;
+    case TokenKind::NumberLiteral:
+        ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
+    default:
+        error("Unsupported literal typeExpr");
+    }
 }

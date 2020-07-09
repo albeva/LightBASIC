@@ -28,7 +28,7 @@ void CodeGen::visit(AstProgram* ast) {
 
     m_block = llvm::BasicBlock::Create(m_context, "", m_function);
 
-    ast->body->accept(this);
+    ast->stmtList->accept(this);
 
     llvm::ReturnInst::Create(m_module->getContext(), nullptr, m_block);
 
@@ -66,14 +66,14 @@ void CodeGen::visit(AstVarDecl* ast) {
             true);
             break;
         default:
-            error("Unsupported expression type");
+            error("Unsupported expression typeExpr");
             break;
         }
     } else {
-        error("Unsupported expression type");
+        error("Unsupported expression typeExpr");
     }
 
-    auto name = string(ast->ident->token->lexeme());
+    auto name = string(ast->identExpr->token->lexeme());
     auto* value = new llvm::GlobalVariable(
     *m_module,
     constant->getType(),
@@ -123,8 +123,8 @@ void CodeGen::visit(AstCallExpr* ast) {
     }
 
     std::vector<llvm::Value*> args;
-    args.reserve(ast->arguments.size());
-    for (const auto& arg : ast->arguments) {
+    args.reserve(ast->argExprs.size());
+    for (const auto& arg : ast->argExprs) {
         if (auto* id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
             auto iter = m_values.find(string(id->token->lexeme()));
             if (iter != m_values.end()) {
@@ -142,7 +142,7 @@ void CodeGen::visit(AstCallExpr* ast) {
 }
 
 llvm::Function* CodeGen::getOrCreate(AstCallExpr* ast) {
-    auto name = string(ast->ident->token->lexeme());
+    auto name = string(ast->identExpr->token->lexeme());
     if (name == "print") {
         auto iter = m_values.find(name);
         if (iter == m_values.end()) {

@@ -21,7 +21,7 @@ Parser::~Parser() = default;
  */
 unique_ptr<AstProgram> Parser::parse() {
     auto program = AstProgram::create();
-    program->body = stmtList();
+    program->stmtList = stmtList();
 
     return program;
 }
@@ -65,7 +65,7 @@ unique_ptr<AstStmt> Parser::statement() {
 }
 
 /**
- * assignStmt = ident '=' expression .
+ * assignStmt = identExpr '=' expression .
  */
 unique_ptr<AstAssignStmt> Parser::assignStmt() {
     auto ident = identifier();
@@ -73,7 +73,7 @@ unique_ptr<AstAssignStmt> Parser::assignStmt() {
     auto expr = expression();
 
     auto assign = AstAssignStmt::create();
-    assign->ident = std::move(ident);
+    assign->identExpr = std::move(ident);
     assign->expr = std::move(expr);
     return assign;
 }
@@ -87,11 +87,11 @@ unique_ptr<AstAssignStmt> Parser::assignStmt() {
  */
 unique_ptr<AstExprStmt> Parser::callStmt() {
     auto call = AstCallExpr::create();
-    call->ident = identifier();
+    call->identExpr = identifier();
 
     bool parens = accept(TokenKind::ParenOpen) != nullptr;
 
-    call->arguments = expressionList();
+    call->argExprs = expressionList();
 
     if (parens) {
         expect(TokenKind::ParenClose);
@@ -155,10 +155,10 @@ unique_ptr<AstAttributeList> Parser::attributeList() {
  */
 unique_ptr<AstAttribute> Parser::attribute() {
     auto attrib = AstAttribute::create();
-    attrib->ident = identifier();
+    attrib->identExpr = identifier();
 
     if (*m_token == TokenKind::Assign || *m_token == TokenKind::ParenOpen) {
-        attrib->arguments = attributeArgumentList();
+        attrib->argExprs = attributeArgumentList();
     }
 
     return attrib;
@@ -210,8 +210,8 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
     }
 
     auto var = AstVarDecl::create();
-    var->ident = std::move(id);
-    var->type = std::move(type);
+    var->identExpr = std::move(id);
+    var->typeExpr = std::move(type);
     var->expr = std::move(expr);
     return var;
 }
@@ -234,16 +234,16 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
         expect(TokenKind::Sub);
     }
 
-    func->ident = identifier();
+    func->identExpr = identifier();
 
     if (accept(TokenKind::ParenOpen)) {
-        func->params = funcParams();
+        func->paramDecls = funcParams();
         expect(TokenKind::ParenClose);
     }
 
     if (isFunc) {
         expect(TokenKind::As);
-        func->type = typeExpr();
+        func->retTypeExpr = typeExpr();
     }
 
     return func;
@@ -261,8 +261,8 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
         auto type = typeExpr();
 
         auto param = AstFuncParamDecl::create();
-        param->ident = std::move(id);
-        param->type = std::move(type);
+        param->identExpr = std::move(id);
+        param->typeExpr = std::move(type);
         params.push_back(std::move(param));
 
         if (!accept(TokenKind::Comma)) {
@@ -285,7 +285,7 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() {
         return type;
     }
     default:
-        error("Expected type");
+        error("Expected typeExpr");
     }
 }
 
@@ -316,7 +316,7 @@ unique_ptr<AstExpr> Parser::expression() {
 }
 
 /**
- * ident = identifier .
+ * identExpr = identifier .
  */
 unique_ptr<AstIdentExpr> Parser::identifier() {
     auto id = AstIdentExpr::create();
@@ -329,10 +329,10 @@ unique_ptr<AstIdentExpr> Parser::identifier() {
  */
 unique_ptr<AstCallExpr> Parser::callExpr() {
     auto call = AstCallExpr::create();
-    call->ident = identifier();
+    call->identExpr = identifier();
 
     expect(TokenKind::ParenOpen);
-    call->arguments = expressionList();
+    call->argExprs = expressionList();
     expect(TokenKind::ParenClose);
 
     return call;

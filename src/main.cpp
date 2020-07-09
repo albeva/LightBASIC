@@ -51,10 +51,10 @@ int main(int argc, char* argv[]) {
     if (auto ast = parser.parse()) {
         AstPrinter printer;
         ast->accept(&printer);
-        //        llvm::LLVMContext context;
 
-        //        SemanticAnalyzer sem(context);
-        //        ast->accept(&sem);
+        llvm::LLVMContext context;
+        SemanticAnalyzer sem(context);
+        ast->accept(&sem);
 
         // CodeGen gen(context);
         // ast->accept(&gen);

@@ -2,6 +2,7 @@
 // Created by Albert on 07/07/2020.
 //
 #include "Type.h"
+#include "Lexer/Token.h"
 using namespace lbc;
 
 namespace {
@@ -14,7 +15,7 @@ std::vector<unique_ptr<const TypeFloatingPoint>> declaredFPs;
 
 // Commonly used types
 const TypeVoid voidTy;                // VOID
-const TypeAny anyTy;                  // Any type
+const TypeAny anyTy;                  // Any typeExpr
 const TypePointer anyPtrTy{ &anyTy }; // void*
 
 // primitives
@@ -36,6 +37,31 @@ FLOATINGPOINT_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 } // namespace
+
+const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
+#define CASE_PRIMITIVE(id, str, KIND, ...) \
+    case TokenKind::id:                    \
+        return Type##KIND::get();
+#define CASE_INTEGER(id, str, KIND, bits, isSigned, ...) \
+    case TokenKind::id:                                  \
+        return Type##KIND::get(bits, isSigned);
+#define CASE_FLOATINGPOINT(id, str, KIND, bits, ...) \
+    case TokenKind::id:                              \
+        return Type##KIND::get(bits);
+
+    switch (kind) {
+    PRIMITIVE_TYPES(CASE_PRIMITIVE)
+    INTEGER_TYPES(CASE_INTEGER)
+    FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
+    default:
+        std::cerr << "Unknown typeExpr "s + string(Token::description(kind));
+        std::exit(EXIT_FAILURE);
+    }
+
+#undef TO_PRIMITIVE_TYPE
+#undef CASE_INTEGER
+#undef CASE_INTEGER
+}
 
 // Void
 

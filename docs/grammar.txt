@@ -11,7 +11,7 @@ Declaration     = [ AttributeList ]
                 .
 AttributeList   = "[" Attribute { ","  Attribute } "]"
                 .
-Attribute       = ident [ AttribParamList ]
+Attribute       = identExpr [ AttribParamList ]
                 .
 AttribParamList = "=" AttribParam
                 | "(" [ AttribParam { "," AttribParam } ] ")"
@@ -21,17 +21,17 @@ AttribParam     = IntegerLiteral
                 | BooleanLiteral
                 | NullLiteral
                 .
-VAR             = "VAR" ident [ "AS" TypeExpr ] "=" Expression
+VAR             = "VAR" identExpr [ "AS" TypeExpr ] "=" Expression
                 .
 FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
                 .
-FuncSignature   = "FUNCTION" ident [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
+FuncSignature   = "FUNCTION" identExpr [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
                 .
-SubSignature    = "SUB" ident [ "(" FuncParamList ")" ]
+SubSignature    = "SUB" identExpr [ "(" FuncParamList ")" ]
                 .
 FuncParamList   = FuncParam { "," FuncParam }
                 .
-FuncParam       = ident "AS" TypeExpr
+FuncParam       = identExpr "AS" TypeExpr
                 .
 TypeExpr        = ("INTEGER" | "ZSTRING")
                 .
@@ -55,7 +55,7 @@ Statement       = DIM
                 .
 AssignStmt      = Expression "=" Expression
                 .
-CallStmt        = ident
+CallStmt        = identExpr
                 ( "(" [ funcArgList ] ")"
                 | [ funcArgList ] )
                 .
@@ -71,7 +71,7 @@ IfStmt          = "IF" Expression "THEN"
                   ]
                   "END" "IF"
                 .
-ForStmt         = "FOR" ( identifier [ "AS" TypeExpr] | "VAR" ident | Expression )
+ForStmt         = "FOR" ( identifier [ "AS" TypeExpr] | "VAR" identExpr | Expression )
                   "=" Expression "TO" Expression [ "STEP" Expression ]
                   StatementList
                   "NEXT"
@@ -80,20 +80,20 @@ Expression      = IntegerLiteral
                 | FloatingPointLiteral
                 | StringLiteral
                 | CallExpr
-                | ident
+                | identExpr
                 | AddressOf
                 | Dereference
                 | BinaryExpression      (. this is broken. will use a expression parser anyway. so ebnf won't work .)
                 .
 BinaryExpression= Expression Op Expression
                 .
-CallExpr        = ident "(" [ funcArgList ] ")"
+CallExpr        = identExpr "(" [ funcArgList ] ")"
                 .
 funcArgList     = Expression { "," Expression }
                 .
 ReturnStmt      = "RETURN" Expression
                 .
-AddressOf       = "&" ident
+AddressOf       = "&" identExpr
                 .
 Dereference     = "*" Expression
                 .
