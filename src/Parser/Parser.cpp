@@ -176,8 +176,9 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
     } else if (accept(TokenKind::ParenOpen)) {
         while (isValid() && *m_token != TokenKind::ParenClose) {
             args.emplace_back(literal());
-            if (!accept(TokenKind::Comma))
+            if (!accept(TokenKind::Comma)) {
                 break;
+            }
         }
         expect(TokenKind::ParenClose);
     }
@@ -225,7 +226,7 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
     auto func = AstFuncDecl::create();
     expect(TokenKind::Declare);
 
-    bool isFunc;
+    bool isFunc = false;
     if (accept(TokenKind::Function)) {
         isFunc = true;
     } else {
@@ -264,8 +265,9 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
         param->type = std::move(type);
         params.push_back(std::move(param));
 
-        if (!accept(TokenKind::Comma))
+        if (!accept(TokenKind::Comma)) {
             break;
+        }
     }
     return params;
 }
@@ -337,13 +339,12 @@ unique_ptr<AstCallExpr> Parser::callExpr() {
 }
 
 unique_ptr<AstLiteralExpr> Parser::literal() {
-    if (m_token->isLiteral()) {
-        auto lit = AstLiteralExpr::create();
-        lit->token = move();
-        return lit;
-    } else {
+    if (!m_token->isLiteral()) {
         error("Expected literal");
     }
+    auto lit = AstLiteralExpr::create();
+    lit->token = move();
+    return lit;
 }
 
 /**
@@ -368,7 +369,6 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
 //----------------------------------------
 
 bool Parser::isValid() const {
-    assert(m_token);
     return *m_token != TokenKind::EndOfFile;
 }
 

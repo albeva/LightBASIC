@@ -35,7 +35,7 @@ constexpr std::array kindToDescription{
 #undef IMPL_LITERAL
 };
 
-unordered_set<string> uppercasedIds; // NOLINT
+unordered_set<string> uppercasedIds;
 
 } // namespace
 

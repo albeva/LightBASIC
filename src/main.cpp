@@ -49,12 +49,12 @@ int main(int argc, char *argv[]) {
     // Lex the input
     Parser parser{srcMgr, ID};
     if (auto ast = parser.parse()) {
-//        AstPrinter printer;
-//        ast->accept(&printer);
-        llvm::LLVMContext context;
+        AstPrinter printer;
+        ast->accept(&printer);
+//        llvm::LLVMContext context;
 
-        SemanticAnalyzer sem(context);
-        ast->accept(&sem);
+//        SemanticAnalyzer sem(context);
+//        ast->accept(&sem);
 
         // CodeGen gen(context);
         // ast->accept(&gen);
