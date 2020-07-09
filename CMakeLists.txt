@@ -43,15 +43,30 @@ add_executable(lbc
         src/Sem/SemanticAnalyzer.cpp
         src/Sem/SemanticAnalyzer.h
         )
+
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)
 target_link_libraries(lbc ${llvm_libs})
 target_compile_options(lbc PRIVATE
         -fno-exceptions -fno-rtti
-        -Werror -Wall -Wextra -pedantic-errors -Wconversion -Wsign-conversion
+
+        -Werror
+        -Wall
+        -Wextra
+        -Wshadow
+        -Wnon-virtual-dtor
+        -Wpedantic
+        -Wconversion
+        -Wsign-conversion
+        -Wold-style-cast
+        -Wcast-align
+        -Woverloaded-virtual
+        -Wnull-dereference
+        -Wdouble-promotion
+        -Wformat=2
+
         -Wno-unused-private-field
         -Wno-gnu-zero-variadic-macro-arguments
-        -Wno-vla-extension
         -Wno-unused-variable
         -Wno-unused-parameter
         -Wno-unused-function
