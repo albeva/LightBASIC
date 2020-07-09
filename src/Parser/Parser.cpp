@@ -2,13 +2,13 @@
 // Created by Albert on 03/07/2020.
 //
 #include "Parser.h"
+#include "Ast/Ast.h"
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
-#include "Ast/Ast.h"
 using namespace lbc;
 
 Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
-    : m_srcMgr(srcMgr), m_fileID(fileId) {
+  : m_srcMgr(srcMgr), m_fileID(fileId) {
     m_lexer = make_unique<Lexer>(srcMgr, fileId);
     m_token = m_lexer->next();
     m_next = m_lexer->next();
@@ -386,11 +386,10 @@ unique_ptr<Token> Parser::accept(TokenKind kind) {
 unique_ptr<Token> Parser::expect(TokenKind kind) {
     if (!match(kind)) {
         error(llvm::Twine("Expected '")
-                  .concat(view_to_stringRef(Token::description(kind)))
-                  .concat("' got '")
-                  .concat(view_to_stringRef(m_token->description()))
-                  .concat("'")
-        );
+              .concat(view_to_stringRef(Token::description(kind)))
+              .concat("' got '")
+              .concat(view_to_stringRef(m_token->description()))
+              .concat("'"));
     }
     return move();
 }
@@ -402,13 +401,11 @@ unique_ptr<Token> Parser::move() {
     return current;
 }
 
-[[noreturn]]
-void Parser::error(const llvm::Twine& message) {
+[[noreturn]] void Parser::error(const llvm::Twine& message) {
     m_srcMgr.PrintMessage(
-        m_token->loc(),
-        llvm::SourceMgr::DK_Error,
-        message,
-        m_token->range()
-    );
+    m_token->loc(),
+    llvm::SourceMgr::DK_Error,
+    message,
+    m_token->range());
     std::exit(EXIT_FAILURE);
 }

@@ -21,7 +21,6 @@ public:
     unique_ptr<AstProgram> parse();
 
 private:
-
     unique_ptr<AstStmtList> stmtList();
     unique_ptr<AstStmt> statement();
     unique_ptr<AstExpr> expression();

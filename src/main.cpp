@@ -2,19 +2,19 @@
 // Created by Albert on 03/07/2020.
 //
 #include "pch.h"
-#include "llvm/Support/CommandLine.h"
-#include "Parser/Parser.h"
 #include "Ast/Ast.h"
-#include "Ast/AstVisitor.h"
 #include "Ast/AstPrinter.h"
+#include "Ast/AstVisitor.h"
 #include "Gen/CodeGen.h"
+#include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
+#include "llvm/Support/CommandLine.h"
 
 namespace cl = llvm::cl;
 namespace fs = std::filesystem;
 using namespace lbc;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     // command line options
     cl::opt<string> inputFile(cl::Positional, cl::Required, cl::desc("<input file>"));
     if (!cl::ParseCommandLineOptions(argc, argv)) {
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 
     // Load
     llvm::SourceMgr srcMgr{};
-    srcMgr.setIncludeDirs({fs::current_path()});
+    srcMgr.setIncludeDirs({ fs::current_path() });
     string included;
     auto ID = srcMgr.AddIncludeFile(path, {}, included);
     if (ID == ~0U) {
@@ -47,14 +47,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Lex the input
-    Parser parser{srcMgr, ID};
+    Parser parser{ srcMgr, ID };
     if (auto ast = parser.parse()) {
         AstPrinter printer;
         ast->accept(&printer);
-//        llvm::LLVMContext context;
+        //        llvm::LLVMContext context;
 
-//        SemanticAnalyzer sem(context);
-//        ast->accept(&sem);
+        //        SemanticAnalyzer sem(context);
+        //        ast->accept(&sem);
 
         // CodeGen gen(context);
         // ast->accept(&gen);
@@ -65,4 +65,3 @@ int main(int argc, char *argv[]) {
 
     return EXIT_SUCCESS;
 }
-

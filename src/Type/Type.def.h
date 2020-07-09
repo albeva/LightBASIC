@@ -3,12 +3,14 @@
 //
 #pragma once
 
-// this table is also used to generate tokens!
+// clang-format off
+
+// ID and STR are used in Token.deh.h for keyword tokens
 
 //     ID        STR         Kind
 #define PRIMITIVE_TYPES(_) \
-    _( Bool,     "BOOL",     Bool          ) \
-    _( ZString,  "ZSTRING",  ZString       )
+    _( Bool,     "BOOL",     Bool    )  \
+    _( ZString,  "ZSTRING",  ZString )
 
 //     ID        STR         Kind,    Bits Signed
 #define INTEGER_TYPES(_) \
@@ -21,12 +23,12 @@
     _( Long,     "LONG",     Integer, 64,  true  ) \
     _( ULong,    "ULONG",    Integer, 64,  false )
 
-//     ID        STR         Bits Kind
+//     ID        STR         Kind           Bits
 #define FLOATINGPOINT_TYPES(_) \
     _( Single,   "SINGLE",   FloatingPoint, 32 ) \
     _( Double,   "DOUBLE",   FloatingPoint, 64 )
 
-#define ALL_TYPES(_) \
-    PRIMITIVE_TYPES(_)     \
-    INTEGER_TYPES(_)       \
+#define ALL_TYPES(_)   \
+    PRIMITIVE_TYPES(_) \
+    INTEGER_TYPES(_)   \
     FLOATINGPOINT_TYPES(_)

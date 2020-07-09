@@ -10,11 +10,10 @@ using namespace lbc;
 
 AstRoot::~AstRoot() = default;
 
-#define IMPLEMENT_AST(KIND) \
-     Ast##KIND::Ast##KIND(): Base{AstKind::KIND} {} \
-     Ast##KIND::~Ast##KIND() = default;             \
-     void Ast##KIND::accept(AstVisitor* visitor) {  \
-         visitor->visit(this);                      \
-     }
+#define IMPLEMENT_AST(KIND)                           \
+    Ast##KIND::Ast##KIND() : Base{ AstKind::KIND } {} \
+    Ast##KIND::~Ast##KIND() = default;                \
+    void Ast##KIND::accept(AstVisitor* visitor) {     \
+        visitor->visit(this);                         \
+    }
 AST_CONTENT_NODES(IMPLEMENT_AST)
-

@@ -11,15 +11,15 @@ static inline bool isWhiteSpace(char ch) {
     return ch == ' ' || ch == '\t';
 }
 
-static inline llvm::SMLoc getLoc(const char *ptr) {
+static inline llvm::SMLoc getLoc(const char* ptr) {
     return llvm::SMLoc::getFromPointer(ptr);
 }
 
 Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
-    : m_srcMgr{srcMgr},
-      m_fileID{fileID},
-      m_buffer{srcMgr.getMemoryBuffer(fileID)},
-      m_hasStmt{false} {
+  : m_srcMgr{ srcMgr },
+    m_fileID{ fileID },
+    m_buffer{ srcMgr.getMemoryBuffer(fileID) },
+    m_hasStmt{ false } {
     m_input = m_buffer->getBufferStart();
     m_char = *m_input;
 }
@@ -64,7 +64,9 @@ unique_ptr<Token> Lexer::next() {
             }
             // part of line continuation
             skipUntilLineEnd();
-            if (m_char == '\n') { move(); }
+            if (m_char == '\n') {
+                move();
+            }
             continue;
         case '"':
             return string();
@@ -109,17 +111,15 @@ unique_ptr<Token> Lexer::endOfFile() {
     if (m_hasStmt) {
         m_hasStmt = false;
         return Token::create(
-            TokenKind::EndOfStmt,
-            Token::description(TokenKind::EndOfStmt),
-            getLoc(m_buffer->getBufferEnd())
-        );
+        TokenKind::EndOfStmt,
+        Token::description(TokenKind::EndOfStmt),
+        getLoc(m_buffer->getBufferEnd()));
     }
 
     return Token::create(
-        TokenKind::EndOfFile,
-        Token::description(TokenKind::EndOfFile),
-        getLoc(m_buffer->getBufferEnd())
-    );
+    TokenKind::EndOfFile,
+    Token::description(TokenKind::EndOfFile),
+    getLoc(m_buffer->getBufferEnd()));
 }
 
 unique_ptr<Token> Lexer::endOfStatement() {
@@ -129,22 +129,24 @@ unique_ptr<Token> Lexer::endOfStatement() {
 }
 
 unique_ptr<Token> Lexer::identifier() {
-    const auto *start = m_input;
-    do { move(); } while (isAlpha(m_char));
+    const auto* start = m_input;
+    do {
+        move();
+    } while (isAlpha(m_char));
     auto length = static_cast<string_view::size_type>(m_input - start);
-    return Token::create({start, length}, getLoc(start));
+    return Token::create({ start, length }, getLoc(start));
 }
 
 unique_ptr<Token> Lexer::string() {
     constexpr char visibleFrom = 32;
 
-    const auto *start = m_input;
+    const auto* start = m_input;
     do {
         move();
         if (m_char == '"') {
             auto length = static_cast<string_view::size_type>(m_input - start - 1);
             move();
-            return Token::create(TokenKind::StringLiteral, {start + 1, length}, getLoc(start)); // NOLINT
+            return Token::create(TokenKind::StringLiteral, { start + 1, length }, getLoc(start)); // NOLINT
         }
     } while (m_char >= visibleFrom);
 
@@ -152,12 +154,12 @@ unique_ptr<Token> Lexer::string() {
 }
 
 unique_ptr<Token> Lexer::character(TokenKind kind) {
-    const auto *start = m_input;
+    const auto* start = m_input;
     move();
-    return Token::create(kind, {start, 1}, getLoc(start));
+    return Token::create(kind, { start, 1 }, getLoc(start));
 }
 
-unique_ptr<Token> Lexer::invalid(const char *loc) {
+unique_ptr<Token> Lexer::invalid(const char* loc) {
     return Token::create(TokenKind::Invalid, {}, getLoc(loc));
 }
 
@@ -176,7 +178,7 @@ bool Lexer::isValid() const {
 }
 
 char Lexer::peek(int ahead) const {
-    const auto *next = m_input + ahead; // NOLINT
+    const auto* next = m_input + ahead; // NOLINT
     if (next < m_buffer->getBufferEnd()) {
         return *next;
     }

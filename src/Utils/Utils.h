@@ -12,10 +12,10 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
     return llvm::StringRef(view.data(), view.size());
 }
 
-#define NON_COPYABLE(Class) \
-    Class(const Class&) = delete;               \
-    Class& operator=(const Class&) = delete;    \
-    Class(Class&&) = delete;                    \
+#define NON_COPYABLE(Class)                  \
+    Class(const Class&) = delete;            \
+    Class& operator=(const Class&) = delete; \
+    Class(Class&&) = delete;                 \
     Class& operator=(Class&&) = delete;
 
 /**
@@ -23,13 +23,11 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
  * value of a variable provided is restored apon
  * exiting the scope
  */
-template<typename T, std::enable_if_t<
-    std::is_trivially_copyable_v<T> &&
-    std::is_trivially_assignable_v<T&, T>, int> = 0>
+template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
 struct ValueRestorer {
     NON_COPYABLE(ValueRestorer)
 
-    explicit ValueRestorer(T& value) : m_target{value}, m_value{value} {}
+    explicit ValueRestorer(T& value) : m_target{ value }, m_value{ value } {}
 
     // restore
     ~ValueRestorer() {
@@ -45,6 +43,6 @@ private:
 #define CONCATENATE_DETAIL(x, y) x##y
 #define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
 #define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
-#define RESTORE_ON_EXIT(V) ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_){V};
+#define RESTORE_ON_EXIT(V) ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_){ V };
 
 } // namespace lbc

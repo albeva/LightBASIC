@@ -4,4 +4,3 @@
 #include "Symbol.h"
 #include "Type/Type.h"
 using namespace lbc;
-

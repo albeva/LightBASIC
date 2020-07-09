@@ -14,9 +14,9 @@ class AstVisitor {
 public:
     AstVisitor() = default;
     virtual ~AstVisitor() = default;
-    #define VIRTUAL_VISIT(KIND) virtual void visit(Ast##KIND* ast) = 0;
+#define VIRTUAL_VISIT(KIND) virtual void visit(Ast##KIND* ast) = 0;
     AST_CONTENT_NODES(VIRTUAL_VISIT)
-    #undef VIRTUAL_VISIT
+#undef VIRTUAL_VISIT
 };
 
 } // namespace lbc

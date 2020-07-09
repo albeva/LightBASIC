@@ -2,51 +2,50 @@
 // Created by Albert on 08/07/2020.
 //
 #include "SemanticAnalyzer.h"
-#include "Lexer/Token.h"
 #include "Ast/Ast.h"
-#include "Type/Type.h"
+#include "Lexer/Token.h"
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
+#include "Type/Type.h"
 using namespace lbc;
 
-[[noreturn]]
-static void error(const string& message) {
+[[noreturn]] static void error(const string& message) {
     std::cerr << message << std::endl;
     std::exit(EXIT_FAILURE);
 }
 
 SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context)
-    : m_context{context} {}
+  : m_context{ context } {}
 
-void SemanticAnalyzer::visit(AstProgram *ast) {
+void SemanticAnalyzer::visit(AstProgram* ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
     m_table = ast->symbolTable.get();
     ast->body->accept(this);
 }
 
-void SemanticAnalyzer::visit(AstStmtList *ast) {
-    for (const auto& stmt: ast->stmts) {
+void SemanticAnalyzer::visit(AstStmtList* ast) {
+    for (const auto& stmt : ast->stmts) {
         stmt->accept(this);
     }
 }
 
-void SemanticAnalyzer::visit(AstAssignStmt *ast) {
+void SemanticAnalyzer::visit(AstAssignStmt* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void SemanticAnalyzer::visit(AstExprStmt *ast) {
+void SemanticAnalyzer::visit(AstExprStmt* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void SemanticAnalyzer::visit(AstVarDecl *ast) {
+void SemanticAnalyzer::visit(AstVarDecl* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
 
 /**
  * Analyze function declaration
  */
-void SemanticAnalyzer::visit(AstFuncDecl *ast) {
+void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     // name
     ast->ident->accept(this);
     auto name = m_identifier;
@@ -57,20 +56,20 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
     }
 
     // parameters
-    std::vector<const TypeRoot *> paramTypes;
+    std::vector<const TypeRoot*> paramTypes;
     paramTypes.reserve(ast->params.size());
     {
         RESTORE_ON_EXIT(m_table);
         ast->symbolTable = make_unique<SymbolTable>(nullptr);
         m_table = ast->symbolTable.get();
-        for (auto& param: ast->params) {
+        for (auto& param : ast->params) {
             param->accept(this);
             paramTypes.emplace_back(m_type);
         }
     }
 
     // return type. subs don't have one so default to Void
-    const TypeRoot *retType = nullptr;
+    const TypeRoot* retType = nullptr;
     if (ast->type) {
         ast->type->accept(this);
         retType = m_type;
@@ -83,7 +82,7 @@ void SemanticAnalyzer::visit(AstFuncDecl *ast) {
     m_symbol = m_table->insert(make_unique<Symbol>(name, m_type));
 }
 
-void SemanticAnalyzer::visit(AstFuncParamDecl *ast) {
+void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
     ast->ident->accept(this);
     auto name = m_identifier;
 
@@ -95,48 +94,49 @@ void SemanticAnalyzer::visit(AstFuncParamDecl *ast) {
     m_symbol = m_table->insert(make_unique<Symbol>(name, m_type));
 }
 
-void SemanticAnalyzer::visit(AstAttributeList *ast) {
+void SemanticAnalyzer::visit(AstAttributeList* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void SemanticAnalyzer::visit(AstAttribute *ast) {
+void SemanticAnalyzer::visit(AstAttribute* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void SemanticAnalyzer::visit(AstTypeExpr *ast) {
-    #define CASE_PRIMITIVE(id, str, kind, ...) case TokenKind::id: \
-            m_type = Type##kind::get(); \
-            return;
-    #define CASE_INTEGER(id, str, kind, bits, isSigned, ...) case TokenKind::id: \
-            m_type = Type##kind::get(bits, isSigned); \
-            return;
-    #define CASE_FLOATINGPOINT(id, str, kind, bits, ...) case TokenKind::id: \
-            m_type = Type##kind::get(bits); \
-            return;
+void SemanticAnalyzer::visit(AstTypeExpr* ast) {
+#define CASE_PRIMITIVE(id, str, kind, ...) \
+    case TokenKind::id:                    \
+        m_type = Type##kind::get();        \
+        return;
+#define CASE_INTEGER(id, str, kind, bits, isSigned, ...) \
+    case TokenKind::id:                                  \
+        m_type = Type##kind::get(bits, isSigned);        \
+        return;
+#define CASE_FLOATINGPOINT(id, str, kind, bits, ...) \
+    case TokenKind::id:                              \
+        m_type = Type##kind::get(bits);              \
+        return;
 
     switch (ast->token->kind()) {
-    PRIMITIVE_TYPES(CASE_PRIMITIVE)
-    INTEGER_TYPES(CASE_INTEGER)
-    FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
+        PRIMITIVE_TYPES(CASE_PRIMITIVE)
+        INTEGER_TYPES(CASE_INTEGER)
+        FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
     default:
         error("Unknown type "s + string(ast->token->lexeme()));
     }
 
-    #undef TO_PRIMITIVE_TYPE
-    #undef CASE_INTEGER
-    #undef CASE_INTEGER
-
+#undef TO_PRIMITIVE_TYPE
+#undef CASE_INTEGER
+#undef CASE_INTEGER
 }
 
-void SemanticAnalyzer::visit(AstIdentExpr *ast) {
+void SemanticAnalyzer::visit(AstIdentExpr* ast) {
     m_identifier = ast->token->lexeme();
 }
 
-void SemanticAnalyzer::visit(AstCallExpr *ast) {
+void SemanticAnalyzer::visit(AstCallExpr* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void SemanticAnalyzer::visit(AstLiteralExpr *ast) {
+void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
     std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
 }
-

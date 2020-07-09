@@ -3,6 +3,8 @@
 //
 #pragma once
 
+// clang-format off
+
 #define AST_ROOT_NODES(_) \
     _( Root ) \
     _( Stmt ) \
@@ -18,13 +20,13 @@
 
 // ast nodes for attributes
 #define AST_ATTRIB_NODES(_) \
-    _( AttributeList )      \
-    _( Attribute )
+    _( AttributeList ) \
+    _( Attribute     )
 
 // declarations
 #define AST_DECL_NODES(_) \
-    _( VarDecl )  \
-    _( FuncDecl ) \
+    _( VarDecl       ) \
+    _( FuncDecl      ) \
     _( FuncParamDecl )
 
 // Types
@@ -39,14 +41,14 @@
 
 // all nodes
 #define AST_CONTENT_NODES(_) \
-    AST_STMT_NODES(_)   \
-    AST_DECL_NODES(_)   \
-    AST_ATTRIB_NODES(_) \
-    AST_TYPE_NODES(_)   \
+    AST_STMT_NODES(_)        \
+    AST_DECL_NODES(_)        \
+    AST_ATTRIB_NODES(_)      \
+    AST_TYPE_NODES(_)        \
     AST_EXPR_NODES(_)
 
 // forward declare all AST nodes
-#define __AST_DECLARE_CLASS(C) class Ast##C;
-#define AST_FORWARD_DECLARE() \
-    AST_ROOT_NODES(__AST_DECLARE_CLASS) \
-    AST_CONTENT_NODES(__AST_DECLARE_CLASS)
+#define AST_DECLARE_CLASS__(C) class Ast##C;
+#define AST_FORWARD_DECLARE()           \
+    AST_ROOT_NODES(AST_DECLARE_CLASS__) \
+    AST_CONTENT_NODES(AST_DECLARE_CLASS__)

@@ -17,7 +17,7 @@ AST_FORWARD_DECLARE()
 // Enumerate all possible ast nodes
 // This works with LLVM rtti system
 enum class AstKind {
-    #define KIND_ENUM(id, ...) id,
+#define KIND_ENUM(id, ...) id,
     Stmt,
     AST_STMT_NODES(KIND_ENUM)
     Decl,
@@ -31,17 +31,17 @@ enum class AstKind {
     Expr,
     AST_EXPR_NODES(KIND_ENUM)
     ExprLast
-    #undef KIND_ENUM
+#undef KIND_ENUM
 };
 
 // Base class for all ast nodes
 class AstRoot {
     NON_COPYABLE(AstRoot)
 public:
-    explicit AstRoot(AstKind kind) : m_kind{kind} {}
+    explicit AstRoot(AstKind kind) : m_kind{ kind } {}
     virtual ~AstRoot();
     [[nodiscard]] AstKind kind() const { return m_kind; }
-    virtual void accept(AstVisitor *visitor) = 0;
+    virtual void accept(AstVisitor* visitor) = 0;
 
 private:
     const AstKind m_kind;
@@ -52,9 +52,8 @@ class AstStmt : public AstRoot {
 public:
     using AstRoot::AstRoot;
 
-    static bool classof(const AstRoot *ast) {
-        return ast->kind() >= AstKind::Stmt &&
-               ast->kind() < AstKind::StmtLast;
+    static bool classof(const AstRoot* ast) {
+        return ast->kind() >= AstKind::Stmt && ast->kind() < AstKind::StmtLast;
     }
 };
 
@@ -63,9 +62,8 @@ class AstExpr : public AstRoot {
 public:
     using AstRoot::AstRoot;
 
-    static bool classof(const AstRoot *ast) {
-        return ast->kind() >= AstKind::Expr &&
-               ast->kind() < AstKind::ExprLast;
+    static bool classof(const AstRoot* ast) {
+        return ast->kind() >= AstKind::Expr && ast->kind() < AstKind::ExprLast;
     }
 };
 
@@ -73,16 +71,15 @@ class AstDecl : public AstStmt {
 public:
     using AstStmt::AstStmt;
 
-    static bool classof(const AstRoot *ast) {
-        return ast->kind() >= AstKind::Decl &&
-               ast->kind() < AstKind::DeclLast;
+    static bool classof(const AstRoot* ast) {
+        return ast->kind() >= AstKind::Decl && ast->kind() < AstKind::DeclLast;
     }
 
     unique_ptr<AstAttributeList> attribs;
 };
 
-#define DECLARE_AST(KIND, BASE) \
-    class Ast##KIND final: public Ast##BASE { \
+#define DECLARE_AST(KIND, BASE)                   \
+    class Ast##KIND final : public Ast##BASE {    \
         NON_COPYABLE(Ast##KIND)                   \
     public:                                       \
         using Base = Ast##BASE;                   \
@@ -96,7 +93,9 @@ public:
             return make_unique<Ast##KIND>();      \
         }
 
-#define DECLARE_END }; // class
+#define DECLARE_END \
+    }               \
+    ; // class
 
 //----------------------------------------
 // Statements

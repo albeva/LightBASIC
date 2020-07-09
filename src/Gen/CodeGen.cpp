@@ -7,25 +7,23 @@
 #include "llvm/IR/IRPrintingPasses.h"
 using namespace lbc;
 
-[[noreturn]]
-static void error(const string& message) {
+[[noreturn]] static void error(const string& message) {
     std::cerr << message << std::endl;
     std::exit(EXIT_FAILURE);
 }
 
 CodeGen::CodeGen(llvm::LLVMContext& context)
-    : m_context{context}, m_builder{context} {}
+  : m_context{ context }, m_builder{ context } {}
 
-void CodeGen::visit(AstProgram *ast) {
+void CodeGen::visit(AstProgram* ast) {
     m_module = make_unique<llvm::Module>("app", m_context);
     m_module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
 
     m_function = llvm::Function::Create(
-        llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false),
-        llvm::Function::ExternalLinkage,
-        "main",
-        *m_module
-    );
+    llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false),
+    llvm::Function::ExternalLinkage,
+    "main",
+    *m_module);
     m_function->setCallingConv(llvm::CallingConv::C);
 
     m_block = llvm::BasicBlock::Create(m_context, "", m_function);
@@ -39,34 +37,33 @@ void CodeGen::visit(AstProgram *ast) {
         std::exit(EXIT_FAILURE);
     }
 
-    auto *printer = llvm::createPrintModulePass(llvm::outs());
+    auto* printer = llvm::createPrintModulePass(llvm::outs());
     printer->runOnModule(*m_module);
 }
 
-void CodeGen::visit(AstStmtList *ast) {
-    for (const auto& stmt: ast->stmts) {
+void CodeGen::visit(AstStmtList* ast) {
+    for (const auto& stmt : ast->stmts) {
         stmt->accept(this);
     }
 }
 
-void CodeGen::visit(AstAssignStmt *ast) {
+void CodeGen::visit(AstAssignStmt* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstExprStmt *ast) {
+void CodeGen::visit(AstExprStmt* ast) {
     ast->expr->accept(this);
 }
 
-void CodeGen::visit(AstVarDecl *ast) {
-    llvm::Constant *constant = nullptr;
-    if (const auto *expr = llvm::dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+void CodeGen::visit(AstVarDecl* ast) {
+    llvm::Constant* constant = nullptr;
+    if (const auto* expr = llvm::dyn_cast<AstLiteralExpr>(ast->expr.get())) {
         switch (expr->token->kind()) {
         case TokenKind::StringLiteral:
             constant = llvm::ConstantDataArray::getString(
-                m_context,
-                view_to_stringRef(expr->token->lexeme()),
-                true
-            );
+            m_context,
+            view_to_stringRef(expr->token->lexeme()),
+            true);
             break;
         default:
             error("Unsupported expression type");
@@ -77,18 +74,17 @@ void CodeGen::visit(AstVarDecl *ast) {
     }
 
     auto name = string(ast->ident->token->lexeme());
-    auto *value = new llvm::GlobalVariable(
-        *m_module,
-        constant->getType(),
-        true,
-        llvm::GlobalValue::PrivateLinkage,
-        constant,
-        ".str"
-    );
+    auto* value = new llvm::GlobalVariable(
+    *m_module,
+    constant->getType(),
+    true,
+    llvm::GlobalValue::PrivateLinkage,
+    constant,
+    ".str");
     value->setAlignment(llvm::MaybeAlign(1));
     value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 
-    llvm::Constant *zero_32 = llvm::Constant::getNullValue(llvm::IntegerType::getInt64Ty(m_context));
+    llvm::Constant* zero_32 = llvm::Constant::getNullValue(llvm::IntegerType::getInt64Ty(m_context));
     std::array indices{
         zero_32,
         zero_32
@@ -96,40 +92,40 @@ void CodeGen::visit(AstVarDecl *ast) {
     m_values[name] = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
 }
 
-void CodeGen::visit(AstFuncDecl *ast) {
+void CodeGen::visit(AstFuncDecl* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstFuncParamDecl *ast) {
+void CodeGen::visit(AstFuncParamDecl* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstAttributeList *ast) {
+void CodeGen::visit(AstAttributeList* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstAttribute *ast) {
+void CodeGen::visit(AstAttribute* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstIdentExpr *ast) {
+void CodeGen::visit(AstIdentExpr* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstTypeExpr *ast) {
+void CodeGen::visit(AstTypeExpr* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
 
-void CodeGen::visit(AstCallExpr *ast) {
-    auto *fn = getOrCreate(ast);
+void CodeGen::visit(AstCallExpr* ast) {
+    auto* fn = getOrCreate(ast);
     if (fn == nullptr) {
         error("Unknown function");
     }
 
-    std::vector<llvm::Value *> args;
+    std::vector<llvm::Value*> args;
     args.reserve(ast->arguments.size());
-    for (const auto& arg: ast->arguments) {
-        if (auto *id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
+    for (const auto& arg : ast->arguments) {
+        if (auto* id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
             auto iter = m_values.find(string(id->token->lexeme()));
             if (iter != m_values.end()) {
                 args.emplace_back(iter->second);
@@ -141,23 +137,23 @@ void CodeGen::visit(AstCallExpr *ast) {
         }
     }
 
-    auto *inst = llvm::CallInst::Create(llvm::FunctionCallee(fn), args, "", m_block);
+    auto* inst = llvm::CallInst::Create(llvm::FunctionCallee(fn), args, "", m_block);
     inst->setTailCall(false);
 }
 
-llvm::Function *CodeGen::getOrCreate(AstCallExpr *ast) {
+llvm::Function* CodeGen::getOrCreate(AstCallExpr* ast) {
     auto name = string(ast->ident->token->lexeme());
     if (name == "print") {
         auto iter = m_values.find(name);
         if (iter == m_values.end()) {
             // pretend:
             // int puts(const char*)
-            auto *resTy = llvm::IntegerType::get(m_context, 32);
-            auto *argBaseTy = llvm::IntegerType::get(m_context, 8);
-            auto *argTy = argBaseTy->getPointerTo();
-            auto *fnTy = llvm::FunctionType::get(resTy, {argTy}, false);
+            auto* resTy = llvm::IntegerType::get(m_context, 32);
+            auto* argBaseTy = llvm::IntegerType::get(m_context, 8);
+            auto* argTy = argBaseTy->getPointerTo();
+            auto* fnTy = llvm::FunctionType::get(resTy, { argTy }, false);
 
-            auto *fn = llvm::Function::Create(fnTy, llvm::GlobalValue::ExternalLinkage, "puts", *m_module);
+            auto* fn = llvm::Function::Create(fnTy, llvm::GlobalValue::ExternalLinkage, "puts", *m_module);
             fn->addParamAttr(0, llvm::Attribute::AttrKind::ReadOnly);
             fn->addParamAttr(0, llvm::Attribute::AttrKind::NoCapture);
             fn->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
@@ -171,8 +167,6 @@ llvm::Function *CodeGen::getOrCreate(AstCallExpr *ast) {
     return nullptr;
 }
 
-void CodeGen::visit(AstLiteralExpr *ast) {
+void CodeGen::visit(AstLiteralExpr* ast) {
     std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
 }
-
-
