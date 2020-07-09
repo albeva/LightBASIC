@@ -85,7 +85,7 @@ public:
         using Base = Ast##BASE;                   \
         Ast##KIND();                              \
         ~Ast##KIND();                             \
-        virtual void accept(AstVisitor* visitor); \
+        void accept(AstVisitor* visitor) final;   \
         static bool classof(const AstRoot* ast) { \
             return ast->kind() == AstKind::KIND;  \
         }                                         \
