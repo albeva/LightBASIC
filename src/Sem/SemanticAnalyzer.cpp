@@ -20,7 +20,7 @@ SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context)
 void SemanticAnalyzer::visit(AstProgram* ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
-    m_table = ast->symbolTable.get();
+    m_rootTable = m_table = ast->symbolTable.get();
     ast->stmtList->accept(this);
 }
 
@@ -39,7 +39,7 @@ void SemanticAnalyzer::visit(AstExprStmt* ast) {
 }
 
 void SemanticAnalyzer::visit(AstVarDecl* ast) {
-    auto* symbol = createIdentSymbol(ast->identExpr.get());
+    auto* symbol = createNewSymbol(ast->identExpr.get());
 
     // type expr?
     const TypeRoot* type = nullptr;
@@ -79,7 +79,7 @@ void SemanticAnalyzer::visit(AstVarDecl* ast) {
  * Analyze function declaration
  */
 void SemanticAnalyzer::visit(AstFuncDecl* ast) {
-    auto* symbol = createIdentSymbol(ast->identExpr.get());
+    auto* symbol = createNewSymbol(ast->identExpr.get(), m_rootTable);
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
@@ -119,7 +119,7 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
 }
 
 void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
-    auto* symbol = createIdentSymbol(ast->identExpr.get());
+    auto* symbol = createNewSymbol(ast->identExpr.get());
 
     ast->typeExpr->accept(this);
     symbol->setType(ast->typeExpr->type);
@@ -130,13 +130,13 @@ void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
 }
 
 void SemanticAnalyzer::visit(AstAttributeList* ast) {
-    for (auto& attrib: ast->attribs) {
+    for (auto& attrib : ast->attribs) {
         attrib->accept(this);
     }
 }
 
 void SemanticAnalyzer::visit(AstAttribute* ast) {
-    for (auto& arg: ast->argExprs) {
+    for (auto& arg : ast->argExprs) {
         arg->accept(this);
     }
 }
@@ -148,8 +148,13 @@ void SemanticAnalyzer::visit(AstTypeExpr* ast) {
 void SemanticAnalyzer::visit(AstIdentExpr* ast) {
     const auto& name = ast->token->lexeme();
     auto* symbol = m_table->find(name, true);
+
     if (symbol == nullptr) {
         error("Unknown identifier "s + string(name));
+    }
+
+    if (symbol->type() == nullptr) {
+        error("Identifier "s + string(name) + " has unresolved type");
     }
 
     ast->symbol = symbol;
@@ -160,23 +165,23 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) {
     ast->identExpr->accept(this);
     auto* symbol = ast->identExpr->symbol;
 
-    const auto* type = llvm::dyn_cast<TypeFunction>(symbol->type());
+    const auto* type = dyn_cast<TypeFunction>(symbol->type());
     if (type == nullptr) {
         error("Identifier "s + string(symbol->name()) + " is not a callable type"s);
     }
 
-    const auto& params = type->paramTypes();
-    if (params.size() != ast->argExprs.size()) {
+    const auto& paramTypes = type->paramTypes();
+    auto& args = ast->argExprs;
+
+    if (paramTypes.size() != args.size()) {
         error("Argument count mismatch");
     }
 
-    size_t index = 0;
-    for (auto& arg: ast->argExprs) {
-        arg->accept(this);
-        if (params[index] != arg->type) {
+    for (size_t index = 0; index < args.size(); index++) {
+        args[index]->accept(this);
+        if (paramTypes[index] != args[index]->type) {
             error("Type mismatch");
         }
-        index++;
     }
 
     ast->type = type->retType();
@@ -196,20 +201,23 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
     case TokenKind::NumberLiteral:
         ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
     default:
-        error("Unsupported literal typeExpr");
+        error("Unsupported literal type");
     }
 }
 
-Symbol* SemanticAnalyzer::createIdentSymbol(AstIdentExpr* identExpr) {
-    // visit(identExpr);
+Symbol* SemanticAnalyzer::createNewSymbol(AstIdentExpr* identExpr, SymbolTable* table) {
+    if (table == nullptr) {
+        table = m_table;
+    }
+
     const auto& name = identExpr->token->lexeme();
 
-    auto* symbol = m_table->find(name, false);
+    auto* symbol = table->find(name, false);
     if (symbol != nullptr) {
         error("Redefinition of " + string(name));
     }
-    symbol = m_table->insert(make_unique<Symbol>(name));
 
+    symbol = table->insert(make_unique<Symbol>(name));
     identExpr->symbol = symbol;
     return symbol;
 }

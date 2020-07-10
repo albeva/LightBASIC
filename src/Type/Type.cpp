@@ -50,9 +50,9 @@ const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
         return Type##KIND::get(bits);
 
     switch (kind) {
-    PRIMITIVE_TYPES(CASE_PRIMITIVE)
-    INTEGER_TYPES(CASE_INTEGER)
-    FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
+        PRIMITIVE_TYPES(CASE_PRIMITIVE)
+        INTEGER_TYPES(CASE_INTEGER)
+        FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
     default:
         std::cerr << "Unknown typeExpr "s + string(Token::description(kind));
         std::exit(EXIT_FAILURE);

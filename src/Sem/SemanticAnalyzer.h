@@ -21,11 +21,11 @@ public:
 #undef IMPL_VISITOR
 
 private:
-
-    [[nodiscard]] Symbol* createIdentSymbol(AstIdentExpr* identExpr);
+    [[nodiscard]] Symbol* createNewSymbol(AstIdentExpr* identExpr, SymbolTable* table = nullptr);
 
     llvm::LLVMContext& m_context;
     SymbolTable* m_table = nullptr;
+    SymbolTable* m_rootTable = nullptr;
 };
 
 } // namespace lbc

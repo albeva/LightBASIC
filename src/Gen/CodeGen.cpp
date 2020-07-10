@@ -57,7 +57,7 @@ void CodeGen::visit(AstExprStmt* ast) {
 
 void CodeGen::visit(AstVarDecl* ast) {
     llvm::Constant* constant = nullptr;
-    if (const auto* expr = llvm::dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+    if (const auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
         switch (expr->token->kind()) {
         case TokenKind::StringLiteral:
             constant = llvm::ConstantDataArray::getString(
@@ -125,7 +125,7 @@ void CodeGen::visit(AstCallExpr* ast) {
     std::vector<llvm::Value*> args;
     args.reserve(ast->argExprs.size());
     for (const auto& arg : ast->argExprs) {
-        if (auto* id = llvm::dyn_cast<AstIdentExpr>(arg.get())) {
+        if (auto* id = dyn_cast<AstIdentExpr>(arg.get())) {
             auto iter = m_values.find(string(id->token->lexeme()));
             if (iter != m_values.end()) {
                 args.emplace_back(iter->second);
@@ -162,7 +162,7 @@ llvm::Function* CodeGen::getOrCreate(AstCallExpr* ast) {
             m_values[name] = fn;
             return fn;
         }
-        return llvm::dyn_cast<llvm::Function>(iter->second);
+        return dyn_cast<llvm::Function>(iter->second);
     }
     return nullptr;
 }

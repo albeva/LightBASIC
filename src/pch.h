@@ -41,6 +41,9 @@ using namespace std::literals::string_literals;
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/SourceMgr.h>
 
+using llvm::dyn_cast;
+using llvm::isa;
+
 // BOOST
 
 // APP

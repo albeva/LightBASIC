@@ -19,7 +19,7 @@ AstRoot::~AstRoot() = default;
 AST_CONTENT_NODES(IMPLEMENT_AST)
 
 const Token* AstAttributeList::getStringLiteral(const string_view& key) const {
-    for (const auto& attr: attribs) {
+    for (const auto& attr : attribs) {
         if (attr->identExpr->token->lexeme() == key) {
             if (attr->argExprs.size() != 1) {
                 std::cerr << "Attribute " << key << " must have 1 value" << std::endl;
