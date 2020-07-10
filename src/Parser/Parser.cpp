@@ -354,10 +354,9 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
     std::vector<unique_ptr<AstExpr>> exprs;
 
     while (isValid() && !match(TokenKind::ParenClose) && !match(TokenKind::EndOfStmt)) {
-        if (auto e = expression()) {
-            exprs.emplace_back(std::move(e));
-        } else {
-            error("Expected expression");
+        exprs.emplace_back(expression());
+        if (!accept(TokenKind::Comma)) {
+            break;
         }
     }
 

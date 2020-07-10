@@ -65,6 +65,8 @@ public:
     static bool classof(const AstRoot* ast) {
         return ast->kind() >= AstKind::Expr && ast->kind() < AstKind::ExprLast;
     }
+
+    const TypeRoot* type = nullptr;
 };
 
 class AstDecl : public AstStmt {
@@ -76,6 +78,9 @@ public:
     }
 
     unique_ptr<AstAttributeList> attribs;
+
+    const TypeRoot* type = nullptr;
+    Symbol* symbol = nullptr;
 };
 
 #define DECLARE_AST(KIND, BASE)                   \
@@ -124,7 +129,6 @@ DECLARE_END
 //----------------------------------------
 DECLARE_AST(AttributeList, Root)
     [[nodiscard]] const Token* getStringLiteral(const string_view& key) const;
-
     std::vector<unique_ptr<AstAttribute>> attribs;
 DECLARE_END
 
@@ -152,8 +156,6 @@ DECLARE_AST(FuncDecl, Decl)
     unique_ptr<AstTypeExpr> retTypeExpr;
     // scope symbol table for parameters
     unique_ptr<SymbolTable> symbolTable;
-    // symbol for this declaration
-    Symbol* symbol = nullptr;
 DECLARE_END
 
 DECLARE_AST(FuncParamDecl, Decl)
@@ -175,6 +177,7 @@ DECLARE_END
 
 DECLARE_AST(IdentExpr, Expr)
     unique_ptr<Token> token;
+    Symbol* symbol = nullptr;
 DECLARE_END
 
 DECLARE_AST(CallExpr, Expr)
@@ -184,7 +187,6 @@ DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
     unique_ptr<Token> token;
-    const TypeRoot* type = nullptr;
 DECLARE_END
 
 #undef DECLARE_AST

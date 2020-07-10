@@ -11,12 +11,14 @@ class TypeRoot;
 class Symbol final {
     NON_COPYABLE(Symbol)
 public:
-    Symbol(const string_view& name, const TypeRoot* type)
+    explicit Symbol(const string_view& name, const TypeRoot* type = nullptr)
       : m_name{ name }, m_type{ type }, m_alias{ name } {}
 
     ~Symbol() = default;
 
     [[nodiscard]] const TypeRoot* type() const { return m_type; }
+    void setType(const TypeRoot* type) { m_type = type; }
+
     [[nodiscard]] const string_view& name() const { return m_name; }
 
     [[nodiscard]] llvm::Value* value() const { return m_value; }

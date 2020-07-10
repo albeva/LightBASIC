@@ -35,25 +35,51 @@ void SemanticAnalyzer::visit(AstAssignStmt* ast) {
 }
 
 void SemanticAnalyzer::visit(AstExprStmt* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    ast->expr->accept(this);
 }
 
 void SemanticAnalyzer::visit(AstVarDecl* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    auto* symbol = createIdentSymbol(ast->identExpr.get());
+
+    // type expr?
+    const TypeRoot* type = nullptr;
+    if (ast->typeExpr) {
+        ast->typeExpr->accept(this);
+        type = ast->typeExpr->type;
+    }
+
+    // expression?
+    if (ast->expr) {
+        ast->expr->accept(this);
+
+        if (type != nullptr) {
+            if (type != ast->expr->type) {
+                error("Type mismatch");
+            }
+        } else {
+            type = ast->expr->type;
+        }
+    }
+
+    // create function symbol
+    symbol->setType(type);
+    ast->identExpr->type = type;
+    ast->type = type;
+    ast->symbol = symbol;
+
+    // alias?
+    if (ast->attribs) {
+        if (const auto* token = ast->attribs->getStringLiteral("ALIAS")) {
+            symbol->setAlias(token->lexeme());
+        }
+    }
 }
 
 /**
  * Analyze function declaration
  */
 void SemanticAnalyzer::visit(AstFuncDecl* ast) {
-    // name
-    ast->identExpr->accept(this);
-    auto name = m_identifier;
-
-    // already declared?
-    if (m_table->exists(name)) {
-        error("Redefinition of "s + string(name));
-    }
+    auto* symbol = createIdentSymbol(ast->identExpr.get());
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
@@ -64,7 +90,7 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
         m_table = ast->symbolTable.get();
         for (auto& param : ast->paramDecls) {
             param->accept(this);
-            paramTypes.emplace_back(m_type);
+            paramTypes.emplace_back(param->type);
         }
     }
 
@@ -72,34 +98,35 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     const TypeRoot* retType = nullptr;
     if (ast->retTypeExpr) {
         ast->retTypeExpr->accept(this);
-        retType = m_type;
+        retType = ast->retTypeExpr->type;
     } else {
         retType = TypeVoid::get();
     }
 
     // create function symbol
-    m_type = TypeFunction::get(retType, std::move(paramTypes));
-    m_symbol = m_table->insert(make_unique<Symbol>(name, m_type));
-    ast->symbol = m_symbol;
+    const auto* type = TypeFunction::get(retType, std::move(paramTypes));
+    symbol->setType(type);
+    ast->identExpr->type = type;
+    ast->type = type;
+    ast->symbol = symbol;
 
     // alias?
     if (ast->attribs) {
         if (const auto* token = ast->attribs->getStringLiteral("ALIAS")) {
-            m_symbol->setAlias(token->lexeme());
+            symbol->setAlias(token->lexeme());
         }
     }
 }
 
 void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
-    ast->identExpr->accept(this);
-    auto name = m_identifier;
-
-    if (m_table->exists(name)) {
-        error("duplicate parameter "s + string(name));
-    }
+    auto* symbol = createIdentSymbol(ast->identExpr.get());
 
     ast->typeExpr->accept(this);
-    m_symbol = m_table->insert(make_unique<Symbol>(name, m_type));
+    symbol->setType(ast->typeExpr->type);
+
+    ast->symbol = symbol;
+    ast->type = symbol->type();
+    ast->identExpr->type = symbol->type();
 }
 
 void SemanticAnalyzer::visit(AstAttributeList* ast) {
@@ -115,16 +142,44 @@ void SemanticAnalyzer::visit(AstAttribute* ast) {
 }
 
 void SemanticAnalyzer::visit(AstTypeExpr* ast) {
-    m_type = TypeRoot::fromTokenKind(ast->token->kind());
-    ast->type = m_type;
+    ast->type = TypeRoot::fromTokenKind(ast->token->kind());
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr* ast) {
-    m_identifier = ast->token->lexeme();
+    const auto& name = ast->token->lexeme();
+    auto* symbol = m_table->find(name, true);
+    if (symbol == nullptr) {
+        error("Unknown identifier "s + string(name));
+    }
+
+    ast->symbol = symbol;
+    ast->type = symbol->type();
 }
 
 void SemanticAnalyzer::visit(AstCallExpr* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    ast->identExpr->accept(this);
+    auto* symbol = ast->identExpr->symbol;
+
+    const auto* type = llvm::dyn_cast<TypeFunction>(symbol->type());
+    if (type == nullptr) {
+        error("Identifier "s + string(symbol->name()) + " is not a callable type"s);
+    }
+
+    const auto& params = type->paramTypes();
+    if (params.size() != ast->argExprs.size()) {
+        error("Argument count mismatch");
+    }
+
+    size_t index = 0;
+    for (auto& arg: ast->argExprs) {
+        arg->accept(this);
+        if (params[index] != arg->type) {
+            error("Type mismatch");
+        }
+        index++;
+    }
+
+    ast->type = type->retType();
 }
 
 void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
@@ -143,4 +198,18 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
     default:
         error("Unsupported literal typeExpr");
     }
+}
+
+Symbol* SemanticAnalyzer::createIdentSymbol(AstIdentExpr* identExpr) {
+    // visit(identExpr);
+    const auto& name = identExpr->token->lexeme();
+
+    auto* symbol = m_table->find(name, false);
+    if (symbol != nullptr) {
+        error("Redefinition of " + string(name));
+    }
+    symbol = m_table->insert(make_unique<Symbol>(name));
+
+    identExpr->symbol = symbol;
+    return symbol;
 }
