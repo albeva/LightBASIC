@@ -4,8 +4,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_C_STANDARD 11)
 
 # Boost
-find_package(Boost 1.73.0 REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+#find_package(Boost 1.73.0 REQUIRED)
+#include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)
@@ -73,7 +73,6 @@ target_compile_options(lbc PRIVATE
         -Wno-unused-variable                        # Remove
         -Wno-unused-parameter                       # Remove
         -Wno-unused-function                        # Remove
-        -Wno-poison-system-directories
         -Wno-exit-time-destructors                  # Remove
         -Wno-global-constructors                    # Remove
         -Wno-switch-enum                            # ?

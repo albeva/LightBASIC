@@ -196,6 +196,7 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
         break;
     case TokenKind::NumberLiteral:
         ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
+        break;
     default:
         error("Unsupported literal type");
     }
