@@ -20,10 +20,10 @@ void CodeGen::visit(AstProgram* ast) {
     m_module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
 
     m_function = llvm::Function::Create(
-    llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false),
-    llvm::Function::ExternalLinkage,
-    "main",
-    *m_module);
+        llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false),
+        llvm::Function::ExternalLinkage,
+        "main",
+        *m_module);
     m_function->setCallingConv(llvm::CallingConv::C);
 
     m_block = llvm::BasicBlock::Create(m_context, "", m_function);
@@ -61,9 +61,9 @@ void CodeGen::visit(AstVarDecl* ast) {
         switch (expr->token->kind()) {
         case TokenKind::StringLiteral:
             constant = llvm::ConstantDataArray::getString(
-            m_context,
-            view_to_stringRef(expr->token->lexeme()),
-            true);
+                m_context,
+                view_to_stringRef(expr->token->lexeme()),
+                true);
             break;
         default:
             error("Unsupported expression typeExpr");
@@ -73,14 +73,14 @@ void CodeGen::visit(AstVarDecl* ast) {
         error("Unsupported expression typeExpr");
     }
 
-    auto name = string(ast->identExpr->token->lexeme());
+    auto name = string(ast->token->lexeme());
     auto* value = new llvm::GlobalVariable(
-    *m_module,
-    constant->getType(),
-    true,
-    llvm::GlobalValue::PrivateLinkage,
-    constant,
-    ".str");
+        *m_module,
+        constant->getType(),
+        true,
+        llvm::GlobalValue::PrivateLinkage,
+        constant,
+        ".str");
     value->setAlignment(llvm::MaybeAlign(1));
     value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Global);
 

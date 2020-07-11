@@ -20,17 +20,17 @@ enum class AstKind {
 #define KIND_ENUM(id, ...) id,
     Stmt,
     AST_STMT_NODES(KIND_ENUM)
-    Decl,
+        Decl,
     AST_DECL_NODES(KIND_ENUM)
-    DeclLast,
+        DeclLast,
     StmtLast,
 
     AST_ATTRIB_NODES(KIND_ENUM)
-    AST_TYPE_NODES(KIND_ENUM)
+        AST_TYPE_NODES(KIND_ENUM)
 
-    Expr,
+            Expr,
     AST_EXPR_NODES(KIND_ENUM)
-    ExprLast
+        ExprLast
 #undef KIND_ENUM
 };
 
@@ -142,14 +142,14 @@ DECLARE_END
 //----------------------------------------
 
 DECLARE_AST(VarDecl, Decl)
-    unique_ptr<AstIdentExpr> identExpr;
+    unique_ptr<Token> token;
     unique_ptr<AstTypeExpr> typeExpr;
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
 DECLARE_AST(FuncDecl, Decl)
     // identifier
-    unique_ptr<AstIdentExpr> identExpr;
+    unique_ptr<Token> token;
     // declared parameters
     std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
     // declared typeExpr
@@ -159,7 +159,7 @@ DECLARE_AST(FuncDecl, Decl)
 DECLARE_END
 
 DECLARE_AST(FuncParamDecl, Decl)
-    unique_ptr<AstIdentExpr> identExpr;
+    unique_ptr<Token> token;
     unique_ptr<AstTypeExpr> typeExpr;
 DECLARE_END
 

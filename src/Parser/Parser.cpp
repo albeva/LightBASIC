@@ -194,7 +194,7 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
 unique_ptr<AstVarDecl> Parser::kwVar() {
     expect(TokenKind::Var);
 
-    auto id = identifier();
+    auto id = expect(TokenKind::Identifier);
 
     unique_ptr<AstTypeExpr> type;
     unique_ptr<AstExpr> expr;
@@ -210,7 +210,7 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
     }
 
     auto var = AstVarDecl::create();
-    var->identExpr = std::move(id);
+    var->token = std::move(id);
     var->typeExpr = std::move(type);
     var->expr = std::move(expr);
     return var;
@@ -234,7 +234,7 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
         expect(TokenKind::Sub);
     }
 
-    func->identExpr = identifier();
+    func->token = expect(TokenKind::Identifier);
 
     if (accept(TokenKind::ParenOpen)) {
         func->paramDecls = funcParams();
@@ -256,12 +256,12 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
 std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
     std::vector<unique_ptr<AstFuncParamDecl>> params;
     while (isValid() && *m_token != TokenKind::ParenClose) {
-        auto id = identifier();
+        auto id = expect(TokenKind::Identifier);
         expect(TokenKind::As);
         auto type = typeExpr();
 
         auto param = AstFuncParamDecl::create();
-        param->identExpr = std::move(id);
+        param->token = std::move(id);
         param->typeExpr = std::move(type);
         params.push_back(std::move(param));
 
@@ -385,10 +385,10 @@ unique_ptr<Token> Parser::accept(TokenKind kind) {
 unique_ptr<Token> Parser::expect(TokenKind kind) {
     if (!match(kind)) {
         error(llvm::Twine("Expected '")
-              .concat(view_to_stringRef(Token::description(kind)))
-              .concat("' got '")
-              .concat(view_to_stringRef(m_token->description()))
-              .concat("'"));
+                  .concat(view_to_stringRef(Token::description(kind)))
+                  .concat("' got '")
+                  .concat(view_to_stringRef(m_token->description()))
+                  .concat("'"));
     }
     return move();
 }
@@ -402,9 +402,9 @@ unique_ptr<Token> Parser::move() {
 
 [[noreturn]] void Parser::error(const llvm::Twine& message) {
     m_srcMgr.PrintMessage(
-    m_token->loc(),
-    llvm::SourceMgr::DK_Error,
-    message,
-    m_token->range());
+        m_token->loc(),
+        llvm::SourceMgr::DK_Error,
+        message,
+        m_token->range());
     std::exit(EXIT_FAILURE);
 }

@@ -78,7 +78,7 @@ void AstPrinter::visit(AstVarDecl* ast) {
     }
 
     std::cout << "VAR ";
-    ast->identExpr->accept(this);
+    std::cout << ast->token->lexeme();
 
     if (ast->typeExpr) {
         std::cout << " AS ";
@@ -102,7 +102,7 @@ void AstPrinter::visit(AstFuncDecl* ast) {
     } else {
         std::cout << "SUB ";
     }
-    ast->identExpr->accept(this);
+    std::cout << ast->token->lexeme();
 
     if (!ast->paramDecls.empty()) {
         std::cout << "(";
@@ -125,7 +125,7 @@ void AstPrinter::visit(AstFuncDecl* ast) {
 }
 
 void AstPrinter::visit(AstFuncParamDecl* ast) {
-    ast->identExpr->accept(this);
+    std::cout << ast->token->lexeme();
     std::cout << " AS ";
     ast->typeExpr->accept(this);
 }

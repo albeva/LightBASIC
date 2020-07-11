@@ -21,7 +21,7 @@ public:
 #undef IMPL_VISITOR
 
 private:
-    [[nodiscard]] Symbol* createNewSymbol(AstIdentExpr* identExpr, SymbolTable* table = nullptr);
+    [[nodiscard]] Symbol* createNewSymbol(Token* identExpr, SymbolTable* table = nullptr);
 
     llvm::LLVMContext& m_context;
     SymbolTable* m_table = nullptr;

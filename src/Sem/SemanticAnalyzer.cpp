@@ -39,7 +39,7 @@ void SemanticAnalyzer::visit(AstExprStmt* ast) {
 }
 
 void SemanticAnalyzer::visit(AstVarDecl* ast) {
-    auto* symbol = createNewSymbol(ast->identExpr.get());
+    auto* symbol = createNewSymbol(ast->token.get());
 
     // type expr?
     const TypeRoot* type = nullptr;
@@ -63,7 +63,6 @@ void SemanticAnalyzer::visit(AstVarDecl* ast) {
 
     // create function symbol
     symbol->setType(type);
-    ast->identExpr->type = type;
     ast->type = type;
     ast->symbol = symbol;
 
@@ -79,7 +78,7 @@ void SemanticAnalyzer::visit(AstVarDecl* ast) {
  * Analyze function declaration
  */
 void SemanticAnalyzer::visit(AstFuncDecl* ast) {
-    auto* symbol = createNewSymbol(ast->identExpr.get(), m_rootTable);
+    auto* symbol = createNewSymbol(ast->token.get(), m_rootTable);
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
@@ -106,7 +105,6 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     // create function symbol
     const auto* type = TypeFunction::get(retType, std::move(paramTypes));
     symbol->setType(type);
-    ast->identExpr->type = type;
     ast->type = type;
     ast->symbol = symbol;
 
@@ -119,14 +117,13 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
 }
 
 void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
-    auto* symbol = createNewSymbol(ast->identExpr.get());
+    auto* symbol = createNewSymbol(ast->token.get());
 
     ast->typeExpr->accept(this);
     symbol->setType(ast->typeExpr->type);
 
     ast->symbol = symbol;
     ast->type = symbol->type();
-    ast->identExpr->type = symbol->type();
 }
 
 void SemanticAnalyzer::visit(AstAttributeList* ast) {
@@ -205,19 +202,16 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
     }
 }
 
-Symbol* SemanticAnalyzer::createNewSymbol(AstIdentExpr* identExpr, SymbolTable* table) {
+Symbol* SemanticAnalyzer::createNewSymbol(Token* token, SymbolTable* table) {
     if (table == nullptr) {
         table = m_table;
     }
 
-    const auto& name = identExpr->token->lexeme();
-
-    auto* symbol = table->find(name, false);
+    auto* symbol = table->find(token->lexeme(), false);
     if (symbol != nullptr) {
-        error("Redefinition of " + string(name));
+        error("Redefinition of " + string(token->lexeme()));
     }
 
-    symbol = table->insert(make_unique<Symbol>(name));
-    identExpr->symbol = symbol;
+    symbol = table->insert(make_unique<Symbol>(token->lexeme()));
     return symbol;
 }

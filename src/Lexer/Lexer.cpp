@@ -111,15 +111,15 @@ unique_ptr<Token> Lexer::endOfFile() {
     if (m_hasStmt) {
         m_hasStmt = false;
         return Token::create(
-        TokenKind::EndOfStmt,
-        Token::description(TokenKind::EndOfStmt),
-        getLoc(m_buffer->getBufferEnd()));
+            TokenKind::EndOfStmt,
+            Token::description(TokenKind::EndOfStmt),
+            getLoc(m_buffer->getBufferEnd()));
     }
 
     return Token::create(
-    TokenKind::EndOfFile,
-    Token::description(TokenKind::EndOfFile),
-    getLoc(m_buffer->getBufferEnd()));
+        TokenKind::EndOfFile,
+        Token::description(TokenKind::EndOfFile),
+        getLoc(m_buffer->getBufferEnd()));
 }
 
 unique_ptr<Token> Lexer::endOfStatement() {
