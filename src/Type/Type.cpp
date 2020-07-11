@@ -10,8 +10,6 @@ namespace {
 // Declared declaredTypes.
 static std::vector<unique_ptr<TypeFunction>> declaredFunc;
 static std::vector<unique_ptr<TypePointer>> declaredPtrs;
-static std::vector<unique_ptr<TypeInteger>> declaredInts;
-static std::vector<unique_ptr<TypeFloatingPoint>> declaredFPs;
 
 // Commonly used types
 const TypeVoid voidTy;                // VOID
@@ -69,8 +67,9 @@ const TypeVoid* TypeVoid::get() {
     return &voidTy;
 }
 
-llvm::Type* TypeVoid::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeVoid::genLlvmType(llvm::LLVMContext& context) const {
+    // should never be called?
+    return llvm::Type::getVoidTy(context);
 }
 
 // Any
@@ -78,8 +77,8 @@ const TypeAny* TypeAny::get() {
     return &anyTy;
 }
 
-llvm::Type* TypeAny::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeAny::genLlvmType(llvm::LLVMContext& context) const {
+    return llvm::Type::getVoidTy(context);
 }
 
 // Pointer
@@ -98,8 +97,8 @@ const TypePointer* TypePointer::get(const TypeRoot* base) {
     return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
 }
 
-llvm::Type* TypePointer::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypePointer::genLlvmType(llvm::LLVMContext& context) const {
+    return llvm::PointerType::get(m_base->llvmType(context), 0);
 }
 
 // Bool
@@ -108,53 +107,52 @@ const TypeBool* TypeBool::get() {
     return &BoolTy;
 }
 
-llvm::Type* TypeBool::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeBool::genLlvmType(llvm::LLVMContext& context) const {
+    return llvm::Type::getInt1Ty(context);
 }
 
 // Integer
 
-const TypeInteger* TypeInteger::get(int bits, bool isSigned) {
+const TypeInteger* TypeInteger::get(unsigned bits, bool isSigned) {
 #define USE_TYPE(id, str, kind, BITS, IS_SIGNED) \
     if (bits == BITS && isSigned == IS_SIGNED)   \
         return &id##Ty;
     INTEGER_TYPES(USE_TYPE)
 #undef USE_TYPE
 
-    for (const auto& ptr : declaredInts) {
-        if (ptr->bits() == bits && ptr->isSigned() == isSigned) {
-            return ptr.get();
-        }
-    }
-
-    return declaredInts.emplace_back(make_unique<TypeInteger>(bits, isSigned)).get();
+    std::cerr << "Invalid integer type size: " << bits << std::endl;
+    std::exit(EXIT_FAILURE);
 }
 
-llvm::Type* TypeInteger::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeInteger::genLlvmType(llvm::LLVMContext& context) const {
+    return llvm::IntegerType::get(context, bits());
 }
 
 // Floating Point
 
-const TypeFloatingPoint* TypeFloatingPoint::get(int bits) {
+const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
+    switch (bits) {
 #define USE_TYPE(id, str, kind, BITS) \
-    if (bits == BITS) {               \
-        return &id##Ty;               \
-    }
-    FLOATINGPOINT_TYPES(USE_TYPE)
+    case BITS:                        \
+        return &id##Ty;
+        FLOATINGPOINT_TYPES(USE_TYPE)
 #undef USE_TYPE
-
-    for (const auto& ptr : declaredFPs) {
-        if (ptr->bits() == bits) {
-            return ptr.get();
-        }
+    default:
+        std::cerr << "Invalid floating point type size: " << bits << std::endl;
+        std::exit(EXIT_FAILURE);
     }
-
-    return declaredFPs.emplace_back(make_unique<TypeFloatingPoint>(bits)).get();
 }
 
-llvm::Type* TypeFloatingPoint::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeFloatingPoint::genLlvmType(llvm::LLVMContext& context) const {
+    switch (bits()) {
+    case 32: // NOLINT
+        return llvm::Type::getFloatTy(context);
+    case 64: // NOLINT
+        return llvm::Type::getDoubleTy(context);
+    default:
+        std::cerr << "Invalid floating point type size: " << bits() << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
 }
 
 // Function
@@ -170,8 +168,16 @@ const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const
     return declaredFunc.emplace_back(std::move(ty)).get();
 }
 
-llvm::Type* TypeFunction::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeFunction::genLlvmType(llvm::LLVMContext& context) const {
+    auto* retTy = m_retType->llvmType(context);
+
+    std::vector<llvm::Type*> params;
+    params.reserve(m_paramTypes.size());
+    for (const auto& p: m_paramTypes) {
+        params.emplace_back(p->llvmType(context));
+    }
+
+    return llvm::FunctionType::get(retTy, params, false);
 }
 
 // ZString
@@ -179,6 +185,6 @@ const TypeZString* TypeZString::get() {
     return &ZStringTy;
 }
 
-llvm::Type* TypeZString::genLlvmType() const {
-    return nullptr;
+llvm::Type* TypeZString::genLlvmType(llvm::LLVMContext& context) const {
+    return llvm::Type::getInt8PtrTy(context);
 }

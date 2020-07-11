@@ -44,9 +44,9 @@ public:
 
     [[nodiscard]] TypeKind kind() const { return m_kind; }
 
-    [[nodiscard]] llvm::Type* llvmType() const {
+    [[nodiscard]] llvm::Type* llvmType(llvm::LLVMContext& context) const {
         if (m_llvmType == nullptr) {
-            m_llvmType = genLlvmType();
+            m_llvmType = genLlvmType(context);
         }
         return m_llvmType;
     }
@@ -56,7 +56,7 @@ public:
 protected:
     explicit TypeRoot(TypeKind kind) : m_kind{ kind } {}
 
-    [[nodiscard]] virtual llvm::Type* genLlvmType() const = 0;
+    [[nodiscard]] virtual llvm::Type* genLlvmType(llvm::LLVMContext& context) const = 0;
 
 private:
     mutable llvm::Type* m_llvmType = nullptr;
@@ -77,7 +77,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
 
 /**
@@ -94,7 +94,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
 
 /**
@@ -114,7 +114,7 @@ public:
     [[nodiscard]] const TypeRoot* base() const { return m_base; }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 
 private:
     const TypeRoot* m_base;
@@ -126,15 +126,20 @@ private:
  */
 class TypeNumber : public TypeRoot {
 protected:
-    using TypeRoot::TypeRoot;
+    TypeNumber(TypeKind kind, unsigned bits, bool isSigned)
+        : TypeRoot{kind}, m_bits{bits}, m_isSigned{isSigned} {}
 
 public:
     static bool classof(const TypeRoot* type) {
         return type->kind() >= TypeKind::Number && type->kind() < TypeKind::NumberLast;
     }
 
-    [[nodiscard]] virtual int bits() const = 0;
-    [[nodiscard]] virtual bool isSigned() const = 0;
+    unsigned bits() const { return m_bits; }
+    bool isSigned() const { return m_isSigned; }
+
+private:
+    const unsigned m_bits;
+    const bool m_isSigned;
 };
 
 /**
@@ -142,7 +147,7 @@ public:
  */
 class TypeBool final : public TypeNumber {
 public:
-    TypeBool() : TypeNumber{ TypeKind::Bool } {}
+    TypeBool() : TypeNumber{ TypeKind::Bool, 1, false } {}
 
     static const TypeBool* get();
 
@@ -150,11 +155,8 @@ public:
         return type->kind() == TypeKind::Bool;
     }
 
-    [[nodiscard]] int bits() const final { return 1; }
-    [[nodiscard]] bool isSigned() const final { return false; }
-
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
 
 /**
@@ -162,26 +164,17 @@ protected:
  */
 class TypeInteger final : public TypeNumber {
 public:
-    TypeInteger(int bits, bool isSigned)
-      : TypeNumber{ TypeKind::Integer },
-        m_bits{ bits },
-        m_isSigned{ isSigned } {}
+    TypeInteger(unsigned bits, bool isSigned)
+      : TypeNumber{ TypeKind::Integer, bits, isSigned } {}
 
-    static const TypeInteger* get(int bits, bool isSigned);
+    static const TypeInteger* get(unsigned bits, bool isSigned);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Integer;
     }
 
-    [[nodiscard]] int bits() const final { return m_bits; }
-    [[nodiscard]] bool isSigned() const final { return m_isSigned; }
-
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
-private:
-    const int m_bits;
-    const bool m_isSigned;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
 
 /**
@@ -189,24 +182,17 @@ private:
  */
 class TypeFloatingPoint final : public TypeNumber {
 public:
-    explicit TypeFloatingPoint(int bits)
-      : TypeNumber{ TypeKind::FloatingPoint },
-        m_bits{ bits } {}
+    explicit TypeFloatingPoint(unsigned bits)
+      : TypeNumber{ TypeKind::FloatingPoint, bits, false } {}
 
-    static const TypeFloatingPoint* get(int bits);
+    static const TypeFloatingPoint* get(unsigned bits);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::FloatingPoint;
     }
 
-    [[nodiscard]] int bits() const final { return m_bits; }
-    [[nodiscard]] bool isSigned() const final { return false; }
-
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
-
-private:
-    const int m_bits;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
 
 /**
@@ -229,7 +215,7 @@ public:
     [[nodiscard]] const std::vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 
 private:
     const TypeRoot* m_retType;
@@ -251,7 +237,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType() const final;
+    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
 
 

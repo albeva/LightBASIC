@@ -5,6 +5,8 @@
 #include "Ast/Ast.h"
 #include "Lexer/Token.h"
 #include "Type/Type.h"
+#include "Symbol/Symbol.h"
+#include "Symbol/SymbolTable.h"
 #include "llvm/IR/IRPrintingPasses.h"
 using namespace lbc;
 
@@ -100,6 +102,8 @@ void CodeGen::visit(AstVarDecl* ast) {
 
 void CodeGen::visit(AstFuncDecl* ast) {
     // ast->retTypeExpr->accept(this);
+    auto fnTy = ast->symbol->type()->llvmType(m_context);
+
 
 }
 
