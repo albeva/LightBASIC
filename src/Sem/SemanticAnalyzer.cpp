@@ -63,7 +63,6 @@ void SemanticAnalyzer::visit(AstVarDecl* ast) {
 
     // create function symbol
     symbol->setType(type);
-    ast->type = type;
     ast->symbol = symbol;
 
     // alias?
@@ -89,7 +88,7 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
         m_table = ast->symbolTable.get();
         for (auto& param : ast->paramDecls) {
             param->accept(this);
-            paramTypes.emplace_back(param->type);
+            paramTypes.emplace_back(param->symbol->type());
         }
     }
 
@@ -105,7 +104,6 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     // create function symbol
     const auto* type = TypeFunction::get(retType, std::move(paramTypes));
     symbol->setType(type);
-    ast->type = type;
     ast->symbol = symbol;
 
     // alias?
@@ -123,7 +121,6 @@ void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
     symbol->setType(ast->typeExpr->type);
 
     ast->symbol = symbol;
-    ast->type = symbol->type();
 }
 
 void SemanticAnalyzer::visit(AstAttributeList* ast) {

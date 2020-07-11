@@ -78,8 +78,6 @@ public:
     }
 
     unique_ptr<AstAttributeList> attribs;
-
-    const TypeRoot* type = nullptr;
     Symbol* symbol = nullptr;
 };
 
