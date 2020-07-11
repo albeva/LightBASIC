@@ -49,8 +49,10 @@ private:
 
 // Base class for all statements
 class AstStmt : public AstRoot {
+    NON_COPYABLE(AstStmt)
 public:
     using AstRoot::AstRoot;
+    ~AstStmt() override;
 
     static bool classof(const AstRoot* ast) {
         return ast->kind() >= AstKind::Stmt && ast->kind() < AstKind::StmtLast;
@@ -59,8 +61,10 @@ public:
 
 // Base class for all expressions
 class AstExpr : public AstRoot {
+    NON_COPYABLE(AstExpr)
 public:
     using AstRoot::AstRoot;
+    ~AstExpr() override;
 
     static bool classof(const AstRoot* ast) {
         return ast->kind() >= AstKind::Expr && ast->kind() < AstKind::ExprLast;
@@ -70,8 +74,10 @@ public:
 };
 
 class AstDecl : public AstStmt {
+    NON_COPYABLE(AstDecl)
 public:
     using AstStmt::AstStmt;
+    ~AstDecl() override;
 
     static bool classof(const AstRoot* ast) {
         return ast->kind() >= AstKind::Decl && ast->kind() < AstKind::DeclLast;
@@ -185,6 +191,7 @@ DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
     unique_ptr<Token> token;
+    llvm::Constant* value;
 DECLARE_END
 
 #undef DECLARE_AST

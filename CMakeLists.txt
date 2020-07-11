@@ -27,6 +27,7 @@ add_executable(lbc
         src/Lexer/Token.def.h
         src/Ast/Ast.cpp
         src/Ast/Ast.h
+        src/Ast/AstVisitor.cpp
         src/Ast/AstVisitor.h
         src/Ast/Ast.def.h
         src/Ast/AstPrinter.cpp
@@ -41,8 +42,7 @@ add_executable(lbc
         src/Type/Type.h
         src/Type/Type.def.h
         src/Sem/SemanticAnalyzer.cpp
-        src/Sem/SemanticAnalyzer.h
-        )
+        src/Sem/SemanticAnalyzer.h)
 
 include_directories(${lbc_SOURCE_DIR}/src)
 target_precompile_headers(lbc PRIVATE src/pch.h)
@@ -50,6 +50,7 @@ target_link_libraries(lbc ${llvm_libs})
 target_compile_options(lbc PRIVATE
         -fno-exceptions -fno-rtti
 
+        -Weverything
         -Werror
         -Wall
         -Wextra
@@ -65,9 +66,15 @@ target_compile_options(lbc PRIVATE
         -Wdouble-promotion
         -Wformat=2
 
-        -Wno-unused-private-field
+        -Wno-padded
+        -Wno-c++98-compat-pedantic
         -Wno-gnu-zero-variadic-macro-arguments
-        -Wno-unused-variable
-        -Wno-unused-parameter
-        -Wno-unused-function
+        -Wno-unused-private-field                   # Remove
+        -Wno-unused-variable                        # Remove
+        -Wno-unused-parameter                       # Remove
+        -Wno-unused-function                        # Remove
+        -Wno-poison-system-directories
+        -Wno-exit-time-destructors                  # Remove
+        -Wno-global-constructors                    # Remove
+        -Wno-switch-enum                            # ?
         )

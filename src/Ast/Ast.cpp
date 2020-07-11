@@ -9,6 +9,9 @@
 using namespace lbc;
 
 AstRoot::~AstRoot() = default;
+AstStmt::~AstStmt() = default;
+AstExpr::~AstExpr() = default;
+AstDecl::~AstDecl() = default;
 
 #define IMPLEMENT_AST(KIND)                           \
     Ast##KIND::Ast##KIND() : Base{ AstKind::KIND } {} \

@@ -36,6 +36,8 @@ FLOATINGPOINT_TYPES(DEFINE_TYPE)
 
 } // namespace
 
+TypeRoot::~TypeRoot() = default;
+
 const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
 #define CASE_PRIMITIVE(id, str, KIND, ...) \
     case TokenKind::id:                    \
@@ -100,6 +102,9 @@ const TypePointer* TypePointer::get(const TypeRoot* base) {
 llvm::Type* TypePointer::genLlvmType(llvm::LLVMContext& context) const {
     return llvm::PointerType::get(m_base->llvmType(context), 0);
 }
+
+// numeric base
+TypeNumber::~TypeNumber() = default;
 
 // Bool
 

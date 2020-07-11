@@ -13,7 +13,7 @@ class AstVisitor {
     NON_COPYABLE(AstVisitor)
 public:
     AstVisitor() = default;
-    virtual ~AstVisitor() = default;
+    virtual ~AstVisitor();
 #define VIRTUAL_VISIT(KIND) virtual void visit(Ast##KIND* ast) = 0;
     AST_CONTENT_NODES(VIRTUAL_VISIT)
 #undef VIRTUAL_VISIT

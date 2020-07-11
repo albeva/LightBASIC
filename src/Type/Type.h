@@ -40,7 +40,7 @@ enum class TokenKind;
 class TypeRoot {
     NON_COPYABLE(TypeRoot)
 public:
-    virtual ~TypeRoot() = default;
+    virtual ~TypeRoot();
 
     [[nodiscard]] TypeKind kind() const { return m_kind; }
 
@@ -51,10 +51,10 @@ public:
         return m_llvmType;
     }
 
-    static const TypeRoot* fromTokenKind(TokenKind kind);
+    [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind);
 
 protected:
-    explicit TypeRoot(TypeKind kind) : m_kind{ kind } {}
+    explicit TypeRoot(TypeKind kind): m_kind{kind} {}
 
     [[nodiscard]] virtual llvm::Type* genLlvmType(llvm::LLVMContext& context) const = 0;
 
@@ -87,7 +87,7 @@ protected:
 class TypeAny final : public TypeRoot {
 public:
     TypeAny() : TypeRoot{ TypeKind::Any } {}
-    static const TypeAny* get();
+    [[nodiscard]] static const TypeAny* get();
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Any;
@@ -105,7 +105,7 @@ public:
     explicit TypePointer(const TypeRoot* base)
       : TypeRoot{ TypeKind::Pointer }, m_base{ base } {}
 
-    static const TypePointer* get(const TypeRoot* base);
+    [[nodiscard]] static const TypePointer* get(const TypeRoot* base);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Pointer;
@@ -125,6 +125,7 @@ private:
  * Bool while conforming, is special kind
  */
 class TypeNumber : public TypeRoot {
+    NON_COPYABLE(TypeNumber)
 protected:
     TypeNumber(TypeKind kind, unsigned bits, bool isSigned)
         : TypeRoot{kind}, m_bits{bits}, m_isSigned{isSigned} {}
@@ -134,8 +135,10 @@ public:
         return type->kind() >= TypeKind::Number && type->kind() < TypeKind::NumberLast;
     }
 
-    unsigned bits() const { return m_bits; }
-    bool isSigned() const { return m_isSigned; }
+    ~TypeNumber() override;
+
+    [[nodiscard]] unsigned bits() const { return m_bits; }
+    [[nodiscard]] bool isSigned() const { return m_isSigned; }
 
 private:
     const unsigned m_bits;
@@ -149,7 +152,7 @@ class TypeBool final : public TypeNumber {
 public:
     TypeBool() : TypeNumber{ TypeKind::Bool, 1, false } {}
 
-    static const TypeBool* get();
+    [[nodiscard]] static const TypeBool* get();
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Bool;
@@ -167,7 +170,7 @@ public:
     TypeInteger(unsigned bits, bool isSigned)
       : TypeNumber{ TypeKind::Integer, bits, isSigned } {}
 
-    static const TypeInteger* get(unsigned bits, bool isSigned);
+    [[nodiscard]] static const TypeInteger* get(unsigned bits, bool isSigned);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Integer;
@@ -185,7 +188,7 @@ public:
     explicit TypeFloatingPoint(unsigned bits)
       : TypeNumber{ TypeKind::FloatingPoint, bits, false } {}
 
-    static const TypeFloatingPoint* get(unsigned bits);
+    [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::FloatingPoint;
@@ -205,7 +208,7 @@ public:
         m_retType{ retType },
         m_paramTypes{ std::move(paramTypes) } {}
 
-    static const TypeFunction* get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes);
+    [[nodiscard]] static const TypeFunction* get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Function;
@@ -230,7 +233,7 @@ class TypeZString final : public TypeRoot {
 public:
     TypeZString() : TypeRoot{ TypeKind::ZString } {}
 
-    static const TypeZString* get();
+    [[nodiscard]] static const TypeZString* get();
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::ZString;
