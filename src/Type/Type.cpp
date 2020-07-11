@@ -8,10 +8,10 @@ using namespace lbc;
 namespace {
 
 // Declared declaredTypes.
-std::vector<unique_ptr<const TypeFunction>> declaredFunc;
-std::vector<unique_ptr<const TypePointer>> declaredPtrs;
-std::vector<unique_ptr<const TypeInteger>> declaredInts;
-std::vector<unique_ptr<const TypeFloatingPoint>> declaredFPs;
+static std::vector<unique_ptr<TypeFunction>> declaredFunc;
+static std::vector<unique_ptr<TypePointer>> declaredPtrs;
+static std::vector<unique_ptr<TypeInteger>> declaredInts;
+static std::vector<unique_ptr<TypeFloatingPoint>> declaredFPs;
 
 // Commonly used types
 const TypeVoid voidTy;                // VOID

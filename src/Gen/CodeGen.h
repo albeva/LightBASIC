@@ -9,7 +9,7 @@ namespace lbc {
 
 class CodeGen final : public AstVisitor {
 public:
-    explicit CodeGen(llvm::LLVMContext& context);
+    explicit CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId);
 
 #define IMPL_VISITOR(NODE, ...) virtual void visit(Ast##NODE* ast);
     AST_CONTENT_NODES(IMPL_VISITOR)
@@ -20,6 +20,9 @@ private:
     llvm::Function* getOrCreate(AstCallExpr* ast);
 
     llvm::LLVMContext& m_context;
+    llvm::SourceMgr& m_srcMgr;
+    unsigned m_fileId;
+
     llvm::IRBuilder<> m_builder;
     unique_ptr<llvm::Module> m_module;
     llvm::Value* m_value = nullptr;

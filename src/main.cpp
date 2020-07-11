@@ -49,15 +49,12 @@ int main(int argc, char* argv[]) {
     // Lex the input
     Parser parser{ srcMgr, ID };
     if (auto ast = parser.parse()) {
-        AstPrinter printer;
-        ast->accept(&printer);
-
         llvm::LLVMContext context;
-        SemanticAnalyzer sem(context);
+        SemanticAnalyzer sem(context, srcMgr, ID);
         ast->accept(&sem);
 
-        // CodeGen gen(context);
-        // ast->accept(&gen);
+        CodeGen gen(context, srcMgr, ID);
+        ast->accept(&gen);
     } else {
         std::cerr << "Failed to parse the input" << std::endl;
         return EXIT_FAILURE;

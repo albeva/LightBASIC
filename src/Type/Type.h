@@ -44,7 +44,7 @@ public:
 
     [[nodiscard]] TypeKind kind() const { return m_kind; }
 
-    [[nodiscard]] llvm::Type* llvmType() {
+    [[nodiscard]] llvm::Type* llvmType() const {
         if (m_llvmType == nullptr) {
             m_llvmType = genLlvmType();
         }
@@ -59,7 +59,7 @@ protected:
     [[nodiscard]] virtual llvm::Type* genLlvmType() const = 0;
 
 private:
-    llvm::Type* m_llvmType = nullptr;
+    mutable llvm::Type* m_llvmType = nullptr;
     const TypeKind m_kind;
 };
 

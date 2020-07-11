@@ -14,8 +14,10 @@ using namespace lbc;
     std::exit(EXIT_FAILURE);
 }
 
-SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context)
-  : m_context{ context } {}
+SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId)
+  : m_context{ context },
+    m_srcMgr{ srcMgr },
+    m_fileId{ fileId } {}
 
 void SemanticAnalyzer::visit(AstProgram* ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
