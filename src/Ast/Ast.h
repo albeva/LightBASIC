@@ -191,7 +191,7 @@ DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
     unique_ptr<Token> token;
-    llvm::Constant* value;
+    llvm::Constant* value = nullptr;
 DECLARE_END
 
 #undef DECLARE_AST
