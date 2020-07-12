@@ -277,16 +277,17 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
 //----------------------------------------
 
 unique_ptr<AstTypeExpr> Parser::typeExpr() {
+#define TYPE_KEYWORD(id, ...) case TokenKind::id:
     switch (m_token->kind()) {
-    case TokenKind::ZString:
-    case TokenKind::Integer: {
-        auto type = AstTypeExpr::create();
-        type->token = move();
-        return type;
-    }
+        ALL_TYPES(TYPE_KEYWORD) {
+            auto type = AstTypeExpr::create();
+            type->token = move();
+            return type;
+        }
     default:
         error("Expected typeExpr");
     }
+#undef TYPE_KEYWORD
 }
 
 //----------------------------------------

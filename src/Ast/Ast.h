@@ -14,25 +14,29 @@ class SymbolTable;
 class TypeRoot;
 AST_FORWARD_DECLARE()
 
+// clang-format off
+
 // Enumerate all possible ast nodes
 // This works with LLVM rtti system
 enum class AstKind {
 #define KIND_ENUM(id, ...) id,
     Stmt,
-    AST_STMT_NODES(KIND_ENUM)
+        AST_STMT_NODES(KIND_ENUM)
         Decl,
-    AST_DECL_NODES(KIND_ENUM)
+            AST_DECL_NODES(KIND_ENUM)
         DeclLast,
     StmtLast,
 
     AST_ATTRIB_NODES(KIND_ENUM)
-        AST_TYPE_NODES(KIND_ENUM)
+    AST_TYPE_NODES(KIND_ENUM)
 
-            Expr,
-    AST_EXPR_NODES(KIND_ENUM)
-        ExprLast
+    Expr,
+        AST_EXPR_NODES(KIND_ENUM)
+    ExprLast
 #undef KIND_ENUM
 };
+
+// clang-format on
 
 // Base class for all ast nodes
 class AstRoot {
@@ -71,6 +75,7 @@ public:
     }
 
     const TypeRoot* type = nullptr;
+    llvm::Value* llvmValue = nullptr;
 };
 
 class AstDecl : public AstStmt {
@@ -191,7 +196,6 @@ DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
     unique_ptr<Token> token;
-    llvm::Constant* value = nullptr;
 DECLARE_END
 
 #undef DECLARE_AST

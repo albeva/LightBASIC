@@ -25,7 +25,7 @@ const Token* AstAttributeList::getStringLiteral(const string_view& key) const {
     for (const auto& attr : attribs) {
         if (attr->identExpr->token->lexeme() == key) {
             if (attr->argExprs.size() != 1) {
-                std::cerr << "Attribute " << key << " must have 1 value" << std::endl;
+                std::cerr << "Attribute " << key << " must have 1 llvmValue" << std::endl;
                 std::exit(EXIT_FAILURE);
             }
             const auto* token = attr->argExprs[0]->token.get();

@@ -26,7 +26,7 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
 
 /**
  * Simple helper. Basically ensured that original
- * value of a variable provided is restored apon
+ * llvmValue of a variable provided is restored apon
  * exiting the scope
  */
 template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
