@@ -1,3 +1,4 @@
+# Sources
 add_executable(
     lbc
     main.cpp
@@ -29,9 +30,15 @@ add_executable(
     Sem/SemanticAnalyzer.cpp
     Sem/SemanticAnalyzer.h)
 
-# This sets a global PCH parameter.
+# PCH header
 target_precompile_headers(project_options INTERFACE pch.h)
+
+# LLVM
 target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
-target_include_directories(lbc PRIVATE ${lbc_SOURCE_DIR}/src)
-target_link_libraries(lbc PRIVATE ${llvm_libs} project_options project_warnings)
 add_definitions(${LLVM_DEFINITIONS})
+
+# Source includes
+target_include_directories(lbc PRIVATE ${lbc_SOURCE_DIR}/src)
+
+# build lbc
+target_link_libraries(lbc PRIVATE ${llvm_libs} project_options project_warnings)
