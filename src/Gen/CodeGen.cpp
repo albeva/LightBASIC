@@ -201,7 +201,7 @@ void CodeGen::visit(AstLiteralExpr* ast) {
         break;
     case TokenKind::NumberLiteral: {
         uint64_t result = 0;
-        std::from_chars(lexeme.begin(), lexeme.end(), result);
+        std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), result); // NOLINT
         constant = llvm::ConstantInt::get(
             ast->type->llvmType(m_context),
             result,

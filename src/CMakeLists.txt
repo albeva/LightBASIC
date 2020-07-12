@@ -31,4 +31,7 @@ add_executable(
     Sem/SemanticAnalyzer.cpp
     Sem/SemanticAnalyzer.h)
 
+target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
+
 target_link_libraries(lbc PRIVATE ${llvm_libs} project_options project_warnings)
