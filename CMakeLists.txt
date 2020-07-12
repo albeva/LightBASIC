@@ -1,5 +1,4 @@
-# This file is based on starter project from
-# https://github.com/lefticus/cpp_starter_project
+# This file is based on starter project from https://github.com/lefticus/cpp_starter_project
 cmake_minimum_required(VERSION 3.16)
 
 # Set the project name to your project name
@@ -35,28 +34,25 @@ include(cmake/StaticAnalyzers.cmake)
 # This sets a global PCH parameter, each project will build its own PCH, which is a good idea if any #define's change
 #
 # consider breaking this out per project as necessary
-target_precompile_headers(
-        project_options
-        INTERFACE
-        src/pch.h)
+target_precompile_headers(project_options INTERFACE src/pch.h)
 
-## LLVM
+# LLVM
 find_package(LLVM REQUIRED CONFIG)
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
-llvm_map_components_to_libnames(llvm_libs core support bitwriter)
+llvm_map_components_to_libnames(
+    llvm_libs
+    core
+    support
+    bitwriter)
 
 # Project specific compiler options
 if(MSVC)
 
 elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-    target_compile_options(project_options INTERFACE
-            -fno-exceptions -fno-rtti
-            )
+    target_compile_options(project_options INTERFACE -fno-exceptions -fno-rtti)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(project_options INTERFACE
-            -fno-exceptions -fno-rtti
-            )
+    target_compile_options(project_options INTERFACE -fno-exceptions -fno-rtti)
 else()
     message(AUTHOR_WARNING "No compiler options set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 endif()
