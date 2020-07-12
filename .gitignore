@@ -8,6 +8,9 @@ xcuserdata/
 timeline.xctimeline
 playground.xcworkspace
 
+# Visual Studio
+.vs/
+
 # 
 bin/
 obj/
@@ -31,4 +34,5 @@ cmake_install.cmake
 install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
+CMakeSettings.json
 _deps
