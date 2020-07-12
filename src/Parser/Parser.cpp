@@ -246,7 +246,7 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
         func->retTypeExpr = typeExpr();
     }
 
-    return std::move(func);
+    return func;
 }
 
 /**
