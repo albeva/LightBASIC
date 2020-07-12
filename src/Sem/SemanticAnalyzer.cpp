@@ -33,7 +33,7 @@ void SemanticAnalyzer::visit(AstStmtList* ast) {
 }
 
 void SemanticAnalyzer::visit(AstAssignStmt* ast) {
-    std::cout << "Not implemented " << __PRETTY_FUNCTION__ << '\n';
+    std::cout << "Not implemented " << LBC_FUNCTION << '\n';
 }
 
 void SemanticAnalyzer::visit(AstExprStmt* ast) {

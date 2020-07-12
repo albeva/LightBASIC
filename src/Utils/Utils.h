@@ -6,17 +6,23 @@
 
 #define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
 
-namespace lbc {
-
-inline llvm::StringRef view_to_stringRef(const string_view& view) {
-    return llvm::StringRef(view.data(), view.size());
-}
-
 #define NON_COPYABLE(Class)                  \
     Class(const Class&) = delete;            \
     Class& operator=(const Class&) = delete; \
     Class(Class&&) = delete;                 \
     Class& operator=(Class&&) = delete;
+
+#ifdef __PRETTY_FUNCTION__
+#   define LBC_FUNCTION __PRETTY_FUNCTION__
+#else
+#   define LBC_FUNCTION __FUNCTION__
+#endif
+
+namespace lbc {
+
+inline llvm::StringRef view_to_stringRef(const string_view& view) {
+    return llvm::StringRef(view.data(), view.size());
+}
 
 /**
  * Simple helper. Basically ensured that original

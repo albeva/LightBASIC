@@ -57,7 +57,7 @@ void CodeGen::visit(AstStmtList* ast) {
 }
 
 void CodeGen::visit(AstAssignStmt* ast) {
-    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+    std::cerr << "Not implemented: " << LBC_FUNCTION << '\n';
 }
 
 void CodeGen::visit(AstExprStmt* ast) {
@@ -119,19 +119,19 @@ void CodeGen::visit(AstFuncDecl* ast) {
 }
 
 void CodeGen::visit(AstFuncParamDecl* ast) {
-    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+    std::cerr << "Not implemented: " << LBC_FUNCTION << '\n';
 }
 
 void CodeGen::visit(AstAttributeList* ast) {
-    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+    std::cerr << "Not implemented: " << LBC_FUNCTION << '\n';
 }
 
 void CodeGen::visit(AstAttribute* ast) {
-    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+    std::cerr << "Not implemented: " << LBC_FUNCTION << '\n';
 }
 
 void CodeGen::visit(AstIdentExpr* ast) {
-    std::cerr << "Not implemented: " << __PRETTY_FUNCTION__ << '\n';
+    std::cerr << "Not implemented: " << LBC_FUNCTION << '\n';
 }
 
 void CodeGen::visit(AstTypeExpr* ast) {
