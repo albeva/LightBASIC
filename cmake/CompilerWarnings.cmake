@@ -68,19 +68,14 @@ function(set_project_warnings project_name)
       -Wno-switch-enum                            # ?
   )
 
-  if(WARNINGS_AS_ERRORS)
-    set(CLANG_WARNINGS ${CLANG_WARNINGS} -Werror)
-    set(MSVC_WARNINGS ${MSVC_WARNINGS} /WX)
-  endif()
-
   set(GCC_WARNINGS
       ${CLANG_GCC_COMMON_WARNINGS}
 
-      -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
-      -Wduplicated-cond # warn if if / else chain has duplicated conditions
-      -Wduplicated-branches # warn if if / else branches have duplicated code
-      -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
-      -Wuseless-cast # warn if you perform a cast to the same type
+      -Wmisleading-indentation  # warn if indentation implies blocks where blocks do not exist
+      -Wduplicated-cond         # warn if if / else chain has duplicated conditions
+      -Wduplicated-branches     # warn if if / else branches have duplicated code
+      -Wlogical-op              # warn about logical operations being used where bitwise were probably wanted
+      -Wuseless-cast            # warn if you perform a cast to the same type
   )
 
   if(MSVC)
