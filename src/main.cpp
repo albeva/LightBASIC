@@ -37,9 +37,10 @@ int main(int argc, char* argv[]) {
 
     // Load
     llvm::SourceMgr srcMgr{};
-    srcMgr.setIncludeDirs({ fs::current_path() });
+    std::vector include_paths{ fs::current_path().string() };
+    srcMgr.setIncludeDirs(include_paths);
     string included;
-    auto ID = srcMgr.AddIncludeFile(path, {}, included);
+    auto ID = srcMgr.AddIncludeFile(path.string(), {}, included);
     if (ID == ~0U) {
         auto message = "Failed to load '"s + path.string() + "'";
         std::cerr << message << std::endl;
