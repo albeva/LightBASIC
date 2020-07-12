@@ -11,17 +11,22 @@ static inline bool isWhiteSpace(char ch) {
     return ch == ' ' || ch == '\t';
 }
 
+static inline bool isLineEnd(char ch) {
+    return ch == '\n';
+}
+
 static inline llvm::SMLoc getLoc(const char* ptr) {
     return llvm::SMLoc::getFromPointer(ptr);
 }
 
 Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
-  : m_srcMgr{ srcMgr },
-    m_fileID{ fileID },
-    m_buffer{ srcMgr.getMemoryBuffer(fileID) },
-    m_hasStmt{ false } {
+: m_srcMgr{ srcMgr },
+  m_fileID{ fileID },
+  m_buffer{ srcMgr.getMemoryBuffer(fileID) },
+  m_hasStmt{ false } {
     m_input = m_buffer->getBufferStart();
     m_char = *m_input;
+    handleLineEnd();
 }
 
 unique_ptr<Token> Lexer::next() {
@@ -33,7 +38,7 @@ unique_ptr<Token> Lexer::next() {
         }
 
         // new line, emit statement if there is one
-        if (m_char == '\n') {
+        if (isLineEnd(m_char)) {
             if (m_hasStmt) {
                 m_hasStmt = false;
                 return endOfStatement();
@@ -130,10 +135,11 @@ unique_ptr<Token> Lexer::endOfStatement() {
 
 unique_ptr<Token> Lexer::identifier() {
     const auto* start = m_input;
+    size_t length = 0;
     do {
+        length++;
         move();
     } while (isAlpha(m_char));
-    auto length = static_cast<string_view::size_type>(m_input - start);
     return Token::create({ start, length }, getLoc(start));
 }
 
@@ -144,7 +150,7 @@ unique_ptr<Token> Lexer::string() {
     do {
         move();
         if (m_char == '"') {
-            auto length = static_cast<string_view::size_type>(m_input - start - 1);
+            auto length = static_cast<size_t>(m_input - start - 1);
             move();
             return Token::create(TokenKind::StringLiteral, { start + 1, length }, getLoc(start)); // NOLINT
         }
@@ -171,6 +177,17 @@ void Lexer::skipUntilLineEnd() {
 
 void Lexer::move() {
     m_char = *++m_input; // NOLINT
+    handleLineEnd();
+}
+
+void Lexer::handleLineEnd() {
+    if (m_char == '\r') {
+        if (peek() == '\n') {
+            move();
+        } else {
+            m_char = '\n';
+        }
+    }
 }
 
 bool Lexer::isValid() const {

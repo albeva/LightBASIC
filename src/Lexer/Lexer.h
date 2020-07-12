@@ -36,6 +36,7 @@ private:
     const char* m_input;
     char m_char;
     bool m_hasStmt;
+    void handleLineEnd();
 };
 
 } // namespace lbc
