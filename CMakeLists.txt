@@ -31,11 +31,6 @@ enable_sanitizers(project_options)
 # allow for static analysis options
 include(cmake/StaticAnalyzers.cmake)
 
-# This sets a global PCH parameter, each project will build its own PCH, which is a good idea if any #define's change
-#
-# consider breaking this out per project as necessary
-target_precompile_headers(project_options INTERFACE src/pch.h)
-
 # LLVM
 find_package(LLVM REQUIRED CONFIG)
 llvm_map_components_to_libnames(
