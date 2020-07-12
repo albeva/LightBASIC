@@ -1,5 +1,3 @@
-include_directories(${lbc_SOURCE_DIR}/src)
-
 add_executable(
     lbc
     main.cpp
@@ -32,6 +30,6 @@ add_executable(
     Sem/SemanticAnalyzer.h)
 
 target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
-
+target_include_directories(lbc PRIVATE ${lbc_SOURCE_DIR}/src)
 target_link_libraries(lbc PRIVATE ${llvm_libs} project_options project_warnings)
+add_definitions(${LLVM_DEFINITIONS})
