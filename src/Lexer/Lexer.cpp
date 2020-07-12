@@ -183,10 +183,9 @@ void Lexer::move() {
 void Lexer::handleLineEnd() {
     if (m_char == '\r') {
         if (peek() == '\n') {
-            move();
-        } else {
-            m_char = '\n';
+            m_input++; // NOLINT
         }
+        m_char = '\n';
     }
 }
 

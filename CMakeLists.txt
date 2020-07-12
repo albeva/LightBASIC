@@ -1,79 +1,65 @@
+# This file is based on starter project from
+# https://github.com/lefticus/cpp_starter_project
 cmake_minimum_required(VERSION 3.16)
-project(lbc)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_C_STANDARD 11)
 
-# Boost
-#find_package(Boost 1.73.0 REQUIRED)
-#include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
+# Set the project name to your project name
+project(lbc CXX)
+include(cmake/StandardProjectSettings.cmake)
+include(cmake/PreventInSourceBuilds.cmake)
 
-# LLVM
+# Link this 'library' to set the c++ standard / compile-time options requested
+add_library(project_options INTERFACE)
+target_compile_features(project_options INTERFACE cxx_std_17)
+
+if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+    option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
+    if(ENABLE_BUILD_WITH_TIME_TRACE)
+        add_compile_definitions(project_options INTERFACE -ftime-trace)
+    endif()
+endif()
+
+# Link this 'library' to use the warnings specified in CompilerWarnings.cmake
+add_library(project_warnings INTERFACE)
+
+# standard compiler warnings
+include(cmake/CompilerWarnings.cmake)
+set_project_warnings(project_warnings)
+
+# sanitizer options if supported by compiler
+include(cmake/Sanitizers.cmake)
+enable_sanitizers(project_options)
+
+# allow for static analysis options
+include(cmake/StaticAnalyzers.cmake)
+
+# This sets a global PCH parameter, each project will build its own PCH, which is a good idea if any #define's change
+#
+# consider breaking this out per project as necessary
+target_precompile_headers(
+        project_options
+        INTERFACE
+        src/pch.h)
+
+## LLVM
 find_package(LLVM REQUIRED CONFIG)
 include_directories(SYSTEM ${LLVM_INCLUDE_DIRS})
 add_definitions(${LLVM_DEFINITIONS})
 llvm_map_components_to_libnames(llvm_libs core support bitwriter)
 
-# lbc
-add_executable(lbc
-        src/main.cpp
-        src/pch.h
-        src/Lexer/Lexer.cpp
-        src/Lexer/Lexer.h
-        src/Lexer/Token.cpp
-        src/Lexer/Token.h
-        src/Utils/Utils.h
-        src/Parser/Parser.cpp
-        src/Parser/Parser.h
-        src/Lexer/Token.def.h
-        src/Ast/Ast.cpp
-        src/Ast/Ast.h
-        src/Ast/AstVisitor.cpp
-        src/Ast/AstVisitor.h
-        src/Ast/Ast.def.h
-        src/Ast/AstPrinter.cpp
-        src/Ast/AstPrinter.h
-        src/Gen/CodeGen.cpp
-        src/Gen/CodeGen.h
-        src/Symbol/SymbolTable.cpp
-        src/Symbol/SymbolTable.h
-        src/Symbol/Symbol.cpp
-        src/Symbol/Symbol.h
-        src/Type/Type.cpp
-        src/Type/Type.h
-        src/Type/Type.def.h
-        src/Sem/SemanticAnalyzer.cpp
-        src/Sem/SemanticAnalyzer.h)
+# Project specific compiler options
+if(MSVC)
 
-include_directories(${lbc_SOURCE_DIR}/src)
-target_precompile_headers(lbc PRIVATE src/pch.h)
-target_link_libraries(lbc ${llvm_libs})
-target_compile_options(lbc PRIVATE
-        -fno-exceptions -fno-rtti
+elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+    target_compile_options(project_options INTERFACE
+            -fno-exceptions -fno-rtti
+            )
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(project_options INTERFACE
+            -fno-exceptions -fno-rtti
+            )
+else()
+    message(AUTHOR_WARNING "No compiler options set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
+endif()
 
-        -Weverything
-        -Werror
-        -Wall
-        -Wextra
-        -Wshadow
-        -Wnon-virtual-dtor
-        -Wpedantic
-        -Wconversion
-        -Wsign-conversion
-        -Wold-style-cast
-        -Wcast-align
-        -Woverloaded-virtual
-        -Wnull-dereference
-        -Wdouble-promotion
-        -Wformat=2
-
-        -Wno-padded
-        -Wno-c++98-compat-pedantic
-        -Wno-gnu-zero-variadic-macro-arguments
-        -Wno-unused-private-field                   # Remove
-        -Wno-unused-variable                        # Remove
-        -Wno-unused-parameter                       # Remove
-        -Wno-unused-function                        # Remove
-        -Wno-exit-time-destructors                  # Remove
-        -Wno-global-constructors                    # Remove
-        -Wno-switch-enum                            # ?
-        )
+# Source Code
+add_subdirectory(src)
