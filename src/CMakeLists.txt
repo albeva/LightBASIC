@@ -28,7 +28,9 @@ add_executable(
     Type/Type.h
     Type/Type.def.h
     Sem/SemanticAnalyzer.cpp
-    Sem/SemanticAnalyzer.h)
+    Sem/SemanticAnalyzer.h
+    Driver/Driver.cpp
+    Driver/Driver.h)
 
 # PCH header
 target_precompile_headers(project_options INTERFACE pch.h)

@@ -7,11 +7,11 @@
 #include "Ast/AstVisitor.h"
 #include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
+#include "Driver/Driver.h"
 #include "Sem/SemanticAnalyzer.h"
 #include "llvm/Support/CommandLine.h"
 
 namespace cl = llvm::cl;
-namespace fs = std::filesystem;
 using namespace lbc;
 
 int main(int argc, char* argv[]) {
@@ -35,8 +35,10 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    Driver driver;
+
     // Load
-    llvm::SourceMgr srcMgr{};
+    auto& srcMgr = driver.getSourceMrg();
     std::vector include_paths{ fs::current_path().string() };
     srcMgr.setIncludeDirs(include_paths);
     string included;
@@ -50,7 +52,8 @@ int main(int argc, char* argv[]) {
     // Lex the input
     Parser parser{ srcMgr, ID };
     if (auto ast = parser.parse()) {
-        llvm::LLVMContext context;
+        auto& context = driver.getLlvmContext();
+        
         // Analyze
         SemanticAnalyzer sem(context, srcMgr, ID);
         ast->accept(&sem);
