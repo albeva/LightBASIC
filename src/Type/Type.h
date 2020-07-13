@@ -81,7 +81,6 @@ protected:
 };
 
 /**
- * Void, lack of typeExpr. Cannot be used for C style `void*`
  * Use `Any Ptr` for this
  */
 class TypeAny final : public TypeRoot {

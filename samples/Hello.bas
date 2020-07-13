@@ -3,7 +3,7 @@
 declare function print(s as zstring) as integer
 
 ' deduce typeExpr of message from expression: zstring
-var message = "Hello World!"
+var message = "Hello World"
 
 ' no need for braces when function does not return
-print message
+Print message

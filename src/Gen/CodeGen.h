@@ -29,6 +29,9 @@ private:
     unique_ptr<llvm::Module> m_module;
     llvm::Value* m_value = nullptr;
     llvm::Function* m_function = nullptr;
+    llvm::Function* m_startupFn = nullptr;
+    llvm::BasicBlock* m_startupBlock = nullptr;
+
     llvm::BasicBlock* m_block = nullptr;
     ValueMap m_values;
     LiteralMap m_stringLiterals;

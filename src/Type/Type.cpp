@@ -80,7 +80,7 @@ const TypeAny* TypeAny::get() {
 }
 
 llvm::Type* TypeAny::genLlvmType(llvm::LLVMContext& context) const {
-    return llvm::Type::getVoidTy(context);
+    return llvm::Type::getInt8Ty(context);
 }
 
 // Pointer

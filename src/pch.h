@@ -42,6 +42,7 @@ using namespace std::literals::string_literals;
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
+#include <llvm/Support/Program.h>
 
 using llvm::dyn_cast;
 using llvm::isa;

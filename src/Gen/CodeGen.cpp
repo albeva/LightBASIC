@@ -7,7 +7,7 @@
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
-#include "llvm/IR/IRPrintingPasses.h"
+#include <llvm/IR/IRPrintingPasses.h>
 #include <charconv>
 using namespace lbc;
 
@@ -28,6 +28,7 @@ void CodeGen::visit(AstProgram* ast) {
     m_module = make_unique<llvm::Module>(file, m_context);
     m_module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
 
+    // main
     m_function = llvm::Function::Create(
         llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), false),
         llvm::Function::ExternalLinkage,
@@ -36,19 +37,24 @@ void CodeGen::visit(AstProgram* ast) {
     m_function->setCallingConv(llvm::CallingConv::C);
     m_function->setDSOLocal(true);
     m_function->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
-
     m_block = llvm::BasicBlock::Create(m_context, "", m_function);
 
+    m_builder.SetInsertPoint(m_block);
+
+    // parse statements
     ast->stmtList->accept(this);
 
+    // close main
     auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
     llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
 
+    // verify
     if (llvm::verifyModule(*m_module, &llvm::outs())) {
         std::cerr << "Failed to verify modeul" << '\n';
         std::exit(EXIT_FAILURE);
     }
 
+    // Print out
     auto* printer = llvm::createPrintModulePass(llvm::outs());
     printer->runOnModule(*m_module);
 }
@@ -67,27 +73,40 @@ void CodeGen::visit(AstExprStmt* ast) {
 }
 
 void CodeGen::visit(AstVarDecl* ast) {
+    // process resulting type
     ast->typeExpr->accept(this);
 
     llvm::Constant* exprValue = nullptr;
-    bool isConstantArray = false;
-    if (auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
-        ast->expr->accept(this);
-        exprValue = llvm::cast<llvm::Constant>(ast->expr->llvmValue);
-        isConstantArray = expr->token->kind() == TokenKind::StringLiteral;
-    }
+    llvm::Type* exprType = nullptr;
+    bool generateStoreInCtror = false;
 
-    if (exprValue == nullptr) {
-        error("var decl must have an expr");
+    // has an init expr?
+    if (ast->expr) {
+        ast->expr->accept(this);
+        if (auto* constExpr = dyn_cast<llvm::Constant>(ast->expr->llvmValue)) {
+            exprValue = constExpr;
+            exprType = exprValue->getType();
+        } else {
+            exprType = ast->expr->type->llvmType(m_context);
+            exprValue = llvm::Constant::getNullValue(exprType);
+            generateStoreInCtror = true;
+        }
+    } else {
+        exprType = ast->typeExpr->type->llvmType(m_context);
+        exprValue = llvm::Constant::getNullValue(exprType);
     }
 
     auto* value = new llvm::GlobalVariable(
         *m_module,
-        exprValue->getType(),
+        exprType,
         false,
         llvm::GlobalValue::PrivateLinkage,
         exprValue,
         view_to_stringRef(ast->symbol->name()));
+
+    if (generateStoreInCtror) {
+        new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
+    }
 
     ast->symbol->setValue(value);
 }
@@ -195,7 +214,7 @@ void CodeGen::visit(AstLiteralExpr* ast) {
     }
     case TokenKind::NullLiteral:
         constant = llvm::ConstantPointerNull::get(
-            llvm::cast<llvm::PointerType>(TypeAny::get()->llvmType(m_context)));
+            llvm::cast<llvm::PointerType>(ast->type->llvmType(m_context)));
         break;
     default:
         error("Invalid literal type");

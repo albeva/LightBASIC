@@ -71,20 +71,24 @@ int main(int argc, char* argv[]) {
         // turn into .o
         fs::path objectPath{inputPath};
         objectPath.replace_extension(".o");
-        string llc{"/usr/local/bin/llc"};
-        llc += " -filetype=obj";
-        llc += " -o "s + objectPath.string();
-        llc += " "s + bitcodePath.string();
-        ::system(llc.c_str()); // NOLINT
+        std::vector<llvm::StringRef> llcArgs{
+            "llc",
+            "-filetype=obj",
+            "-o", objectPath.string(),
+            bitcodePath.string()
+        };
+        llvm::sys::ExecuteAndWait("/usr/local/bin/llc", llcArgs);
 
         // generate executable
         fs::path binaryPath{inputPath};
         binaryPath.replace_extension(".a");
-        string ld{"/usr/bin/ld"};
-        ld += " -lSystem";
-        ld += " -o "s + binaryPath.string();
-        ld += " "s + objectPath.string();
-        ::system(ld.c_str()); // NOLINT
+        std::vector<llvm::StringRef> ldArgs{
+            "ld",
+            "-lSystem",
+            "-o", binaryPath.string(),
+            objectPath.string()
+        };
+        llvm::sys::ExecuteAndWait("/usr/bin/ld", ldArgs);
 
         // clean up
         fs::remove(objectPath);
