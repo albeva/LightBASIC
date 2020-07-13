@@ -49,8 +49,8 @@ void CodeGen::visit(AstProgram* ast) {
         std::exit(EXIT_FAILURE);
     }
 
-//    auto* printer = llvm::createPrintModulePass(llvm::outs());
-//    printer->runOnModule(*m_module);
+    auto* printer = llvm::createPrintModulePass(llvm::outs());
+    printer->runOnModule(*m_module);
 }
 
 void CodeGen::visit(AstStmtList* ast) {
@@ -69,8 +69,8 @@ void CodeGen::visit(AstExprStmt* ast) {
 void CodeGen::visit(AstVarDecl* ast) {
     ast->typeExpr->accept(this);
 
-    bool isConstantArray = false;
     llvm::Constant* exprValue = nullptr;
+    bool isConstantArray = false;
     if (auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
         ast->expr->accept(this);
         exprValue = llvm::cast<llvm::Constant>(ast->expr->llvmValue);
@@ -86,19 +86,10 @@ void CodeGen::visit(AstVarDecl* ast) {
         exprValue->getType(),
         false,
         llvm::GlobalValue::PrivateLinkage,
-        exprValue);
+        exprValue,
+        view_to_stringRef(ast->symbol->name()));
 
-    if (isConstantArray) {
-        llvm::Constant* zero_32 = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
-        std::array indices{
-            zero_32,
-            zero_32
-        };
-
-        ast->symbol->setValue(llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true));
-    } else {
-        ast->symbol->setValue(value);
-    }
+    ast->symbol->setValue(value);
 }
 
 void CodeGen::visit(AstFuncDecl* ast) {
@@ -123,7 +114,7 @@ void CodeGen::visit(AstAttribute* ast) {
 
 void CodeGen::visit(AstIdentExpr* ast) {
     const auto* type = ast->type;
-    if (isa<TypeZString>(type) || isa<TypeFunction>(type)) {
+    if (isa<TypeFunction>(type)) {
         ast->llvmValue = ast->symbol->value();
         return;
     }
@@ -154,12 +145,37 @@ void CodeGen::visit(AstLiteralExpr* ast) {
     const auto& lexeme = ast->token->lexeme();
 
     switch (ast->token->kind()) {
-    case TokenKind::StringLiteral:
-        constant = llvm::ConstantDataArray::getString(
-            m_context,
-            view_to_stringRef(lexeme),
-            true);
+    case TokenKind::StringLiteral: {
+        auto iter = m_stringLiterals.find(lexeme);
+        if (iter != m_stringLiterals.end()) {
+            constant = iter->second;
+        } else {
+            constant = llvm::ConstantDataArray::getString(
+                m_context,
+                view_to_stringRef(lexeme),
+                true);
+
+            auto* value = new llvm::GlobalVariable(
+                *m_module,
+                constant->getType(),
+                true,
+                llvm::GlobalValue::PrivateLinkage,
+                constant,
+                ".str");
+            value->setAlignment(llvm::MaybeAlign(1));
+            value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
+
+            llvm::Constant* zero_32 = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
+            std::array indices{
+                zero_32,
+                zero_32
+            };
+
+            constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
+            m_stringLiterals.emplace(lexeme, constant);
+        }
         break;
+    }
     case TokenKind::NumberLiteral: {
         uint64_t result = 0;
         std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), result); // NOLINT

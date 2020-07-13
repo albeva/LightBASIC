@@ -19,6 +19,7 @@ public:
 
 private:
     using ValueMap = std::unordered_map<string, llvm::Value*>;
+    using LiteralMap = std::unordered_map<string_view, llvm::Constant*>;
 
     llvm::LLVMContext& m_context;
     llvm::SourceMgr& m_srcMgr;
@@ -30,6 +31,7 @@ private:
     llvm::Function* m_function = nullptr;
     llvm::BasicBlock* m_block = nullptr;
     ValueMap m_values;
+    LiteralMap m_stringLiterals;
 };
 
 } // namespace lbc

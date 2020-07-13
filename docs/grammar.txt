@@ -1,8 +1,8 @@
 EBNF
 ----
-Program         = { Declaration }
+Program         = { VarDecl }
                 .
-Declaration     = [ AttributeList ]
+VarDecl     = [ AttributeList ]
                 ( VAR
                 | DECLARE
                 | FunctionImpl
