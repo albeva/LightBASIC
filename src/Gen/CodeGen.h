@@ -9,6 +9,8 @@ namespace lbc {
 
 class CodeGen final : public AstVisitor {
 public:
+    [[nodiscard]] llvm::Module* module() const { return m_module.get(); }
+
     explicit CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId);
 
 #define IMPL_VISITOR(NODE, ...) virtual void visit(Ast##NODE* ast);
@@ -17,7 +19,6 @@ public:
 
 private:
     using ValueMap = std::unordered_map<string, llvm::Value*>;
-    llvm::Function* getOrCreate(AstCallExpr* ast);
 
     llvm::LLVMContext& m_context;
     llvm::SourceMgr& m_srcMgr;

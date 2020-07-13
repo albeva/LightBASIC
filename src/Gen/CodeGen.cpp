@@ -29,25 +29,28 @@ void CodeGen::visit(AstProgram* ast) {
     m_module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
 
     m_function = llvm::Function::Create(
-        llvm::FunctionType::get(llvm::Type::getVoidTy(m_context), false),
+        llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), false),
         llvm::Function::ExternalLinkage,
         "main",
         *m_module);
     m_function->setCallingConv(llvm::CallingConv::C);
+    m_function->setDSOLocal(true);
+    m_function->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
 
     m_block = llvm::BasicBlock::Create(m_context, "", m_function);
 
     ast->stmtList->accept(this);
 
-    llvm::ReturnInst::Create(m_module->getContext(), nullptr, m_block);
+    auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
+    llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
 
     if (llvm::verifyModule(*m_module, &llvm::outs())) {
         std::cerr << "Failed to verify modeul" << '\n';
         std::exit(EXIT_FAILURE);
     }
 
-    auto* printer = llvm::createPrintModulePass(llvm::outs());
-    printer->runOnModule(*m_module);
+//    auto* printer = llvm::createPrintModulePass(llvm::outs());
+//    printer->runOnModule(*m_module);
 }
 
 void CodeGen::visit(AstStmtList* ast) {
@@ -105,6 +108,7 @@ void CodeGen::visit(AstFuncDecl* ast) {
         llvm::GlobalValue::ExternalLinkage,
         view_to_stringRef(ast->symbol->alias()),
         *m_module);
+    fn->setCallingConv(llvm::CallingConv::C);
     ast->symbol->setValue(fn);
 }
 
@@ -123,7 +127,7 @@ void CodeGen::visit(AstIdentExpr* ast) {
         ast->llvmValue = ast->symbol->value();
         return;
     }
-    ast->llvmValue = new llvm::LoadInst(ast->symbol->value(), "", m_block);
+    ast->llvmValue = new llvm::LoadInst(ast->symbol->value(), "", m_block); // NOLINT
 }
 
 void CodeGen::visit(AstTypeExpr* ast) {

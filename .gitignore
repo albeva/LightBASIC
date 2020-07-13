@@ -11,6 +11,12 @@ playground.xcworkspace
 # Visual Studio
 .vs/
 
+# LLVM intermediate files
+*.ll
+*.bc
+*.o
+*.a
+
 # 
 bin/
 obj/
