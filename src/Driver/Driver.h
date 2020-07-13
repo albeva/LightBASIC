@@ -60,11 +60,11 @@ public:
      * Resource type. Paths, source files, linked libraries, etc.
      */
     enum class ResourceType {
-        GlobalPath,
-        SourcePath,
-        SourceFile,
-        LibraryPath,
-        LibraryFile,
+        GlobalDirectory,
+        SourceDirectory,
+        Source,
+        LibraryDirectory,
+        Library,
         Count
     };
     using ResourceContainer = std::set<fs::path>;
@@ -76,17 +76,17 @@ public:
      * Tools that driver can make use of
      */
     enum class Tool {
-        Opt, // llvm optimizer
-        Llc, // llvm assembler
-        Ld,  // linker
+        Optimizer, // llvm optimizer
+        Assembler, // llvm assembler
+        Linker,    // linker
         Count
     };
 
     void setTool(Tool tool, const fs::path& path);
     [[nodiscard]] const fs::path& getTool(Tool tool) const;
 
-    void setWorkingPath(const fs::path& path) { m_workingPath = path; }
-    [[nodiscard]] const fs::path& getWorkingPath() const { return m_workingPath; }
+    void setWorkingDir(const fs::path& path) { m_WorkingDir = path; }
+    [[nodiscard]] const fs::path& getWorkingDir() const { return m_WorkingDir; }
 
     void setCompilerPath(const fs::path& path) { m_compilerPath = path; }
     [[nodiscard]] const fs::path& getCompilerPath() const { return m_compilerPath; }
@@ -114,7 +114,7 @@ private:
     OptimizationLevel m_level = OptimizationLevel::O0;
     BuildMode m_mode = BuildMode::Debug;
 
-    fs::path m_workingPath{};
+    fs::path m_WorkingDir{};
     fs::path m_compilerPath{};
     fs::path m_outputPath{};
 

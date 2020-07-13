@@ -5,9 +5,9 @@
 #include "Ast/Ast.h"
 #include "Ast/AstPrinter.h"
 #include "Ast/AstVisitor.h"
+#include "Driver/Driver.h"
 #include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
-#include "Driver/Driver.h"
 #include "Sem/SemanticAnalyzer.h"
 #include "llvm/Support/CommandLine.h"
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
     Parser parser{ srcMgr, ID };
     if (auto ast = parser.parse()) {
         auto& context = driver.getLlvmContext();
-        
+
         // Analyze
         SemanticAnalyzer sem(context, srcMgr, ID);
         ast->accept(&sem);
