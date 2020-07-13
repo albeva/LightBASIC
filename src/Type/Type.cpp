@@ -178,7 +178,7 @@ llvm::Type* TypeFunction::genLlvmType(llvm::LLVMContext& context) const {
 
     std::vector<llvm::Type*> params;
     params.reserve(m_paramTypes.size());
-    for (const auto& p: m_paramTypes) {
+    for (const auto& p : m_paramTypes) {
         params.emplace_back(p->llvmType(context));
     }
 

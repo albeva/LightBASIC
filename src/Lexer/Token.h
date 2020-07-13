@@ -39,7 +39,7 @@ public:
     static const string_view& description(TokenKind kind);
 
     Token(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc)
-      : m_kind{ kind }, m_lexeme{ lexeme }, m_loc{ loc } {}
+    : m_kind{ kind }, m_lexeme{ lexeme }, m_loc{ loc } {}
 
     [[nodiscard]] inline TokenKind kind() const { return m_kind; }
     [[nodiscard]] inline const string_view& lexeme() const { return m_lexeme; }

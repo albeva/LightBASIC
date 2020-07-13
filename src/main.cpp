@@ -63,29 +63,31 @@ int main(int argc, char* argv[]) {
         fs::path bitcodePath{ inputPath };
         bitcodePath.replace_extension(".bc");
         std::error_code errors{};
-        llvm::raw_fd_ostream stream{ bitcodePath.string(), errors};
+        llvm::raw_fd_ostream stream{ bitcodePath.string(), errors };
         llvm::WriteBitcodeToFile(*gen.module(), stream);
         stream.flush();
         stream.close();
 
         // turn into .o
-        fs::path objectPath{inputPath};
+        fs::path objectPath{ inputPath };
         objectPath.replace_extension(".o");
         std::vector<llvm::StringRef> llcArgs{
             "llc",
             "-filetype=obj",
-            "-o", objectPath.string(),
+            "-o",
+            objectPath.string(),
             bitcodePath.string()
         };
         llvm::sys::ExecuteAndWait("/usr/local/bin/llc", llcArgs);
 
         // generate executable
-        fs::path binaryPath{inputPath};
+        fs::path binaryPath{ inputPath };
         binaryPath.replace_extension(".a");
         std::vector<llvm::StringRef> ldArgs{
             "ld",
             "-lSystem",
-            "-o", binaryPath.string(),
+            "-o",
+            binaryPath.string(),
             objectPath.string()
         };
         llvm::sys::ExecuteAndWait("/usr/bin/ld", ldArgs);

@@ -54,7 +54,7 @@ public:
     [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind);
 
 protected:
-    explicit TypeRoot(TypeKind kind): m_kind{kind} {}
+    explicit TypeRoot(TypeKind kind) : m_kind{ kind } {}
 
     [[nodiscard]] virtual llvm::Type* genLlvmType(llvm::LLVMContext& context) const = 0;
 
@@ -102,7 +102,7 @@ protected:
 class TypePointer final : public TypeRoot {
 public:
     explicit TypePointer(const TypeRoot* base)
-      : TypeRoot{ TypeKind::Pointer }, m_base{ base } {}
+    : TypeRoot{ TypeKind::Pointer }, m_base{ base } {}
 
     [[nodiscard]] static const TypePointer* get(const TypeRoot* base);
 
@@ -127,7 +127,7 @@ class TypeNumber : public TypeRoot {
     NON_COPYABLE(TypeNumber)
 protected:
     TypeNumber(TypeKind kind, unsigned bits, bool isSigned)
-        : TypeRoot{kind}, m_bits{bits}, m_isSigned{isSigned} {}
+    : TypeRoot{ kind }, m_bits{ bits }, m_isSigned{ isSigned } {}
 
 public:
     static bool classof(const TypeRoot* type) {
@@ -167,7 +167,7 @@ protected:
 class TypeInteger final : public TypeNumber {
 public:
     TypeInteger(unsigned bits, bool isSigned)
-      : TypeNumber{ TypeKind::Integer, bits, isSigned } {}
+    : TypeNumber{ TypeKind::Integer, bits, isSigned } {}
 
     [[nodiscard]] static const TypeInteger* get(unsigned bits, bool isSigned);
 
@@ -185,7 +185,7 @@ protected:
 class TypeFloatingPoint final : public TypeNumber {
 public:
     explicit TypeFloatingPoint(unsigned bits)
-      : TypeNumber{ TypeKind::FloatingPoint, bits, false } {}
+    : TypeNumber{ TypeKind::FloatingPoint, bits, false } {}
 
     [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits);
 
@@ -203,10 +203,10 @@ protected:
 class TypeFunction final : public TypeRoot {
 public:
     TypeFunction(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic)
-      : TypeRoot{ TypeKind::Function },
-        m_retType{ retType },
-        m_paramTypes{ std::move(paramTypes) },
-        m_variadic{ variadic } {}
+    : TypeRoot{ TypeKind::Function },
+      m_retType{ retType },
+      m_paramTypes{ std::move(paramTypes) },
+      m_variadic{ variadic } {}
 
     [[nodiscard]] static const TypeFunction* get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic);
 

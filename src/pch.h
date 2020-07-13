@@ -27,6 +27,7 @@ using namespace std::literals::string_literals;
 // LLVM
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/Triple.h>
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Config/llvm-config.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
@@ -39,10 +40,9 @@ using namespace std::literals::string_literals;
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/Support/Program.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/Bitcode/BitcodeWriter.h>
-#include <llvm/Support/Program.h>
 
 using llvm::dyn_cast;
 using llvm::isa;

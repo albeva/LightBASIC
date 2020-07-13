@@ -8,7 +8,7 @@
 using namespace lbc;
 
 Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
-  : m_srcMgr(srcMgr), m_fileID(fileId) {
+: m_srcMgr(srcMgr), m_fileID(fileId) {
     m_lexer = make_unique<Lexer>(srcMgr, fileId);
     m_token = m_lexer->next();
     m_next = m_lexer->next();
@@ -293,7 +293,8 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
 unique_ptr<AstTypeExpr> Parser::typeExpr() {
 #define TYPE_KEYWORD(id, ...) case TokenKind::id:
     switch (m_token->kind()) {
-        ALL_TYPES(TYPE_KEYWORD) {
+        ALL_TYPES(TYPE_KEYWORD)
+        {
             auto type = AstTypeExpr::create();
             type->token = move();
             return type;

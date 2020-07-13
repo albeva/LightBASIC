@@ -13,9 +13,9 @@
     Class& operator=(Class&&) = delete;
 
 #ifdef __PRETTY_FUNCTION__
-#   define LBC_FUNCTION __PRETTY_FUNCTION__
+#    define LBC_FUNCTION __PRETTY_FUNCTION__
 #else
-#   define LBC_FUNCTION __FUNCTION__
+#    define LBC_FUNCTION __FUNCTION__
 #endif
 
 namespace lbc {

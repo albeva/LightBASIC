@@ -12,7 +12,7 @@ class Symbol final {
     NON_COPYABLE(Symbol)
 public:
     explicit Symbol(const string_view& name, const TypeRoot* type = nullptr)
-      : m_name{ name }, m_type{ type }, m_alias{ name } {}
+    : m_name{ name }, m_type{ type }, m_alias{ name } {}
 
     ~Symbol() = default;
 

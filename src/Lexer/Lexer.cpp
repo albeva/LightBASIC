@@ -138,7 +138,9 @@ unique_ptr<Token> Lexer::endOfStatement() {
 
 unique_ptr<Token> Lexer::ellipsis() {
     auto loc = getLoc(m_input);
-    move(); move(); move();
+    move();
+    move();
+    move();
     return Token::create(TokenKind::Ellipsis, loc);
 }
 
@@ -201,7 +203,8 @@ unique_ptr<Token> Lexer::invalid(const char* loc) {
 }
 
 void Lexer::skipUntilLineEnd() {
-    while (move() && m_char != '\n');
+    while (move() && m_char != '\n')
+        ;
 }
 
 bool Lexer::move() {

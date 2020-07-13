@@ -7,8 +7,8 @@
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
-#include <llvm/IR/IRPrintingPasses.h>
 #include <charconv>
+#include <llvm/IR/IRPrintingPasses.h>
 using namespace lbc;
 
 [[noreturn]] static void error(const string& message) {
@@ -17,10 +17,10 @@ using namespace lbc;
 }
 
 CodeGen::CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId)
-  : m_context{ context },
-    m_srcMgr{ srcMgr },
-    m_fileId{ fileId },
-    m_builder{ context } {}
+: m_context{ context },
+  m_srcMgr{ srcMgr },
+  m_fileId{ fileId },
+  m_builder{ context } {}
 
 void CodeGen::visit(AstProgram* ast) {
     auto file = m_srcMgr.getMemoryBuffer(m_fileId)->getBufferIdentifier();
