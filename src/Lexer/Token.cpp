@@ -62,6 +62,7 @@ unique_ptr<Token> Token::create(const string_view& lexeme, const llvm::SMLoc& lo
 }
 
 unique_ptr<Token> Token::create(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc) {
+    // literal string may have been processed for escape sequences. Store a local copy
     if (kind == TokenKind::StringLiteral) {
         auto entry = literalStrings.insert(string{lexeme});
         return make_unique<Token>(kind, *entry.first, loc);

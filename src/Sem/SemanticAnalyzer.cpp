@@ -33,7 +33,12 @@ void SemanticAnalyzer::visit(AstStmtList* ast) {
 }
 
 void SemanticAnalyzer::visit(AstAssignStmt* ast) {
-    std::cout << "Not implemented " << LBC_FUNCTION << '\n';
+    ast->identExpr->accept(this);
+    ast->expr->accept(this);
+
+    if (ast->identExpr->type != ast->expr->type) {
+        error("Tye mismatch in assignment");
+    }
 }
 
 void SemanticAnalyzer::visit(AstExprStmt* ast) {

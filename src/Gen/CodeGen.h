@@ -21,6 +21,8 @@ private:
     using ValueMap = std::unordered_map<string, llvm::Value*>;
     using LiteralMap = std::unordered_map<string_view, llvm::Constant*>;
 
+    static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
+
     llvm::LLVMContext& m_context;
     llvm::SourceMgr& m_srcMgr;
     unsigned m_fileId;

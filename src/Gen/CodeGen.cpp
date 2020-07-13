@@ -66,6 +66,13 @@ void CodeGen::visit(AstStmtList* ast) {
 }
 
 void CodeGen::visit(AstAssignStmt* ast) {
+    auto* dstValue = getStoreValue(ast->identExpr.get());
+    ast->expr->accept(this);
+    m_builder.CreateStore(ast->expr->llvmValue, dstValue);
+}
+
+llvm::Value* CodeGen::getStoreValue(AstIdentExpr* identExpr) {
+    return identExpr->symbol->value();
 }
 
 void CodeGen::visit(AstExprStmt* ast) {
