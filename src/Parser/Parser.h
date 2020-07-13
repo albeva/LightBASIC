@@ -39,7 +39,7 @@ private:
 
     unique_ptr<AstVarDecl> kwVar();
     unique_ptr<AstDecl> kwDeclare();
-    std::vector<unique_ptr<AstFuncParamDecl>> funcParams();
+    std::vector<unique_ptr<AstFuncParamDecl>> funcParams(bool& isVariadic);
     unique_ptr<AstTypeExpr> typeExpr();
 
     // return true if has more content to parse

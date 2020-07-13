@@ -19,13 +19,14 @@
     _( NullLiteral,     "Null-Literal"    )
 
 #define TOKEN_SYMBOLS(_) \
-    _( Assign,          "=" ) \
-    _( Comma,           "," ) \
-    _( Period,          "." ) \
-    _( ParenOpen,       "(" ) \
-    _( ParenClose,      ")" ) \
-    _( BracketOpen,     "[" ) \
-    _( BracketClose,    "]" )
+    _( Assign,          "="   ) \
+    _( Comma,           ","   ) \
+    _( Period,          "."   ) \
+    _( ParenOpen,       "("   ) \
+    _( ParenClose,      ")"   ) \
+    _( BracketOpen,     "["   ) \
+    _( BracketClose,    "]"   ) \
+    _( Ellipsis,        "..." )
 
 #define TOKEN_OPERATORS(_) \
     _( Plus,            "+",   1, Binary, Left  ) \

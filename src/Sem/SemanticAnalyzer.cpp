@@ -104,7 +104,7 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
     }
 
     // create function symbol
-    const auto* type = TypeFunction::get(retType, std::move(paramTypes));
+    const auto* type = TypeFunction::get(retType, std::move(paramTypes), ast->variadic);
     symbol->setType(type);
     ast->symbol = symbol;
 
@@ -169,14 +169,20 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) {
     const auto& paramTypes = type->paramTypes();
     auto& args = ast->argExprs;
 
-    if (paramTypes.size() != args.size()) {
+    if (type->variadic()) {
+        if (paramTypes.size() > args.size()) {
+            error("Argument count mismatch");
+        }
+    } else if (paramTypes.size() != args.size()) {
         error("Argument count mismatch");
     }
 
     for (size_t index = 0; index < args.size(); index++) {
         args[index]->accept(this);
-        if (paramTypes[index] != args[index]->type) {
-            error("Type mismatch");
+        if (index < paramTypes.size()) {
+            if (paramTypes[index] != args[index]->type) {
+                error("Type mismatch");
+            }
         }
     }
 

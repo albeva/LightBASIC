@@ -18,10 +18,24 @@ class Token final {
 public:
     ~Token() = default;
 
+    /**
+     * Create either identifier or a keyword token from string literal
+     */
     static unique_ptr<Token> create(const string_view& lexeme, const llvm::SMLoc& loc);
 
+    /**
+     * Create token with given kind and lexeme
+     */
     static unique_ptr<Token> create(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc);
 
+    /**
+     * Create token with given kind and use description for lexeme
+     */
+    static unique_ptr<Token> create(TokenKind kind, const llvm::SMLoc& loc);
+
+    /**
+     * Get TokenKind string representation
+     */
     static const string_view& description(TokenKind kind);
 
     Token(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc)

@@ -237,7 +237,9 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
     func->token = expect(TokenKind::Identifier);
 
     if (accept(TokenKind::ParenOpen)) {
-        func->paramDecls = funcParams();
+        bool isVariadic = false;
+        func->paramDecls = funcParams(isVariadic);
+        func->variadic = isVariadic;
         expect(TokenKind::ParenClose);
     }
 
@@ -250,12 +252,24 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
 }
 
 /**
- *  ParamList = [ Param { "," Param } ] .
+ *  ParamList = <empty>
+ *            | Param { "," Param } [ "," "..." ]
+ *            | "..."
+ *            .
  *  Param = id "AS" TypeExpr .
  */
-std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams() {
+std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
     std::vector<unique_ptr<AstFuncParamDecl>> params;
+
     while (isValid() && *m_token != TokenKind::ParenClose) {
+        if (accept(TokenKind::Ellipsis)) {
+            isVariadic = true;
+            if (match(TokenKind::Comma)) {
+                error("Variadic parameter must be last in function declaration");
+            }
+            break;
+        }
+
         auto id = expect(TokenKind::Identifier);
         expect(TokenKind::As);
         auto type = typeExpr();

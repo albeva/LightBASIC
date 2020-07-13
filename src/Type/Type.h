@@ -202,12 +202,13 @@ protected:
  */
 class TypeFunction final : public TypeRoot {
 public:
-    TypeFunction(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes)
+    TypeFunction(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic)
       : TypeRoot{ TypeKind::Function },
         m_retType{ retType },
-        m_paramTypes{ std::move(paramTypes) } {}
+        m_paramTypes{ std::move(paramTypes) },
+        m_variadic{ variadic } {}
 
-    [[nodiscard]] static const TypeFunction* get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes);
+    [[nodiscard]] static const TypeFunction* get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic);
 
     static bool classof(const TypeRoot* type) {
         return type->kind() == TypeKind::Function;
@@ -215,6 +216,7 @@ public:
 
     [[nodiscard]] const TypeRoot* retType() const { return m_retType; }
     [[nodiscard]] const std::vector<const TypeRoot*>& paramTypes() const { return m_paramTypes; }
+    [[nodiscard]] bool variadic() const { return m_variadic; }
 
 protected:
     [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
@@ -222,6 +224,7 @@ protected:
 private:
     const TypeRoot* m_retType;
     const std::vector<const TypeRoot*> m_paramTypes;
+    const bool m_variadic;
 };
 
 /**

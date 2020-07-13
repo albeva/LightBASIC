@@ -35,6 +35,7 @@ constexpr std::array kindToDescription {
 };
 
 unordered_set<string> uppercasedIds;
+unordered_set<string> literalStrings;
 
 } // namespace
 
@@ -61,9 +62,16 @@ unique_ptr<Token> Token::create(const string_view& lexeme, const llvm::SMLoc& lo
 }
 
 unique_ptr<Token> Token::create(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc) {
+    if (kind == TokenKind::StringLiteral) {
+        auto entry = literalStrings.insert(string{lexeme});
+        return make_unique<Token>(kind, *entry.first, loc);
+    }
     return make_unique<Token>(kind, lexeme, loc);
 }
 
+unique_ptr<Token> Token::create(TokenKind kind, const llvm::SMLoc& loc) {
+    return create(kind, description(kind), loc);
+}
 
 llvm::SMRange Token::range() const {
     if (isGeneral()) {

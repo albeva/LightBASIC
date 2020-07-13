@@ -162,14 +162,14 @@ llvm::Type* TypeFloatingPoint::genLlvmType(llvm::LLVMContext& context) const {
 
 // Function
 
-const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes) {
+const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) {
     for (const auto& ptr : declaredFunc) {
-        if (ptr->retType() == retType && ptr->paramTypes() == paramTypes) {
+        if (ptr->retType() == retType && ptr->paramTypes() == paramTypes && ptr->variadic() == variadic) {
             return ptr.get();
         }
     }
 
-    auto ty = make_unique<TypeFunction>(retType, std::move(paramTypes));
+    auto ty = make_unique<TypeFunction>(retType, std::move(paramTypes), variadic);
     return declaredFunc.emplace_back(std::move(ty)).get();
 }
 
@@ -182,7 +182,7 @@ llvm::Type* TypeFunction::genLlvmType(llvm::LLVMContext& context) const {
         params.emplace_back(p->llvmType(context));
     }
 
-    return llvm::FunctionType::get(retTy, params, false);
+    return llvm::FunctionType::get(retTy, params, m_variadic);
 }
 
 // ZString

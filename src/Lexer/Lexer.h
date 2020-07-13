@@ -18,6 +18,7 @@ public:
     [[nodiscard]] unique_ptr<Token> next();
 
 private:
+    [[nodiscard]] unique_ptr<Token> ellipsis();
     [[nodiscard]] unique_ptr<Token> identifier();
     [[nodiscard]] unique_ptr<Token> string();
     [[nodiscard]] unique_ptr<Token> character(TokenKind kind);
@@ -26,7 +27,7 @@ private:
     [[nodiscard]] static unique_ptr<Token> invalid(const char* loc);
 
     void skipUntilLineEnd();
-    void move();
+    bool move();
     [[nodiscard]] bool isValid() const;
     [[nodiscard]] char peek(int ahead = 1) const;
 

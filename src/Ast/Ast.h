@@ -161,6 +161,8 @@ DECLARE_AST(FuncDecl, Decl)
     unique_ptr<Token> token;
     // declared parameters
     std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
+    // is function variadic?
+    bool variadic = false;
     // declared typeExpr
     unique_ptr<AstTypeExpr> retTypeExpr;
     // scope symbol table for parameters

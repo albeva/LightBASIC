@@ -1,9 +1,9 @@
-' Declare func from C std lib: int puts(const char*);
-[Alias = "puts"] _
-declare function print(s as zstring) as integer
+' Declare func from C std lib: int printf(const char* format, ...);
+[Alias = "printf"] _
+declare function Print(fmt as zstring, ...) as integer
 
 ' deduce typeExpr of message from expression: zstring
-var message = "Hello World"
+var message = "World"
 
 ' no need for braces when function does not return
-Print message
+Print "Hello %s!\n", message

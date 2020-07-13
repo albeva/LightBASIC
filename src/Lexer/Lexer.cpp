@@ -80,6 +80,9 @@ unique_ptr<Token> Lexer::next() {
         case ',':
             return character(TokenKind::Comma);
         case '.':
+            if (peek(1) == '.' && peek(2) == '.') {
+                return ellipsis();
+            }
             return character(TokenKind::Period);
         case '(':
             return character(TokenKind::ParenOpen);
@@ -130,39 +133,67 @@ unique_ptr<Token> Lexer::endOfFile() {
 unique_ptr<Token> Lexer::endOfStatement() {
     auto loc = getLoc(m_input);
     move();
-    return Token::create(TokenKind::EndOfStmt, Token::description(TokenKind::EndOfStmt), loc);
+    return Token::create(TokenKind::EndOfStmt, loc);
+}
+
+unique_ptr<Token> Lexer::ellipsis() {
+    auto loc = getLoc(m_input);
+    move(); move(); move();
+    return Token::create(TokenKind::Ellipsis, loc);
 }
 
 unique_ptr<Token> Lexer::identifier() {
     const auto* start = m_input;
-    size_t length = 0;
-    do {
+
+    size_t length = 1;
+    while (move() && isAlpha(m_char)) {
         length++;
-        move();
-    } while (isAlpha(m_char));
+    }
+
     return Token::create({ start, length }, getLoc(start));
 }
 
 unique_ptr<Token> Lexer::string() {
+    auto loc = getLoc(m_input);
     constexpr char visibleFrom = 32;
-
     const auto* start = m_input;
-    do {
-        move();
-        if (m_char == '"') {
-            auto length = static_cast<size_t>(m_input - start - 1);
-            move();
-            return Token::create(TokenKind::StringLiteral, { start + 1, length }, getLoc(start)); // NOLINT
-        }
-    } while (m_char >= visibleFrom);
+    std::string literal{};
 
-    return invalid(start);
+    while (move() && m_char >= visibleFrom && m_char != '"') {
+        if (m_char == '\\') {
+            switch (peek()) {
+            case '\\':
+            case '"':
+                move();
+                literal += m_char;
+                continue;
+            case 'n':
+                literal += '\n';
+                move();
+                continue;
+            case 't':
+                literal += '\t';
+                move();
+                continue;
+            default:
+                return invalid(m_input);
+            }
+        }
+        literal += m_char;
+    }
+
+    if (m_char != '"') {
+        return invalid(start);
+    }
+    move();
+
+    return Token::create(TokenKind::StringLiteral, literal, getLoc(start)); // NOLINT
 }
 
 unique_ptr<Token> Lexer::character(TokenKind kind) {
     const auto* start = m_input;
     move();
-    return Token::create(kind, { start, 1 }, getLoc(start));
+    return Token::create(kind, getLoc(start));
 }
 
 unique_ptr<Token> Lexer::invalid(const char* loc) {
@@ -170,14 +201,13 @@ unique_ptr<Token> Lexer::invalid(const char* loc) {
 }
 
 void Lexer::skipUntilLineEnd() {
-    do {
-        move();
-    } while (isValid() && m_char != '\n');
+    while (move() && m_char != '\n');
 }
 
-void Lexer::move() {
+bool Lexer::move() {
     m_char = *++m_input; // NOLINT
     handleLineEnd();
+    return isValid();
 }
 
 void Lexer::handleLineEnd() {
