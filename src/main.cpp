@@ -14,7 +14,7 @@ static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& ar
 
 int main(int argc, const char* argv[]) {
     if (argc < 2) {
-        showError("lbc: no input");
+        showError("lbc: no input.");
     }
 
     Driver driver;
@@ -29,49 +29,65 @@ static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& ar
     auto workingdir = fs::current_path();
     driver.setWorkingDir(workingdir);
 
+    bool options = true;
     for (size_t index = 1; index < args.size(); index++) {
         const string_view arg{ args[index] };
 
         if (arg.empty()) {
-            showError("Invalid command line parameter");
-        } else if (arg == "-v") {
-            driver.setVerbose(true);
-        } else if (arg == "-o") {
-            auto next = index + 1;
-            if (next > args.size()) {
-                showError("ouput path missing");
+            showError("Invalid command line parameter.");
+        }
+
+        if (options) {
+            if (arg == "-v") {
+                driver.setVerbose(true);
+            } else if (arg == "-o") {
+                auto next = index + 1;
+                if (next > args.size()) {
+                    showError("ouput path missing.");
+                }
+                driver.setOutputPath(args[next]);
+                next++;
+            } else if (arg == "-m32") {
+                auto& triple = driver.getTriple();
+                triple = triple.get32BitArchVariant();
+            } else if (arg == "-m64") {
+                auto& triple = driver.getTriple();
+                triple = triple.get64BitArchVariant();
+            } else if (arg == "--help") {
+                showHelp();
+            } else if (arg == "--version") {
+                showVersion();
+            } else if (arg == "-O0") {
+                driver.setLevel(Driver::OptimizationLevel::O0);
+            } else if (arg == "-O1") {
+                driver.setLevel(Driver::OptimizationLevel::O1);
+            } else if (arg == "-O2") {
+                driver.setLevel(Driver::OptimizationLevel::O2);
+            } else if (arg == "-O3") {
+                driver.setLevel(Driver::OptimizationLevel::O3);
+            } else if (arg == "-S") {
+                driver.setResult(Driver::CompileResult::Assembly);
+            } else if (arg == "-c") {
+                driver.setResult(Driver::CompileResult::Object);
+            } else if (arg == "-llvm") {
+                driver.setResult(Driver::CompileResult::LLVMIr);
+            } else if (arg[0] == '-') {
+                showError("Unrecognized option "s + string(arg) + ".");
+            } else {
+                options = false;
             }
-            driver.setOutputPath(args[next]);
-            next++;
-        } else if (arg == "-m32") {
-            auto& triple = driver.getTriple();
-            triple = triple.get32BitArchVariant();
-        } else if (arg == "-m64") {
-            auto& triple = driver.getTriple();
-            triple = triple.get64BitArchVariant();
-        } else if (arg == "--help") {
-            showHelp();
-        } else if (arg == "--version") {
-            showVersion();
-        } else if (arg == "-O0") {
-            driver.setLevel(Driver::OptimizationLevel::O0);
-        } else if (arg == "-O1") {
-            driver.setLevel(Driver::OptimizationLevel::O1);
-        } else if (arg == "-O2") {
-            driver.setLevel(Driver::OptimizationLevel::O2);
-        } else if (arg == "-O3") {
-            driver.setLevel(Driver::OptimizationLevel::O3);
-        } else if (arg == "-S") {
-            driver.setResult(Driver::CompileResult::Assembly);
-        } else if (arg == "-c") {
-            driver.setResult(Driver::CompileResult::Object);
-        } else if (arg == "-llvm") {
-            driver.setResult(Driver::CompileResult::LLVMIr);
-        } else if (arg[0] == '-') {
-            showError("Unrecognized option "s + string(arg));
-        } else {
+        }
+
+        if (!options) {
+            if (arg[0] == '-') {
+                showError("Options must be in [options] part.");
+            }
             driver.addResource(Driver::ResourceType::Source, arg);
         }
+    }
+
+    if (driver.getResources(Driver::ResourceType::Source).empty()) {
+        showError("lbc: no input.");
     }
 }
 
@@ -104,6 +120,6 @@ void showVersion() {
 }
 
 void showError(const string& message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << " Use --help for more info" << std::endl;
     std::exit(EXIT_FAILURE);
 }
