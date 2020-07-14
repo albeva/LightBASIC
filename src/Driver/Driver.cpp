@@ -4,7 +4,10 @@
 #include "Driver.h"
 using namespace lbc;
 
-Driver::Driver() = default;
+Driver::Driver()
+: m_triple{ llvm::sys::getDefaultTargetTriple() } {
+}
+
 Driver::~Driver() = default;
 
 string Driver::getOptionString(Driver::CompileResult result) {
@@ -67,4 +70,8 @@ const fs::path& Driver::getTool(Driver::Tool tool) const {
 
 string Driver::getOptionsString() const {
     return "";
+}
+
+int Driver::execute() {
+    return EXIT_SUCCESS;
 }

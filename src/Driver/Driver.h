@@ -106,6 +106,8 @@ public:
 
     [[nodiscard]] string getOptionsString() const;
 
+    int execute();
+
 private:
     std::array<ResourceContainer, static_cast<size_t>(ResourceType::Count)> m_resources{};
     std::array<fs::path, static_cast<size_t>(Tool::Count)> m_tools{};
@@ -120,7 +122,7 @@ private:
 
     bool m_verbose = false;
 
-    llvm::Triple m_triple{};
+    llvm::Triple m_triple;
     llvm::SourceMgr m_sourceMgr{};
     llvm::LLVMContext m_llvmContext{};
 };
