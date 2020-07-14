@@ -16,16 +16,16 @@ static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& ar
 static void processInputFiles(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index);
 
 int main(int argc, const char* argv[]) {
-    if (argc < 2) {
-        showError("lbc: no input.");
-    }
-
     Driver driver;
     processCmdLine(driver, { argv, static_cast<size_t>(argc) });
     return driver.execute();
 }
 
 static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args) {
+    if (args.size() < 2) {
+        showError("lbc: no input.");
+    }
+
     // compiler executable
     fs::path executable = llvm::sys::fs::getMainExecutable(args[0], reinterpret_cast<void*>(processCmdLine)); // NOLINT
     driver.setCompilerPath(executable);
