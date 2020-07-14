@@ -26,7 +26,6 @@ public:
         Library
     };
 
-    [[nodiscard]] static string getOptionString(CompileResult result);
     [[nodiscard]] CompileResult getResult() const { return m_result; }
     void setResult(CompileResult result) { m_result = result; }
 
@@ -40,7 +39,6 @@ public:
         O3
     };
 
-    [[nodiscard]] static string getOptionString(OptimizationLevel level);
     [[nodiscard]] OptimizationLevel getLevel() const { return m_level; }
     void setLevel(OptimizationLevel level) { m_level = level; }
 
@@ -52,7 +50,6 @@ public:
         Release
     };
 
-    [[nodiscard]] static string getOptionString(BuildMode mode);
     [[nodiscard]] BuildMode getMode() const { return m_mode; }
     void setMode(BuildMode mode) { m_mode = mode; }
 
@@ -103,8 +100,6 @@ public:
     [[nodiscard]] llvm::SourceMgr& getSourceMrg() { return m_sourceMgr; }
 
     [[nodiscard]] llvm::LLVMContext& getLlvmContext() { return m_llvmContext; }
-
-    [[nodiscard]] string getOptionsString() const;
 
     int execute();
 
