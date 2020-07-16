@@ -143,25 +143,26 @@ std::vector<fs::path> Driver::emitNative(CompileResult emit, bool final) {
 
 void Driver::emitExecutable() {
     auto objects = emitNative(CompileResult::Object, false);
-    auto outputPath = resolveOutputPath("a", ".out", true, true);
-    auto output = outputPath.string();
-    auto tool = getToolPath(Tool::Linker);
+    auto output = resolveOutputPath("a", ".out", true, true).string();
+    auto tool = getToolPath(Tool::Linker).string();
 
     std::vector<string> stringCopies;
-    stringCopies.reserve(objects.size() + 1);
+    stringCopies.reserve(objects.size());
 
-    std::vector<llvm::StringRef> args{
-        stringCopies.emplace_back(tool.string()),
+    std::vector<llvm::StringRef> args;
+    args.reserve(objects.size() + 4);
+    args = {
+        tool,
         "-lSystem",
         "-o",
         output
     };
-    args.reserve(args.size() + objects.size());
+
     for (const auto& path: objects) {
         args.emplace_back(stringCopies.emplace_back(path.string()));
     }
 
-    auto code = llvm::sys::ExecuteAndWait(tool.string(), args);
+    auto code = llvm::sys::ExecuteAndWait(tool, args);
     if (code != EXIT_SUCCESS) {
         error("Failed generate '"s + output + "'");
     }
@@ -276,6 +277,10 @@ fs::path Driver::resolveOutputPath(const fs::path& path, const string& ext, bool
     if (m_outputPath.empty()) {
         fs::path output{path};
         output.replace_extension(ext);
+        if (!output.is_absolute()) {
+            output = fs::absolute(m_workingDir / output);
+        }
+        fs::create_directories(output.parent_path());
         return output;
     }
 

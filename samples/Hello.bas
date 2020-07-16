@@ -1,15 +1,9 @@
-' Declare func from C std lib: int printf(const char* format, ...);
-[Alias = "printf"] _
-declare function Printf(fmt as zstring, ...) as integer
-
-' Declare func from C std lib: int printf(const char* format, ...);
+' Declare func from C std lib: int puts(const char*);
 [Alias = "puts"] _
-declare function Puts(fmt as zstring) as integer
+declare function print(str as zstring) as integer
 
-' deduce typeExpr of message from expression: zstring
-var message = "World"
-var copy as zstring = message
+' deduce type of message from value
+var message = "Hello World!"
 
-' no need for braces when function does not return
-Printf "Hello %s!\n", message
-Puts copy
+' no need for braces when function is not inside expression
+print message
