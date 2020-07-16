@@ -74,12 +74,14 @@ static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& ar
             driver.setLevel(Driver::OptimizationLevel::O2);
         } else if (arg == "-O3") {
             driver.setLevel(Driver::OptimizationLevel::O3);
-        } else if (arg == "-S") {
+        } else if (arg == "-emit-asm") {
             driver.setResult(Driver::CompileResult::Assembly);
-        } else if (arg == "-c") {
+        } else if (arg == "-emit-obj") {
             driver.setResult(Driver::CompileResult::Object);
-        } else if (arg == "-llvm") {
+        } else if (arg == "-emit-llvm") {
             driver.setResult(Driver::CompileResult::LLVMIr);
+        } else if (arg == "-emit-bc") {
+            driver.setResult(Driver::CompileResult::BitCode);
         } else {
             showError("Unrecognized option "s + string(arg) + ".");
         }
@@ -112,9 +114,10 @@ OPTIONS:
     -O<number> Set optimization. Valid options: O0, O1, O2, O3
     -m32       Generate 32bit i386 code
     -m64       Generate 64bit x86-64 code
-    -S         Output assembly
-    -c         Output objects
-    -llvm      Output llvm
+    -emit-llvm Emit LLVM IR
+    -emit-bc   Emit LLVM bitcode
+    -emit-asm  Emit assembly
+    -emit-obj  Emit objects
 )HELP";
     std::exit(EXIT_SUCCESS);
 }

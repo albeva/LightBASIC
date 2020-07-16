@@ -27,19 +27,19 @@ int Driver::execute() {
 
     switch (m_result) {
         case CompileResult::LLVMIr:
-            emitLLVMIr(true);
+            emitLLVMIr();
             break;
         case CompileResult::BitCode:
             emitBitCode(true);
             break;
         case CompileResult::Assembly:
-            emitAssembly(true);
+            emitNative(CompileResult::Assembly, true);
             break;
         case CompileResult::Object:
-            emitObjects(true);
+            emitNative(CompileResult::Object, true);
             break;
         case CompileResult::Executable:
-            emitExecutable(true);
+            emitExecutable();
             break;
         case CompileResult::Library:
             error("Creating libraries is not supported");
@@ -48,22 +48,17 @@ int Driver::execute() {
     return EXIT_SUCCESS;
 }
 
-std::vector<fs::path> Driver::emitLLVMIr(bool final) {
-    std::vector<fs::path> result{};
-    result.reserve(m_modules.size());
-
+void Driver::emitLLVMIr() {
     if (m_level > OptimizationLevel::O0) {
         auto bcFiles = emitBitCode(false);
-        result = optimize(bcFiles, CompileResult::LLVMIr, final);
-        if (final) {
-            for (const auto& file : bcFiles) {
-                fs::remove(file);
-            }
+        optimize(bcFiles, CompileResult::LLVMIr, true);
+        for (const auto& file : bcFiles) {
+            fs::remove(file);
         }
     } else {
         bool single = m_modules.size() == 1;
         for (auto& module: m_modules) {
-            fs::path path = resolveOutputPath(module->getSourceFileName(), ".ll", single, final);
+            fs::path path = resolveOutputPath(module->getSourceFileName(), ".ll", single, true);
 
             std::error_code ec{};
             llvm::raw_fd_ostream os{path.string(), ec, llvm::sys::fs::OF_Text};
@@ -73,11 +68,8 @@ std::vector<fs::path> Driver::emitLLVMIr(bool final) {
 
             os.flush();
             os.close();
-
-            result.emplace_back(std::move(path));
         }
     }
-    return result;
 }
 
 std::vector<fs::path> Driver::emitBitCode(bool final) {
@@ -100,16 +92,83 @@ std::vector<fs::path> Driver::emitBitCode(bool final) {
     return result;
 }
 
-std::vector<fs::path> Driver::emitAssembly(bool final) {
-    return {};
+std::vector<fs::path> Driver::emitNative(CompileResult emit, bool final) {
+    string fileType;
+    string ext;
+    switch (emit) {
+    case CompileResult::Object:
+        fileType = "-filetype=obj";
+        ext = ".o";
+        break;
+    case CompileResult::Assembly:
+        fileType = "-filetype=asm";
+        ext = ".s";
+        break;
+    default:
+        llvm_unreachable("Emit Native only emits object and asm");
+    }
+
+    std::vector<fs::path> result{};
+    result.reserve(m_modules.size());
+
+    auto bcFiles = emitBitCode(false);
+    if (m_level > OptimizationLevel::O0) {
+        bcFiles = optimize(bcFiles, CompileResult::BitCode, false);
+    }
+
+    auto tool = getToolPath(Tool::Assembler).string();
+    bool single = bcFiles.size() == 1;
+    for (const auto& path: bcFiles) {
+        string input{path.string()};
+        auto output = resolveOutputPath(path, ext, single, final).string();
+
+        std::vector<llvm::StringRef> args{
+            tool,
+            fileType,
+            "-o",
+            output,
+            input
+        };
+        auto code = llvm::sys::ExecuteAndWait(tool, args);
+        if (code != EXIT_SUCCESS) {
+            error("Failed emit '"s + output + "'");
+        }
+        result.emplace_back(output);
+
+        fs::remove(input);
+    }
+
+    return result;
 }
 
-std::vector<fs::path> Driver::emitObjects(bool final) {
-    return {};
-}
+void Driver::emitExecutable() {
+    auto objects = emitNative(CompileResult::Object, false);
+    auto outputPath = resolveOutputPath("a", ".out", true, true);
+    auto output = outputPath.string();
+    auto tool = getToolPath(Tool::Linker);
 
-std::vector<fs::path> Driver::emitExecutable(bool final) {
-    return {};
+    std::vector<string> stringCopies;
+    stringCopies.reserve(objects.size() + 1);
+
+    std::vector<llvm::StringRef> args{
+        stringCopies.emplace_back(tool.string()),
+        "-lSystem",
+        "-o",
+        output
+    };
+    args.reserve(args.size() + objects.size());
+    for (const auto& path: objects) {
+        args.emplace_back(stringCopies.emplace_back(path.string()));
+    }
+
+    auto code = llvm::sys::ExecuteAndWait(tool.string(), args);
+    if (code != EXIT_SUCCESS) {
+        error("Failed generate '"s + output + "'");
+    }
+
+    for (const auto& path: objects) {
+        fs::remove(path);
+    }
 }
 
 // Compile
@@ -181,18 +240,18 @@ std::vector<fs::path> Driver::optimize(const std::vector<fs::path>& files, Compi
             break;
         case CompileResult::Executable:
         case CompileResult::Library:
-            llvm_unreachable("Optimizer does not generate executabl/library output");
-            break;
+            llvm_unreachable("Optimizer does not generate executable/library output");
     }
 
-    auto tool = getToolPath(Tool::Optimizer);
+    auto level = getCmdOption(m_level);
+    auto tool = getToolPath(Tool::Optimizer).string();
     bool single = files.size() == 1;
     for(const auto& path: files) {
         string file{path.string()};
         auto output = resolveOutputPath(path, ext, single, final).string();
         std::vector<llvm::StringRef> args{
-            tool.string(),
-            getCmdOption(m_level),
+            tool,
+            level,
             "-o",
             output,
             file
@@ -200,7 +259,7 @@ std::vector<fs::path> Driver::optimize(const std::vector<fs::path>& files, Compi
         if (!emitOpt.empty()) {
             args.insert(std::next(args.begin()), emitOpt);
         }
-        auto code = llvm::sys::ExecuteAndWait(tool.string(), args);
+        auto code = llvm::sys::ExecuteAndWait(tool, args);
         if (code != EXIT_SUCCESS) {
             error("Failed to optimize '"s + file + "'");
         }

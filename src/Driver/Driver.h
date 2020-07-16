@@ -150,11 +150,10 @@ public:
     int execute();
 
 private:
-    std::vector<fs::path> emitLLVMIr(bool final);
+    void emitLLVMIr();
     std::vector<fs::path> emitBitCode(bool final);
-    std::vector<fs::path> emitAssembly(bool final);
-    std::vector<fs::path> emitObjects(bool final);
-    std::vector<fs::path> emitExecutable(bool final);
+    std::vector<fs::path> emitNative(CompileResult emit, bool final);
+    void emitExecutable();
 
     /**
      * Resolve input file path to corresponding output path.
