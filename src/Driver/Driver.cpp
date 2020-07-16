@@ -181,7 +181,7 @@ void Driver::emitExecutable() {
         args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crt1.o").string()));
         args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crti.o").string()));
     } else if (m_triple.isMacOSX()) {
-        args.emplace_back("lSystem");
+        args.emplace_back("-lSystem");
     } else if (m_triple.isOSWindows()) {
         error("Building for Windows not currently supported");
     }
