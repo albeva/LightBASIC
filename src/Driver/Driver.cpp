@@ -2,6 +2,11 @@
 // Created by Albert on 13/07/2020.
 //
 #include "Driver.h"
+#include "Parser/Parser.h"
+#include "Sem/SemanticAnalyzer.h"
+#include "Gen/CodeGen.h"
+#include "Ast/Ast.h"
+#include <llvm/IR/IRPrintingPasses.h>
 using namespace lbc;
 
 Driver::Driver()
@@ -9,6 +14,299 @@ Driver::Driver()
 }
 
 Driver::~Driver() = default;
+
+[[noreturn]] static void error(const string& message) {
+    std::cerr << message << '\n';
+    std::exit(EXIT_FAILURE);
+}
+
+// Process input
+
+int Driver::execute() {
+    compileSources();
+
+    switch (m_result) {
+        case CompileResult::LLVMIr:
+            emitLLVMIr(true);
+            break;
+        case CompileResult::BitCode:
+            emitBitCode(true);
+            break;
+        case CompileResult::Assembly:
+            emitAssembly(true);
+            break;
+        case CompileResult::Object:
+            emitObjects(true);
+            break;
+        case CompileResult::Executable:
+            emitExecutable(true);
+            break;
+        case CompileResult::Library:
+            error("Creating libraries is not supported");
+    }
+
+    return EXIT_SUCCESS;
+}
+
+std::vector<fs::path> Driver::emitLLVMIr(bool final) {
+    std::vector<fs::path> result{};
+    result.reserve(m_modules.size());
+
+    if (m_level > OptimizationLevel::O0) {
+        auto bcFiles = emitBitCode(false);
+        result = optimize(bcFiles, CompileResult::LLVMIr, final);
+        if (final) {
+            for (const auto& file : bcFiles) {
+                fs::remove(file);
+            }
+        }
+    } else {
+        bool single = m_modules.size() == 1;
+        for (auto& module: m_modules) {
+            fs::path path = resolveOutputPath(module->getSourceFileName(), ".ll", single, final);
+
+            std::error_code ec{};
+            llvm::raw_fd_ostream os{path.string(), ec, llvm::sys::fs::OF_Text};
+
+            auto* printer = llvm::createPrintModulePass(os);
+            printer->runOnModule(*module);
+
+            os.flush();
+            os.close();
+
+            result.emplace_back(std::move(path));
+        }
+    }
+    return result;
+}
+
+std::vector<fs::path> Driver::emitBitCode(bool final) {
+    std::vector<fs::path> result;
+    result.reserve(m_modules.size());
+
+    bool single = m_modules.size() == 1;
+    for (auto& module: m_modules) {
+        fs::path output = resolveOutputPath(module->getSourceFileName(), ".bc", single, final);
+
+        std::error_code errors{};
+        llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OF_None};
+        llvm::WriteBitcodeToFile(*module, stream);
+        stream.flush();
+        stream.close();
+
+        result.emplace_back(output);
+    }
+
+    return result;
+}
+
+std::vector<fs::path> Driver::emitAssembly(bool final) {
+    return {};
+}
+
+std::vector<fs::path> Driver::emitObjects(bool final) {
+    return {};
+}
+
+std::vector<fs::path> Driver::emitExecutable(bool final) {
+    return {};
+}
+
+// Compile
+
+void Driver::compileSources() {
+    const auto& sources = getResources(ResourceType::Source);
+    m_modules.reserve(sources.size());
+    for (const auto& source: sources) {
+        auto path = resolvePath(source, ResourceType::SourceDirectory).string();
+
+        string included;
+        auto ID = m_sourceMgr.AddIncludeFile(path, {}, included);
+        if (ID == ~0U) {
+            error("Failed to load '"s + path + "'");
+        }
+
+        compileSource(path, ID);
+    }
+}
+
+void Driver::compileSource(const fs::path& path, unsigned int ID) {
+    Parser parser{ m_sourceMgr, ID };
+    auto ast = parser.parse();
+    if (!ast) {
+        error("Failed to parse '"s + path.string() + "'");
+    }
+
+    // Analyze
+    SemanticAnalyzer sem(m_llvmContext, m_sourceMgr, ID);
+    ast->accept(&sem);
+
+    // generate IR
+    CodeGen gen(m_llvmContext, m_sourceMgr, m_triple, ID);
+    ast->accept(&gen);
+
+    // done
+    if (!gen.validate()) {
+        error("Failed to compile '"s + path.string() + "'");
+    }
+
+    // Happy Days
+    m_modules.emplace_back(gen.getModule());
+}
+
+// Optimize
+
+std::vector<fs::path> Driver::optimize(const std::vector<fs::path>& files, CompileResult emit, bool final) {
+    std::vector<fs::path> result;
+    result.reserve(files.size());
+
+    string emitOpt;
+    string ext;
+    switch (emit) {
+        case CompileResult::LLVMIr:
+            emitOpt = "-S";
+            ext = ".ll";
+            break;
+        case CompileResult::BitCode:
+            emitOpt = "";
+            ext = ".bc";
+            break;
+        case CompileResult::Assembly:
+            emitOpt = "--filetype=asm";
+            ext = ".asm";
+            break;
+        case CompileResult::Object:
+            emitOpt = "--filetype=obj";
+            ext = ".o";
+            break;
+        case CompileResult::Executable:
+        case CompileResult::Library:
+            llvm_unreachable("Optimizer does not generate executabl/library output");
+            break;
+    }
+
+    auto tool = getToolPath(Tool::Optimizer);
+    bool single = files.size() == 1;
+    for(const auto& path: files) {
+        string file{path.string()};
+        auto output = resolveOutputPath(path, ext, single, final).string();
+        std::vector<llvm::StringRef> args{
+            tool.string(),
+            getCmdOption(m_level),
+            "-o",
+            output,
+            file
+        };
+        if (!emitOpt.empty()) {
+            args.insert(std::next(args.begin()), emitOpt);
+        }
+        auto code = llvm::sys::ExecuteAndWait(tool.string(), args);
+        if (code != EXIT_SUCCESS) {
+            error("Failed to optimize '"s + file + "'");
+        }
+
+        result.emplace_back(output);
+    }
+
+    return result;
+}
+
+// Path management
+
+fs::path Driver::resolveOutputPath(const fs::path& path, const string& ext, bool single, bool final) const {
+    if (m_outputPath.empty()) {
+        fs::path output{path};
+        output.replace_extension(ext);
+        return output;
+    }
+
+    if (fs::is_directory(m_outputPath) || m_outputPath.filename().empty()) {
+        fs::path relative = fs::relative(path, m_workingDir);
+        relative.replace_extension(ext);
+        auto fullPath = fs::absolute(m_outputPath / relative);
+        fs::create_directories(fullPath.parent_path());
+        return fullPath;
+    }
+
+    if (!final) {
+        fs::path relative = fs::relative(path, m_workingDir);
+        relative.replace_extension(ext);
+        auto fullPath = fs::absolute(m_workingDir / relative);
+        fs::create_directories(fullPath.parent_path());
+        return fullPath;
+    }
+
+    if (!single) {
+        error("Output path '"s + m_outputPath.string() + "' can have only one input file");
+    }
+
+    fs::create_directories(m_outputPath.parent_path());
+    return m_outputPath;
+}
+
+fs::path Driver::resolvePath(const fs::path& path, ResourceType type) const {
+    if (path.is_absolute()) {
+        if (validateFile(path, true)) {
+            return path;
+        }
+    }
+
+    for (const auto& dir: getResources(type)) {
+        auto p = fs::absolute(dir / path);
+        if (validateFile(p, false)) {
+            return p;
+        }
+    }
+
+    if (validateFile(path, true)) {
+        return path;
+    }
+
+    llvm_unreachable("file resolving failed");
+}
+
+[[nodiscard]] bool Driver::validateFile(const fs::path& path, bool mustExist) {
+    if (!fs::exists(path)) {
+        if (mustExist) {
+            error("File '"s + path.string() + "' not found");
+        }
+        return false;
+    }
+
+    if (!fs::is_regular_file(path)) {
+        error("File '"s + path.string() + "' is not regular");
+    }
+
+    return true;
+}
+
+void Driver::setWorkingDir(const fs::path& path) {
+    if (!path.is_absolute()) {
+        error("Working dir not a full path");
+    }
+
+    if (!fs::exists(path)) {
+        error("Working dir does not exist");
+    }
+
+    if (!fs::is_directory(path)) {
+        error("Working dir must point to a directory");
+    }
+
+    m_workingDir = path;
+    addResource(ResourceType::SourceDirectory, path);
+    addResource(ResourceType::LibraryDirectory, path);
+}
+
+void Driver::setOutputPath(const fs::path& path) {
+    if (path.is_absolute()) {
+        m_outputPath = path;
+    } else {
+        m_outputPath = fs::absolute(m_workingDir / path);
+    }
+}
+
+// Manage resources
 
 void Driver::addResource(Driver::ResourceType type, const fs::path& path) {
     auto index = static_cast<size_t>(type);
@@ -20,16 +318,32 @@ const Driver::ResourceContainer& Driver::getResources(Driver::ResourceType type)
     return m_resources.at(index);
 }
 
-void Driver::setTool(Driver::Tool tool, const fs::path& path) {
-    auto index = static_cast<size_t>(tool);
-    m_tools.at(index) = path;
+// Manage tools
+
+fs::path Driver::getToolPath(Tool tool) {
+    switch (tool) {
+        case Tool::Optimizer:
+            return "/usr/local/bin/opt";
+        case Tool::Assembler:
+            return "/usr/local/bin/llc";
+        case Tool::Linker:
+            return "/usr/bin/ld";
+        case Tool::Count:
+            llvm_unreachable("Tool::Count is invalid tool");
+    }
 }
 
-const fs::path& Driver::getTool(Driver::Tool tool) const {
-    auto index = static_cast<size_t>(tool);
-    return m_tools.at(index);
-}
+// Stringify
 
-int Driver::execute() {
-    return EXIT_SUCCESS;
+string Driver::getCmdOption(Driver::OptimizationLevel level) {
+    switch (level) {
+    case OptimizationLevel::O0:
+        return "-O0";
+    case OptimizationLevel::O1:
+        return "-O1";
+    case OptimizationLevel::O2:
+        return "-O2";
+    case OptimizationLevel::O3:
+        return "-O3";
+    }
 }

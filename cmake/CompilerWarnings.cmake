@@ -54,7 +54,6 @@ function(set_project_warnings project_name)
 
   set(CLANG_WARNINGS
       ${CLANG_GCC_COMMON_WARNINGS}
-      -Weverything
 
       -Wno-padded
       -Wno-c++98-compat-pedantic

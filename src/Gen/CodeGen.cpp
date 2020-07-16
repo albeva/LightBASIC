@@ -16,9 +16,10 @@ using namespace lbc;
     std::exit(EXIT_FAILURE);
 }
 
-CodeGen::CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId)
+CodeGen::CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, llvm::Triple& tripe, unsigned fileId)
 : m_context{ context },
   m_srcMgr{ srcMgr },
+  m_tripe{ tripe },
   m_fileId{ fileId },
   m_builder{ context } {}
 
@@ -26,7 +27,7 @@ void CodeGen::visit(AstProgram* ast) {
     auto file = m_srcMgr.getMemoryBuffer(m_fileId)->getBufferIdentifier();
 
     m_module = make_unique<llvm::Module>(file, m_context);
-    m_module->setTargetTriple(llvm::sys::getDefaultTargetTriple());
+    m_module->setTargetTriple(m_tripe.str());
 
     // main
     m_function = llvm::Function::Create(
@@ -47,14 +48,15 @@ void CodeGen::visit(AstProgram* ast) {
     // close main
     auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
     llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
+}
 
-    // verify
-    if (llvm::verifyModule(*m_module, &llvm::outs())) {
-        std::cerr << "Failed to verify modeul" << '\n';
-        std::exit(EXIT_FAILURE);
-    }
+bool CodeGen::validate() const {
+    assert(m_module != nullptr); // NOLINT
+    return !llvm::verifyModule(*m_module, &llvm::outs());
+}
 
-    // Print out
+void CodeGen::print() const {
+    assert(m_module != nullptr); // NOLINT
     auto* printer = llvm::createPrintModulePass(llvm::outs());
     printer->runOnModule(*m_module);
 }
@@ -228,4 +230,8 @@ void CodeGen::visit(AstLiteralExpr* ast) {
     }
 
     ast->llvmValue = constant;
+}
+
+unique_ptr<llvm::Module> CodeGen::getModule() {
+    return std::move(m_module);
 }

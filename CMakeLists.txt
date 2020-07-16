@@ -6,7 +6,7 @@ project(lbc CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
 
-# Link this 'library' to set the c++ standard / compile-time options requested
+# Link this 'library' to set the c++ standard / compileSource-time options requested
 add_library(project_options INTERFACE)
 target_compile_features(project_options INTERFACE cxx_std_17)
 

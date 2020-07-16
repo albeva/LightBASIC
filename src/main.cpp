@@ -31,8 +31,8 @@ static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& ar
     driver.setCompilerPath(executable);
 
     // current working directory
-    auto workingdir = fs::current_path();
-    driver.setWorkingDir(workingdir);
+    auto workingDir = fs::current_path();
+    driver.setWorkingDir(workingDir);
 
     // lbc [options] <input>+
     size_t index = 1;
@@ -52,7 +52,7 @@ static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& ar
         } else if (arg == "-o") {
             auto next = index + 1;
             if (next >= args.size()) {
-                showError("ouput path missing.");
+                showError("output path missing.");
             }
             driver.setOutputPath(args[next]);
             index = next;
