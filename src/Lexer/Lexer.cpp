@@ -156,7 +156,6 @@ unique_ptr<Token> Lexer::identifier() {
 }
 
 unique_ptr<Token> Lexer::string() {
-    auto loc = getLoc(m_input);
     constexpr char visibleFrom = 32;
     const auto* start = m_input;
     std::string literal{};

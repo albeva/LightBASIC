@@ -150,16 +150,52 @@ void Driver::emitExecutable() {
     stringCopies.reserve(objects.size());
 
     std::vector<llvm::StringRef> args;
-    args.reserve(objects.size() + 4);
-    args = {
-        tool,
-        "-lSystem",
-        "-o",
-        output
-    };
+    constexpr auto reserve = 16;
+    args.reserve(objects.size() + reserve);
+    args.emplace_back(tool);
+
+    fs::path linuxSysPath;
+    if (m_triple.isOSLinux()) {
+        if (m_triple.isArch32Bit()) {
+            args.emplace_back("-m");
+            args.emplace_back("elf_i386");
+            linuxSysPath = "/usr/libr32";
+            if (!fs::exists(linuxSysPath)) {
+                linuxSysPath = "/usr/lib/i386-linux-gnu";
+                if (!fs::exists(linuxSysPath)) {
+                    error("No 32 bit libraries found");
+                }
+            }
+        } else if (m_triple.isArch64Bit()) {
+            args.emplace_back("-m");
+            args.emplace_back("elf_x86_64");
+            args.emplace_back("-dynamic-linker");
+            args.emplace_back("/lib64/ld-linux-x86-64.so.2");
+            linuxSysPath = "/usr/lib/x86_64-linux-gnu";
+        } else {
+            error("Unknown architecture");
+        }
+        args.emplace_back("-L");
+        args.emplace_back("/usr/lib");
+
+        args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crt1.o").string()));
+        args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crti.o").string()));
+    } else if (m_triple.isMacOSX()) {
+        args.emplace_back("lSystem");
+    } else if (m_triple.isOSWindows()) {
+        error("Building for Windows not currently supported");
+    }
+    args.emplace_back("-o");
+    args.emplace_back(output);
 
     for (const auto& path: objects) {
         args.emplace_back(stringCopies.emplace_back(path.string()));
+    }
+
+    if (m_triple.isOSLinux()) {
+        args.emplace_back("--no-as-needed");
+        args.emplace_back("-lc");
+        args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crtn.o").string()));
     }
 
     auto code = llvm::sys::ExecuteAndWait(tool, args);
@@ -385,16 +421,24 @@ const Driver::ResourceContainer& Driver::getResources(Driver::ResourceType type)
 // Manage tools
 
 fs::path Driver::getToolPath(Tool tool) {
+    fs::path path;
     switch (tool) {
         case Tool::Optimizer:
-            return "/usr/local/bin/opt";
+            path = "/usr/local/bin/opt";
+            break;
         case Tool::Assembler:
-            return "/usr/local/bin/llc";
+            path = "/usr/local/bin/llc";
+            break;
         case Tool::Linker:
-            return "/usr/bin/ld";
-        case Tool::Count:
-            llvm_unreachable("Tool::Count is invalid tool");
+            path = "/usr/bin/ld";
+            break;
+        default:
+            llvm_unreachable("Invalid Tool ID");
     }
+    if (!fs::exists(path)) {
+        error("Tool "s + path.string() + " not found!");
+    }
+    return path;
 }
 
 // Stringify
@@ -410,4 +454,5 @@ string Driver::getCmdOption(Driver::OptimizationLevel level) {
     case OptimizationLevel::O3:
         return "-O3";
     }
+    llvm_unreachable("Unreachable optimization level");
 }
