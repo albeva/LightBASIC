@@ -22,7 +22,7 @@ Driver::~Driver() = default;
 }
 
 void Driver::validate() {
-    size_t count = std::accumulate(m_inputFiles.begin(), m_inputFiles.end(), size_t{}, [](auto cnt, const auto& vec){
+    size_t count = std::accumulate(m_inputFiles.begin(), m_inputFiles.end(), size_t{}, [](auto cnt, const auto& vec) {
         return cnt + vec.size();
     });
 
@@ -30,10 +30,8 @@ void Driver::validate() {
         error("no input.");
     }
 
-    if (count > 1 && !isTargetLinkable()) {
-        if (!m_outputFilePath.empty()) {
-            error("cannot specify -o when generating multiple output files.");
-        }
+    if (count > 1 && !isTargetLinkable() && !m_outputFilePath.empty()) {
+        error("cannot specify -o when generating multiple output files.");
     }
 
     if (m_outputType == OutputType::LLVM && isTargetNativeOnly()) {
@@ -47,29 +45,29 @@ int Driver::execute() {
 
     compileSources();
 
-//    switch (m_result) {
-//    case CompileResult::Default:
-//        emitExecutable();
-//        break;
-//    case CompileResult::LLVMIr:
-//        emitLLVMIr();
-//        break;
-//    case CompileResult::BitCode:
-//        emitBitCode(true);
-//        break;
-//    case CompileResult::Assembly:
-//        emitNative(CompileResult::Assembly, true);
-//        break;
-//    case CompileResult::Object:
-//        emitNative(CompileResult::Object, true);
-//        break;
-//    case CompileResult::Executable:
-//        emitExecutable();
-//        break;
-//    case CompileResult::Library:
-//        error("Creating libraries is not supported");
-//    }
-//
+    //    switch (m_result) {
+    //    case CompileResult::Default:
+    //        emitExecutable();
+    //        break;
+    //    case CompileResult::LLVMIr:
+    //        emitLLVMIr();
+    //        break;
+    //    case CompileResult::BitCode:
+    //        emitBitCode(true);
+    //        break;
+    //    case CompileResult::Assembly:
+    //        emitNative(CompileResult::Assembly, true);
+    //        break;
+    //    case CompileResult::Object:
+    //        emitNative(CompileResult::Object, true);
+    //        break;
+    //    case CompileResult::Executable:
+    //        emitExecutable();
+    //        break;
+    //    case CompileResult::Library:
+    //        error("Creating libraries is not supported");
+    //    }
+    //
     return EXIT_SUCCESS;
 }
 
@@ -490,16 +488,15 @@ const char* Driver::getCmdOption(Driver::OptimizationLevel level) {
 
 const char* Driver::getFileExt(Driver::FileType type) {
     switch (type) {
-        case FileType::Source:
-            return ".bas";
-        case FileType::Object:
-            return ".o";
-        case FileType::LLVMIr:
-            return ".ll";
-        case FileType::BitCode:
-            return ".bc";
-        default:
-            llvm_unreachable("Invalid file type");
+    case FileType::Source:
+        return ".bas";
+    case FileType::Object:
+        return ".o";
+    case FileType::LLVMIr:
+        return ".ll";
+    case FileType::BitCode:
+        return ".bc";
+    default:
+        llvm_unreachable("Invalid file type");
     }
 }
-

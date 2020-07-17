@@ -57,10 +57,10 @@ public:
     void setDebugBuild(bool debug) { m_isDebug = debug; }
 
     enum class FileType {
-        Source,     // anything, but mostly .bas
-        Object,     // .o
-        LLVMIr,     // .ll
-        BitCode,    // .bc
+        Source,  // anything, but mostly .bas
+        Object,  // .o
+        LLVMIr,  // .ll
+        BitCode, // .bc
         count
     };
 
@@ -160,10 +160,10 @@ private:
     }
 
 
-//    void emitLLVMIr();
-//    std::vector<fs::path> emitBitCode(bool final);
-//    std::vector<fs::path> emitNative(CompileResult emit, bool final);
-//    void emitExecutable();
+    //    void emitLLVMIr();
+    //    std::vector<fs::path> emitBitCode(bool final);
+    //    std::vector<fs::path> emitNative(CompileResult emit, bool final);
+    //    void emitExecutable();
 
     /**
      * Resolve input file path to corresponding output path.
@@ -226,8 +226,6 @@ private:
     llvm::SourceMgr m_sourceMgr{};
     llvm::LLVMContext m_llvmContext{};
     std::vector<unique_ptr<llvm::Module>> m_modules{};
-
-
 };
 
 } // namespace lbc
