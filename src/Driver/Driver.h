@@ -18,6 +18,7 @@ public:
      * What are we generating?
      */
     enum class CompileResult {
+        Default,
         LLVMIr,
         BitCode,
         Assembly,
@@ -84,7 +85,7 @@ public:
      * @param tool path
      * @return
      */
-    [[nodiscard]] static fs::path getToolPath(Tool tool) ;
+    [[nodiscard]] static fs::path getToolPath(Tool tool);
 
     /**
      * Set current working directory which is used
@@ -206,7 +207,7 @@ private:
 
     std::array<ResourceContainer, static_cast<size_t>(ResourceType::Count)> m_resources{};
 
-    CompileResult m_result = CompileResult::Executable;
+    CompileResult m_result = CompileResult::Default;
     OptimizationLevel m_level = OptimizationLevel::O2;
     BuildMode m_mode = BuildMode::Debug;
 

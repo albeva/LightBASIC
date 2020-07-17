@@ -2,10 +2,10 @@
 // Created by Albert on 13/07/2020.
 //
 #include "Driver.h"
+#include "Ast/Ast.h"
+#include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
-#include "Gen/CodeGen.h"
-#include "Ast/Ast.h"
 #include <llvm/IR/IRPrintingPasses.h>
 using namespace lbc;
 
@@ -26,23 +26,26 @@ int Driver::execute() {
     compileSources();
 
     switch (m_result) {
-        case CompileResult::LLVMIr:
-            emitLLVMIr();
-            break;
-        case CompileResult::BitCode:
-            emitBitCode(true);
-            break;
-        case CompileResult::Assembly:
-            emitNative(CompileResult::Assembly, true);
-            break;
-        case CompileResult::Object:
-            emitNative(CompileResult::Object, true);
-            break;
-        case CompileResult::Executable:
-            emitExecutable();
-            break;
-        case CompileResult::Library:
-            error("Creating libraries is not supported");
+    case CompileResult::Default:
+        emitExecutable();
+        break;
+    case CompileResult::LLVMIr:
+        emitLLVMIr();
+        break;
+    case CompileResult::BitCode:
+        emitBitCode(true);
+        break;
+    case CompileResult::Assembly:
+        emitNative(CompileResult::Assembly, true);
+        break;
+    case CompileResult::Object:
+        emitNative(CompileResult::Object, true);
+        break;
+    case CompileResult::Executable:
+        emitExecutable();
+        break;
+    case CompileResult::Library:
+        error("Creating libraries is not supported");
     }
 
     return EXIT_SUCCESS;
@@ -57,11 +60,11 @@ void Driver::emitLLVMIr() {
         }
     } else {
         bool single = m_modules.size() == 1;
-        for (auto& module: m_modules) {
+        for (auto& module : m_modules) {
             fs::path path = resolveOutputPath(module->getSourceFileName(), ".ll", single, true);
 
             std::error_code ec{};
-            llvm::raw_fd_ostream os{path.string(), ec, llvm::sys::fs::OF_Text};
+            llvm::raw_fd_ostream os{ path.string(), ec, llvm::sys::fs::OF_Text };
 
             auto* printer = llvm::createPrintModulePass(os);
             printer->runOnModule(*module);
@@ -77,11 +80,11 @@ std::vector<fs::path> Driver::emitBitCode(bool final) {
     result.reserve(m_modules.size());
 
     bool single = m_modules.size() == 1;
-    for (auto& module: m_modules) {
+    for (auto& module : m_modules) {
         fs::path output = resolveOutputPath(module->getSourceFileName(), ".bc", single, final);
 
         std::error_code errors{};
-        llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OF_None};
+        llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OF_None };
         llvm::WriteBitcodeToFile(*module, stream);
         stream.flush();
         stream.close();
@@ -118,8 +121,8 @@ std::vector<fs::path> Driver::emitNative(CompileResult emit, bool final) {
 
     auto tool = getToolPath(Tool::Assembler).string();
     bool single = bcFiles.size() == 1;
-    for (const auto& path: bcFiles) {
-        string input{path.string()};
+    for (const auto& path : bcFiles) {
+        string input{ path.string() };
         auto output = resolveOutputPath(path, ext, single, final).string();
 
         std::vector<llvm::StringRef> args{
@@ -188,7 +191,7 @@ void Driver::emitExecutable() {
     args.emplace_back("-o");
     args.emplace_back(output);
 
-    for (const auto& path: objects) {
+    for (const auto& path : objects) {
         args.emplace_back(stringCopies.emplace_back(path.string()));
     }
 
@@ -203,7 +206,7 @@ void Driver::emitExecutable() {
         error("Failed generate '"s + output + "'");
     }
 
-    for (const auto& path: objects) {
+    for (const auto& path : objects) {
         fs::remove(path);
     }
 }
@@ -213,7 +216,7 @@ void Driver::emitExecutable() {
 void Driver::compileSources() {
     const auto& sources = getResources(ResourceType::Source);
     m_modules.reserve(sources.size());
-    for (const auto& source: sources) {
+    for (const auto& source : sources) {
         auto path = resolvePath(source, ResourceType::SourceDirectory).string();
 
         string included;
@@ -259,32 +262,33 @@ std::vector<fs::path> Driver::optimize(const std::vector<fs::path>& files, Compi
     string emitOpt;
     string ext;
     switch (emit) {
-        case CompileResult::LLVMIr:
-            emitOpt = "-S";
-            ext = ".ll";
-            break;
-        case CompileResult::BitCode:
-            emitOpt = "";
-            ext = ".bc";
-            break;
-        case CompileResult::Assembly:
-            emitOpt = "--filetype=asm";
-            ext = ".asm";
-            break;
-        case CompileResult::Object:
-            emitOpt = "--filetype=obj";
-            ext = ".o";
-            break;
-        case CompileResult::Executable:
-        case CompileResult::Library:
-            llvm_unreachable("Optimizer does not generate executable/library output");
+    case CompileResult::LLVMIr:
+        emitOpt = "-S";
+        ext = ".ll";
+        break;
+    case CompileResult::BitCode:
+        emitOpt = "";
+        ext = ".bc";
+        break;
+    case CompileResult::Assembly:
+        emitOpt = "--filetype=asm";
+        ext = ".asm";
+        break;
+    case CompileResult::Object:
+        emitOpt = "--filetype=obj";
+        ext = ".o";
+        break;
+    case CompileResult::Default:
+    case CompileResult::Executable:
+    case CompileResult::Library:
+        llvm_unreachable("Optimizer does not generate executable/library output");
     }
 
     auto level = getCmdOption(m_level);
     auto tool = getToolPath(Tool::Optimizer).string();
     bool single = files.size() == 1;
-    for(const auto& path: files) {
-        string file{path.string()};
+    for (const auto& path : files) {
+        string file{ path.string() };
         auto output = resolveOutputPath(path, ext, single, final).string();
         std::vector<llvm::StringRef> args{
             tool,
@@ -311,7 +315,7 @@ std::vector<fs::path> Driver::optimize(const std::vector<fs::path>& files, Compi
 
 fs::path Driver::resolveOutputPath(const fs::path& path, const string& ext, bool single, bool final) const {
     if (m_outputPath.empty()) {
-        fs::path output{path};
+        fs::path output{ path };
         output.replace_extension(ext);
         if (!output.is_absolute()) {
             output = fs::absolute(m_workingDir / output);
@@ -351,7 +355,7 @@ fs::path Driver::resolvePath(const fs::path& path, ResourceType type) const {
         }
     }
 
-    for (const auto& dir: getResources(type)) {
+    for (const auto& dir : getResources(type)) {
         auto p = fs::absolute(dir / path);
         if (validateFile(p, false)) {
             return p;
@@ -404,6 +408,19 @@ void Driver::setOutputPath(const fs::path& path) {
     } else {
         m_outputPath = fs::absolute(m_workingDir / path);
     }
+
+    if (m_result == CompileResult::Default) {
+        auto ext = m_outputPath.extension();
+        if (ext == ".o") {
+            m_result = CompileResult::Object;
+        } else if (ext == ".ll") {
+            m_result = CompileResult::LLVMIr;
+        } else if (ext == ".bc") {
+            m_result = CompileResult::BitCode;
+        } else if (ext == ".s") {
+            m_result = CompileResult::Assembly;
+        }
+    }
 }
 
 // Manage resources
@@ -423,17 +440,17 @@ const Driver::ResourceContainer& Driver::getResources(Driver::ResourceType type)
 fs::path Driver::getToolPath(Tool tool) {
     fs::path path;
     switch (tool) {
-        case Tool::Optimizer:
-            path = "/usr/local/bin/opt";
-            break;
-        case Tool::Assembler:
-            path = "/usr/local/bin/llc";
-            break;
-        case Tool::Linker:
-            path = "/usr/bin/ld";
-            break;
-        default:
-            llvm_unreachable("Invalid Tool ID");
+    case Tool::Optimizer:
+        path = "/usr/local/bin/opt";
+        break;
+    case Tool::Assembler:
+        path = "/usr/local/bin/llc";
+        break;
+    case Tool::Linker:
+        path = "/usr/bin/ld";
+        break;
+    default:
+        llvm_unreachable("Invalid Tool ID");
     }
     if (!fs::exists(path)) {
         error("Tool "s + path.string() + " not found!");
