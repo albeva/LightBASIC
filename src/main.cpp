@@ -20,9 +20,9 @@ int main(int argc, const char* argv[]) {
     return driver.execute();
 }
 
-static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args) {
+void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args) {
     if (args.size() < 2) {
-        showError("lbc: no input.");
+        showError("no input");
     }
 
     // compiler executable
@@ -33,13 +33,13 @@ static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& ar
     auto workingDir = fs::current_path();
     driver.setWorkingDir(workingDir);
 
-    // lbc [options] <input>+
+    // lbc ( option | <file> )+
     size_t index = 1;
     for (; index < args.size(); index++) {
         if (*args[index] == '-') {
             processOptions(driver, args, index);
         } else {
-            driver.addResource(Driver::ResourceType::Source, args[index]);
+            driver.addInputFile(args[index]);
         }
     }
 }
@@ -51,9 +51,9 @@ static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& ar
     } else if (arg == "-o") {
         auto next = index + 1;
         if (next >= args.size()) {
-            showError("output path missing.");
+            showError("output file path missing.");
         }
-        driver.setOutputPath(args[next]);
+        driver.setOutputFilePath(args[next]);
         index = next;
     } else if (arg == "-m32") {
         auto& triple = driver.getTriple();
@@ -66,21 +66,21 @@ static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& ar
     } else if (arg == "--version") {
         showVersion();
     } else if (arg == "-O0") {
-        driver.setLevel(Driver::OptimizationLevel::O0);
+        driver.setOptimizationLevel(Driver::OptimizationLevel::O0);
+    } else if (arg == "-OS") {
+        driver.setOptimizationLevel(Driver::OptimizationLevel::OS);
     } else if (arg == "-O1") {
-        driver.setLevel(Driver::OptimizationLevel::O1);
+        driver.setOptimizationLevel(Driver::OptimizationLevel::O1);
     } else if (arg == "-O2") {
-        driver.setLevel(Driver::OptimizationLevel::O2);
+        driver.setOptimizationLevel(Driver::OptimizationLevel::O2);
     } else if (arg == "-O3") {
-        driver.setLevel(Driver::OptimizationLevel::O3);
-    } else if (arg == "-emit-asm") {
-        driver.setResult(Driver::CompileResult::Assembly);
-    } else if (arg == "-emit-obj") {
-        driver.setResult(Driver::CompileResult::Object);
+        driver.setOptimizationLevel(Driver::OptimizationLevel::O3);
+    } else if (arg == "-c") {
+        driver.setCompilationTarget(Driver::CompilationTarget::Object);
+    } else if (arg == "-S") {
+        driver.setCompilationTarget(Driver::CompilationTarget::Assembly);
     } else if (arg == "-emit-llvm") {
-        driver.setResult(Driver::CompileResult::LLVMIr);
-    } else if (arg == "-emit-bc") {
-        driver.setResult(Driver::CompileResult::BitCode);
+        driver.setOutputType(Driver::OutputType::LLVM);
     } else {
         showError("Unrecognized option "s + string(arg) + ".");
     }
@@ -88,25 +88,26 @@ static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& ar
 
 
 void showHelp() {
+    // TODO in new *near* future
+    // -toolchain <dir> Use the llvm toolchain at the given directory
+    // -I <dir>         Add directory to include search path
+    // -L <dir>         Add directory to library search path
+    // -g               Generate source-level debug information
     std::cout << R"HELP(LightBASIC compiler
 
 USAGE: lbc [options] <inputs>
 
 OPTIONS:
-    --help           Display available options
-    --version        Show version information
-    -v               Show verbose output
-    -c               Only run compile and assemble steps
-    -S               Only run compilation steps
-    -emit-llvm       Use the LLVM representation for assembler and object files
-    -toolchain <dir> Use the llvm toolchain at the given directory
-    -I <dir>         Add directory to include search path
-    -L <dir>         Add directory to library search path
-    -o <file>        Write output to <file>
-    -g               Generate source-level debug information
-    -O<number>       Set optimization. Valid options: O0, O1, O2, O3
-    -m32             Generate 32bit i386 code
-    -m64             Generate 64bit x86-64 code
+    --help     Display available options
+    --version  Show version information
+    -v         Show verbose output
+    -c         Only run compile and assemble steps
+    -S         Only run compilation steps
+    -emit-llvm Use the LLVM representation for assembler and object files
+    -o <file>  Write output to <file>
+    -O<number> Set optimization. Valid options: O0, OS, O1, O2, O3
+    -m32       Generate 32bit i386 code
+    -m64       Generate 64bit x86-64 code
 )HELP";
     std::exit(EXIT_SUCCESS);
 }

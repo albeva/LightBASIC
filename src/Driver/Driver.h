@@ -17,58 +17,56 @@ public:
     /**
      * What are we generating?
      */
-    enum class CompileResult {
-        Default,
-        LLVMIr,
-        BitCode,
-        Assembly,
-        Object,
+    enum class CompilationTarget {
         Executable,
-        Library
+        Object,
+        Assembly
     };
 
-    [[nodiscard]] CompileResult getResult() const { return m_result; }
-    void setResult(CompileResult result) { m_result = result; }
+    [[nodiscard]] CompilationTarget getCompilationTarget() const { return m_compilationTarget; }
+    void setCompilationTarget(CompilationTarget target) { m_compilationTarget = target; }
+
+    /**
+     * Type of output. Native asm/obj or
+     * LLVM IR/ButCode
+     */
+    enum class OutputType {
+        Native,
+        LLVM
+    };
+
+    [[nodiscard]] OutputType getOutputType() const { return m_outputType; }
+    void setOutputType(OutputType outputType) { m_outputType = outputType; }
 
     /**
      * Optimization level
      */
     enum class OptimizationLevel {
         O0,
+        OS,
         O1,
         O2,
         O3
     };
 
-    [[nodiscard]] static string getCmdOption(OptimizationLevel level);
-    [[nodiscard]] OptimizationLevel getLevel() const { return m_level; }
-    void setLevel(OptimizationLevel level) { m_level = level; }
+    [[nodiscard]] static const char* getCmdOption(OptimizationLevel level);
+    [[nodiscard]] OptimizationLevel getOptimizationLevel() const { return m_optimizationLevel; }
+    void setOptimizationLevel(OptimizationLevel level) { m_optimizationLevel = level; }
 
-    /**
-     * Build type
-     */
-    enum class BuildMode {
-        Debug,
-        Release
+    [[nodiscard]] bool isDebugBuild() const { return m_isDebug; }
+    void setDebugBuild(bool debug) { m_isDebug = debug; }
+
+    enum class FileType {
+        Source,     // anything, but mostly .bas
+        Object,     // .o
+        LLVMIr,     // .ll
+        BitCode,    // .bc
+        count
     };
 
-    [[nodiscard]] BuildMode getMode() const { return m_mode; }
-    void setMode(BuildMode mode) { m_mode = mode; }
-
-    /**
-     * Resource type. Paths, source files, linked libraries, etc.
-     */
-    enum class ResourceType {
-        SourceDirectory,
-        Source,
-        LibraryDirectory,
-        Library,
-        Count
-    };
-    using ResourceContainer = std::set<fs::path>;
-
-    void addResource(ResourceType type, const fs::path& path);
-    [[nodiscard]] const ResourceContainer& getResources(ResourceType type) const;
+    [[nodiscard]] static const char* getFileExt(FileType type);
+    void addInputFile(const fs::path& path);
+    [[nodiscard]] const std::vector<fs::path>& getInputFiles(FileType type) const;
 
     /**
      * Tools that driver can make use of
@@ -111,12 +109,12 @@ public:
     /**
      * Set output file path or a directory
      */
-    void setOutputPath(const fs::path& path);
+    void setOutputFilePath(const fs::path& path);
 
     /**
      * Get defined output path or an empty path if none is set
      */
-    [[nodiscard]] const fs::path& getOutputPath() const { return m_outputPath; }
+    [[nodiscard]] const fs::path& getOutputPath() const { return m_outputFilePath; }
 
     /**
      * Set compiler log generation to verbose
@@ -151,10 +149,21 @@ public:
     int execute();
 
 private:
-    void emitLLVMIr();
-    std::vector<fs::path> emitBitCode(bool final);
-    std::vector<fs::path> emitNative(CompileResult emit, bool final);
-    void emitExecutable();
+    void validate();
+
+    [[nodiscard]] inline bool isTargetLinkable() const {
+        return m_compilationTarget == CompilationTarget::Executable;
+    }
+
+    [[nodiscard]] inline bool isTargetNativeOnly() const {
+        return m_compilationTarget == CompilationTarget::Executable;
+    }
+
+
+//    void emitLLVMIr();
+//    std::vector<fs::path> emitBitCode(bool final);
+//    std::vector<fs::path> emitNative(CompileResult emit, bool final);
+//    void emitExecutable();
 
     /**
      * Resolve input file path to corresponding output path.
@@ -176,7 +185,7 @@ private:
      * @param type path kind
      * @return resolved path
      */
-    [[nodiscard]] fs::path resolvePath(const fs::path& path, ResourceType type) const;
+    [[nodiscard]] fs::path resolvePath(const fs::path& path) const;
 
     /**
      * Validate that file exists and is a valid readable file
@@ -200,27 +209,25 @@ private:
      */
     void compileSource(const fs::path& path, unsigned ID);
 
-    /**
-     * Optimize given files, in-place
-     */
-    std::vector<fs::path> optimize(const std::vector<fs::path>&, CompileResult emit, bool final);
+    bool m_verbose = false;
 
-    std::array<ResourceContainer, static_cast<size_t>(ResourceType::Count)> m_resources{};
+    std::array<std::vector<fs::path>, static_cast<size_t>(FileType::count)> m_inputFiles{};
 
-    CompileResult m_result = CompileResult::Default;
-    OptimizationLevel m_level = OptimizationLevel::O2;
-    BuildMode m_mode = BuildMode::Debug;
+    OutputType m_outputType = OutputType::Native;
+    CompilationTarget m_compilationTarget = CompilationTarget::Executable;
+    OptimizationLevel m_optimizationLevel = OptimizationLevel::O2;
+    bool m_isDebug = false;
 
     fs::path m_workingDir{};
     fs::path m_compilerPath{};
-    fs::path m_outputPath{};
-
-    bool m_verbose = false;
+    fs::path m_outputFilePath{};
 
     llvm::Triple m_triple;
     llvm::SourceMgr m_sourceMgr{};
     llvm::LLVMContext m_llvmContext{};
     std::vector<unique_ptr<llvm::Module>> m_modules{};
+
+
 };
 
 } // namespace lbc
