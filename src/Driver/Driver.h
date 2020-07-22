@@ -151,11 +151,11 @@ public:
 private:
     void validate();
 
-    [[nodiscard]] inline bool isTargetLinkable() const {
+    [[nodiscard]] bool isTargetLinkable() const {
         return m_compilationTarget == CompilationTarget::Executable;
     }
 
-    [[nodiscard]] inline bool isTargetNativeOnly() const {
+    [[nodiscard]] bool isTargetNativeOnly() const {
         return m_compilationTarget == CompilationTarget::Executable;
     }
 

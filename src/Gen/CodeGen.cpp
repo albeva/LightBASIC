@@ -139,15 +139,15 @@ std::any CodeGen::visit(AstFuncDecl* ast) {
     return {};
 }
 
-std::any CodeGen::visit(AstFuncParamDecl* ast) {
+std::any CodeGen::visit(AstFuncParamDecl*  /*ast*/) {
     return {};
 }
 
-std::any CodeGen::visit(AstAttributeList* ast) {
+std::any CodeGen::visit(AstAttributeList*  /*ast*/) {
     return {};
 }
 
-std::any CodeGen::visit(AstAttribute* ast) {
+std::any CodeGen::visit(AstAttribute*  /*ast*/) {
     return {};
 }
 
@@ -161,7 +161,7 @@ std::any CodeGen::visit(AstIdentExpr* ast) {
     return {};
 }
 
-std::any CodeGen::visit(AstTypeExpr* ast) {
+std::any CodeGen::visit(AstTypeExpr*  /*ast*/) {
     return {};
 }
 
