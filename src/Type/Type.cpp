@@ -125,7 +125,7 @@ const TypeInteger* TypeInteger::get(unsigned bits, bool isSigned) {
     INTEGER_TYPES(USE_TYPE)
 #undef USE_TYPE
 
-    std::cerr << "Invalid integer type size: " << bits << std::endl;
+    std::cerr << "Invalid integer type size: " << bits << '\n';
     std::exit(EXIT_FAILURE);
 }
 
@@ -143,7 +143,7 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
         FLOATINGPOINT_TYPES(USE_TYPE)
 #undef USE_TYPE
     default:
-        std::cerr << "Invalid floating point type size: " << bits << std::endl;
+        std::cerr << "Invalid floating point type size: " << bits << '\n';
         std::exit(EXIT_FAILURE);
     }
 }
@@ -155,7 +155,7 @@ llvm::Type* TypeFloatingPoint::genLlvmType(llvm::LLVMContext& context) const {
     case 64: // NOLINT
         return llvm::Type::getDoubleTy(context);
     default:
-        std::cerr << "Invalid floating point type size: " << bits() << std::endl;
+        std::cerr << "Invalid floating point type size: " << bits() << '\n';
         std::exit(EXIT_FAILURE);
     }
 }

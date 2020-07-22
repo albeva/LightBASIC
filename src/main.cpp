@@ -12,7 +12,7 @@ using namespace lbc;
 [[noreturn]] static void showError(const string& message);
 
 static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args);
-static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index);
+static void processOption(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index);
 
 int main(int argc, const char* argv[]) {
     Driver driver;
@@ -37,14 +37,14 @@ void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args) {
     size_t index = 1;
     for (; index < args.size(); index++) {
         if (*args[index] == '-') {
-            processOptions(driver, args, index);
+            processOption(driver, args, index);
         } else {
             driver.addInputFile(args[index]);
         }
     }
 }
 
-static void processOptions(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index) {
+static void processOption(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index) {
     const string_view arg{ args[index] };
     if (arg == "-v") {
         driver.setVerbose(true);
@@ -116,13 +116,13 @@ void showVersion() {
     std::cout << "LightBASIC version " << LBC_VERSION_STRING
               << " (Based on LLVM " << LLVM_VERSION_STRING << ")\n"
               << "(c) Albert Varaksin 2020"
-              << std::endl;
+              << '\n';
     std::exit(EXIT_SUCCESS);
 }
 
 void showError(const string& message) {
     std::cerr << message
               << " Use --help for more info"
-              << std::endl;
+              << '\n';
     std::exit(EXIT_FAILURE);
 }

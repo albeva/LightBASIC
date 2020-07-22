@@ -12,7 +12,7 @@
 using namespace lbc;
 
 [[noreturn]] static void error(const string& message) {
-    std::cerr << message << std::endl;
+    std::cerr << message << '\n';
     std::exit(EXIT_FAILURE);
 }
 
