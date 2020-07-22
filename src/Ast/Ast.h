@@ -45,7 +45,7 @@ public:
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
     virtual ~AstRoot();
     [[nodiscard]] AstKind kind() const { return m_kind; }
-    virtual void accept(AstVisitor* visitor) = 0;
+    virtual std::any accept(AstVisitor* visitor) = 0;
 
 private:
     const AstKind m_kind;
@@ -92,19 +92,19 @@ public:
     Symbol* symbol = nullptr;
 };
 
-#define DECLARE_AST(KIND, BASE)                   \
-    class Ast##KIND final : public Ast##BASE {    \
-        NON_COPYABLE(Ast##KIND)                   \
-    public:                                       \
-        using Base = Ast##BASE;                   \
-        Ast##KIND();                              \
-        ~Ast##KIND();                             \
-        void accept(AstVisitor* visitor) final;   \
-        static bool classof(const AstRoot* ast) { \
-            return ast->kind() == AstKind::KIND;  \
-        }                                         \
-        static unique_ptr<Ast##KIND> create() {   \
-            return make_unique<Ast##KIND>();      \
+#define DECLARE_AST(KIND, BASE)                     \
+    class Ast##KIND final : public Ast##BASE {      \
+        NON_COPYABLE(Ast##KIND)                     \
+    public:                                         \
+        using Base = Ast##BASE;                     \
+        Ast##KIND();                                \
+        ~Ast##KIND();                               \
+        std::any accept(AstVisitor* visitor) final; \
+        static bool classof(const AstRoot* ast) {   \
+            return ast->kind() == AstKind::KIND;    \
+        }                                           \
+        static unique_ptr<Ast##KIND> create() {     \
+            return make_unique<Ast##KIND>();        \
         }
 
 #define DECLARE_END \

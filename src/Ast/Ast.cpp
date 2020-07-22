@@ -16,8 +16,8 @@ AstDecl::~AstDecl() = default;
 #define IMPLEMENT_AST(KIND)                           \
     Ast##KIND::Ast##KIND() : Base{ AstKind::KIND } {} \
     Ast##KIND::~Ast##KIND() = default;                \
-    void Ast##KIND::accept(AstVisitor* visitor) {     \
-        visitor->visit(this);                         \
+    std::any Ast##KIND::accept(AstVisitor* visitor) { \
+        return visitor->visit(this);                  \
     }
 AST_CONTENT_NODES(IMPLEMENT_AST)
 

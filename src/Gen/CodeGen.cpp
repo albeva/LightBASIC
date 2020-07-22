@@ -23,7 +23,7 @@ CodeGen::CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, llvm::Trip
   m_fileId{ fileId },
   m_builder{ context } {}
 
-void CodeGen::visit(AstProgram* ast) {
+std::any CodeGen::visit(AstProgram* ast) {
     auto file = m_srcMgr.getMemoryBuffer(m_fileId)->getBufferIdentifier();
 
     m_module = make_unique<llvm::Module>(file, m_context);
@@ -48,6 +48,8 @@ void CodeGen::visit(AstProgram* ast) {
     // close main
     auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
     llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
+
+    return {};
 }
 
 bool CodeGen::validate() const {
@@ -61,27 +63,31 @@ void CodeGen::print() const {
     printer->runOnModule(*m_module);
 }
 
-void CodeGen::visit(AstStmtList* ast) {
+std::any CodeGen::visit(AstStmtList* ast) {
     for (const auto& stmt : ast->stmts) {
         stmt->accept(this);
     }
+    return {};
 }
 
-void CodeGen::visit(AstAssignStmt* ast) {
+std::any CodeGen::visit(AstAssignStmt* ast) {
     auto* dstValue = getStoreValue(ast->identExpr.get());
     ast->expr->accept(this);
     m_builder.CreateStore(ast->expr->llvmValue, dstValue);
+    return {};
 }
 
 llvm::Value* CodeGen::getStoreValue(AstIdentExpr* identExpr) {
     return identExpr->symbol->value();
+    return {};
 }
 
-void CodeGen::visit(AstExprStmt* ast) {
+std::any CodeGen::visit(AstExprStmt* ast) {
     ast->expr->accept(this);
+    return {};
 }
 
-void CodeGen::visit(AstVarDecl* ast) {
+std::any CodeGen::visit(AstVarDecl* ast) {
     // process resulting type
     ast->typeExpr->accept(this);
 
@@ -118,9 +124,10 @@ void CodeGen::visit(AstVarDecl* ast) {
     }
 
     ast->symbol->setValue(value);
+    return {};
 }
 
-void CodeGen::visit(AstFuncDecl* ast) {
+std::any CodeGen::visit(AstFuncDecl* ast) {
     auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_context));
     auto* fn = llvm::Function::Create(
         fnTy,
@@ -129,30 +136,36 @@ void CodeGen::visit(AstFuncDecl* ast) {
         *m_module);
     fn->setCallingConv(llvm::CallingConv::C);
     ast->symbol->setValue(fn);
+    return {};
 }
 
-void CodeGen::visit(AstFuncParamDecl* ast) {
+std::any CodeGen::visit(AstFuncParamDecl* ast) {
+    return {};
 }
 
-void CodeGen::visit(AstAttributeList* ast) {
+std::any CodeGen::visit(AstAttributeList* ast) {
+    return {};
 }
 
-void CodeGen::visit(AstAttribute* ast) {
+std::any CodeGen::visit(AstAttribute* ast) {
+    return {};
 }
 
-void CodeGen::visit(AstIdentExpr* ast) {
+std::any CodeGen::visit(AstIdentExpr* ast) {
     const auto* type = ast->type;
     if (isa<TypeFunction>(type)) {
         ast->llvmValue = ast->symbol->value();
-        return;
+        return {};
     }
     ast->llvmValue = new llvm::LoadInst(ast->symbol->value(), "", m_block); // NOLINT
+    return {};
 }
 
-void CodeGen::visit(AstTypeExpr* ast) {
+std::any CodeGen::visit(AstTypeExpr* ast) {
+    return {};
 }
 
-void CodeGen::visit(AstCallExpr* ast) {
+std::any CodeGen::visit(AstCallExpr* ast) {
     ast->identExpr->accept(this);
 
     auto* fn = llvm::cast<llvm::Function>(ast->identExpr->llvmValue);
@@ -166,9 +179,10 @@ void CodeGen::visit(AstCallExpr* ast) {
 
     auto* inst = llvm::CallInst::Create(llvm::FunctionCallee(fn), args, "", m_block);
     inst->setTailCall(false);
+    return {};
 }
 
-void CodeGen::visit(AstLiteralExpr* ast) {
+std::any CodeGen::visit(AstLiteralExpr* ast) {
     llvm::Constant* constant = nullptr;
     const auto& lexeme = ast->token->lexeme();
 
@@ -230,6 +244,7 @@ void CodeGen::visit(AstLiteralExpr* ast) {
     }
 
     ast->llvmValue = constant;
+    return {};
 }
 
 unique_ptr<llvm::Module> CodeGen::getModule() {

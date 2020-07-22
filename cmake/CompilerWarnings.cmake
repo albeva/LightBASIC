@@ -50,6 +50,7 @@ function(set_project_warnings project_name)
       -Wformat=2            # warn on security issues around functions that format output (ie printf)
 
       -Wno-unused-parameter # Remove
+      -Wno-gnu-zero-variadic-macro-arguments
   )
 
   set(CLANG_WARNINGS
@@ -57,7 +58,6 @@ function(set_project_warnings project_name)
 
       -Wno-padded
       -Wno-c++98-compat-pedantic
-      -Wno-gnu-zero-variadic-macro-arguments
       -Wno-unused-private-field                   # Remove
       -Wno-unused-variable                        # Remove
       -Wno-unused-parameter                       # Remove

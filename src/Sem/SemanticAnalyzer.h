@@ -16,7 +16,7 @@ class SemanticAnalyzer final : public AstVisitor {
 public:
     explicit SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId);
 
-#define IMPL_VISITOR(NODE, ...) virtual void visit(Ast##NODE* ast);
+#define IMPL_VISITOR(NODE, ...) virtual std::any visit(Ast##NODE* ast);
     AST_CONTENT_NODES(IMPL_VISITOR)
 #undef IMPL_VISITOR
 

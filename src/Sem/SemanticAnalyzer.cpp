@@ -19,33 +19,38 @@ SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& 
   m_srcMgr{ srcMgr },
   m_fileId{ fileId } {}
 
-void SemanticAnalyzer::visit(AstProgram* ast) {
+std::any SemanticAnalyzer::visit(AstProgram* ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
     m_rootTable = m_table = ast->symbolTable.get();
     ast->stmtList->accept(this);
+
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstStmtList* ast) {
+std::any SemanticAnalyzer::visit(AstStmtList* ast) {
     for (auto& stmt : ast->stmts) {
         stmt->accept(this);
     }
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstAssignStmt* ast) {
+std::any SemanticAnalyzer::visit(AstAssignStmt* ast) {
     ast->identExpr->accept(this);
     ast->expr->accept(this);
 
     if (ast->identExpr->type != ast->expr->type) {
         error("Tye mismatch in assignment");
     }
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstExprStmt* ast) {
+std::any SemanticAnalyzer::visit(AstExprStmt* ast) {
     ast->expr->accept(this);
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstVarDecl* ast) {
+std::any SemanticAnalyzer::visit(AstVarDecl* ast) {
     auto* symbol = createNewSymbol(ast->token.get());
 
     // type expr?
@@ -78,19 +83,21 @@ void SemanticAnalyzer::visit(AstVarDecl* ast) {
             symbol->setAlias(token->lexeme());
         }
     }
+
+    return {};
 }
 
 /**
  * Analyze function declaration
  */
-void SemanticAnalyzer::visit(AstFuncDecl* ast) {
+std::any SemanticAnalyzer::visit(AstFuncDecl* ast) {
     auto* symbol = createNewSymbol(ast->token.get(), m_rootTable);
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
     paramTypes.reserve(ast->paramDecls.size());
     {
-        RESTORE_ON_EXIT(m_table);
+        RESTORE_ON_EXIT(m_table)
         ast->symbolTable = make_unique<SymbolTable>(nullptr);
         m_table = ast->symbolTable.get();
         for (auto& param : ast->paramDecls) {
@@ -119,34 +126,40 @@ void SemanticAnalyzer::visit(AstFuncDecl* ast) {
             symbol->setAlias(token->lexeme());
         }
     }
+
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
+std::any SemanticAnalyzer::visit(AstFuncParamDecl* ast) {
     auto* symbol = createNewSymbol(ast->token.get());
 
     ast->typeExpr->accept(this);
     symbol->setType(ast->typeExpr->type);
 
     ast->symbol = symbol;
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstAttributeList* ast) {
+std::any SemanticAnalyzer::visit(AstAttributeList* ast) {
     for (auto& attrib : ast->attribs) {
         attrib->accept(this);
     }
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstAttribute* ast) {
+std::any SemanticAnalyzer::visit(AstAttribute* ast) {
     for (auto& arg : ast->argExprs) {
         arg->accept(this);
     }
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstTypeExpr* ast) {
+std::any SemanticAnalyzer::visit(AstTypeExpr* ast) {
     ast->type = TypeRoot::fromTokenKind(ast->token->kind());
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstIdentExpr* ast) {
+std::any SemanticAnalyzer::visit(AstIdentExpr* ast) {
     const auto& name = ast->token->lexeme();
     auto* symbol = m_table->find(name, true);
 
@@ -160,9 +173,10 @@ void SemanticAnalyzer::visit(AstIdentExpr* ast) {
 
     ast->symbol = symbol;
     ast->type = symbol->type();
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstCallExpr* ast) {
+std::any SemanticAnalyzer::visit(AstCallExpr* ast) {
     ast->identExpr->accept(this);
     auto* symbol = ast->identExpr->symbol;
 
@@ -192,9 +206,10 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) {
     }
 
     ast->type = type->retType();
+    return {};
 }
 
-void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
+std::any SemanticAnalyzer::visit(AstLiteralExpr* ast) {
     switch (ast->token->kind()) {
     case TokenKind::StringLiteral:
         ast->type = TypeZString::get();
@@ -211,6 +226,7 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) {
     default:
         error("Unsupported literal type");
     }
+    return {};
 }
 
 Symbol* SemanticAnalyzer::createNewSymbol(Token* token, SymbolTable* table) {
