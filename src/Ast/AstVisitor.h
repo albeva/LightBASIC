@@ -19,4 +19,8 @@ public:
 #undef VIRTUAL_VISIT
 };
 
+#define AST_DECLARE_VISIT_METHOD(KIND) std::any visit(Ast##KIND* ast) final;
+#define AST_DECLARE_ALL_VISIT_METHODS() \
+    AST_CONTENT_NODES(AST_DECLARE_VISIT_METHOD)
+
 } // namespace lbc

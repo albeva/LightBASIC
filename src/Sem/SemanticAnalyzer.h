@@ -16,9 +16,7 @@ class SemanticAnalyzer final : public AstVisitor {
 public:
     explicit SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId);
 
-#define IMPL_VISITOR(NODE, ...) virtual std::any visit(Ast##NODE* ast);
-    AST_CONTENT_NODES(IMPL_VISITOR)
-#undef IMPL_VISITOR
+    AST_DECLARE_ALL_VISIT_METHODS()
 
 private:
     [[nodiscard]] Symbol* createNewSymbol(Token* identExpr, SymbolTable* table = nullptr);

@@ -26,9 +26,7 @@ public:
      */
     void print() const;
 
-#define IMPL_VISITOR(NODE, ...) virtual std::any visit(Ast##NODE* ast);
-    AST_CONTENT_NODES(IMPL_VISITOR)
-#undef IMPL_VISITOR
+    AST_DECLARE_ALL_VISIT_METHODS()
 
 private:
     using ValueMap = std::unordered_map<string, llvm::Value*>;

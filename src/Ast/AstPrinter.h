@@ -8,9 +8,7 @@ namespace lbc {
 
 class AstPrinter final : public AstVisitor {
 public:
-#define IMPL_VISITOR(NODE, ...) virtual std::any visit(Ast##NODE* ast);
-    AST_CONTENT_NODES(IMPL_VISITOR)
-#undef IMPL_VISITOR
+    AST_DECLARE_ALL_VISIT_METHODS()
 };
 
 } // namespace lbc
