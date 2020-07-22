@@ -6,6 +6,7 @@
 #include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
+#include "Ast/AstPrinter.h"
 #include <llvm/IR/IRPrintingPasses.h>
 
 using namespace lbc;
@@ -41,7 +42,6 @@ void Driver::validate() {
 
 int Driver::execute() {
     validate();
-
 
     compileSources();
 
@@ -256,21 +256,24 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
         error("Failed to parse '"s + path.string() + "'");
     }
 
-    // Analyze
-    SemanticAnalyzer sem(m_llvmContext, m_sourceMgr, ID);
-    ast->accept(&sem);
+    AstPrinter astPrinter{llvm::outs()};
+    ast->accept(&astPrinter);
 
-    // generate IR
-    CodeGen gen(m_llvmContext, m_sourceMgr, m_triple, ID);
-    ast->accept(&gen);
-
-    // done
-    if (!gen.validate()) {
-        error("Failed to compile '"s + path.string() + "'");
-    }
-
-    // Happy Days
-    m_modules.emplace_back(gen.getModule());
+//    // Analyze
+//    SemanticAnalyzer sem(m_llvmContext, m_sourceMgr, ID);
+//    ast->accept(&sem);
+//
+//    // generate IR
+//    CodeGen gen(m_llvmContext, m_sourceMgr, m_triple, ID);
+//    ast->accept(&gen);
+//
+//    // done
+//    if (!gen.validate()) {
+//        error("Failed to compile '"s + path.string() + "'");
+//    }
+//
+//    // Happy Days
+//    m_modules.emplace_back(gen.getModule());
 }
 
 //// Optimize
