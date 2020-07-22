@@ -16,8 +16,8 @@ add_executable(
     Ast/AstVisitor.cpp
     Ast/AstVisitor.h
     Ast/Ast.def.h
-    Ast/AstPrinter.cpp
-    Ast/AstPrinter.h
+    Ast/CodePrinter.cpp
+    Ast/CodePrinter.h
     Gen/CodeGen.cpp
     Gen/CodeGen.h
     Symbol/SymbolTable.cpp

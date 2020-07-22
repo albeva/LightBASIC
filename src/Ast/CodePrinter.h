@@ -6,7 +6,7 @@
 
 namespace lbc {
 
-class AstPrinter final : public AstVisitor {
+class CodePrinter final : public AstVisitor {
 public:
     AST_DECLARE_ALL_VISIT_METHODS()
 };
