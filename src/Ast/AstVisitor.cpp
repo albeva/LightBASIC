@@ -4,4 +4,4 @@
 #include "AstVisitor.h"
 using namespace lbc;
 
-AstVisitor::~AstVisitor() = default;
+//AstVisitor::~AstVisitor() = default;

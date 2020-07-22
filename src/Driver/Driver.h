@@ -27,7 +27,7 @@ public:
     void setCompilationTarget(CompilationTarget target) { m_compilationTarget = target; }
 
     /**
-     * Type of output. Native asm/obj or
+     * TypeFirst of output. Native asm/obj or
      * LLVM IR/ButCode
      */
     enum class OutputType {

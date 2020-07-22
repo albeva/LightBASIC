@@ -5,6 +5,7 @@
 
 // STL
 #include <algorithm>
+#include <any>
 #include <array>
 #include <cassert>
 #include <filesystem>
@@ -18,7 +19,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <any>
 
 using std::make_unique;
 using std::string;

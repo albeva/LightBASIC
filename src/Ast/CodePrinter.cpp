@@ -1,175 +1,165 @@
-//
-// Created by Albert on 05/07/2020.
-//
+////
+//// Created by Albert on 05/07/2020.
+////
 #include "CodePrinter.h"
 #include "Ast.h"
 #include "Lexer/Token.h"
 using namespace lbc;
 
-std::any CodePrinter::visit(AstProgram* ast) {
-    ast->stmtList->accept(this);
-    return {};
+void CodePrinter::visitProgram(AstProgram* ast) {
+    visitStmtList(ast->stmtList.get());
 }
 
 // Statements
 
-std::any CodePrinter::visit(AstStmtList* ast) {
+void CodePrinter::visitStmtList(AstStmtList* ast) {
     for (const auto& stmt : ast->stmts) {
-        stmt->accept(this);
-        std::cout << '\n';
+        visitStmt(stmt.get());
+        m_os << '\n';
     }
-    return {};
 }
 
-std::any CodePrinter::visit(AstAssignStmt* ast) {
-    ast->identExpr->accept(this);
-    std::cout << " = ";
-    ast->expr->accept(this);
-    return {};
+void CodePrinter::visitAssignStmt(AstAssignStmt* ast) {
+    visitIdentExpr(ast->identExpr.get());
+    m_os << " = ";
+    visitExpr(ast->expr.get());
 }
 
-std::any CodePrinter::visit(AstExprStmt* ast) {
-    ast->expr->accept(this);
-    return {};
+void CodePrinter::visitExprStmt(AstExprStmt* ast) {
+    visitExpr(ast->expr.get());
 }
 
 // Attributes
 
-std::any CodePrinter::visit(AstAttributeList* ast) {
-    std::cout << '[';
+void CodePrinter::visitAttributeList(AstAttributeList* ast) {
+    m_os << '[';
     bool isFirst = true;
     for (const auto& attr : ast->attribs) {
         if (isFirst) {
             isFirst = false;
         } else {
-            std::cout << ", ";
+            m_os << ", ";
         }
-        attr->accept(this);
+        visitAttribute(attr.get());
     }
-    std::cout << "]";
-    return {};
+    m_os << "]";
 }
 
-std::any CodePrinter::visit(AstAttribute* ast) {
-    ast->identExpr->accept(this);
+void CodePrinter::visitAttribute(AstAttribute* ast) {
+    visitIdentExpr(ast->identExpr.get());
     if (ast->argExprs.size() == 1) {
-        std::cout << " = ";
-        ast->argExprs[0]->accept(this);
+        m_os << " = ";
+        visitLiteralExpr(ast->argExprs[0].get());
     } else if (ast->argExprs.size() > 1) {
         bool isFirst = true;
-        std::cout << "(";
+        m_os << "(";
         for (const auto& arg : ast->argExprs) {
             if (isFirst) {
                 isFirst = false;
             } else {
-                std::cout << ", ";
+                m_os << ", ";
             }
-            arg->accept(this);
+            visitLiteralExpr(arg.get());
         }
-        std::cout << ")";
+        m_os << ")";
     }
-    return {};
 }
 
-std::any CodePrinter::visit(AstTypeExpr* ast) {
-    std::cout << ast->token->lexeme();
-    return {};
+void CodePrinter::visitTypeExpr(AstTypeExpr* ast) {
+    m_os << view_to_stringRef(ast->token->lexeme());
 }
 
 // Declarations
 
-std::any CodePrinter::visit(AstVarDecl* ast) {
-    if (ast->attribs) {
-        ast->attribs->accept(this);
-        std::cout << " _" << '\n';
+void CodePrinter::visitVarDecl(AstVarDecl* ast) {
+    if (ast->attributes) {
+        visitAttributeList(ast->attributes.get());
+        m_os << " _" << '\n';
     }
 
-    std::cout << "VAR ";
-    std::cout << ast->token->lexeme();
+    m_os << "VAR ";
+    m_os << view_to_stringRef(ast->token->lexeme());
 
     if (ast->typeExpr) {
-        std::cout << " AS ";
-        ast->typeExpr->accept(this);
+        m_os << " AS ";
+        visitTypeExpr(ast->typeExpr.get());
     }
 
     if (ast->expr) {
-        std::cout << " = ";
-        ast->expr->accept(this);
+        m_os << " = ";
+        visitExpr(ast->expr.get());
     }
-    return {};
 }
 
-std::any CodePrinter::visit(AstFuncDecl* ast) {
-    if (ast->attribs) {
-        ast->attribs->accept(this);
-        std::cout << " _" << '\n';
+void CodePrinter::visitFuncDecl(AstFuncDecl* ast) {
+    if (ast->attributes) {
+        visitAttributeList(ast->attributes.get());
+        m_os << " _" << '\n';
     }
 
     if (ast->retTypeExpr) {
-        std::cout << "FUNCTION ";
+        m_os << "FUNCTION ";
     } else {
-        std::cout << "SUB ";
+        m_os << "SUB ";
     }
-    std::cout << ast->token->lexeme();
+    m_os << view_to_stringRef(ast->token->lexeme());
 
     if (!ast->paramDecls.empty()) {
-        std::cout << "(";
+        m_os << "(";
         bool isFirst = true;
         for (const auto& param : ast->paramDecls) {
             if (isFirst) {
                 isFirst = false;
             } else {
-                std::cout << ", ";
+                m_os << ", ";
             }
-            param->accept(this);
+            visitFuncParamDecl(param.get());
         }
-        std::cout << ")";
+        m_os << ")";
     }
 
     if (ast->retTypeExpr) {
-        std::cout << " AS ";
-        ast->retTypeExpr->accept(this);
+        m_os << " AS ";
+        visitTypeExpr(ast->retTypeExpr.get());
     }
-
-    return {};
 }
 
-std::any CodePrinter::visit(AstFuncParamDecl* ast) {
-    std::cout << ast->token->lexeme();
-    std::cout << " AS ";
-    ast->typeExpr->accept(this);
-    return {};
+void CodePrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
+    m_os << view_to_stringRef(ast->token->lexeme());
+    m_os << " AS ";
+    visitTypeExpr(ast->typeExpr.get());
 }
 
 // Expressions
 
-std::any CodePrinter::visit(AstIdentExpr* ast) {
-    std::cout << ast->token->lexeme();
-    return {};
+void CodePrinter::visitIdentExpr(AstIdentExpr* ast) {
+    m_os << view_to_stringRef(ast->token->lexeme());
 }
 
-std::any CodePrinter::visit(AstCallExpr* ast) {
-    ast->identExpr->accept(this);
-    std::cout << "(";
+void CodePrinter::visitCallExpr(AstCallExpr* ast) {
+    visitIdentExpr(ast->identExpr.get());
+    m_os << "(";
     bool isFirst = true;
     for (const auto& arg : ast->argExprs) {
         if (isFirst) {
             isFirst = false;
         } else {
-            std::cout << ", ";
+            m_os << ", ";
         }
 
-        arg->accept(this);
+        visitExpr(arg.get());
     }
-    std::cout << ")";
-    return {};
+    m_os << ")";
 }
 
-std::any CodePrinter::visit(AstLiteralExpr* ast) {
+void CodePrinter::visitLiteralExpr(AstLiteralExpr* ast) {
     if (ast->token->kind() == TokenKind::StringLiteral) {
-        std::cout << '"' << ast->token->lexeme() << '"';
+        m_os << '"' << view_to_stringRef(ast->token->lexeme()) << '"';
     } else {
-        std::cout << ast->token->lexeme();
+        m_os << view_to_stringRef(ast->token->lexeme());
     }
-    return {};
+}
+
+string CodePrinter::indent() const {
+    return string(m_indent * SPACES, ' ');
 }

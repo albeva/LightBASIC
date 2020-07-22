@@ -7,7 +7,6 @@
 
 namespace lbc {
 
-class AstVisitor;
 class Token;
 class Symbol;
 class SymbolTable;
@@ -20,17 +19,22 @@ AST_FORWARD_DECLARE()
 // This works with LLVM rtti system
 enum class AstKind {
 #define KIND_ENUM(id, ...) id,
-    Stmt,
+    StmtFirst,
         AST_STMT_NODES(KIND_ENUM)
-        Decl,
+        DeclFirst,
             AST_DECL_NODES(KIND_ENUM)
         DeclLast,
     StmtLast,
 
-    AST_ATTRIB_NODES(KIND_ENUM)
-    AST_TYPE_NODES(KIND_ENUM)
+    AttrFirst,
+        AST_ATTRIB_NODES(KIND_ENUM)
+    AttrLast,
 
-    Expr,
+    TypeFirst,
+        AST_TYPE_NODES(KIND_ENUM)
+    TypeLast,
+
+    ExprFirst,
         AST_EXPR_NODES(KIND_ENUM)
     ExprLast
 #undef KIND_ENUM
@@ -38,20 +42,24 @@ enum class AstKind {
 
 // clang-format on
 
-// Base class for all ast nodes
+/**
+ * Root class for all AST nodes. This is an abstract class
+ * and should never be used as type for ast node directly
+ */
 class AstRoot {
     NON_COPYABLE(AstRoot)
 public:
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
     virtual ~AstRoot();
     [[nodiscard]] AstKind kind() const { return m_kind; }
-    virtual std::any accept(AstVisitor* visitor) = 0;
-
 private:
     const AstKind m_kind;
 };
 
-// Base class for all statements
+/**
+ * Base class for all statement nodes
+ * Declarations also fall under statement!
+ */
 class AstStmt : public AstRoot {
     NON_COPYABLE(AstStmt)
 public:
@@ -59,11 +67,13 @@ public:
     ~AstStmt() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() >= AstKind::Stmt && ast->kind() < AstKind::StmtLast;
+        return ast->kind() > AstKind::StmtFirst && ast->kind() < AstKind::StmtLast;
     }
 };
 
-// Base class for all expressions
+/**
+ * Base class for all expression nodes
+ */
 class AstExpr : public AstRoot {
     NON_COPYABLE(AstExpr)
 public:
@@ -71,13 +81,44 @@ public:
     ~AstExpr() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() >= AstKind::Expr && ast->kind() < AstKind::ExprLast;
+        return ast->kind() > AstKind::ExprFirst && ast->kind() < AstKind::ExprLast;
     }
 
     const TypeRoot* type = nullptr;
     llvm::Value* llvmValue = nullptr;
 };
 
+/**
+ * Base class for attribute nodes.
+ */
+class AstAttr : public AstRoot {
+    NON_COPYABLE(AstAttr)
+public:
+    using AstRoot::AstRoot;
+    ~AstAttr() override;
+
+    static bool classof(const AstRoot* ast) {
+        return ast->kind() > AstKind::AttrFirst && ast->kind() < AstKind::AttrLast;
+    }
+};
+
+/**
+ * Base class for type expressions
+ */
+class AstType : public AstRoot {
+    NON_COPYABLE(AstType)
+public:
+    using AstRoot::AstRoot;
+    ~AstType() override;
+
+    static bool classof(const AstRoot* ast) {
+        return ast->kind() > AstKind::TypeFirst && ast->kind() < AstKind::TypeLast;
+    }
+};
+
+/**
+ * Base class for declaration nodes
+ */
 class AstDecl : public AstStmt {
     NON_COPYABLE(AstDecl)
 public:
@@ -85,26 +126,25 @@ public:
     ~AstDecl() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() >= AstKind::Decl && ast->kind() < AstKind::DeclLast;
+        return ast->kind() > AstKind::DeclFirst && ast->kind() < AstKind::DeclLast;
     }
 
-    unique_ptr<AstAttributeList> attribs;
+    unique_ptr<AstAttributeList> attributes;
     Symbol* symbol = nullptr;
 };
 
-#define DECLARE_AST(KIND, BASE)                     \
-    class Ast##KIND final : public Ast##BASE {      \
-        NON_COPYABLE(Ast##KIND)                     \
-    public:                                         \
-        using Base = Ast##BASE;                     \
-        Ast##KIND();                                \
-        ~Ast##KIND();                               \
-        std::any accept(AstVisitor* visitor) final; \
-        static bool classof(const AstRoot* ast) {   \
-            return ast->kind() == AstKind::KIND;    \
-        }                                           \
-        static unique_ptr<Ast##KIND> create() {     \
-            return make_unique<Ast##KIND>();        \
+#define DECLARE_AST(KIND, BASE)                   \
+    class Ast##KIND final : public Ast##BASE {    \
+        NON_COPYABLE(Ast##KIND)                   \
+    public:                                       \
+        using Base = Ast##BASE;                   \
+        Ast##KIND();                              \
+        ~Ast##KIND();                             \
+        static bool classof(const AstRoot* ast) { \
+            return ast->kind() == AstKind::KIND;  \
+        }                                         \
+        static unique_ptr<Ast##KIND> create() {   \
+            return make_unique<Ast##KIND>();      \
         }
 
 #define DECLARE_END \
@@ -136,12 +176,12 @@ DECLARE_END
 //----------------------------------------
 // Attributes
 //----------------------------------------
-DECLARE_AST(AttributeList, Root)
+DECLARE_AST(AttributeList, Attr)
     [[nodiscard]] const Token* getStringLiteral(const string_view& key) const;
     std::vector<unique_ptr<AstAttribute>> attribs;
 DECLARE_END
 
-DECLARE_AST(Attribute, Root)
+DECLARE_AST(Attribute, Attr)
     unique_ptr<AstIdentExpr> identExpr;
     std::vector<unique_ptr<AstLiteralExpr>> argExprs;
 DECLARE_END
@@ -177,7 +217,7 @@ DECLARE_END
 //----------------------------------------
 // Types
 //----------------------------------------
-DECLARE_AST(TypeExpr, Root)
+DECLARE_AST(TypeExpr, Type)
     unique_ptr<Token> token;
     const TypeRoot* type = nullptr;
 DECLARE_END

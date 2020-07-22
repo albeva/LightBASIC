@@ -9,7 +9,7 @@
 #define TOKEN_GENERAL(_) \
     _( Invalid,         "Invalid"     ) \
     _( EndOfFile,       "End-Of-File" ) \
-    _( EndOfStmt,       "End-Of-Stmt" ) \
+    _( EndOfStmt,       "End-Of-StmtFirst" ) \
     _( Identifier,      "Identifier"  )
 
 #define TOKEN_LITERALS(_) \

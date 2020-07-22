@@ -107,7 +107,7 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
 //----------------------------------------
 
 /**
- * Decl = [ '[' attributeList '] ]
+ * DeclFirst = [ '[' attributeList '] ]
  *      ( VAR
  *      )
  *      .
@@ -131,7 +131,7 @@ unique_ptr<AstDecl> Parser::declaration() {
         error("Expected declaration");
     }
 
-    decl->attribs = std::move(attribs);
+    decl->attributes = std::move(attribs);
     return decl;
 }
 

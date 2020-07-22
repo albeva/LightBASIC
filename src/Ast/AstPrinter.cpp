@@ -6,133 +6,118 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-AstPrinter::AstPrinter(llvm::raw_ostream& os) : m_os(os) {}
-
-std::any AstPrinter::visit(AstProgram* ast) {
+void AstPrinter::visitProgram(AstProgram* ast) {
     m_os << indent() << "AstProgram" << '\n';
     m_indent++;
-    ast->stmtList->accept(this);
+    visitStmtList(ast->stmtList.get());
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstStmtList* ast) {
+void AstPrinter::visitStmtList(AstStmtList* ast) {
     m_os << indent() << "AstStmtList" << '\n';
     m_indent++;
-    for (const auto& stmt: ast->stmts) {
-        stmt->accept(this);
+    for (const auto& stmt : ast->stmts) {
+        visitStmt(stmt.get());
     }
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstAssignStmt* ast) {
+void AstPrinter::visitAssignStmt(AstAssignStmt* ast) {
     m_os << indent() << "AstAssignStmt" << '\n';
     m_indent++;
-    ast->identExpr->accept(this);
-    ast->expr->accept(this);
+    visitIdentExpr(ast->identExpr.get());
+    visitExpr(ast->expr.get());
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstExprStmt* ast) {
+void AstPrinter::visitExprStmt(AstExprStmt* ast) {
     m_os << indent() << "AstExprStmt" << '\n';
     m_indent++;
-    ast->expr->accept(this);
+    visitExpr(ast->expr.get());
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstVarDecl* ast) {
+void AstPrinter::visitVarDecl(AstVarDecl* ast) {
     m_os << indent() << "AstVarDecl \"" << view_to_stringRef(ast->token->lexeme()) << '\"' << '\n';
     m_indent++;
-    if (ast->attribs) {
-        ast->attribs->accept(this);
+    if (ast->attributes) {
+        visitAttributeList(ast->attributes.get());
     }
     if (ast->typeExpr) {
-        ast->typeExpr->accept(this);
+        visitTypeExpr(ast->typeExpr.get());
     }
     if (ast->expr) {
-        ast->expr->accept(this);
+        visitExpr(ast->expr.get());
     }
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstFuncDecl* ast) {
+void AstPrinter::visitFuncDecl(AstFuncDecl* ast) {
     m_os << indent() << "AstFuncDecl \"" << view_to_stringRef(ast->token->lexeme()) << '\"' << '\n';
     m_indent++;
-    if (ast->attribs) {
-        ast->attribs->accept(this);
+    if (ast->attributes) {
+        visitAttributeList(ast->attributes.get());
     }
 
-    for (const auto& param: ast->paramDecls) {
-        param->accept(this);
+    for (const auto& param : ast->paramDecls) {
+        visitFuncParamDecl(param.get());
     }
 
     if (ast->retTypeExpr) {
-        ast->retTypeExpr->accept(this);
+        visitTypeExpr(ast->retTypeExpr.get());
     }
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstFuncParamDecl* ast) {
+void AstPrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
     m_os << indent() << "AstFuncParamDecl \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
     m_indent++;
-    if (ast->attribs) {
-        ast->attribs->accept(this);
+    if (ast->attributes) {
+        visitAttributeList(ast->attributes.get());
     }
-    ast->typeExpr->accept(this);
+    visitTypeExpr(ast->typeExpr.get());
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstAttributeList* ast) {
+void AstPrinter::visitAttributeList(AstAttributeList* ast) {
     m_os << indent() << "AstAttributeList" << '\n';
     m_indent++;
-    for (const auto& attr: ast->attribs) {
-        attr->accept(this);
+    for (const auto& attr : ast->attribs) {
+        visitAttribute(attr.get());
     }
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstAttribute* ast) {
+void AstPrinter::visitAttribute(AstAttribute* ast) {
     m_os << indent() << "AstAttribute" << '\n';
     m_indent++;
-    ast->identExpr->accept(this);
-    for (const auto& arg: ast->argExprs) {
-        arg->accept(this);
+    visitIdentExpr(ast->identExpr.get());
+    for (const auto& arg : ast->argExprs) {
+        visitLiteralExpr(arg.get());
     }
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstTypeExpr* ast) {
+void AstPrinter::visitTypeExpr(AstTypeExpr* ast) {
     m_os << indent() << "AstTypeExpr \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
-    return {};
 }
 
-std::any AstPrinter::visit(AstIdentExpr* ast) {
+void AstPrinter::visitIdentExpr(AstIdentExpr* ast) {
     m_os << indent() << "AstIdentExpr \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
-    return {};
 }
 
-std::any AstPrinter::visit(AstCallExpr* ast) {
+void AstPrinter::visitCallExpr(AstCallExpr* ast) {
     m_os << indent() << "AstCallExpr" << '\n';
     m_indent++;
-    ast->identExpr->accept(this);
-    for (const auto& arg: ast->argExprs) {
-        arg->accept(this);
+    visitIdentExpr(ast->identExpr.get());
+    for (const auto& arg : ast->argExprs) {
+        visitExpr(arg.get());
     }
     m_indent--;
-    return {};
 }
 
-std::any AstPrinter::visit(AstLiteralExpr* ast) {
+void AstPrinter::visitLiteralExpr(AstLiteralExpr* ast) {
     m_os << indent() << "AstLiteralExpr \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
-    return {};
 }
 
 string AstPrinter::indent() const {
