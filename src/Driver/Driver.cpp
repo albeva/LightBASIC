@@ -257,8 +257,8 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
         error("Failed to parse '"s + path.string() + "'");
     }
 
-//        AstPrinter astPrinter{llvm::outs()};
-//        astPrinter.visitStmt(ast.get());
+    //        AstPrinter astPrinter{llvm::outs()};
+    //        astPrinter.visitStmt(ast.get());
     CodePrinter codePrinter{ llvm::outs() };
     codePrinter.visitStmt(ast.get());
 

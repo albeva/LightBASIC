@@ -35,11 +35,12 @@ public:
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
     virtual ~AstRoot();
     [[nodiscard]] AstKind kind() const { return m_kind; }
+
 private:
     const AstKind m_kind;
 };
 
-#define CHECK_NODE_IN_RANGE(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
+#define IS_AST_CLASSOF(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
 
 /**
  * Base class for all statement nodes
@@ -53,7 +54,7 @@ public:
     ~AstStmt() override;
 
     static bool classof(const AstRoot* ast) {
-        return AST_STMT_RANGE(CHECK_NODE_IN_RANGE)
+        return AST_STMT_RANGE(IS_AST_CLASSOF)
     }
 };
 
@@ -66,8 +67,8 @@ public:
     using AstStmt::AstStmt;
     ~AstDecl() override;
 
-    static bool classof(const AstRoot* ast) {
-        return AST_DECL_RANGE(CHECK_NODE_IN_RANGE)
+    static bool classof(const AstRoot* ast){
+        return AST_DECL_RANGE(IS_AST_CLASSOF)
     }
 
     unique_ptr<AstAttributeList> attributes;
@@ -84,7 +85,7 @@ public:
     ~AstExpr() override;
 
     static bool classof(const AstRoot* ast) {
-        return AST_EXPR_RANGE(CHECK_NODE_IN_RANGE)
+        return AST_EXPR_RANGE(IS_AST_CLASSOF)
     }
 
     const TypeRoot* type = nullptr;
@@ -101,7 +102,7 @@ public:
     ~AstAttr() override;
 
     static bool classof(const AstRoot* ast) {
-        return AST_ATTR_RANGE(CHECK_NODE_IN_RANGE)
+        return AST_ATTR_RANGE(IS_AST_CLASSOF)
     }
 };
 
@@ -115,13 +116,13 @@ public:
     ~AstType() override;
 
     static bool classof(const AstRoot* ast) {
-        return AST_TYPE_RANGE(CHECK_NODE_IN_RANGE)
+        return AST_TYPE_RANGE(IS_AST_CLASSOF)
     }
 
     const TypeRoot* type = nullptr;
 };
 
-#undef CHECK_NODE_IN_RANGE
+#undef IS_AST_CLASSOF
 
 #define DECLARE_AST(KIND, BASE)                   \
     class Ast##KIND final : public Ast##BASE {    \
