@@ -11,35 +11,58 @@
     _( Expr ) \
     _( Decl )
 
-// statements
+/**
+ * Statements
+ */
 #define AST_STMT_NODES(_) \
     _( Program    ) \
     _( StmtList   ) \
     _( AssignStmt ) \
     _( ExprStmt   )
 
-// ast nodes for attributes
-#define AST_ATTRIB_NODES(_) \
-    _( AttributeList ) \
-    _( Attribute     )
+// include declarations
+#define AST_STMT_RANGE(_) _(Program, FuncParamDecl)
 
-// declarations
+/**
+ * Declarations
+ */
 #define AST_DECL_NODES(_) \
     _( VarDecl       ) \
     _( FuncDecl      ) \
     _( FuncParamDecl )
 
-// Types
+#define AST_DECL_RANGE(_) _(VarDecl, FuncParamDecl)
+
+/**
+ * Attributes
+ */
+#define AST_ATTRIB_NODES(_) \
+    _( AttributeList ) \
+    _( Attribute     )
+
+#define AST_ATTR_RANGE(_) _(AttributeList, Attribute)
+
+/**
+ * Types
+ */
 #define AST_TYPE_NODES(_) \
     _( TypeExpr )
 
-// all expressions
+#define AST_TYPE_RANGE(_) _(TypeExpr, TypeExpr)
+
+/**
+ * Expressions
+ */
 #define AST_EXPR_NODES(_) \
     _( IdentExpr   ) \
     _( CallExpr    ) \
     _( LiteralExpr )
 
-// all nodes
+#define AST_EXPR_RANGE(_) _(IdentExpr, LiteralExpr)
+
+/**
+ * Combined
+ */
 #define AST_CONTENT_NODES(_) \
     AST_STMT_NODES(_)        \
     AST_DECL_NODES(_)        \
@@ -47,8 +70,10 @@
     AST_TYPE_NODES(_)        \
     AST_EXPR_NODES(_)
 
-// forward declare all AST nodes
-#define AST_DECLARE_CLASS_IMPL(C) class Ast##C;
+/**
+ * Handy macro to forward declare all ast classes
+ */
+#define AST_FORWARD_DECLARE_IMPL(C) class Ast##C;
 #define AST_FORWARD_DECLARE()           \
-    AST_ROOT_NODES(AST_DECLARE_CLASS_IMPL) \
-    AST_CONTENT_NODES(AST_DECLARE_CLASS_IMPL)
+    AST_ROOT_NODES(AST_FORWARD_DECLARE_IMPL) \
+    AST_CONTENT_NODES(AST_FORWARD_DECLARE_IMPL)

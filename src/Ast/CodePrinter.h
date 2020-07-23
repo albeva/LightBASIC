@@ -17,7 +17,7 @@ private:
     [[nodiscard]] string indent() const;
     size_t m_indent = 0;
     llvm::raw_ostream& m_os;
-    static constexpr auto SPACES = 2;
+    static constexpr auto SPACES = 4;
 };
 
 } // namespace lbc

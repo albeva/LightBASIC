@@ -15,28 +15,11 @@ AST_FORWARD_DECLARE()
 
 // clang-format off
 
-// Enumerate all possible ast nodes
+// Enumerate ast content nodes
 // This works with LLVM rtti system
 enum class AstKind {
 #define KIND_ENUM(id, ...) id,
-    StmtFirst,
-        AST_STMT_NODES(KIND_ENUM)
-        DeclFirst,
-            AST_DECL_NODES(KIND_ENUM)
-        DeclLast,
-    StmtLast,
-
-    AttrFirst,
-        AST_ATTRIB_NODES(KIND_ENUM)
-    AttrLast,
-
-    TypeFirst,
-        AST_TYPE_NODES(KIND_ENUM)
-    TypeLast,
-
-    ExprFirst,
-        AST_EXPR_NODES(KIND_ENUM)
-    ExprLast
+    AST_CONTENT_NODES(KIND_ENUM)
 #undef KIND_ENUM
 };
 
@@ -56,9 +39,12 @@ private:
     const AstKind m_kind;
 };
 
+#define CHECK_NODE_IN_RANGE(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
+
 /**
  * Base class for all statement nodes
- * Declarations also fall under statement!
+ * Statements also include:
+ * - declarations
  */
 class AstStmt : public AstRoot {
     NON_COPYABLE(AstStmt)
@@ -67,8 +53,25 @@ public:
     ~AstStmt() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() > AstKind::StmtFirst && ast->kind() < AstKind::StmtLast;
+        return AST_STMT_RANGE(CHECK_NODE_IN_RANGE)
     }
+};
+
+/**
+ * Base class for declaration nodes
+ */
+class AstDecl : public AstStmt {
+    NON_COPYABLE(AstDecl)
+public:
+    using AstStmt::AstStmt;
+    ~AstDecl() override;
+
+    static bool classof(const AstRoot* ast) {
+        return AST_DECL_RANGE(CHECK_NODE_IN_RANGE)
+    }
+
+    unique_ptr<AstAttributeList> attributes;
+    Symbol* symbol = nullptr;
 };
 
 /**
@@ -81,7 +84,7 @@ public:
     ~AstExpr() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() > AstKind::ExprFirst && ast->kind() < AstKind::ExprLast;
+        return AST_EXPR_RANGE(CHECK_NODE_IN_RANGE)
     }
 
     const TypeRoot* type = nullptr;
@@ -98,7 +101,7 @@ public:
     ~AstAttr() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() > AstKind::AttrFirst && ast->kind() < AstKind::AttrLast;
+        return AST_ATTR_RANGE(CHECK_NODE_IN_RANGE)
     }
 };
 
@@ -112,26 +115,13 @@ public:
     ~AstType() override;
 
     static bool classof(const AstRoot* ast) {
-        return ast->kind() > AstKind::TypeFirst && ast->kind() < AstKind::TypeLast;
-    }
-};
-
-/**
- * Base class for declaration nodes
- */
-class AstDecl : public AstStmt {
-    NON_COPYABLE(AstDecl)
-public:
-    using AstStmt::AstStmt;
-    ~AstDecl() override;
-
-    static bool classof(const AstRoot* ast) {
-        return ast->kind() > AstKind::DeclFirst && ast->kind() < AstKind::DeclLast;
+        return AST_TYPE_RANGE(CHECK_NODE_IN_RANGE)
     }
 
-    unique_ptr<AstAttributeList> attributes;
-    Symbol* symbol = nullptr;
+    const TypeRoot* type = nullptr;
 };
+
+#undef CHECK_NODE_IN_RANGE
 
 #define DECLARE_AST(KIND, BASE)                   \
     class Ast##KIND final : public Ast##BASE {    \
@@ -219,7 +209,6 @@ DECLARE_END
 //----------------------------------------
 DECLARE_AST(TypeExpr, Type)
     unique_ptr<Token> token;
-    const TypeRoot* type = nullptr;
 DECLARE_END
 
 //----------------------------------------
