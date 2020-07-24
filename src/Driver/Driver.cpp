@@ -36,15 +36,115 @@ void Driver::validate() {
         error("cannot specify -o when generating multiple output files.");
     }
 
-    if (m_outputType == OutputType::LLVM && isTargetNativeOnly()) {
+    if (m_outputType == OutputType::LLVM && isTargetNative()) {
         error("flag -emit-llvm must be combined with -S or -c");
+    }
+
+    // .s > `.o`
+    if (!getInputFiles(FileType::Assembly).empty()) {
+        if (m_outputType == OutputType::LLVM) {
+            error("Cannot emit llvm from native assembly");
+        }
+        if (m_compilationTarget == CompilationTarget::Assembly) {
+            error("Invalid output: assembly to assembly");
+        }
+    }
+
+    // .o > only native linkable target
+    if (!getInputFiles(FileType::Object).empty()) {
+        if (m_outputType == OutputType::LLVM) {
+            error("Cannot emit llvm from native objects");
+        }
+        if (!isTargetLinkable()) {
+            error(".o files can only be added to a linkable target");
+        }
+    }
+
+    // .ll > everything
+    if (!getInputFiles(FileType::LLVMIr).empty()) {
+        if (m_outputType == OutputType::LLVM && m_compilationTarget == CompilationTarget::Assembly) {
+            error("Invalid output: llvm ir to llvm ir");
+        }
+    }
+
+    // .bc > everything
+    if (!getInputFiles(FileType::BitCode).empty()) {
+        if (m_outputType == OutputType::LLVM && m_compilationTarget == CompilationTarget::Object) {
+            error("Invalid output: bitcode to bitcode");
+        }
     }
 }
 
 int Driver::execute() {
     validate();
-
     compileSources();
+
+    if (outputLLVMIr()) {
+        emitLLVMIr();
+    } else {
+        emitBitCode(false);
+    }
+
+//    switch (m_outputType) {
+//    case OutputType::Native:
+//        switch (m_compilationTarget) {
+//        case CompilationTarget::Executable:
+//            // compile sources
+//            // generate bitcode files from:
+//            // - sources, .ll
+//            // optimize bitcode files
+//            // generate object files from:
+//            // - bitcode, .s
+//            // final link output
+//            // output target
+//            // remove generated temp files
+//            break;
+//        case CompilationTarget::Object:
+//            // compile sources
+//            // generate bitcode files from:
+//            // - sources, .ll
+//            // optimize bitcode files
+//            // generate object files from:
+//            // - bitcode, .s
+//            // output target
+//            // remove generated temp files
+//            break;
+//        case CompilationTarget::Assembly:
+//            // compile sources
+//            // generate bitcode files from:
+//            // - sources, .ll
+//            // optimize bitcode files
+//            // generate asm files from:
+//            // - bitcode
+//            // output target
+//            // remove generated temp files
+//            break;
+//        }
+//        break;
+//    case OutputType::LLVM:
+//        switch (m_compilationTarget) {
+//        case CompilationTarget::Object:
+//            // compile sources
+//            // generate bitcode files from:
+//            // - sources, .ll
+//            // optimize bitcode files
+//            // output target
+//            // remove generated temp files
+//            break;
+//        case CompilationTarget::Assembly:
+//            // compile sources
+//            // generate llvm-ir files from:
+//            // - sources, .bc
+//            // optimize llvm-ir files
+//            // output target
+//            // remove generated temp files
+//            break;
+//        default:
+//            llvm_unreachable("Invalid target");
+//        }
+//        break;
+//    }
+
 
     //    switch (m_result) {
     //    case CompileResult::Default:
@@ -72,7 +172,7 @@ int Driver::execute() {
     return EXIT_SUCCESS;
 }
 
-//void Driver::emitLLVMIr() {
+void Driver::emitLLVMIr() {
 //    if (m_optimizationLevel > OptimizationLevel::O0) {
 //        auto bcFiles = emitBitCode(false);
 //        optimize(bcFiles, CompileResult::LLVMIr, true);
@@ -94,10 +194,10 @@ int Driver::execute() {
 //            os.close();
 //        }
 //    }
-//}
-//
-//std::vector<fs::path> Driver::emitBitCode(bool final) {
-//    std::vector<fs::path> result;
+}
+
+std::vector<fs::path> Driver::emitBitCode(bool final) {
+    std::vector<fs::path> result;
 //    result.reserve(m_modules.size());
 //
 //    bool single = m_modules.size() == 1;
@@ -113,10 +213,10 @@ int Driver::execute() {
 //        result.emplace_back(output);
 //    }
 //
-//    return result;
-//}
-//
-//std::vector<fs::path> Driver::emitNative(CompileResult emit, bool final) {
+    return result;
+}
+
+std::vector<fs::path> Driver::emitNative(CompilationTarget emit, bool final) {
 //    string fileType;
 //    string ext;
 //    switch (emit) {
@@ -132,7 +232,7 @@ int Driver::execute() {
 //        llvm_unreachable("Emit Native only emits object and asm");
 //    }
 //
-//    std::vector<fs::path> result{};
+    std::vector<fs::path> result{};
 //    result.reserve(m_modules.size());
 //
 //    auto bcFiles = emitBitCode(false);
@@ -162,10 +262,10 @@ int Driver::execute() {
 //        fs::remove(input);
 //    }
 //
-//    return result;
-//}
-//
-//void Driver::emitExecutable() {
+    return result;
+}
+
+void Driver::emitExecutable() {
 //    auto objects = emitNative(CompileResult::Object, false);
 //    auto output = resolveOutputPath("a", ".out", true, true).string();
 //    auto tool = getToolPath(Tool::Linker).string();
@@ -230,7 +330,7 @@ int Driver::execute() {
 //    for (const auto& path : objects) {
 //        fs::remove(path);
 //    }
-//}
+}
 
 // Compile
 
@@ -257,26 +357,21 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
         error("Failed to parse '"s + path.string() + "'");
     }
 
-    //        AstPrinter astPrinter{llvm::outs()};
-    //        astPrinter.visitStmt(ast.get());
-    CodePrinter codePrinter{ llvm::outs() };
-    codePrinter.visitStmt(ast.get());
+    // Analyze
+    SemanticAnalyzer sem(m_llvmContext, m_sourceMgr, ID);
+    sem.visitStmt(ast.get());
 
-    //    // Analyze
-    //    SemanticAnalyzer sem(m_llvmContext, m_sourceMgr, ID);
-    //    ast->accept(&sem);
-    //
-    //    // generate IR
-    //    CodeGen gen(m_llvmContext, m_sourceMgr, m_triple, ID);
-    //    ast->accept(&gen);
-    //
-    //    // done
-    //    if (!gen.validate()) {
-    //        error("Failed to compile '"s + path.string() + "'");
-    //    }
-    //
-    //    // Happy Days
-    //    m_modules.emplace_back(gen.getModule());
+    // generate IR
+    CodeGen gen(m_llvmContext, m_sourceMgr, m_triple, ID);
+    gen.visitStmt(ast.get());
+
+    // done
+    if (!gen.validate()) {
+        error("Failed to compile '"s + path.string() + "'");
+    }
+
+    // Happy Days
+    m_modules.emplace_back(gen.getModule());
 }
 
 //// Optimize
@@ -436,12 +531,17 @@ void Driver::addInputFile(const fs::path& path) {
     auto ext = path.extension();
     FileType type = FileType::Source;
 
-    if (ext == ".o") {
-        type = FileType::Object;
-    } else if (ext == ".ll") {
-        type = FileType::LLVMIr;
-    } else if (ext == ".bc") {
-        type = FileType::BitCode;
+    constexpr std::array types{
+        FileType::Assembly,
+        FileType::Object,
+        FileType::LLVMIr,
+        FileType::BitCode
+    };
+    for (auto ft: types) {
+        if (getFileExt(ft) == ext) {
+            type = ft;
+            break;
+        }
     }
 
     m_inputFiles.at(static_cast<size_t>(type)).emplace_back(path);
@@ -490,19 +590,4 @@ const char* Driver::getCmdOption(Driver::OptimizationLevel level) {
         return "-O3";
     }
     llvm_unreachable("Unreachable optimization level");
-}
-
-const char* Driver::getFileExt(Driver::FileType type) {
-    switch (type) {
-    case FileType::Source:
-        return ".bas";
-    case FileType::Object:
-        return ".o";
-    case FileType::LLVMIr:
-        return ".ll";
-    case FileType::BitCode:
-        return ".bc";
-    default:
-        llvm_unreachable("Invalid file type");
-    }
 }

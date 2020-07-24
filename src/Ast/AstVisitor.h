@@ -172,8 +172,6 @@ class AstVisitor : public AstStmtVisitor<ImplClass, StmtRetTy>
 , public AstAttrVisitor<ImplClass, AttrRetTy>
 , public AstTypeVisitor<ImplClass, TypeRetTy>
 , public AstDeclVisitor<ImplClass, DeclRetTy> {
-public:
-    using ReturnType = RetTy;
 };
 
 #define AST_DECLARE_ALL_ROOT_VISIT_METHODS() \

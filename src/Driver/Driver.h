@@ -57,14 +57,31 @@ public:
     void setDebugBuild(bool debug) { m_isDebug = debug; }
 
     enum class FileType {
-        Source,  // anything, but mostly .bas
-        Object,  // .o
-        LLVMIr,  // .ll
-        BitCode, // .bc
+        Source,   // anything, but mostly .bas
+        Assembly, // .s
+        Object,   // .o
+        LLVMIr,   // .ll
+        BitCode,  // .bc
         count
     };
 
-    [[nodiscard]] static const char* getFileExt(FileType type);
+    [[nodiscard]] static constexpr const char* getFileExt(FileType type) {
+        switch (type) {
+        case FileType::Source:
+            return ".bas";
+        case FileType::Assembly:
+            return ".s";
+        case FileType::Object:
+            return ".o";
+        case FileType::LLVMIr:
+            return ".ll";
+        case FileType::BitCode:
+            return ".bc";
+        default:
+            llvm_unreachable("Invalid file type");
+        }
+    }
+
     void addInputFile(const fs::path& path);
     [[nodiscard]] const std::vector<fs::path>& getInputFiles(FileType type) const;
 
@@ -155,15 +172,18 @@ private:
         return m_compilationTarget == CompilationTarget::Executable;
     }
 
-    [[nodiscard]] bool isTargetNativeOnly() const {
+    [[nodiscard]] bool isTargetNative() const {
         return m_compilationTarget == CompilationTarget::Executable;
     }
 
+    [[nodiscard]] bool outputLLVMIr() const {
+        return m_outputType == OutputType::LLVM && m_compilationTarget == CompilationTarget::Assembly;
+    }
 
-    //    void emitLLVMIr();
-    //    std::vector<fs::path> emitBitCode(bool final);
-    //    std::vector<fs::path> emitNative(CompileResult emit, bool final);
-    //    void emitExecutable();
+    void emitLLVMIr();
+    std::vector<fs::path> emitBitCode(bool final);
+    std::vector<fs::path> emitNative(CompilationTarget emit, bool final);
+    void emitExecutable();
 
     /**
      * Resolve input file path to corresponding output path.
