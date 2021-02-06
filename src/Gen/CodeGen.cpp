@@ -146,7 +146,9 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
         ast->llvmValue = ast->symbol->value();
         return;
     }
-    ast->llvmValue = new llvm::LoadInst(ast->symbol->value(), "", m_block); // NOLINT
+
+    auto *sym = ast->symbol;
+    ast->llvmValue = new llvm::LoadInst(sym->type()->llvmType(m_context), sym->value(), "", m_block);
 }
 
 void CodeGen::visitTypeExpr(AstTypeExpr*  /*ast*/) {

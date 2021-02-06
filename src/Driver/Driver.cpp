@@ -9,11 +9,12 @@
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
 #include <llvm/IR/IRPrintingPasses.h>
+#include <llvm/Support/Host.h>
 
 using namespace lbc;
 
 Driver::Driver()
-: m_triple{ llvm::sys::getDefaultTargetTriple() } {
+    : m_triple{ llvm::sys::getDefaultTargetTriple() } {
 }
 
 Driver::~Driver() = default;

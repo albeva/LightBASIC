@@ -23,7 +23,7 @@ int main(int argc, const char* argv[]) {
 
 void processCmdLine(Driver& driver, const Args& args) {
     if (args.size() < 2) {
-        showError("no input");
+        showError("no input.");
     }
 
     // compiler executable
