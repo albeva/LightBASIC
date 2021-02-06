@@ -11,8 +11,9 @@ using namespace lbc;
 [[noreturn]] static void showVersion();
 [[noreturn]] static void showError(const string& message);
 
-static void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args);
-static void processOption(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index);
+using Args = llvm::ArrayRef<const char*>;
+static void processCmdLine(Driver& driver, const Args& args);
+static void processOption(Driver& driver, const Args& args, size_t& index);
 
 int main(int argc, const char* argv[]) {
     Driver driver;
@@ -20,7 +21,7 @@ int main(int argc, const char* argv[]) {
     return driver.execute();
 }
 
-void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args) {
+void processCmdLine(Driver& driver, const Args& args) {
     if (args.size() < 2) {
         showError("no input");
     }
@@ -44,7 +45,7 @@ void processCmdLine(Driver& driver, const llvm::ArrayRef<const char*>& args) {
     }
 }
 
-static void processOption(Driver& driver, const llvm::ArrayRef<const char*>& args, size_t& index) {
+static void processOption(Driver& driver, const Args& args, size_t& index) {
     const string_view arg{ args[index] };
     if (arg == "-v") {
         driver.setVerbose(true);
@@ -86,7 +87,7 @@ static void processOption(Driver& driver, const llvm::ArrayRef<const char*>& arg
     }
 }
 
-
+[[noreturn]]
 void showHelp() {
     // TODO in new *near* future
     // -toolchain <dir> Use the llvm toolchain at the given directory
@@ -112,6 +113,7 @@ OPTIONS:
     std::exit(EXIT_SUCCESS);
 }
 
+[[noreturn]]
 void showVersion() {
     std::cout << "LightBASIC version " << LBC_VERSION_STRING
               << " (Based on LLVM " << LLVM_VERSION_STRING << ")\n"
@@ -120,6 +122,7 @@ void showVersion() {
     std::exit(EXIT_SUCCESS);
 }
 
+[[noreturn]]
 void showError(const string& message) {
     std::cerr << message
               << " Use --help for more info"

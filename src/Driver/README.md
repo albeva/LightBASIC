@@ -5,10 +5,10 @@ General `lbc` command line format follows simplified g++.
 
 Options:
 
-    `-c`         emit object/bitcode files
-    `-o`         output file name
-    `-S`         emit assembly/llvm-ir
-    `-emit-llvm` emit llvm. Must be combined with `-S` or `-c` flags
+    -c         emit object/bitcode files
+    -o         output file name
+    -S         emit assembly/llvm-ir
+    -emit-llvm emit llvm. Must be combined with `-S` or `-c` flags
 
 1. Input files and options can me mingled: \
     `lbc foo.bas -o foo other.bas`

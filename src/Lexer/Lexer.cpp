@@ -23,9 +23,9 @@ Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
 : m_srcMgr{ srcMgr },
   m_fileID{ fileID },
   m_buffer{ srcMgr.getMemoryBuffer(fileID) },
+  m_input{ m_buffer->getBufferStart() },
+  m_char{ *m_input },
   m_hasStmt{ false } {
-    m_input = m_buffer->getBufferStart();
-    m_char = *m_input;
     handleLineEnd();
 }
 
@@ -202,8 +202,7 @@ unique_ptr<Token> Lexer::invalid(const char* loc) {
 }
 
 void Lexer::skipUntilLineEnd() {
-    while (move() && m_char != '\n')
-        ;
+    while (move() && m_char != '\n') {}
 }
 
 bool Lexer::move() {
