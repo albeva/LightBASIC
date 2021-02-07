@@ -1,9 +1,18 @@
 //
 // Created by Albert on 07/02/2021.
 //
+#include "pch.h"
 #pragma once
 
 namespace lbc {
+
+class ToolTask;
+
+enum class ToolKind {
+    Optimizer, // optimizer
+    Assembler, // assembler
+    Linker,    // linker
+};
 
 /**
  * Abstract access and execution of tools
@@ -16,12 +25,6 @@ class Toolchain final {
 public:
     ~Toolchain() = default;
 
-    enum class Tool {
-        Optimizer, // optimizer
-        Assembler, // assembler
-        Linker,    // linker
-    };
-
     /**
      * Set toolchain base path
      * @param path
@@ -31,7 +34,9 @@ public:
     /**
      * Get path for the given tool
      */
-    [[nodiscard]] fs::path getPath(Tool tool);
+    [[nodiscard]] fs::path getPath(ToolKind tool);
+
+    ToolTask createTask(ToolKind kind);
 };
 
 } // namespace lbc

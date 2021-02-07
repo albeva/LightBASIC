@@ -7,6 +7,7 @@
 #include "Ast/CodePrinter.h"
 #include "Gen/CodeGen.h"
 #include "Toolchain/Toolchain.h"
+#include "Toolchain/ToolTask.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
 #include <llvm/IR/IRPrintingPasses.h>
@@ -78,15 +79,15 @@ void Driver::validate() {
 }
 
 int Driver::execute() {
-    validate();
-    compileSources();
+//    validate();
+//    compileSources();
 
-    if (outputLLVMIr()) {
-        emitLLVMIr();
-    } else {
-        emitBitCode(false);
-    }
-
+//    if (outputLLVMIr()) {
+//        emitLLVMIr();
+//    } else {
+//        emitBitCode(false);
+//    }
+//
 //    switch (m_outputType) {
 //    case OutputType::Native:
 //        switch (m_compilationTarget) {
@@ -242,7 +243,7 @@ std::vector<fs::path> Driver::emitNative(CompilationTarget emit, bool final) {
 //        bcFiles = optimize(bcFiles, CompileResult::BitCode, false);
 //    }
 //
-//    auto tool = getToolPath(Tool::Assembler).string();
+//    auto tool = getToolPath(ToolKind::Assembler).string();
 //    bool single = bcFiles.size() == 1;
 //    for (const auto& path : bcFiles) {
 //        string input{ path.string() };
@@ -270,7 +271,7 @@ std::vector<fs::path> Driver::emitNative(CompilationTarget emit, bool final) {
 void Driver::emitExecutable() {
 //    auto objects = emitNative(CompileResult::Object, false);
 //    auto output = resolveOutputPath("a", ".out", true, true).string();
-//    auto tool = getToolPath(Tool::Linker).string();
+//    auto tool = getToolPath(ToolKind::Linker).string();
 //
 //    std::vector<string> stringCopies;
 //    stringCopies.reserve(objects.size());
@@ -408,7 +409,7 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
 //    }
 //
 //    auto level = getCmdOption(m_optimizationLevel);
-//    auto tool = getToolPath(Tool::Optimizer).string();
+//    auto tool = getToolPath(ToolKind::Optimizer).string();
 //    bool single = files.size() == 1;
 //    for (const auto& path : files) {
 //        string file{ path.string() };

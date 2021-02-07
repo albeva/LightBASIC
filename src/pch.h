@@ -50,8 +50,6 @@ using namespace std::literals::string_literals;
 using llvm::dyn_cast;
 using llvm::isa;
 
-// BOOST
-
 // APP
 #include "Utils/Utils.h"
 #include "Utils/Version.h"

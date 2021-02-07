@@ -35,8 +35,9 @@ add_executable(
     Driver/Driver.h
     Driver/Toolchain/Toolchain.h
     Driver/Toolchain/Toolchain.cpp
-    Utils/Version.h
-)
+    Driver/Toolchain/ToolTask.cpp
+    Driver/Toolchain/ToolTask.h
+    Utils/Version.h)
 
 # PCH header
 target_precompile_headers(project_options INTERFACE pch.h)
