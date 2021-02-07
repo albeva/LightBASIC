@@ -16,9 +16,9 @@ namespace lbc {
 template<typename ImplClass, typename RetTy = void>
 class AstStmtVisitor {
 public:
-    using StmtReturnType = RetTy;
+    using StmtRetTy = RetTy;
 
-    RetTy visitStmt(AstStmt* ast) {
+    StmtRetTy visitStmt(AstStmt* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -33,7 +33,7 @@ public:
     }
 };
 
-#define AST_DECLARE_STMT_VISIT_METHOD(KIND) StmtReturnType visit##KIND(Ast##KIND* ast);
+#define AST_DECLARE_STMT_VISIT_METHOD(KIND) StmtRetTy visit##KIND(Ast##KIND* ast);
 #define AST_DECLARE_ALL_STMT_VISIT_METHODS() \
     AST_STMT_NODES(AST_DECLARE_STMT_VISIT_METHOD)
 
@@ -46,9 +46,9 @@ public:
 template<typename ImplClass, typename RetTy = void>
 class AstExprVisitor {
 public:
-    using ExprReturnType = RetTy;
+    using ExprRetTy = RetTy;
 
-    RetTy visitExpr(AstExpr* ast) {
+    ExprRetTy visitExpr(AstExpr* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -62,7 +62,7 @@ public:
     }
 };
 
-#define AST_DECLARE_EXPR_VISIT_METHOD(KIND) ExprReturnType visit##KIND(Ast##KIND* ast);
+#define AST_DECLARE_EXPR_VISIT_METHOD(KIND) ExprRetTy visit##KIND(Ast##KIND* ast);
 #define AST_DECLARE_ALL_EXPR_VISIT_METHODS() \
     AST_EXPR_NODES(AST_DECLARE_EXPR_VISIT_METHOD)
 
@@ -75,9 +75,9 @@ public:
 template<typename ImplClass, typename RetTy = void>
 class AstAttrVisitor {
 public:
-    using AttrReturnType = RetTy;
+    using AttrRetTy = RetTy;
 
-    RetTy visitAttr(AstAttr* ast) {
+    AttrRetTy visitAttr(AstAttr* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -91,7 +91,7 @@ public:
     }
 };
 
-#define AST_DECLARE_ATTR_VISIT_METHOD(KIND) AttrReturnType visit##KIND(Ast##KIND* ast);
+#define AST_DECLARE_ATTR_VISIT_METHOD(KIND) AttrRetTy visit##KIND(Ast##KIND* ast);
 #define AST_DECLARE_ALL_ATTR_VISIT_METHODS() \
     AST_ATTRIB_NODES(AST_DECLARE_ATTR_VISIT_METHOD)
 
@@ -104,9 +104,9 @@ public:
 template<typename ImplClass, typename RetTy = void>
 class AstTypeVisitor {
 public:
-    using TypeReturnType = RetTy;
+    using TypeRetTy = RetTy;
 
-    RetTy visitType(AstType* ast) {
+    TypeRetTy visitType(AstType* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -120,7 +120,7 @@ public:
     }
 };
 
-#define AST_DECLARE_TYPE_VISIT_METHOD(KIND) TypeReturnType visit##KIND(Ast##KIND* ast);
+#define AST_DECLARE_TYPE_VISIT_METHOD(KIND) TypeRetTy visit##KIND(Ast##KIND* ast);
 #define AST_DECLARE_ALL_TYPE_VISIT_METHODS() \
     AST_TYPE_NODES(AST_DECLARE_TYPE_VISIT_METHOD)
 
@@ -133,9 +133,9 @@ public:
 template<typename ImplClass, typename RetTy = void>
 class AstDeclVisitor {
 public:
-    using DeclReturnType = RetTy;
+    using DeclRetTy = RetTy;
 
-    RetTy visitDecl(AstDecl* ast) {
+    DeclRetTy visitDecl(AstDecl* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -149,7 +149,7 @@ public:
     }
 };
 
-#define AST_DECLARE_DECL_VISIT_METHOD(KIND) DeclReturnType visit##KIND(Ast##KIND* ast);
+#define AST_DECLARE_DECL_VISIT_METHOD(KIND) DeclRetTy visit##KIND(Ast##KIND* ast);
 #define AST_DECLARE_ALL_DECL_VISIT_METHODS() \
     AST_DECL_NODES(AST_DECLARE_DECL_VISIT_METHOD)
 
@@ -167,7 +167,8 @@ template<
     typename AttrRetTy = RetTy,
     typename TypeRetTy = RetTy,
     typename DeclRetTy = RetTy>
-class AstVisitor : public AstStmtVisitor<ImplClass, StmtRetTy>
+class AstVisitor
+: public AstStmtVisitor<ImplClass, StmtRetTy>
 , public AstExprVisitor<ImplClass, ExprRetTy>
 , public AstAttrVisitor<ImplClass, AttrRetTy>
 , public AstTypeVisitor<ImplClass, TypeRetTy>

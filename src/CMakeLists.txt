@@ -18,6 +18,8 @@ add_executable(
     Ast/Ast.def.h
     Ast/CodePrinter.cpp
     Ast/CodePrinter.h
+    Ast/AstPrinter.cpp
+    Ast/AstPrinter.h
     Gen/CodeGen.cpp
     Gen/CodeGen.h
     Symbol/SymbolTable.cpp
@@ -31,7 +33,10 @@ add_executable(
     Sem/SemanticAnalyzer.h
     Driver/Driver.cpp
     Driver/Driver.h
-    Utils/Version.h Ast/AstPrinter.cpp Ast/AstPrinter.h)
+    Driver/Toolchain/Toolchain.h
+    Driver/Toolchain/Toolchain.cpp
+    Utils/Version.h
+)
 
 # PCH header
 target_precompile_headers(project_options INTERFACE pch.h)

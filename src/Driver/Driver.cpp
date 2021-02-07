@@ -6,6 +6,7 @@
 #include "Ast/AstPrinter.h"
 #include "Ast/CodePrinter.h"
 #include "Gen/CodeGen.h"
+#include "Toolchain/Toolchain.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
 #include <llvm/IR/IRPrintingPasses.h>
@@ -550,29 +551,6 @@ void Driver::addInputFile(const fs::path& path) {
 
 const std::vector<fs::path>& Driver::getInputFiles(FileType type) const {
     return m_inputFiles.at(static_cast<size_t>(type));
-}
-
-// Manage tools
-//
-fs::path Driver::getToolPath(Tool tool) {
-    fs::path path;
-    switch (tool) {
-    case Tool::Optimizer:
-        path = "/usr/local/bin/opt";
-        break;
-    case Tool::Assembler:
-        path = "/usr/local/bin/llc";
-        break;
-    case Tool::Linker:
-        path = "/usr/bin/ld";
-        break;
-    default:
-        llvm_unreachable("Invalid Tool ID");
-    }
-    if (!fs::exists(path)) {
-        error("Tool "s + path.string() + " not found!");
-    }
-    return path;
 }
 
 // Stringify

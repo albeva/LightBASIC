@@ -2,6 +2,7 @@
 // Created by Albert on 13/07/2020.
 //
 #include "pch.h"
+#include "Toolchain/Toolchain.h"
 
 namespace lbc {
 
@@ -86,23 +87,6 @@ public:
     [[nodiscard]] const std::vector<fs::path>& getInputFiles(FileType type) const;
 
     /**
-     * Tools that driver can make use of
-     */
-    enum class Tool {
-        Optimizer, // llvm optimizer
-        Assembler, // llvm assembler
-        Linker,    // linker
-        Count
-    };
-
-    /**
-     * Find path to the given tool
-     * @param tool path
-     * @return
-     */
-    [[nodiscard]] static fs::path getToolPath(Tool tool);
-
-    /**
      * Set current working directory which is used
      * for resolving file paths
      */
@@ -142,6 +126,11 @@ public:
      * Get compiler log generation is verbose
      */
     [[nodiscard]] bool getVerbose() const { return m_verbose; }
+
+    /**
+     * Get toolchain instance
+     */
+    [[nodiscard]] Toolchain& getToolchain() { return m_toolchain; }
 
     /**
      * Set the triple used for code generation
@@ -230,6 +219,7 @@ private:
     void compileSource(const fs::path& path, unsigned ID);
 
     bool m_verbose = false;
+    Toolchain m_toolchain{};
 
     std::array<std::vector<fs::path>, static_cast<size_t>(FileType::count)> m_inputFiles{};
 
