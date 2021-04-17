@@ -1,6 +1,7 @@
 //
 // Created by Albert on 13/07/2020.
 //
+#pragma once
 #include "pch.h"
 #include "Toolchain/Toolchain.h"
 

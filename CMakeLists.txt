@@ -50,5 +50,13 @@ else()
     message(AUTHOR_WARNING "No compiler options set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 endif()
 
+if (MSVC)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    else()
+        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    endif()
+endif()
+
 # Source Code
 add_subdirectory(src)

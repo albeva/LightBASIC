@@ -23,5 +23,5 @@ ToolTask Toolchain::createTask(ToolKind kind) {
 #if __APPLE__ || __linux__ || __unix__
 #   include "Toolchain.unix.cpp"
 #else
-#   error "Unsupported platform"
+#   include "Toolchain.windows.cpp"
 #endif

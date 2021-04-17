@@ -33,11 +33,14 @@ add_executable(
     Sem/SemanticAnalyzer.h
     Driver/Driver.cpp
     Driver/Driver.h
+    Driver/CmdLineParser.cpp
+    Driver/CmdLineParser.h
     Driver/Toolchain/Toolchain.h
     Driver/Toolchain/Toolchain.cpp
     Driver/Toolchain/ToolTask.cpp
     Driver/Toolchain/ToolTask.h
-    Utils/Version.h)
+    Utils/Version.h
+)
 
 # PCH header
 target_precompile_headers(project_options INTERFACE pch.h)
