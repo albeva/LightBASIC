@@ -5,8 +5,6 @@
 #include "Driver/CmdLineParser.h"
 #include "Driver/Context.h"
 #include "Driver/Driver.h"
-#include <llvm/Support/FileSystem.h>
-
 using namespace lbc;
 
 int main(int argc, const char* argv[]) {
