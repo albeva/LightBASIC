@@ -22,11 +22,10 @@ public:
 
     void parse(const Args& args) noexcept;
 
-    [[noreturn]] static void showError(const string& message) noexcept;
-
 private:
     void processOption(const Args& args, size_t& index) noexcept;
 
+    [[noreturn]] static void showError(const string& message) noexcept;
     [[noreturn]] static void showHelp() noexcept;
     [[noreturn]] static void showVersion() noexcept;
 

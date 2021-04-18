@@ -24,10 +24,20 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
     return llvm::StringRef(view.data(), view.size());
 }
 
+[[noreturn]] void fatalError(const string& message);
+
 /**
- * Simple helper. Basically ensured that original
- * llvmValue of a variable provided is restored apon
- * exiting the scope
+ * Helper class that restores variable value when existing scope
+ *
+ * Example usage:
+ *
+ *    int foo = 5;
+ *    {
+ *        RESTORE_ON_EXIT(foo); // use macro defined below.
+ *        foo = 10;
+ *        assert(foo == 10);
+ *    }
+ *    assert(foo == 5);
  */
 template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
 struct ValueRestorer {
@@ -45,8 +55,6 @@ private:
     T& m_target;
     T m_value;
 };
-
-[[noreturn]] void fatalError(const string& message);
 
 #define CONCATENATE_DETAIL(x, y) x##y
 #define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
