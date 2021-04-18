@@ -9,17 +9,12 @@
 #include "Type/Type.h"
 using namespace lbc;
 
-[[noreturn]] static void error(const string& message) {
-    std::cerr << message << '\n';
-    std::exit(EXIT_FAILURE);
-}
-
 SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId)
 : m_context{ context },
   m_srcMgr{ srcMgr },
   m_fileId{ fileId } {}
 
-void SemanticAnalyzer::visitProgram(AstProgram *ast) {
+void SemanticAnalyzer::visitProgram(AstProgram* ast) {
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
     m_rootTable = m_table = ast->symbolTable.get();
@@ -37,7 +32,7 @@ void SemanticAnalyzer::visitAssignStmt(AstAssignStmt* ast) {
     visitExpr(ast->expr.get());
 
     if (ast->identExpr->type != ast->expr->type) {
-        error("Tye mismatch in assignment");
+        fatalError("Tye mismatch in assignment");
     }
 }
 
@@ -61,7 +56,7 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
 
         if (type != nullptr) {
             if (type != ast->expr->type) {
-                error("TypeFirst mismatch");
+                fatalError("TypeFirst mismatch");
             }
         } else {
             type = ast->expr->type;
@@ -151,11 +146,11 @@ void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
     auto* symbol = m_table->find(name, true);
 
     if (symbol == nullptr) {
-        error("Unknown identifier "s + string(name));
+        fatalError("Unknown identifier "s + string(name));
     }
 
     if (symbol->type() == nullptr) {
-        error("Identifier "s + string(name) + " has unresolved type");
+        fatalError("Identifier "s + string(name) + " has unresolved type");
     }
 
     ast->symbol = symbol;
@@ -169,7 +164,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
 
     const auto* type = dyn_cast<TypeFunction>(symbol->type());
     if (type == nullptr) {
-        error("Identifier "s + string(symbol->name()) + " is not a callable type"s);
+        fatalError("Identifier "s + string(symbol->name()) + " is not a callable type"s);
     }
 
     const auto& paramTypes = type->paramTypes();
@@ -177,17 +172,17 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
 
     if (type->variadic()) {
         if (paramTypes.size() > args.size()) {
-            error("Argument count mismatch");
+            fatalError("Argument count mismatch");
         }
     } else if (paramTypes.size() != args.size()) {
-        error("Argument count mismatch");
+        fatalError("Argument count mismatch");
     }
 
     for (size_t index = 0; index < args.size(); index++) {
         visitExpr(args[index].get());
         if (index < paramTypes.size()) {
             if (paramTypes[index] != args[index]->type) {
-                error("TypeFirst mismatch");
+                fatalError("TypeFirst mismatch");
             }
         }
     }
@@ -210,7 +205,7 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
         ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
         break;
     default:
-        error("Unsupported literal type");
+        fatalError("Unsupported literal type");
     }
 }
 
@@ -221,7 +216,7 @@ Symbol* SemanticAnalyzer::createNewSymbol(Token* token, SymbolTable* table) {
 
     auto* symbol = table->find(token->lexeme(), false);
     if (symbol != nullptr) {
-        error("Redefinition of " + string(token->lexeme()));
+        fatalError("Redefinition of " + string(token->lexeme()));
     }
 
     symbol = table->insert(make_unique<Symbol>(token->lexeme()));

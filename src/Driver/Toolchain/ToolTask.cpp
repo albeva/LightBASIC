@@ -8,14 +8,13 @@
 using namespace lbc;
 
 ToolTask::ToolTask(ToolKind kind, fs::path path)
-    : m_kind{kind}
-    , m_path{std::move(path)} {
+: m_kind{ kind }, m_path{ std::move(path) } {
 }
 
 int ToolTask::run() {
     std::vector<llvm::StringRef> args;
     args.reserve(m_args.size());
-    for (const auto& arg: m_args) {
+    for (const auto& arg : m_args) {
         args.emplace_back(arg);
     }
 

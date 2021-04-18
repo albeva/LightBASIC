@@ -11,7 +11,7 @@ enum class ToolKind;
 
 class ToolTask final {
 public:
-    explicit ToolTask(ToolKind kind, fs::path  path);
+    explicit ToolTask(ToolKind kind, fs::path path);
 
     void addArg(string arg);
     void addPath(const fs::path& path);

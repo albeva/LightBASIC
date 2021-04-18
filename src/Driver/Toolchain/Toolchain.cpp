@@ -6,14 +6,9 @@
 
 using namespace lbc;
 
-[[noreturn]] static void error(const string& message) {
-    std::cerr << "lbc: error: " << message << '\n';
-    std::exit(EXIT_FAILURE);
-}
-
 void Toolchain::setBasePath(fs::path /*path*/) {
     // TODO
-    error("Setting toolchain basepath is not implemented");
+    fatalError("Setting toolchain basepath is not implemented");
 }
 
 ToolTask Toolchain::createTask(ToolKind kind) {
@@ -21,7 +16,7 @@ ToolTask Toolchain::createTask(ToolKind kind) {
 }
 
 #if __APPLE__ || __linux__ || __unix__
-#   include "Toolchain.unix.cpp"
+#    include "Toolchain.unix.cpp"
 #else
-#   include "Toolchain.windows.cpp"
+#    include "Toolchain.windows.cpp"
 #endif

@@ -11,11 +11,6 @@
 #include <llvm/IR/IRPrintingPasses.h>
 using namespace lbc;
 
-[[noreturn]] static void error(const string& message) {
-    std::cerr << message << '\n';
-    std::exit(EXIT_FAILURE);
-}
-
 CodeGen::CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, llvm::Triple& tripe, unsigned fileId)
 : m_context{ context },
   m_srcMgr{ srcMgr },
@@ -34,7 +29,7 @@ void CodeGen::print() const {
     printer->runOnModule(*m_module);
 }
 
-void CodeGen::visitProgram(AstProgram *ast) {
+void CodeGen::visitProgram(AstProgram* ast) {
     auto file = m_srcMgr.getMemoryBuffer(m_fileId)->getBufferIdentifier();
 
     m_module = make_unique<llvm::Module>(file, m_context);
@@ -131,13 +126,13 @@ void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
     ast->symbol->setValue(fn);
 }
 
-void CodeGen::visitFuncParamDecl(AstFuncParamDecl*  /*ast*/) {
+void CodeGen::visitFuncParamDecl(AstFuncParamDecl* /*ast*/) {
 }
 
-void CodeGen::visitAttributeList(AstAttributeList*  /*ast*/) {
+void CodeGen::visitAttributeList(AstAttributeList* /*ast*/) {
 }
 
-void CodeGen::visitAttribute(AstAttribute*  /*ast*/) {
+void CodeGen::visitAttribute(AstAttribute* /*ast*/) {
 }
 
 void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
@@ -147,11 +142,11 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
         return;
     }
 
-    auto *sym = ast->symbol;
+    auto* sym = ast->symbol;
     ast->llvmValue = new llvm::LoadInst(sym->type()->llvmType(m_context), sym->value(), "", m_block);
 }
 
-void CodeGen::visitTypeExpr(AstTypeExpr*  /*ast*/) {
+void CodeGen::visitTypeExpr(AstTypeExpr* /*ast*/) {
 }
 
 void CodeGen::visitCallExpr(AstCallExpr* ast) {
@@ -228,7 +223,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             llvm::cast<llvm::PointerType>(ast->type->llvmType(m_context)));
         break;
     default:
-        error("Invalid literal type");
+        fatalError("Invalid literal type");
     }
 
     ast->llvmValue = constant;

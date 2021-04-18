@@ -1,32 +1,36 @@
 //
 // Created by Albert on 17/04/2021.
 //
-
 #pragma once
 #include "pch.h"
 
 namespace lbc {
 
-class Driver;
+class Context;
 
+/**
+ * Parse given commandline arguments
+ * and build up the context
+ */
 class CmdLineParser final {
     NON_COPYABLE(CmdLineParser)
 public:
     using Args = llvm::ArrayRef<const char*>;
 
-    explicit CmdLineParser(Driver& driver) noexcept;
+    explicit CmdLineParser(Context& context) noexcept;
     ~CmdLineParser();
 
     void parse(const Args& args) noexcept;
 
     [[noreturn]] static void showError(const string& message) noexcept;
+
 private:
     void processOption(const Args& args, size_t& index) noexcept;
 
     [[noreturn]] static void showHelp() noexcept;
     [[noreturn]] static void showVersion() noexcept;
 
-    Driver& m_driver;
+    Context& m_context;
 };
 
 } // namespace lbc

@@ -3,42 +3,45 @@ add_executable(
     lbc
     main.cpp
     pch.h
+    Ast/Ast.cpp
+    Ast/Ast.def.h
+    Ast/Ast.h
+    Ast/AstPrinter.cpp
+    Ast/AstPrinter.h
+    Ast/AstVisitor.cpp
+    Ast/AstVisitor.h
+    Ast/CodePrinter.cpp
+    Ast/CodePrinter.h
+    Driver/CmdLineParser.cpp
+    Driver/CmdLineParser.h
+    Driver/Context.cpp
+    Driver/Context.h
+    Driver/Driver.cpp
+    Driver/Driver.h
+    Driver/Toolchain/ToolTask.cpp
+    Driver/Toolchain/ToolTask.h
+    Driver/Toolchain/Toolchain.cpp
+    Driver/Toolchain/Toolchain.h
+    Gen/CodeGen.cpp
+    Gen/CodeGen.h
     Lexer/Lexer.cpp
     Lexer/Lexer.h
     Lexer/Token.cpp
+    Lexer/Token.def.h
     Lexer/Token.h
-    Utils/Utils.h
     Parser/Parser.cpp
     Parser/Parser.h
-    Lexer/Token.def.h
-    Ast/Ast.cpp
-    Ast/Ast.h
-    Ast/AstVisitor.cpp
-    Ast/AstVisitor.h
-    Ast/Ast.def.h
-    Ast/CodePrinter.cpp
-    Ast/CodePrinter.h
-    Ast/AstPrinter.cpp
-    Ast/AstPrinter.h
-    Gen/CodeGen.cpp
-    Gen/CodeGen.h
-    Symbol/SymbolTable.cpp
-    Symbol/SymbolTable.h
-    Symbol/Symbol.cpp
-    Symbol/Symbol.h
-    Type/Type.cpp
-    Type/Type.h
-    Type/Type.def.h
     Sem/SemanticAnalyzer.cpp
     Sem/SemanticAnalyzer.h
-    Driver/Driver.cpp
-    Driver/Driver.h
-    Driver/CmdLineParser.cpp
-    Driver/CmdLineParser.h
-    Driver/Toolchain/Toolchain.h
-    Driver/Toolchain/Toolchain.cpp
-    Driver/Toolchain/ToolTask.cpp
-    Driver/Toolchain/ToolTask.h
+    Symbol/Symbol.cpp
+    Symbol/Symbol.h
+    Symbol/SymbolTable.cpp
+    Symbol/SymbolTable.h
+    Type/Type.cpp
+    Type/Type.def.h
+    Type/Type.h
+    Utils/Utils.cpp
+    Utils/Utils.h
     Utils/Version.h
 )
 

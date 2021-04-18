@@ -2,13 +2,12 @@
 // Created by Albert on 17/04/2021.
 //
 #include "CmdLineParser.h"
-#include "Driver.h"
+#include "Context.h"
 #include <llvm/Support/FileSystem.h>
 using namespace lbc;
 
-CmdLineParser::CmdLineParser(lbc::Driver& driver) noexcept
-    : m_driver(driver)
-{}
+CmdLineParser::CmdLineParser(lbc::Context& context) noexcept
+: m_context{ context } {}
 
 CmdLineParser::~CmdLineParser() = default;
 
@@ -21,11 +20,11 @@ void CmdLineParser::parse(const Args& args) noexcept {
     fs::path executable = llvm::sys::fs::getMainExecutable(
         args[0],
         reinterpret_cast<void*>(showHelp)); // NOLINT
-    m_driver.setCompilerPath(executable);
+    m_context.setCompilerPath(executable);
 
     // current working directory
     auto workingDir = fs::current_path();
-    m_driver.setWorkingDir(workingDir);
+    m_context.setWorkingDir(workingDir);
 
     // lbc ( option | <file> )+
     size_t index = 1;
@@ -33,7 +32,7 @@ void CmdLineParser::parse(const Args& args) noexcept {
         if (*args[index] == '-') {
             processOption(args, index);
         } else {
-            m_driver.addInputFile(args[index]);
+            m_context.addInputFile(args[index]);
         }
     }
 }
@@ -41,42 +40,42 @@ void CmdLineParser::parse(const Args& args) noexcept {
 void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
     const string_view arg{ args[index] };
     if (arg == "-v") {
-        m_driver.setVerbose(true);
+        m_context.setVerbose(true);
     } else if (arg == "-o") {
         auto next = index + 1;
         if (next >= args.size()) {
             showError("output file path missing.");
         }
-        m_driver.setOutputFilePath(args[next]);
+        m_context.setOutputFilePath(args[next]);
         index = next;
     } else if (arg == "-m32") {
-        auto& triple = m_driver.getTriple();
+        auto& triple = m_context.getTriple();
         triple = triple.get32BitArchVariant();
     } else if (arg == "-m64") {
-        auto& triple = m_driver.getTriple();
+        auto& triple = m_context.getTriple();
         triple = triple.get64BitArchVariant();
     } else if (arg == "--help") {
         showHelp();
     } else if (arg == "--version") {
         showVersion();
     } else if (arg == "-O0") {
-        m_driver.setOptimizationLevel(Driver::OptimizationLevel::O0);
+        m_context.setOptimizationLevel(Context::OptimizationLevel::O0);
     } else if (arg == "-OS") {
-        m_driver.setOptimizationLevel(Driver::OptimizationLevel::OS);
+        m_context.setOptimizationLevel(Context::OptimizationLevel::OS);
     } else if (arg == "-O1") {
-        m_driver.setOptimizationLevel(Driver::OptimizationLevel::O1);
+        m_context.setOptimizationLevel(Context::OptimizationLevel::O1);
     } else if (arg == "-O2") {
-        m_driver.setOptimizationLevel(Driver::OptimizationLevel::O2);
+        m_context.setOptimizationLevel(Context::OptimizationLevel::O2);
     } else if (arg == "-O3") {
-        m_driver.setOptimizationLevel(Driver::OptimizationLevel::O3);
+        m_context.setOptimizationLevel(Context::OptimizationLevel::O3);
     } else if (arg == "-c") {
-        m_driver.setCompilationTarget(Driver::CompilationTarget::Object);
+        m_context.setCompilationTarget(Context::CompilationTarget::Object);
     } else if (arg == "-S") {
-        m_driver.setCompilationTarget(Driver::CompilationTarget::Assembly);
+        m_context.setCompilationTarget(Context::CompilationTarget::Assembly);
     } else if (arg == "-emit-llvm") {
-        m_driver.setOutputType(Driver::OutputType::LLVM);
+        m_context.setOutputType(Context::OutputType::LLVM);
     } else if (arg == "-g") {
-        m_driver.setDebugBuild(true);
+        m_context.setDebugBuild(true);
     } else {
         showError("Unrecognized option "s + string(arg) + ".");
     }
