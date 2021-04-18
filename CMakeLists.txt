@@ -31,31 +31,19 @@ enable_sanitizers(project_options)
 # allow for static analysis options
 include(cmake/StaticAnalyzers.cmake)
 
-# LLVM
-find_package(LLVM REQUIRED CONFIG)
-llvm_map_components_to_libnames(
-    llvm_libs
-    core
-    support
-    bitwriter)
-
 # Project specific compiler options
 if(MSVC)
-
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    else()
+        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
     target_compile_options(project_options INTERFACE -fno-exceptions -fno-rtti)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(project_options INTERFACE -fno-exceptions -fno-rtti)
 else()
     message(AUTHOR_WARNING "No compiler options set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-endif()
-
-if (MSVC)
-    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
-    else()
-        set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDLL)
-    endif()
 endif()
 
 # Source Code

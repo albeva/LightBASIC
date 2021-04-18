@@ -45,6 +45,14 @@ add_executable(
     Utils/Version.h
 )
 
+# LLVM
+find_package(LLVM REQUIRED CONFIG)
+llvm_map_components_to_libnames(
+    llvm_libs
+    core
+    support
+    bitwriter)
+
 # PCH header
 target_precompile_headers(project_options INTERFACE pch.h)
 
