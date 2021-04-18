@@ -8,7 +8,7 @@
 using namespace lbc;
 
 int main(int argc, const char* argv[]) {
-    Context context;
+    Context context{};
     CmdLineParser cmdLineParser{ context };
     cmdLineParser.parse({ argv, static_cast<size_t>(argc) });
     context.validate();
