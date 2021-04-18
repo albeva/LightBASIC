@@ -9,9 +9,8 @@
 #include "Type/Type.h"
 using namespace lbc;
 
-SemanticAnalyzer::SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId)
+SemanticAnalyzer::SemanticAnalyzer(Context& context, unsigned fileId)
 : m_context{ context },
-  m_srcMgr{ srcMgr },
   m_fileId{ fileId } {}
 
 void SemanticAnalyzer::visitProgram(AstProgram* ast) {

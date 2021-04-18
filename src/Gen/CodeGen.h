@@ -7,9 +7,11 @@
 
 namespace lbc {
 
+class Context;
+
 class CodeGen final : public AstVisitor<CodeGen> {
 public:
-    explicit CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, llvm::Triple& tripe, unsigned fileId);
+    CodeGen(Context& context, unsigned fileId);
 
     /**
      * Give up ownership of the generated module.
@@ -34,9 +36,8 @@ private:
 
     static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
 
-    llvm::LLVMContext& m_context;
-    llvm::SourceMgr& m_srcMgr;
-    llvm::Triple& m_tripe;
+    Context& m_context;
+    llvm::LLVMContext& m_llvmContext;
     unsigned m_fileId;
 
     llvm::IRBuilder<> m_builder;

@@ -11,18 +11,17 @@ class Token;
 class Symbol;
 class SymbolTable;
 class TypeRoot;
+class Context;
 
 class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
-    explicit SemanticAnalyzer(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, unsigned fileId);
+    SemanticAnalyzer(Context& context, unsigned fileId);
 
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
-
 private:
     [[nodiscard]] Symbol* createNewSymbol(Token* identExpr, SymbolTable* table = nullptr);
 
-    llvm::LLVMContext& m_context;
-    llvm::SourceMgr& m_srcMgr;
+    Context& m_context;
     unsigned m_fileId;
     SymbolTable* m_table = nullptr;
     SymbolTable* m_rootTable = nullptr;

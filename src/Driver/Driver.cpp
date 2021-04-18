@@ -297,18 +297,18 @@ void Driver::compileSources() {
 }
 
 void Driver::compileSource(const fs::path& path, unsigned int ID) {
-    Parser parser{ m_context.getSourceMrg(), ID };
+    Parser parser{ m_context, ID };
     auto ast = parser.parse();
     if (!ast) {
         fatalError("Failed to parse '"s + path.string() + "'");
     }
 
     // Analyze
-    SemanticAnalyzer sem(m_context.getLlvmContext(), m_context.getSourceMrg(), ID);
+    SemanticAnalyzer sem{ m_context, ID };
     sem.visitStmt(ast.get());
 
     // generate IR
-    CodeGen gen(m_context.getLlvmContext(), m_context.getSourceMrg(), m_context.getTriple(), ID);
+    CodeGen gen{ m_context, ID };
     gen.visitStmt(ast.get());
 
     // done

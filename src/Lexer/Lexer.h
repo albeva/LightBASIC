@@ -6,13 +6,14 @@
 
 namespace lbc {
 
+class Context;
 class Token;
 enum class TokenKind;
 
 class Lexer final {
     NON_COPYABLE(Lexer)
 public:
-    Lexer(llvm::SourceMgr& srcMgr, unsigned fileID);
+    Lexer(Context& context, unsigned fileID);
     ~Lexer() = default;
 
     [[nodiscard]] unique_ptr<Token> next();
@@ -31,7 +32,7 @@ private:
     [[nodiscard]] bool isValid() const;
     [[nodiscard]] char peek(int ahead = 1) const;
 
-    llvm::SourceMgr& m_srcMgr;
+    Context& m_context;
     unsigned m_fileID;
     const llvm::MemoryBuffer* m_buffer;
     const char* m_input;

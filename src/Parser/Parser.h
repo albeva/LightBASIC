@@ -9,13 +9,14 @@ namespace lbc {
 
 class Lexer;
 class Token;
+class Context;
 enum class TokenKind;
 AST_FORWARD_DECLARE()
 
 class Parser final {
     NON_COPYABLE(Parser)
 public:
-    Parser(llvm::SourceMgr& srcMgr, unsigned int fileId);
+    Parser(Context& context, unsigned int fileId);
     ~Parser();
 
     unique_ptr<AstProgram> parse();
@@ -62,7 +63,7 @@ private:
     // show error and terminate compilation
     [[noreturn]] void error(const llvm::Twine& message);
 
-    llvm::SourceMgr& m_srcMgr;
+    Context& m_context;
     unsigned m_fileID;
     unique_ptr<Lexer> m_lexer;
     unique_ptr<Token> m_token;

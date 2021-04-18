@@ -2,6 +2,7 @@
 // Created by Albert on 03/07/2020.
 //
 #include "Lexer.h"
+#include "Driver/Context.h"
 #include "Token.h"
 using namespace lbc;
 
@@ -19,10 +20,10 @@ static inline llvm::SMLoc getLoc(const char* ptr) {
     return llvm::SMLoc::getFromPointer(ptr);
 }
 
-Lexer::Lexer(llvm::SourceMgr& srcMgr, unsigned fileID)
-: m_srcMgr{ srcMgr },
+Lexer::Lexer(Context& context, unsigned fileID)
+: m_context{ context },
   m_fileID{ fileID },
-  m_buffer{ srcMgr.getMemoryBuffer(fileID) },
+  m_buffer{ m_context.getSourceMrg().getMemoryBuffer(fileID) },
   m_input{ m_buffer->getBufferStart() },
   m_char{ *m_input },
   m_hasStmt{ false } {

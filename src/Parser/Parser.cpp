@@ -3,13 +3,14 @@
 //
 #include "Parser.h"
 #include "Ast/Ast.h"
+#include "Driver/Context.h"
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
 using namespace lbc;
 
-Parser::Parser(llvm::SourceMgr& srcMgr, unsigned int fileId)
-: m_srcMgr(srcMgr), m_fileID(fileId) {
-    m_lexer = make_unique<Lexer>(srcMgr, fileId);
+Parser::Parser(Context& context, unsigned int fileId)
+: m_context{ context }, m_fileID{ fileId } {
+    m_lexer = make_unique<Lexer>(m_context, fileId);
     m_token = m_lexer->next();
     m_next = m_lexer->next();
 }
@@ -417,7 +418,7 @@ unique_ptr<Token> Parser::move() {
 }
 
 [[noreturn]] void Parser::error(const llvm::Twine& message) {
-    m_srcMgr.PrintMessage(
+    m_context.getSourceMrg().PrintMessage(
         m_token->loc(),
         llvm::SourceMgr::DK_Error,
         message,

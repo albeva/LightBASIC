@@ -3,6 +3,7 @@
 //
 #include "CodeGen.h"
 #include "Ast/Ast.h"
+#include "Driver/Context.h"
 #include "Lexer/Token.h"
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
@@ -11,12 +12,12 @@
 #include <llvm/IR/IRPrintingPasses.h>
 using namespace lbc;
 
-CodeGen::CodeGen(llvm::LLVMContext& context, llvm::SourceMgr& srcMgr, llvm::Triple& tripe, unsigned fileId)
+CodeGen::CodeGen(Context& context, unsigned fileId)
 : m_context{ context },
-  m_srcMgr{ srcMgr },
-  m_tripe{ tripe },
-  m_fileId{ fileId },
-  m_builder{ context } {}
+  m_llvmContext{ context.getLlvmContext() },
+  m_builder{ m_llvmContext },
+  m_fileId{ fileId } {
+}
 
 bool CodeGen::validate() const {
     assert(m_module != nullptr); // NOLINT
@@ -30,21 +31,21 @@ void CodeGen::print() const {
 }
 
 void CodeGen::visitProgram(AstProgram* ast) {
-    auto file = m_srcMgr.getMemoryBuffer(m_fileId)->getBufferIdentifier();
+    auto file = m_context.getSourceMrg().getMemoryBuffer(m_fileId)->getBufferIdentifier();
 
-    m_module = make_unique<llvm::Module>(file, m_context);
-    m_module->setTargetTriple(m_tripe.str());
+    m_module = make_unique<llvm::Module>(file, m_llvmContext);
+    m_module->setTargetTriple(m_context.getTriple().str());
 
     // main
     m_function = llvm::Function::Create(
-        llvm::FunctionType::get(llvm::Type::getInt32Ty(m_context), false),
+        llvm::FunctionType::get(llvm::Type::getInt32Ty(m_llvmContext), false),
         llvm::Function::ExternalLinkage,
         "main",
         *m_module);
     m_function->setCallingConv(llvm::CallingConv::C);
     m_function->setDSOLocal(true);
     m_function->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
-    m_block = llvm::BasicBlock::Create(m_context, "", m_function);
+    m_block = llvm::BasicBlock::Create(m_llvmContext, "", m_function);
 
     m_builder.SetInsertPoint(m_block);
 
@@ -52,7 +53,7 @@ void CodeGen::visitProgram(AstProgram* ast) {
     visitStmtList(ast->stmtList.get());
 
     // close main
-    auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
+    auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_llvmContext));
     llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
 }
 
@@ -91,12 +92,12 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
             exprValue = constExpr;
             exprType = exprValue->getType();
         } else {
-            exprType = ast->expr->type->llvmType(m_context);
+            exprType = ast->expr->type->llvmType(m_llvmContext);
             exprValue = llvm::Constant::getNullValue(exprType);
             generateStoreInCtror = true;
         }
     } else {
-        exprType = ast->typeExpr->type->llvmType(m_context);
+        exprType = ast->typeExpr->type->llvmType(m_llvmContext);
         exprValue = llvm::Constant::getNullValue(exprType);
     }
 
@@ -116,7 +117,7 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
 }
 
 void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
-    auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_context));
+    auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_llvmContext));
     auto* fn = llvm::Function::Create(
         fnTy,
         llvm::GlobalValue::ExternalLinkage,
@@ -143,7 +144,11 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
     }
 
     auto* sym = ast->symbol;
-    ast->llvmValue = new llvm::LoadInst(sym->type()->llvmType(m_context), sym->value(), "", m_block);
+    ast->llvmValue = new llvm::LoadInst(
+        sym->type()->llvmType(m_llvmContext),
+        sym->value(),
+        "",
+        m_block);
 }
 
 void CodeGen::visitTypeExpr(AstTypeExpr* /*ast*/) {
@@ -176,7 +181,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             constant = iter->second;
         } else {
             constant = llvm::ConstantDataArray::getString(
-                m_context,
+                m_llvmContext,
                 view_to_stringRef(lexeme),
                 true);
 
@@ -190,7 +195,9 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             value->setAlignment(llvm::MaybeAlign(1));
             value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
 
-            llvm::Constant* zero_32 = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_context));
+            llvm::Constant* zero_32 = llvm::Constant::getNullValue(
+                llvm::IntegerType::getInt32Ty(m_llvmContext));
+
             std::array indices{
                 zero_32,
                 zero_32
@@ -205,7 +212,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         uint64_t result = 0;
         std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), result); // NOLINT
         constant = llvm::ConstantInt::get(
-            ast->type->llvmType(m_context),
+            ast->type->llvmType(m_llvmContext),
             result,
             llvm::cast<TypeNumber>(ast->type)->isSigned());
         break;
@@ -213,14 +220,14 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     case TokenKind::BooleanLiteral: {
         uint64_t value = lexeme == "TRUE" ? 1 : 0;
         constant = llvm::ConstantInt::get(
-            ast->type->llvmType(m_context),
+            ast->type->llvmType(m_llvmContext),
             value,
             llvm::cast<TypeNumber>(ast->type)->isSigned());
         break;
     }
     case TokenKind::NullLiteral:
         constant = llvm::ConstantPointerNull::get(
-            llvm::cast<llvm::PointerType>(ast->type->llvmType(m_context)));
+            llvm::cast<llvm::PointerType>(ast->type->llvmType(m_llvmContext)));
         break;
     default:
         fatalError("Invalid literal type");
