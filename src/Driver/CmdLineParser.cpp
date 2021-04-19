@@ -109,7 +109,7 @@ OPTIONS:
 void CmdLineParser::showVersion() noexcept {
     std::cout << "LightBASIC version " << LBC_VERSION_STRING
               << " (Based on LLVM " << LLVM_VERSION_STRING << ")\n"
-              << "(c) Albert Varaksin 2020"
+              << "(c) Albert Varaksin 2021"
               << '\n';
     std::exit(EXIT_SUCCESS);
 }
