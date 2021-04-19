@@ -49,11 +49,11 @@ void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
         m_context.setOutputFilePath(args[next]);
         index = next;
     } else if (arg == "-m32") {
-        auto& triple = m_context.getTriple();
-        triple = triple.get32BitArchVariant();
+        auto triple = m_context.getTriple();
+        m_context.setTriple(triple.get32BitArchVariant());
     } else if (arg == "-m64") {
-        auto& triple = m_context.getTriple();
-        triple = triple.get64BitArchVariant();
+        auto triple = m_context.getTriple();
+        m_context.setTriple(triple.get64BitArchVariant());
     } else if (arg == "--help") {
         showHelp();
     } else if (arg == "--version") {
