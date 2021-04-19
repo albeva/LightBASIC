@@ -1,5 +1,5 @@
 //
-// Created by Albert on 07/07/2020.
+// Created by Albert Varaksin on 07/07/2020.
 //
 #include "Type.h"
 #include "Lexer/Token.h"

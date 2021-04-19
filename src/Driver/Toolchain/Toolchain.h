@@ -1,5 +1,5 @@
 //
-// Created by Albert on 07/02/2021.
+// Created by Albert Varaksin on 07/02/2021.
 //
 #include "pch.h"
 #pragma once
@@ -27,7 +27,7 @@ public:
 
     /**
      * Set toolchain base path
-     * @param path
+     * @param path to llvm toolchain
      */
     void setBasePath(fs::path path);
 

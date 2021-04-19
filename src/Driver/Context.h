@@ -1,5 +1,5 @@
 //
-// Created by Albert on 18/04/2021.
+// Created by Albert Varaksin on 18/04/2021.
 //
 #pragma once
 #include "Toolchain/Toolchain.h"
@@ -98,7 +98,7 @@ public:
     /**
      * Validate that file exists and is a valid readable file
      *
-     * @param path
+     * @param path to the file to validate
      * @param mustExist if file does not exist lbc will quit with an error
      * @return true if file is valid
      */

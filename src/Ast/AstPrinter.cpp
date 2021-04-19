@@ -1,5 +1,5 @@
 //
-// Created by albert on 22/07/2020.
+// Created by Albert Varaksin on 22/07/2020.
 //
 #include "AstPrinter.h"
 #include "Ast.h"

@@ -1,5 +1,5 @@
 //
-// Created by Albert on 08/07/2020.
+// Created by Albert Varaksin on 08/07/2020.
 //
 #include "SemanticAnalyzer.h"
 #include "Ast/Ast.h"

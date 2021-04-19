@@ -1,5 +1,5 @@
 //
-// Created by Albert on 05/07/2020.
+// Created by Albert Varaksin on 05/07/2020.
 //
 #include "CodeGen.h"
 #include "Ast/Ast.h"

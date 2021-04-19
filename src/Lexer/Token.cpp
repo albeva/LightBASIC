@@ -1,5 +1,5 @@
 //
-// Created by Albert on 03/07/2020.
+// Created by Albert Varaksin on 03/07/2020.
 //
 #include "Token.h"
 using namespace lbc;

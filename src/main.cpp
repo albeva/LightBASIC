@@ -1,5 +1,5 @@
 //
-// Created by Albert on 03/07/2020.
+// Created by Albert Varaksin on 03/07/2020.
 //
 #include "pch.h"
 #include "Driver/CmdLineParser.h"
@@ -14,5 +14,7 @@ int main(int argc, const char* argv[]) {
     context.validate();
 
     Driver driver{ context };
-    return driver.execute();
+    auto result = driver.execute();
+    std::cout << "Done" << std::endl;
+    return result;
 }

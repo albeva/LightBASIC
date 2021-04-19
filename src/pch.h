@@ -1,5 +1,5 @@
 //
-// Created by Albert on 03/07/2020.
+// Created by Albert Varaksin on 03/07/2020.
 //
 #pragma once
 
@@ -28,6 +28,9 @@ namespace fs = std::filesystem;
 using namespace std::literals::string_literals;
 
 // LLVM
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wcomma"
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/Triple.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -46,6 +49,7 @@ using namespace std::literals::string_literals;
 #include <llvm/Support/Program.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
+#pragma clang diagnostic pop
 
 using llvm::dyn_cast;
 using llvm::isa;

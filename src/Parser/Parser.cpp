@@ -1,5 +1,5 @@
 //
-// Created by Albert on 03/07/2020.
+// Created by Albert Varaksin on 03/07/2020.
 //
 #include "Parser.h"
 #include "Ast/Ast.h"
