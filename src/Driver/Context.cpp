@@ -82,10 +82,10 @@ string Context::getFileExt(FileType type) {
 
 void Context::addInputFile(const fs::path& path) {
     auto ext = path.extension();
-    auto index = (size_t)FileType::Source;
+    auto index = static_cast<size_t>(FileType::Source);
 
     for (size_t typeIdx = 0; typeIdx < fileTypeCount; typeIdx++) {
-        if (getFileExt((FileType)typeIdx) == ext) {
+        if (getFileExt(static_cast<FileType>(typeIdx)) == ext) {
             index = typeIdx;
             break;
         }
@@ -95,7 +95,7 @@ void Context::addInputFile(const fs::path& path) {
 }
 
 const std::vector<fs::path>& Context::getInputFiles(FileType type) const {
-    return m_inputFiles.at((size_t)type);
+    return m_inputFiles.at(static_cast<size_t>(type));
 }
 
 void Context::setWorkingDir(const fs::path& path) {

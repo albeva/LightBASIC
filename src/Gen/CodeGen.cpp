@@ -15,8 +15,8 @@ using namespace lbc;
 CodeGen::CodeGen(Context& context, unsigned fileId)
 : m_context{ context },
   m_llvmContext{ context.getLlvmContext() },
-  m_builder{ m_llvmContext },
-  m_fileId{ fileId } {
+  m_fileId{ fileId },
+  m_builder{ m_llvmContext } {
 }
 
 bool CodeGen::validate() const {
