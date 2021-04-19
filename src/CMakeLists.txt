@@ -51,14 +51,14 @@ llvm_map_components_to_libnames(
     llvm_libs
     core
     support
-    bitwriter)
+    bitwriter
+)
+
+target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
+add_definitions(${LLVM_DEFINITIONS})
 
 # PCH header
 target_precompile_headers(project_options INTERFACE pch.h)
-
-# LLVM
-target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
 
 # Source includes
 target_include_directories(lbc PRIVATE ${lbc_SOURCE_DIR}/src)
