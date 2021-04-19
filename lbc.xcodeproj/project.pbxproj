@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -305,6 +305,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		50FE7AB6262E028300564218 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -318,7 +319,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# llvm libraries\nLLVM_CONFIG=\"/usr/local/bin/llvm-config\"\nLIBS=\"core support bitwriter\"\nLLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags`\nLLVM_CFLAGS=`$LLVM_CONFIG --cflags`\nLLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`\nLLVM_LIBS=`$LLVM_CONFIG --libs $LIBS`\" \"`$LLVM_CONFIG --system-libs`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings, generated as a build phase.\" > $LLVM_XCCONFIG\necho \"OTHER_CPLUSPLUSFLAGS = \\$(inherited) $LLVM_CXXFLAGS\" >> $LLVM_XCCONFIG\necho \"OTHER_LDFLAGS = \\$(inherited) $LLVM_LDFLAGS $LLVM_LIBS\" >> $LLVM_XCCONFIG\necho \"OTHER_CFLAGS = \\$(inherited) $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\n";
+			shellScript = "# run llvm-config\nLIBS=\"core support bitwriter\"\nLLVM_CONFIG=\"/usr/local/bin/llvm-config\"\n\nLLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags`\nLLVM_CFLAGS=`$LLVM_CONFIG --cflags`\nLLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`\nLLVM_LIBS=`$LLVM_CONFIG --libs $LIBS`\" \"`$LLVM_CONFIG --system-libs`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings. Auto generated during a build phase.\" > $LLVM_XCCONFIG\necho \"OTHER_CPLUSPLUSFLAGS = \\$(inherited) $LLVM_CXXFLAGS\" >> $LLVM_XCCONFIG\necho \"OTHER_LDFLAGS = \\$(inherited) $LLVM_LDFLAGS $LLVM_LIBS\" >> $LLVM_XCCONFIG\necho \"OTHER_CFLAGS = \\$(inherited) $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\n";
+			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
 
