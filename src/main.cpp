@@ -1,7 +1,6 @@
 //
 // Created by Albert Varaksin on 03/07/2020.
 //
-#include "pch.h"
 #include "Driver/CmdLineParser.h"
 #include "Driver/Context.h"
 #include "Driver/Driver.h"

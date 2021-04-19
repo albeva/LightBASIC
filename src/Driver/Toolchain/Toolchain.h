@@ -1,8 +1,8 @@
 //
 // Created by Albert Varaksin on 07/02/2021.
 //
-#include "pch.h"
 #pragma once
+#include "pch.h"
 
 namespace lbc {
 
