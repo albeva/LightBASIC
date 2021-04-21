@@ -45,7 +45,7 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
  *    assert(foo == 5);
  */
 template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
-struct ValueRestorer: private NonCopyable {
+struct ValueRestorer {
 public:
     explicit ValueRestorer(T& value) : m_target{ value }, m_value{ value } {}
 
@@ -53,6 +53,11 @@ public:
     ~ValueRestorer() {
         m_target = m_value;
     }
+
+    ValueRestorer(ValueRestorer&&) = delete;
+    ValueRestorer(const ValueRestorer&) = delete;
+    ValueRestorer& operator= (ValueRestorer&&) = delete;
+    ValueRestorer& operator= (const ValueRestorer&) = delete;
 
     // members
 private:

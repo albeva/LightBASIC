@@ -27,6 +27,7 @@ private:
 
     void skipUntilLineEnd();
     bool move();
+    bool move(int steps);
     [[nodiscard]] bool isValid() const;
     [[nodiscard]] char peek(int ahead = 1) const;
 
