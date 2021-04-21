@@ -9,8 +9,6 @@ using namespace lbc;
 CmdLineParser::CmdLineParser(lbc::Context& context) noexcept
 : m_context{ context } {}
 
-CmdLineParser::~CmdLineParser() = default;
-
 void CmdLineParser::parse(const Args& args) noexcept {
     if (args.size() < 2) {
         showError("no input.");

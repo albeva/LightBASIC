@@ -6,12 +6,6 @@
 
 #define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
 
-#define NON_COPYABLE(Class)                  \
-    Class(const Class&) = delete;            \
-    Class& operator=(const Class&) = delete; \
-    Class(Class&&) = delete;                 \
-    Class& operator=(Class&&) = delete;
-
 #ifdef __PRETTY_FUNCTION__
 #    define LBC_FUNCTION __PRETTY_FUNCTION__
 #else
@@ -19,6 +13,17 @@
 #endif
 
 namespace lbc {
+
+class NonCopyable {
+public:
+    constexpr NonCopyable() = default;
+    ~NonCopyable() = default;
+
+    NonCopyable(NonCopyable&&) = delete;
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable& operator= (NonCopyable&&) = delete;
+    NonCopyable& operator= (const NonCopyable&) = delete;
+};
 
 inline llvm::StringRef view_to_stringRef(const string_view& view) {
     return llvm::StringRef(view.data(), view.size());
@@ -40,9 +45,8 @@ inline llvm::StringRef view_to_stringRef(const string_view& view) {
  *    assert(foo == 5);
  */
 template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
-struct ValueRestorer {
-    NON_COPYABLE(ValueRestorer)
-
+struct ValueRestorer: private NonCopyable {
+public:
     explicit ValueRestorer(T& value) : m_target{ value }, m_value{ value } {}
 
     // restore

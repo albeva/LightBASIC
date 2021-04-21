@@ -10,8 +10,7 @@ namespace lbc {
  * Hold information about compilation process
  * configuration, input and expected outputs
  */
-class Context final {
-    NON_COPYABLE(Context)
+class Context final: private NonCopyable {
 public:
     enum class CompilationTarget {
         Executable,
@@ -44,7 +43,6 @@ public:
     [[nodiscard]] static string getFileExt(FileType type);
 
     Context();
-    ~Context();
 
     void validate() const noexcept;
 

@@ -9,7 +9,7 @@ namespace lbc {
 class Toolchain;
 enum class ToolKind;
 
-class ToolTask final {
+class ToolTask final: private NonCopyable {
 public:
     explicit ToolTask(ToolKind kind, fs::path path);
 

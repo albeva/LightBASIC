@@ -1,5 +1,13 @@
 ---
-Checks:          '*,-concurrency-mt-*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type,-llvmlibc-callee-namespace,-misc-non-private-member-variables-in-classes'
+Checks: '*,
+        -concurrency-mt-*,
+        -fuchsia-*,
+        -google-*,
+        -zircon-*,
+        -abseil-*,
+        -modernize-use-trailing-return-type,
+        -llvmlibc-callee-namespace,
+        -misc-non-private-member-variables-in-classes'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
-FormatStyle:     none
+FormatStyle: none

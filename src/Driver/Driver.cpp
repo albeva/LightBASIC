@@ -19,11 +19,8 @@ Driver::Driver(Context& context)
 : m_context{ context } {
 }
 
-Driver::~Driver() = default;
-
 int Driver::execute() {
-    //    validate();
-    //    compileSources();
+    compileSources();
 
     //    if (outputLLVMIr()) {
     //        emitLLVMIr();

@@ -29,8 +29,7 @@ enum class AstKind {
  * Root class for all AST nodes. This is an abstract class
  * and should never be used as type for ast node directly
  */
-class AstRoot {
-    NON_COPYABLE(AstRoot)
+class AstRoot: private NonCopyable {
 public:
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
     virtual ~AstRoot();
@@ -48,7 +47,6 @@ private:
  * - declarations
  */
 class AstStmt : public AstRoot {
-    NON_COPYABLE(AstStmt)
 public:
     using AstRoot::AstRoot;
     ~AstStmt() override;
@@ -62,7 +60,6 @@ public:
  * Base class for declaration nodes
  */
 class AstDecl : public AstStmt {
-    NON_COPYABLE(AstDecl)
 public:
     using AstStmt::AstStmt;
     ~AstDecl() override;
@@ -79,7 +76,6 @@ public:
  * Base class for all expression nodes
  */
 class AstExpr : public AstRoot {
-    NON_COPYABLE(AstExpr)
 public:
     using AstRoot::AstRoot;
     ~AstExpr() override;
@@ -96,7 +92,6 @@ public:
  * Base class for attribute nodes.
  */
 class AstAttr : public AstRoot {
-    NON_COPYABLE(AstAttr)
 public:
     using AstRoot::AstRoot;
     ~AstAttr() override;
@@ -110,7 +105,6 @@ public:
  * Base class for type expressions
  */
 class AstType : public AstRoot {
-    NON_COPYABLE(AstType)
 public:
     using AstRoot::AstRoot;
     ~AstType() override;
@@ -126,7 +120,6 @@ public:
 
 #define DECLARE_AST(KIND, BASE)                   \
     class Ast##KIND final : public Ast##BASE {    \
-        NON_COPYABLE(Ast##KIND)                   \
     public:                                       \
         using Base = Ast##BASE;                   \
         Ast##KIND();                              \

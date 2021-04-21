@@ -3,18 +3,16 @@
 //
 #pragma once
 #include "pch.h"
+#include "Token.h"
 
 namespace lbc {
 
 class Context;
-class Token;
 enum class TokenKind;
 
-class Lexer final {
-    NON_COPYABLE(Lexer)
+class Lexer final: private NonCopyable {
 public:
     Lexer(Context& context, unsigned fileID);
-    ~Lexer() = default;
 
     [[nodiscard]] unique_ptr<Token> next();
 

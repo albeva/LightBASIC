@@ -11,11 +11,9 @@ namespace lbc {
 /**
  * Drive compilation process
  */
-class Driver final {
-    NON_COPYABLE(Driver)
+class Driver final: private NonCopyable {
 public:
     explicit Driver(Context& m_context);
-    ~Driver();
 
     int execute();
     [[nodiscard]] Context& getContext() { return m_context; }

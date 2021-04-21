@@ -13,11 +13,8 @@ enum class TokenKind {
 #undef IMPL_TOKENS
 };
 
-class Token final {
-    NON_COPYABLE(Token)
+class Token final: private NonCopyable {
 public:
-    ~Token() = default;
-
     /**
      * Create either identifier or a keyword token from string literal
      */

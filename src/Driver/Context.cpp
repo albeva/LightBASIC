@@ -9,8 +9,6 @@ Context::Context()
 : m_triple{ llvm::sys::getDefaultTargetTriple() } {
 }
 
-Context::~Context() = default;
-
 void Context::validate() const noexcept {
     size_t count = std::accumulate(m_inputFiles.begin(), m_inputFiles.end(), size_t{}, [](auto cnt, const auto& vec) {
         return cnt + vec.size();

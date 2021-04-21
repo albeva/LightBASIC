@@ -20,11 +20,8 @@ enum class ToolKind {
  *
  * e.g. a linker
  */
-class Toolchain final {
-    NON_COPYABLE(Toolchain)
+class Toolchain final: private NonCopyable {
 public:
-    ~Toolchain() = default;
-
     /**
      * Set toolchain base path
      * @param path to llvm toolchain

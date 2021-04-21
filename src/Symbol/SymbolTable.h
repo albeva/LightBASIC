@@ -8,14 +8,12 @@ namespace lbc {
 
 class Symbol;
 
-class SymbolTable final {
-    NON_COPYABLE(SymbolTable)
+class SymbolTable final: private NonCopyable {
 public:
     using Storage = std::unordered_map<string_view, unique_ptr<Symbol>>;
     using iterator = Storage::iterator;
 
     explicit SymbolTable(SymbolTable* parent = nullptr) : m_parent{ parent } {}
-    ~SymbolTable() = default;
 
     iterator begin() { return m_symbols.begin(); }
     iterator end() { return m_symbols.end(); }

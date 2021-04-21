@@ -37,11 +37,8 @@ enum class TokenKind;
  *
  * It uses llvm custom rtti system
  */
-class TypeRoot {
-    NON_COPYABLE(TypeRoot)
+class TypeRoot: private NonCopyable {
 public:
-    virtual ~TypeRoot();
-
     [[nodiscard]] TypeKind kind() const { return m_kind; }
 
     [[nodiscard]] llvm::Type* llvmType(llvm::LLVMContext& context) const {
@@ -124,7 +121,6 @@ private:
  * Bool while conforming, is special kind
  */
 class TypeNumber : public TypeRoot {
-    NON_COPYABLE(TypeNumber)
 protected:
     TypeNumber(TypeKind kind, unsigned bits, bool isSigned)
     : TypeRoot{ kind }, m_bits{ bits }, m_isSigned{ isSigned } {}
@@ -133,8 +129,6 @@ public:
     static bool classof(const TypeRoot* type) {
         return type->kind() >= TypeKind::Number && type->kind() < TypeKind::NumberLast;
     }
-
-    ~TypeNumber() override;
 
     [[nodiscard]] unsigned bits() const { return m_bits; }
     [[nodiscard]] bool isSigned() const { return m_isSigned; }

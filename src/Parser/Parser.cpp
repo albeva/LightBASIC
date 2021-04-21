@@ -15,8 +15,6 @@ Parser::Parser(Context& context, unsigned int fileId)
     m_next = m_lexer->next();
 }
 
-Parser::~Parser() = default;
-
 /**
  * Program = stmtList .
  */

@@ -12,14 +12,11 @@ class Context;
  * Parse given commandline arguments
  * and build up the context
  */
-class CmdLineParser final {
-    NON_COPYABLE(CmdLineParser)
+class CmdLineParser final: private NonCopyable {
 public:
     using Args = llvm::ArrayRef<const char*>;
 
     explicit CmdLineParser(Context& context) noexcept;
-    ~CmdLineParser();
-
     void parse(const Args& args) noexcept;
 
 private:
