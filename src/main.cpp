@@ -13,7 +13,5 @@ int main(int argc, const char* argv[]) {
     context.validate();
 
     Driver driver{ context };
-    auto result = driver.execute();
-    std::cout << "Done" << std::endl;
-    return result;
+    return driver.execute();
 }
