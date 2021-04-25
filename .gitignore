@@ -43,3 +43,8 @@ compile_commands.json
 CTestTestfile.cmake
 CMakeSettings.json
 _deps
+
+# lbc
+/toolchain
+*.exe
+*.obj
