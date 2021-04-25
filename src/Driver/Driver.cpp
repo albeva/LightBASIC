@@ -50,6 +50,7 @@ int Driver::execute() {
         fatalError("Compiling to assembly not implemented");
     }
 
+    removeTemporaryFiles();
     return EXIT_SUCCESS;
 }
 
@@ -64,6 +65,22 @@ void Driver::processInputs() {
         for (const auto& path : m_context.getInputFiles(type)) {
             auto resolved = m_context.resolveFilePath(path);
             dst.emplace_back(resolved);
+        }
+    }
+}
+
+fs::path Driver::createUniquePath(string suffx) {
+    llvm::SmallVector<char, 128> output{};
+    llvm::sys::fs::createUniquePath("lbc-%%-%%-%%-%%-%%-%%"s + suffx, output, true);
+    auto path = fs::path(output.begin(), output.end());
+    m_tempFiles.emplace_back(path);
+    return path;
+}
+
+void Driver::removeTemporaryFiles() {
+    for (const auto& temp : m_tempFiles) {
+        if (fs::exists(temp)) {
+            fs::remove(temp);
         }
     }
 }
@@ -98,7 +115,7 @@ void Driver::emitBitCode() {
 
     bool single = m_modules.size() == 1;
     for (auto& module : m_modules) {
-        fs::path output = m_context.resolveOutputPath(module->getSourceFileName(), ".bc");
+        auto output = createUniquePath(".bc");
 
         std::error_code errors{};
         llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OpenFlags::OF_None };
@@ -111,14 +128,14 @@ void Driver::emitBitCode() {
 }
 
 void Driver::emitObjects() {
-    auto& bcFiles = getInputs(Context::FileType::BitCode);
+    const auto& bcFiles = getInputs(Context::FileType::BitCode);
     auto& objFiles = getInputs(Context::FileType::Object);
     objFiles.reserve(objFiles.size() + bcFiles.size());
 
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
     task.reserve(4);
     for (const auto& input : bcFiles) {
-        auto output = m_context.resolveOutputPath(input, ".obj");
+        auto output = createUniquePath(".obj");
 
         task.reset();
         task.addArg("-filetype=obj");
@@ -140,7 +157,8 @@ void Driver::emitExecutable() {
 
     if (m_context.getTriple().isOSWindows()) {
         if (output == "") {
-            output = m_context.resolveOutputPath(objFiles[0], "exe");
+            const auto& sources = getInputs(Context::FileType::Source);
+            output = m_context.resolveOutputPath(sources[0], "exe");
         }
 
         linker.addArg("-subsystem", "console");
@@ -157,7 +175,7 @@ void Driver::emitExecutable() {
 
         linker.addArg("-lmsvcrt");
     } else {
-        fatalError("Compilation not this platform supported");
+        fatalError("Compilation not this platform not supported");
     }
 
     linker.addPath("-o", output);

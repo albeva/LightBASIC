@@ -43,7 +43,6 @@ public:
     [[nodiscard]] static string getFileExt(FileType type);
 
     Context();
-
     void validate() const noexcept;
 
     [[nodiscard]] CompilationTarget getCompilationTarget() const { return m_compilationTarget; }

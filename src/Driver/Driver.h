@@ -32,16 +32,13 @@ private:
         return m_inputs.at(static_cast<size_t>(type));
     }
 
+    fs::path createUniquePath(string suffix);
+    void removeTemporaryFiles();
+
     Context& m_context;
     std::vector<unique_ptr<llvm::Module>> m_modules{};
     std::array<std::vector<fs::path>, Context::fileTypeCount> m_inputs;
-
-
-    //    std::vector<fs::path> m_srcFiles{};
-    //    std::vector<fs::path> m_bcFiles{};
-    //    std::vector<fs::path> m_llFiles{};
-    //    std::vector<fs::path> m_asmFiles{};
-    //    std::vector<fs::path> m_objFiles{};
+    std::vector<fs::path> m_tempFiles;
 };
 
 } // namespace lbc
