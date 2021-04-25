@@ -11,6 +11,7 @@
 #include "Toolchain/ToolTask.h"
 #include "Toolchain/Toolchain.h"
 #include <llvm/IR/IRPrintingPasses.h>
+#include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Host.h>
 
 using namespace lbc;
@@ -20,99 +21,51 @@ Driver::Driver(Context& context)
 }
 
 int Driver::execute() {
+    processInputs();
     compileSources();
+    emitBitCode();
 
-    //    if (outputLLVMIr()) {
-    //        emitLLVMIr();
-    //    } else {
-    //        emitBitCode(false);
-    //    }
-    //
-    //    switch (m_outputType) {
-    //    case OutputType::Native:
-    //        switch (m_compilationTarget) {
-    //        case CompilationTarget::Executable:
-    //            // compile sources
-    //            // generate bitcode files from:
-    //            // - sources, .ll
-    //            // optimize bitcode files
-    //            // generate object files from:
-    //            // - bitcode, .s
-    //            // final link output
-    //            // output target
-    //            // remove generated temp files
-    //            break;
-    //        case CompilationTarget::Object:
-    //            // compile sources
-    //            // generate bitcode files from:
-    //            // - sources, .ll
-    //            // optimize bitcode files
-    //            // generate object files from:
-    //            // - bitcode, .s
-    //            // output target
-    //            // remove generated temp files
-    //            break;
-    //        case CompilationTarget::Assembly:
-    //            // compile sources
-    //            // generate bitcode files from:
-    //            // - sources, .ll
-    //            // optimize bitcode files
-    //            // generate asm files from:
-    //            // - bitcode
-    //            // output target
-    //            // remove generated temp files
-    //            break;
-    //        }
-    //        break;
-    //    case OutputType::LLVM:
-    //        switch (m_compilationTarget) {
-    //        case CompilationTarget::Object:
-    //            // compile sources
-    //            // generate bitcode files from:
-    //            // - sources, .ll
-    //            // optimize bitcode files
-    //            // output target
-    //            // remove generated temp files
-    //            break;
-    //        case CompilationTarget::Assembly:
-    //            // compile sources
-    //            // generate llvm-ir files from:
-    //            // - sources, .bc
-    //            // optimize llvm-ir files
-    //            // output target
-    //            // remove generated temp files
-    //            break;
-    //        default:
-    //            llvm_unreachable("Invalid target");
-    //        }
-    //        break;
-    //    }
+    switch (m_context.getCompilationTarget()) {
+    case Context::CompilationTarget::Executable:
+        emitObjects();
+        emitExecutable();
+        break;
+    case Context::CompilationTarget::Object:
+        // generate bitcode files from:
+        // - sources, .ll
+        // optimize bitcode files
+        // generate object files from:
+        // - bitcode, .s
+        // output target
+        // remove generated temp files
+        fatalError("Compiling to object not implemented");
+    case Context::CompilationTarget::Assembly:
+        // generate bitcode files from:
+        // - sources, .ll
+        // optimize bitcode files
+        // generate asm files from:
+        // - bitcode
+        // output target
+        // remove generated temp files
+        fatalError("Compiling to assembly not implemented");
+    }
 
-
-    //    switch (m_result) {
-    //    case CompileResult::Default:
-    //        emitExecutable();
-    //        break;
-    //    case CompileResult::LLVMIr:
-    //        emitLLVMIr();
-    //        break;
-    //    case CompileResult::BitCode:
-    //        emitBitCode(true);
-    //        break;
-    //    case CompileResult::Assembly:
-    //        emitNative(CompileResult::Assembly, true);
-    //        break;
-    //    case CompileResult::Object:
-    //        emitNative(CompileResult::Object, true);
-    //        break;
-    //    case CompileResult::Executable:
-    //        emitExecutable();
-    //        break;
-    //    case CompileResult::Library:
-    //        error("Creating libraries is not supported");
-    //    }
-    //
     return EXIT_SUCCESS;
+}
+
+/**
+ * Process provided input files from the context, resolve their path,
+ * ansure they exost and store in driver paths structure
+ */
+void Driver::processInputs() {
+    for (auto index = 0; index < Context::fileTypeCount; index++) {
+        auto type = static_cast<Context::FileType>(index);
+        auto& dst = getInputs(type);
+        for (const auto& path : m_context.getInputFiles(type)) {
+            auto resolved = m_context.resolveFilePath(path);
+            dst.emplace_back(resolved);
+        }
+    }
 }
 
 void Driver::emitLLVMIr() {
@@ -139,157 +92,93 @@ void Driver::emitLLVMIr() {
     //    }
 }
 
-std::vector<fs::path> Driver::emitBitCode(bool final) {
-    std::vector<fs::path> result;
-    //    result.reserve(m_modules.size());
-    //
-    //    bool single = m_modules.size() == 1;
-    //    for (auto& module : m_modules) {
-    //        fs::path output = resolveOutputPath(module->getSourceFileName(), ".bc", single, final);
-    //
-    //        std::error_code errors{};
-    //        llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OF_None };
-    //        llvm::WriteBitcodeToFile(*module, stream);
-    //        stream.flush();
-    //        stream.close();
-    //
-    //        result.emplace_back(output);
-    //    }
-    //
-    return result;
+void Driver::emitBitCode() {
+    auto& bcFiles = getInputs(Context::FileType::BitCode);
+    bcFiles.reserve(bcFiles.size() + m_modules.size());
+
+    bool single = m_modules.size() == 1;
+    for (auto& module : m_modules) {
+        fs::path output = m_context.resolveOutputPath(module->getSourceFileName(), ".bc");
+
+        std::error_code errors{};
+        llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OpenFlags::OF_None };
+        llvm::WriteBitcodeToFile(*module, stream);
+        stream.flush();
+        stream.close();
+
+        bcFiles.emplace_back(output);
+    }
 }
 
-std::vector<fs::path> Driver::emitNative(Context::CompilationTarget emit, bool final) {
-    //    string fileType;
-    //    string ext;
-    //    switch (emit) {
-    //    case CompileResult::Object:
-    //        fileType = "-filetype=obj";
-    //        ext = ".o";
-    //        break;
-    //    case CompileResult::Assembly:
-    //        fileType = "-filetype=asm";
-    //        ext = ".s";
-    //        break;
-    //    default:
-    //        llvm_unreachable("Emit Native only emits object and asm");
-    //    }
-    //
-    std::vector<fs::path> result{};
-    //    result.reserve(m_modules.size());
-    //
-    //    auto bcFiles = emitBitCode(false);
-    //    if (m_optimizationLevel > OptimizationLevel::O0) {
-    //        bcFiles = optimize(bcFiles, CompileResult::BitCode, false);
-    //    }
-    //
-    //    auto tool = getToolPath(ToolKind::Assembler).string();
-    //    bool single = bcFiles.size() == 1;
-    //    for (const auto& path : bcFiles) {
-    //        string input{ path.string() };
-    //        auto output = resolveOutputPath(path, ext, single, final).string();
-    //
-    //        std::vector<llvm::StringRef> args{
-    //            tool,
-    //            fileType,
-    //            "-o",
-    //            output,
-    //            input
-    //        };
-    //        auto code = llvm::sys::ExecuteAndWait(tool, args);
-    //        if (code != EXIT_SUCCESS) {
-    //            error("Failed emit '"s + output + "'");
-    //        }
-    //        result.emplace_back(output);
-    //
-    //        fs::remove(input);
-    //    }
-    //
-    return result;
+void Driver::emitObjects() {
+    auto& bcFiles = getInputs(Context::FileType::BitCode);
+    auto& objFiles = getInputs(Context::FileType::Object);
+    objFiles.reserve(objFiles.size() + bcFiles.size());
+
+    auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
+    task.reserve(4);
+    for (const auto& input : bcFiles) {
+        auto output = m_context.resolveOutputPath(input, ".obj");
+
+        task.reset();
+        task.addArg("-filetype=obj");
+        task.addPath("-o", output);
+        task.addPath(input.string());
+
+        if (task.execute() != EXIT_SUCCESS) {
+            fatalError("Failed emit '"s + output.string() + "'");
+        }
+
+        objFiles.emplace_back(output);
+    }
 }
 
 void Driver::emitExecutable() {
-    //    auto objects = emitNative(CompileResult::Object, false);
-    //    auto output = resolveOutputPath("a", ".out", true, true).string();
-    //    auto tool = getToolPath(ToolKind::Linker).string();
-    //
-    //    std::vector<string> stringCopies;
-    //    stringCopies.reserve(objects.size());
-    //
-    //    std::vector<llvm::StringRef> args;
-    //    constexpr auto reserve = 16;
-    //    args.reserve(objects.size() + reserve);
-    //    args.emplace_back(tool);
-    //
-    //    fs::path linuxSysPath;
-    //    if (m_triple.isOSLinux()) {
-    //        if (m_triple.isArch32Bit()) {
-    //            args.emplace_back("-m");
-    //            args.emplace_back("elf_i386");
-    //            linuxSysPath = "/usr/libr32";
-    //            if (!fs::exists(linuxSysPath)) {
-    //                linuxSysPath = "/usr/lib/i386-linux-gnu";
-    //                if (!fs::exists(linuxSysPath)) {
-    //                    error("No 32 bit libraries found");
-    //                }
-    //            }
-    //        } else if (m_triple.isArch64Bit()) {
-    //            args.emplace_back("-m");
-    //            args.emplace_back("elf_x86_64");
-    //            args.emplace_back("-dynamic-linker");
-    //            args.emplace_back("/lib64/ld-linux-x86-64.so.2");
-    //            linuxSysPath = "/usr/lib/x86_64-linux-gnu";
-    //        } else {
-    //            error("Unknown architecture");
-    //        }
-    //        args.emplace_back("-L");
-    //        args.emplace_back("/usr/lib");
-    //
-    //        args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crt1.o").string()));
-    //        args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crti.o").string()));
-    //    } else if (m_triple.isMacOSX()) {
-    //        args.emplace_back("-lSystem");
-    //    } else if (m_triple.isOSWindows()) {
-    //        error("Building for Windows not currently supported");
-    //    }
-    //    args.emplace_back("-o");
-    //    args.emplace_back(output);
-    //
-    //    for (const auto& path : objects) {
-    //        args.emplace_back(stringCopies.emplace_back(path.string()));
-    //    }
-    //
-    //    if (m_triple.isOSLinux()) {
-    //        args.emplace_back("--no-as-needed");
-    //        args.emplace_back("-lc");
-    //        args.emplace_back(stringCopies.emplace_back((linuxSysPath / "crtn.o").string()));
-    //    }
-    //
-    //    auto code = llvm::sys::ExecuteAndWait(tool, args);
-    //    if (code != EXIT_SUCCESS) {
-    //        error("Failed generate '"s + output + "'");
-    //    }
-    //
-    //    for (const auto& path : objects) {
-    //        fs::remove(path);
-    //    }
+    auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
+    auto objFiles = getInputs(Context::FileType::Object);
+    auto output = m_context.getOutputPath();
+
+    if (m_context.getTriple().isOSWindows()) {
+        if (output == "") {
+            output = m_context.resolveOutputPath(objFiles[0], "exe");
+        }
+
+        linker.addArg("-subsystem", "console");
+        if (m_context.getTriple().isArch64Bit()) {
+            auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
+            linker.addPath("-L", sysLibPath);
+        } else {
+            fatalError("Building 32bit not supported");
+        }
+
+        for (const auto& obj : objFiles) {
+            linker.addPath(obj);
+        }
+
+        linker.addArg("-lmsvcrt");
+    } else {
+        fatalError("Compilation not this platform supported");
+    }
+
+    linker.addPath("-o", output);
+    if (linker.execute() != EXIT_SUCCESS) {
+        fatalError("Failed generate '"s + output.string() + "'");
+    }
 }
 
 // Compile
 
 void Driver::compileSources() {
-    const auto& sources = m_context.getInputFiles(Context::FileType::Source);
-    m_modules.reserve(sources.size());
+    const auto& sources = getInputs(Context::FileType::Source);
+    m_modules.reserve(m_modules.size() + sources.size());
     for (const auto& source : sources) {
-        auto path = m_context.resolvePath(source).string();
-
         string included;
-        auto ID = m_context.getSourceMrg().AddIncludeFile(path, {}, included);
+        auto ID = m_context.getSourceMrg().AddIncludeFile(source.string(), {}, included);
         if (ID == ~0U) {
-            fatalError("Failed to load '"s + path + "'");
+            fatalError("Failed to load '"s + source.string() + "'");
         }
 
-        compileSource(path, ID);
+        compileSource(source, ID);
     }
 }
 

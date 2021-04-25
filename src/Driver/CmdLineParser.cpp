@@ -40,12 +40,11 @@ void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
     if (arg == "-v") {
         m_context.setVerbose(true);
     } else if (arg == "-o") {
-        auto next = index + 1;
-        if (next >= args.size()) {
+        index++;
+        if (index >= args.size()) {
             showError("output file path missing.");
         }
-        m_context.setOutputFilePath(args[next]);
-        index = next;
+        m_context.setOutputFilePath(args[index]);
     } else if (arg == "-m32") {
         auto triple = m_context.getTriple();
         m_context.setTriple(triple.get32BitArchVariant());
@@ -74,14 +73,42 @@ void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
         m_context.setOutputType(Context::OutputType::LLVM);
     } else if (arg == "-g") {
         m_context.setDebugBuild(true);
+    } else if (arg == "--toolchain") {
+        index++;
+        if (index > args.size()) {
+            showError("Toolchain path is missing");
+        }
+        processToolchainPath(args[index]);
     } else {
         showError("Unrecognized option "s + string(arg) + ".");
     }
 }
 
+void CmdLineParser::processToolchainPath(const fs::path& path) noexcept {
+    if (path.is_absolute()) {
+        if (fs::exists(path)) {
+            m_context.getToolchain().setBasePath(path);
+            return;
+        }
+        showError("Toolchain path not found");
+    }
+
+    if (auto rel = fs::absolute(m_context.getCompilerPath() / path); fs::exists(rel)) {
+        m_context.getToolchain().setBasePath(rel);
+        return;
+    }
+
+    if (auto rel = fs::absolute(m_context.getWorkingDir() / path); fs::exists(rel)) {
+        m_context.getToolchain().setBasePath(rel);
+        return;
+    }
+
+    fatalError("Toolchain path not found");
+}
+
+
 void CmdLineParser::showHelp() noexcept {
     // TODO in new *near* future
-    // -toolchain <dir> Use the llvm toolchain at the given directory
     // -I <dir>         Add directory to include search path
     // -L <dir>         Add directory to library search path
     // -g               Generate source-level debug information
@@ -90,16 +117,17 @@ void CmdLineParser::showHelp() noexcept {
 USAGE: lbc [options] <inputs>
 
 OPTIONS:
-    --help     Display available options
-    --version  Show version information
-    -v         Show verbose output
-    -c         Only run compile and assemble steps
-    -S         Only run compilation steps
-    -emit-llvm Use the LLVM representation for assembler and object files
-    -o <file>  Write output to <file>
-    -O<number> Set optimization. Valid options: O0, OS, O1, O2, O3
-    -m32       Generate 32bit i386 code
-    -m64       Generate 64bit x86-64 code
+    --help           Display available options
+    --version        Show version information
+    -v               Show verbose output
+    -c               Only run compile and assemble steps
+    -S               Only execute compilation steps
+    -emit-llvm       Use the LLVM representation for assembler and object files
+    -o <file>        Write output to <file>
+    -O<number>       Set optimization. Valid options: O0, OS, O1, O2, O3
+    -m32             Generate 32bit i386 code
+    -m64             Generate 64bit x86-64 code
+    -toolchain <Dir> Path to LLVM toolchain
 )HELP";
     std::exit(EXIT_SUCCESS);
 }

@@ -3,8 +3,8 @@
 //
 #pragma once
 #include "pch.h"
-#include "Lexer/Lexer.h"
 #include "Ast/Ast.def.h"
+#include "Lexer/Lexer.h"
 
 namespace lbc {
 
@@ -12,7 +12,7 @@ class Context;
 enum class TokenKind;
 AST_FORWARD_DECLARE()
 
-class Parser final: private NonCopyable {
+class Parser final : private NonCopyable {
 public:
     Parser(Context& context, unsigned int fileId);
     unique_ptr<AstProgram> parse();

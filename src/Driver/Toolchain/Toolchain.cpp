@@ -6,13 +6,8 @@
 
 using namespace lbc;
 
-void Toolchain::setBasePath(fs::path /*path*/) {
-    // TODO
-    fatalError("Setting toolchain basepath is not implemented");
-}
-
 ToolTask Toolchain::createTask(ToolKind kind) {
-    return ToolTask(kind, getPath(kind));
+    return ToolTask(m_context, kind, getPath(kind));
 }
 
 #if __APPLE__ || __linux__ || __unix__

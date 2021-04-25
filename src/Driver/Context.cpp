@@ -120,65 +120,42 @@ void Context::setOutputFilePath(const fs::path& path) {
     }
 }
 
-fs::path Context::resolveOutputPath(const fs::path& path, const string& ext, bool single, bool final) const {
+fs::path Context::resolveOutputPath(const fs::path& path, const string& ext) const {
+    if (!fs::exists(path)) {
+        fatalError("File '"s + path.string() + "' not found");
+    }
+    if (!path.is_absolute()) {
+        fatalError("Path '"s + path.string() + "' is not absolute");
+    }
+    if (fs::is_directory(path)) {
+        fatalError("Path '"s + path.string() + "' is not a file");
+    }
+
     if (m_outputFilePath.empty()) {
         fs::path output{ path };
         output.replace_extension(ext);
-        if (!output.is_absolute()) {
-            output = fs::absolute(m_workingDir / output);
-        }
-        fs::create_directories(output.parent_path());
         return output;
     }
 
-    if (fs::is_directory(m_outputFilePath) || m_outputFilePath.filename().empty()) {
-        fs::path relative = fs::relative(path, m_workingDir);
-        relative.replace_extension(ext);
-        auto fullPath = fs::absolute(m_outputFilePath / relative);
-        fs::create_directories(fullPath.parent_path());
-        return fullPath;
-    }
-
-    if (!final) {
-        fs::path relative = fs::relative(path, m_workingDir);
-        relative.replace_extension(ext);
-        auto fullPath = fs::absolute(m_workingDir / relative);
-        fs::create_directories(fullPath.parent_path());
-        return fullPath;
-    }
-
-    if (!single) {
-        fatalError("Output path '"s + m_outputFilePath.string() + "' can have only one input file");
-    }
-
-    fs::create_directories(m_outputFilePath.parent_path());
-    return m_outputFilePath;
+    fatalError("output path handling is not implemented");
 }
 
-fs::path Context::resolvePath(const fs::path& path) const {
+fs::path Context::resolveFilePath(const fs::path& path) const {
     if (path.is_absolute()) {
-        if (validateFile(path, true)) {
+        if (validateFile(path)) {
             return path;
         }
+    } else if (auto relToWorkingDir = fs::absolute(m_workingDir / path); validateFile(relToWorkingDir)) {
+        return relToWorkingDir;
+    } else if (auto relToCompiler = fs::absolute(m_compilerPath / path); validateFile(relToCompiler)) {
+        return relToCompiler;
     }
 
-    auto p = fs::absolute(m_workingDir / path);
-    if (validateFile(p, false)) {
-        return p;
-    }
-
-    if (validateFile(path, true)) {
-        return path;
-    }
-
-    llvm_unreachable("file resolving failed");
+    fatalError("File '"s + path.string() + "' not found");
 }
 
-[[nodiscard]] bool Context::validateFile(const fs::path& path, bool mustExist) {
+[[nodiscard]] bool Context::validateFile(const fs::path& path) {
     if (!fs::exists(path)) {
-        if (mustExist) {
-            fatalError("File '"s + path.string() + "' not found");
-        }
         return false;
     }
 

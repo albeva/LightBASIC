@@ -8,7 +8,7 @@ namespace lbc {
 
 class TypeRoot;
 
-class Symbol final: private NonCopyable {
+class Symbol final : private NonCopyable {
 public:
     explicit Symbol(const string_view& name, const TypeRoot* type = nullptr)
     : m_name{ name }, m_type{ type }, m_alias{ name } {}

@@ -21,8 +21,8 @@ public:
 
     NonCopyable(NonCopyable&&) = delete;
     NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator= (NonCopyable&&) = delete;
-    NonCopyable& operator= (const NonCopyable&) = delete;
+    NonCopyable& operator=(NonCopyable&&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
 inline llvm::StringRef view_to_stringRef(const string_view& view) {
@@ -56,8 +56,8 @@ public:
 
     ValueRestorer(ValueRestorer&&) = delete;
     ValueRestorer(const ValueRestorer&) = delete;
-    ValueRestorer& operator= (ValueRestorer&&) = delete;
-    ValueRestorer& operator= (const ValueRestorer&) = delete;
+    ValueRestorer& operator=(ValueRestorer&&) = delete;
+    ValueRestorer& operator=(const ValueRestorer&) = delete;
 
     // members
 private:

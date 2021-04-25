@@ -7,13 +7,13 @@ fs::path Toolchain::getPath(ToolKind tool) {
     fs::path path;
     switch (tool) {
     case ToolKind::Optimizer:
-        path = "/usr/local/bin/opt";
+        path = m_basePath / "opt";
         break;
     case ToolKind::Assembler:
-        path = "/usr/local/bin/llc";
+        path = m_basePath / "llc";
         break;
     case ToolKind::Linker:
-        path = "/usr/bin/ld";
+        path = m_basePath / "ld";
         break;
     default:
         llvm_unreachable("Invalid ToolKind ID");

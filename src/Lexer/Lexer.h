@@ -10,7 +10,7 @@ namespace lbc {
 class Context;
 enum class TokenKind;
 
-class Lexer final: private NonCopyable {
+class Lexer final : private NonCopyable {
 public:
     Lexer(Context& context, unsigned fileID);
 

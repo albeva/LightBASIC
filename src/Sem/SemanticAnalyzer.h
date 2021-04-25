@@ -13,7 +13,8 @@ class SymbolTable;
 class TypeRoot;
 class Context;
 
-class SemanticAnalyzer final : private NonCopyable, public AstVisitor<SemanticAnalyzer> {
+class SemanticAnalyzer final : private NonCopyable
+, public AstVisitor<SemanticAnalyzer> {
 public:
     SemanticAnalyzer(Context& context, unsigned fileId);
 

@@ -37,7 +37,7 @@ enum class TokenKind;
  *
  * It uses llvm custom rtti system
  */
-class TypeRoot: private NonCopyable {
+class TypeRoot : private NonCopyable {
 public:
     [[nodiscard]] TypeKind kind() const { return m_kind; }
 

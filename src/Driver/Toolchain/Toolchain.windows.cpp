@@ -7,19 +7,19 @@ fs::path Toolchain::getPath(ToolKind tool) {
     fs::path path;
     switch (tool) {
     case ToolKind::Optimizer:
-        path = "c:/dev/bin/opt.exe";
+        path = m_basePath / "bin" / "opt.exe";
         break;
     case ToolKind::Assembler:
-        path = "c:/dev/bin/llc.exe";
+        path = m_basePath / "bin" / "llc.exe";
         break;
     case ToolKind::Linker:
-        path = "c:/dev/bin/ld.exe";
+        path = m_basePath / "bin" / "ld.exe";
         break;
     default:
         llvm_unreachable("Invalid ToolKind ID");
     }
     if (!fs::exists(path)) {
-        fatalError("ToolKind "s + path.string() + " not found!");
+        fatalError("Tool '"s + path.string() + "' not found!");
     }
     return path;
 }

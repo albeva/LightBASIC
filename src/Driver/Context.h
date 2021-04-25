@@ -10,7 +10,7 @@ namespace lbc {
  * Hold information about compilation process
  * configuration, input and expected outputs
  */
-class Context final: private NonCopyable {
+class Context final : private NonCopyable {
 public:
     enum class CompilationTarget {
         Executable,
@@ -94,33 +94,22 @@ public:
     }
 
     /**
-     * Validate that file exists and is a valid readable file
-     *
-     * @param path to the file to validate
-     * @param mustExist if file does not exist lbc will quit with an error
-     * @return true if file is valid
-     */
-    [[nodiscard]] static bool validateFile(const fs::path& path, bool mustExist);
-
-    /**
      * Resolve input file path to corresponding output path.
      *
-     * This will create any missing directories.
-     *
      * @param path input file that exists and needs output to be mapped
-     * @param ext favoured extension for the output
-     * @param single is this a single file being emitted?
-     * @param final is this final output, or intermediary
+     * @param ext new extension for the output file
      * @return final path for the output path
      */
-    [[nodiscard]] fs::path resolveOutputPath(const fs::path& path, const string& ext, bool single, bool final) const;
+    [[nodiscard]] fs::path resolveOutputPath(const fs::path& path, const string& ext) const;
 
     /**
      * Resolve input type taking into account currently defined paths
      */
-    [[nodiscard]] fs::path resolvePath(const fs::path& path) const;
+    [[nodiscard]] fs::path resolveFilePath(const fs::path& path) const;
 
 private:
+    [[nodiscard]] static bool validateFile(const fs::path& path);
+
     bool m_verbose = false;
     OutputType m_outputType = OutputType::Native;
     CompilationTarget m_compilationTarget = CompilationTarget::Executable;
@@ -129,7 +118,7 @@ private:
 
     std::array<std::vector<fs::path>, fileTypeCount> m_inputFiles{};
 
-    Toolchain m_toolchain{};
+    Toolchain m_toolchain{ *this };
     fs::path m_workingDir{};
     fs::path m_compilerPath{};
     fs::path m_outputFilePath{};

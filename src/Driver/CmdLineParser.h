@@ -12,7 +12,7 @@ class Context;
  * Parse given commandline arguments
  * and build up the context
  */
-class CmdLineParser final: private NonCopyable {
+class CmdLineParser final : private NonCopyable {
 public:
     using Args = llvm::ArrayRef<const char*>;
 
@@ -21,6 +21,7 @@ public:
 
 private:
     void processOption(const Args& args, size_t& index) noexcept;
+    void processToolchainPath(const fs::path& path) noexcept;
 
     [[noreturn]] static void showError(const string& message) noexcept;
     [[noreturn]] static void showHelp() noexcept;
