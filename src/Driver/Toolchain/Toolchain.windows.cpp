@@ -1,7 +1,6 @@
 //
 // Created by Albert Varaksin on 07/02/2021.
 //
-#include "Toolchain.h"
 
 fs::path Toolchain::getPath(ToolKind tool) {
     fs::path path;

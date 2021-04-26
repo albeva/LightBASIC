@@ -26,6 +26,7 @@
 		50FE7AAE262E006100564218 /* CodePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50FE7A96262E006100564218 /* CodePrinter.cpp */; };
 		50FE7AAF262E006100564218 /* AstPrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50FE7A9A262E006100564218 /* AstPrinter.cpp */; };
 		50FE7AB0262E006100564218 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50FE7A9B262E006100564218 /* main.cpp */; };
+		BFC44F062636CD32003121C6 /* TempFileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BFC44F042636CD32003121C6 /* TempFileCache.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -88,6 +89,8 @@
 		50FE7A9A262E006100564218 /* AstPrinter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AstPrinter.cpp; sourceTree = "<group>"; };
 		50FE7A9B262E006100564218 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		50FE7AB8262E030F00564218 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
+		BFC44F042636CD32003121C6 /* TempFileCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = TempFileCache.cpp; sourceTree = "<group>"; };
+		BFC44F052636CD32003121C6 /* TempFileCache.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TempFileCache.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -158,6 +161,8 @@
 				50FE7A6F262E006100564218 /* Context.h */,
 				50FE7A73262E006100564218 /* Driver.cpp */,
 				50FE7A70262E006100564218 /* Driver.h */,
+				BFC44F042636CD32003121C6 /* TempFileCache.cpp */,
+				BFC44F052636CD32003121C6 /* TempFileCache.h */,
 				50FE7A71262E006100564218 /* README.md */,
 			);
 			path = Driver;
@@ -343,6 +348,7 @@
 				50FE7AAB262E006100564218 /* Type.cpp in Sources */,
 				50FE7AAC262E006100564218 /* Ast.cpp in Sources */,
 				50FE7AA1262E006100564218 /* ToolTask.cpp in Sources */,
+				BFC44F062636CD32003121C6 /* TempFileCache.cpp in Sources */,
 				50FE7AAE262E006100564218 /* CodePrinter.cpp in Sources */,
 				50FE7AA8262E006100564218 /* SymbolTable.cpp in Sources */,
 				50FE7AAA262E006100564218 /* Parser.cpp in Sources */,

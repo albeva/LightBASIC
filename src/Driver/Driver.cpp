@@ -8,11 +8,10 @@
 #include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
+#include "TempFileCache.h"
 #include "Toolchain/ToolTask.h"
 #include "Toolchain/Toolchain.h"
-#include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Support/FileSystem.h>
-#include <llvm/Support/Host.h>
 
 using namespace lbc;
 
@@ -50,7 +49,7 @@ int Driver::execute() {
         fatalError("Compiling to assembly not implemented");
     }
 
-    removeTemporaryFiles();
+    TempFileCache::removeTemporaryFiles();
     return EXIT_SUCCESS;
 }
 
@@ -59,28 +58,12 @@ int Driver::execute() {
  * ansure they exost and store in driver paths structure
  */
 void Driver::processInputs() {
-    for (auto index = 0; index < Context::fileTypeCount; index++) {
+    for (size_t index = 0; index < Context::fileTypeCount; index++) {
         auto type = static_cast<Context::FileType>(index);
         auto& dst = getInputs(type);
         for (const auto& path : m_context.getInputFiles(type)) {
             auto resolved = m_context.resolveFilePath(path);
             dst.emplace_back(resolved);
-        }
-    }
-}
-
-fs::path Driver::createUniquePath(string suffx) {
-    llvm::SmallVector<char, 128> output{};
-    llvm::sys::fs::createUniquePath("lbc-%%-%%-%%-%%-%%-%%"s + suffx, output, true);
-    auto path = fs::path(output.begin(), output.end());
-    m_tempFiles.emplace_back(path);
-    return path;
-}
-
-void Driver::removeTemporaryFiles() {
-    for (const auto& temp : m_tempFiles) {
-        if (fs::exists(temp)) {
-            fs::remove(temp);
         }
     }
 }
@@ -113,9 +96,8 @@ void Driver::emitBitCode() {
     auto& bcFiles = getInputs(Context::FileType::BitCode);
     bcFiles.reserve(bcFiles.size() + m_modules.size());
 
-    bool single = m_modules.size() == 1;
     for (auto& module : m_modules) {
-        auto output = createUniquePath(".bc");
+        auto output = TempFileCache::createUniquePath(".bc");
 
         std::error_code errors{};
         llvm::raw_fd_ostream stream{ output.string(), errors, llvm::sys::fs::OpenFlags::OF_None };
@@ -135,7 +117,7 @@ void Driver::emitObjects() {
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
     task.reserve(4);
     for (const auto& input : bcFiles) {
-        auto output = createUniquePath(".obj");
+        auto output = TempFileCache::createUniquePath(".obj");
 
         task.reset();
         task.addArg("-filetype=obj");

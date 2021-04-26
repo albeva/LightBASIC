@@ -64,12 +64,11 @@ int ToolTask::execute() {
     }
 
     if (m_context.getVerbose()) {
-        std::ostringstream commandLine;
-        commandLine << m_path.string();
+        std::cout << m_path.string();
         for (const auto& arg : m_args) {
-            commandLine << " " << arg;
+            std::cout << " " << arg;
         }
-        std::cout << commandLine.str() << std::endl;
+        std::cout << std::endl;
     }
 
     return llvm::sys::ExecuteAndWait(m_path.string(), args);

@@ -10,6 +10,7 @@ playground.xcworkspace
 
 # Visual Studio
 .vs/
+.vscode/
 
 # LLVM intermediate files
 *.ll
