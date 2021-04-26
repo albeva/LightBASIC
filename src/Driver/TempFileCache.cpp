@@ -9,13 +9,22 @@
 using namespace lbc;
 
 namespace {
-std::vector<fs::path> tempFiles{}; // NOLINT
-llvm::SmallVector<char, 255> filenameCache{};  // NOLINT
+std::vector<fs::path> tempFiles{};            // NOLINT
+llvm::SmallVector<char, 255> filenameCache{}; // NOLINT
 } // namespace
 
 fs::path TempFileCache::createUniquePath(const string& suffix) {
     filenameCache.clear();
-    llvm::sys::fs::createUniquePath("lbc-%%-%%-%%-%%-%%-%%"s + suffix, filenameCache, true);
+    llvm::sys::fs::createUniquePath("lbc-%%%%%%%%%%%%"s + suffix, filenameCache, true);
+    return tempFiles.emplace_back(filenameCache.begin(), filenameCache.end());
+}
+
+fs::path TempFileCache::createUniquePath(const fs::path& file, const string& suffix) {
+    filenameCache.clear();
+    llvm::sys::fs::createUniquePath(
+        llvm::Twine("lbc-") + file.stem().string() + "-%%%%%%%%%%%%" + suffix,
+        filenameCache,
+        true);
     return tempFiles.emplace_back(filenameCache.begin(), filenameCache.end());
 }
 

@@ -9,5 +9,6 @@
 
 namespace lbc::TempFileCache {
 [[nodiscard]] fs::path createUniquePath(const string& suffix);
+[[nodiscard]] fs::path createUniquePath(const fs::path& file, const string& suffix);
 void removeTemporaryFiles();
 } // namespace lbc::TempFileCache
