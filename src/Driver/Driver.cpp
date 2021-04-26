@@ -75,7 +75,7 @@ Driver::Artefact* Driver::findArtifact(Context::FileType type, const fs::path& p
         return v.path == path;
     });
     if (result != inputs.end()) {
-        return result.base();
+        return &*result;
     }
     return nullptr;
 }
