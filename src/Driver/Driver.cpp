@@ -72,7 +72,7 @@ void Driver::processInputs() {
 Driver::Artefact* Driver::findArtifact(Context::FileType type, const fs::path& path) {
     auto& inputs = getArtifacts(type);
     auto result = std::find_if(inputs.begin(), inputs.end(), [&](const Artefact& v) {
-        return v.path == path;
+        return v.m_path == path;
     });
     if (result != inputs.end()) {
         return &*result;
@@ -113,7 +113,7 @@ void Driver::emitLLVMIr(bool temporary) {
         stream.flush();
         stream.close();
 
-        irFiles.emplace_back(file->origin, output);
+        irFiles.emplace_back(file->m_origin, output);
     }
 }
 
@@ -138,7 +138,7 @@ void Driver::emitBitCode(bool temporary) {
         stream.flush();
         stream.close();
 
-        bcFiles.emplace_back(file->origin, output);
+        bcFiles.emplace_back(file->m_origin, output);
     }
 }
 
@@ -157,13 +157,13 @@ void Driver::emitAssembly(bool temporary) {
         task.reset();
         task.addArg("-filetype=asm");
         task.addPath("-o", output);
-        task.addPath(input.path.string());
+        task.addPath(input.m_path.string());
 
         if (task.execute() != EXIT_SUCCESS) {
             fatalError("Failed emit '"s + output.string() + "'");
         }
 
-        asmFiles.emplace_back(input.origin, output);
+        asmFiles.emplace_back(input.m_origin, output);
     }
 }
 
@@ -182,13 +182,13 @@ void Driver::emitObjects(bool temporary) {
         task.reset();
         task.addArg("-filetype=obj");
         task.addPath("-o", output);
-        task.addPath(input.path.string());
+        task.addPath(input.m_path.string());
 
         if (task.execute() != EXIT_SUCCESS) {
             fatalError("Failed emit '"s + output.string() + "'");
         }
 
-        objFiles.emplace_back(input.origin, output);
+        objFiles.emplace_back(input.m_origin, output);
     }
 }
 
@@ -200,7 +200,7 @@ void Driver::emitExecutable() {
     if (m_context.getTriple().isOSWindows()) {
         if (output.empty()) {
             const auto& sources = getArtifacts(Context::FileType::Source);
-            output = m_context.resolveOutputPath(sources[0].path, "exe");
+            output = m_context.resolveOutputPath(sources[0].m_path, "exe");
         }
 
         linker.addArg("-subsystem", "console");
@@ -212,21 +212,21 @@ void Driver::emitExecutable() {
         }
 
         for (const auto& obj : objFiles) {
-            linker.addPath(obj.path);
+            linker.addPath(obj.m_path);
         }
 
         linker.addArg("-lmsvcrt");
     } else if (m_context.getTriple().isMacOSX()) {
         if (output.empty()) {
             const auto& sources = getArtifacts(Context::FileType::Source);
-            output = sources[0].path.parent_path() / "a.out";
+            output = sources[0].m_path.parent_path() / "a.out";
         }
         linker.addPath("-L", "/usr/local/lib");
         linker.addPath("-syslibroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk");
         linker.addArg("-lSystem");
         linker.addPath("-o", output);
         for (const auto& obj : objFiles) {
-            linker.addPath(obj.path);
+            linker.addPath(obj.m_path);
         }
     } else {
         fatalError("Compilation not this platform not supported");
@@ -245,12 +245,12 @@ void Driver::compileSources() {
     m_modules.reserve(m_modules.size() + sources.size());
     for (const auto& source : sources) {
         string included;
-        auto ID = m_context.getSourceMrg().AddIncludeFile(source.path.string(), {}, included);
+        auto ID = m_context.getSourceMrg().AddIncludeFile(source.m_path.string(), {}, included);
         if (ID == ~0U) {
-            fatalError("Failed to load '"s + source.path.string() + "'");
+            fatalError("Failed to load '"s + source.m_path.string() + "'");
         }
 
-        compileSource(source.path, ID);
+        compileSource(source.m_path, ID);
     }
 }
 

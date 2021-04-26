@@ -30,20 +30,20 @@ private:
     void compileSource(const fs::path& path, unsigned ID);
 
     struct Origin final { // NOLINT
-        Context::FileType type;
-        size_t index;
+        Context::FileType m_type;
+        size_t m_index;
         Origin(Context::FileType type, size_t index)
-        : type{ type }, index{ index } {}
+        : m_type{ type }, m_index{ index } {}
     };
 
     struct Artefact final { // NOLINT
-        Origin origin;
-        fs::path path;
+        Origin m_origin;
+        fs::path m_path;
         Artefact(Context::FileType type, size_t index, fs::path path)
-        : origin{ type, index }, path{ std::move(path) } {}
+        : m_origin{ type, index }, m_path{ std::move(path) } {}
 
         Artefact(Origin origin, fs::path path)
-        : origin{ origin }, path{ std::move(path) } {}
+        : m_origin{ origin }, m_path{ std::move(path) } {}
     };
 
     std::vector<Artefact>& getArtifacts(Context::FileType type) {
@@ -51,7 +51,7 @@ private:
     }
 
     const fs::path& getOrigin(const Artefact& artefact) {
-        return getArtifacts(artefact.origin.type)[artefact.origin.index].path;
+        return getArtifacts(artefact.m_origin.m_type)[artefact.m_origin.m_index].m_path;
     }
 
     Artefact* findArtifact(Context::FileType type, const fs::path&);

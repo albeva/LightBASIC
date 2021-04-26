@@ -47,7 +47,7 @@ public:
         }
         return m_llvmType;
     }
-
+    virtual ~TypeRoot() = default;
     [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind);
 
 protected:
@@ -223,7 +223,7 @@ private:
 
 /**
  * ZString zero terminated string literal.
- * Equivelant to C `char*`
+ * Equivalent to C `char*`
  */
 class TypeZString final : public TypeRoot {
 public:
@@ -238,6 +238,5 @@ public:
 protected:
     [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
 };
-
 
 } // namespace lbc

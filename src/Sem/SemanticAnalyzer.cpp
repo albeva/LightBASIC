@@ -42,7 +42,7 @@ void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
 void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
     auto* symbol = createNewSymbol(ast->token.get());
 
-    // type expr?
+    // m_type expr?
     const TypeRoot* type = nullptr;
     if (ast->typeExpr) {
         visitTypeExpr(ast->typeExpr.get());
@@ -149,7 +149,7 @@ void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
     }
 
     if (symbol->type() == nullptr) {
-        fatalError("Identifier "s + string(name) + " has unresolved type");
+        fatalError("Identifier "s + string(name) + " has unresolved m_type");
     }
 
     ast->symbol = symbol;
@@ -163,7 +163,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
 
     const auto* type = dyn_cast<TypeFunction>(symbol->type());
     if (type == nullptr) {
-        fatalError("Identifier "s + string(symbol->name()) + " is not a callable type"s);
+        fatalError("Identifier "s + string(symbol->name()) + " is not a callable m_type"s);
     }
 
     const auto& paramTypes = type->paramTypes();
@@ -204,7 +204,7 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
         ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
         break;
     default:
-        fatalError("Unsupported literal type");
+        fatalError("Unsupported literal m_type");
     }
 }
 
