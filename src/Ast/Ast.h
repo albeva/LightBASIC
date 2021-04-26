@@ -4,12 +4,11 @@
 #pragma once
 #include "pch.h"
 #include "Ast.def.h"
+#include "Lexer/Token.h"
+#include "Symbol/SymbolTable.h"
 
 namespace lbc {
 
-class Token;
-class Symbol;
-class SymbolTable;
 class TypeRoot;
 AST_FORWARD_DECLARE()
 
@@ -32,7 +31,6 @@ enum class AstKind {
 class AstRoot : private NonCopyable {
 public:
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
-    virtual ~AstRoot();
     [[nodiscard]] AstKind kind() const { return m_kind; }
 
 private:
@@ -49,7 +47,6 @@ private:
 class AstStmt : public AstRoot {
 public:
     using AstRoot::AstRoot;
-    ~AstStmt() override;
 
     static bool classof(const AstRoot* ast) {
         return AST_STMT_RANGE(IS_AST_CLASSOF)
@@ -62,7 +59,6 @@ public:
 class AstDecl : public AstStmt {
 public:
     using AstStmt::AstStmt;
-    ~AstDecl() override;
 
     static bool classof(const AstRoot* ast){
         return AST_DECL_RANGE(IS_AST_CLASSOF)
@@ -78,7 +74,6 @@ public:
 class AstExpr : public AstRoot {
 public:
     using AstRoot::AstRoot;
-    ~AstExpr() override;
 
     static bool classof(const AstRoot* ast) {
         return AST_EXPR_RANGE(IS_AST_CLASSOF)
@@ -94,7 +89,6 @@ public:
 class AstAttr : public AstRoot {
 public:
     using AstRoot::AstRoot;
-    ~AstAttr() override;
 
     static bool classof(const AstRoot* ast) {
         return AST_ATTR_RANGE(IS_AST_CLASSOF)
@@ -107,7 +101,6 @@ public:
 class AstType : public AstRoot {
 public:
     using AstRoot::AstRoot;
-    ~AstType() override;
 
     static bool classof(const AstRoot* ast) {
         return AST_TYPE_RANGE(IS_AST_CLASSOF)
@@ -118,17 +111,15 @@ public:
 
 #undef IS_AST_CLASSOF
 
-#define DECLARE_AST(KIND, BASE)                   \
-    class Ast##KIND final : public Ast##BASE {    \
-    public:                                       \
-        using Base = Ast##BASE;                   \
-        Ast##KIND();                              \
-        ~Ast##KIND();                             \
-        static bool classof(const AstRoot* ast) { \
-            return ast->kind() == AstKind::KIND;  \
-        }                                         \
-        static unique_ptr<Ast##KIND> create() {   \
-            return make_unique<Ast##KIND>();      \
+#define DECLARE_AST(KIND, BASE)                    \
+    class Ast##KIND final : public Ast##BASE {     \
+    public:                                        \
+        Ast##KIND(): Ast##BASE{ AstKind::KIND } {} \
+        static bool classof(const AstRoot* ast) {  \
+            return ast->kind() == AstKind::KIND;   \
+        }                                          \
+        static unique_ptr<Ast##KIND> create() {    \
+            return make_unique<Ast##KIND>();       \
         }
 
 #define DECLARE_END \

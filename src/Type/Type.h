@@ -50,8 +50,6 @@ public:
 
     [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind);
 
-    virtual ~TypeRoot() = default;
-
 protected:
     explicit TypeRoot(TypeKind kind) : m_kind{ kind } {}
 

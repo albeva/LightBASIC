@@ -3,23 +3,7 @@
 //
 #include "Ast.h"
 #include "AstVisitor.h"
-#include "Lexer/Token.h"
-#include "Symbol/Symbol.h"
-#include "Symbol/SymbolTable.h"
 using namespace lbc;
-
-AstRoot::~AstRoot() = default;
-AstStmt::~AstStmt() = default;
-AstExpr::~AstExpr() = default;
-AstAttr::~AstAttr() = default;
-AstDecl::~AstDecl() = default;
-AstType::~AstType() = default;
-
-#define IMPLEMENT_AST(KIND)                           \
-    Ast##KIND::Ast##KIND() : Base{ AstKind::KIND } {} \
-    Ast##KIND::~Ast##KIND() = default;
-
-AST_CONTENT_NODES(IMPLEMENT_AST)
 
 const Token* AstAttributeList::getStringLiteral(const string_view& key) const {
     for (const auto& attr : attribs) {

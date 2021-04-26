@@ -3,10 +3,9 @@
 //
 #pragma once
 #include "pch.h"
+#include "Symbol.h"
 
 namespace lbc {
-
-class Symbol;
 
 class SymbolTable final : private NonCopyable {
 public:
