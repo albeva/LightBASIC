@@ -58,7 +58,7 @@ public:
     void setDebugBuild(bool debug) { m_isDebug = debug; }
 
     void setVerbose(bool verbose) { m_verbose = verbose; }
-    [[nodiscard]] bool getVerbose() const { return m_verbose; }
+    [[nodiscard]] bool isVerbose() const { return m_verbose; }
 
     void addInputFile(const fs::path& path);
     [[nodiscard]] const std::vector<fs::path>& getInputFiles(FileType type) const;

@@ -63,7 +63,7 @@ int ToolTask::execute() {
         args.emplace_back(arg);
     }
 
-    if (m_context.getVerbose()) {
+    if (m_context.isVerbose()) {
         std::cout << m_path.string();
         for (const auto& arg : m_args) {
             std::cout << " " << arg;

@@ -196,43 +196,66 @@ void Driver::emitExecutable() {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
     auto objFiles = getArtifacts(Context::FileType::Object);
     auto output = m_context.getOutputPath();
+    const auto& triple = m_context.getTriple();
 
-    if (m_context.getTriple().isOSWindows()) {
+    if (triple.isArch32Bit()) {
+        fatalError("32bit is not implemented yet");
+    }
+
+    if (triple.isOSWindows()) {
         if (output.empty()) {
             const auto& sources = getArtifacts(Context::FileType::Source);
             output = m_context.resolveOutputPath(sources[0].m_path, "exe");
         }
 
-        linker.addArg("-subsystem", "console");
-        if (m_context.getTriple().isArch64Bit()) {
-            auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
-            linker.addPath("-L", sysLibPath);
-        } else {
-            fatalError("Building 32bit not supported");
-        }
+        auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
+        linker
+            .addArg("-subsystem", "console")
+            .addPath("-L", sysLibPath);
 
         for (const auto& obj : objFiles) {
             linker.addPath(obj.m_path);
         }
 
         linker.addArg("-lmsvcrt");
-    } else if (m_context.getTriple().isMacOSX()) {
+    } else if (triple.isMacOSX()) {
         if (output.empty()) {
-            const auto& sources = getArtifacts(Context::FileType::Source);
-            output = sources[0].m_path.parent_path() / "a.out";
+            output = m_context.getWorkingDir() / "a.out";
         }
-        linker.addPath("-L", "/usr/local/lib");
-        linker.addPath("-syslibroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk");
-        linker.addArg("-lSystem");
-        linker.addPath("-o", output);
+
+        linker
+            .addPath("-L", "/usr/local/lib")
+            .addPath("-syslibroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
+            .addArg("-lSystem")
+            .addPath("-o", output);
+
         for (const auto& obj : objFiles) {
             linker.addPath(obj.m_path);
         }
+    } else if (triple.isOSLinux()) {
+        if (output.empty()) {
+            output = m_context.getWorkingDir() / "a.out";
+        }
+
+        string linuxSysPath = "/usr/lib/x86_64-linux-gnu";
+        linker
+            .addArg("-m", "elf_x86_64")
+            .addArg("-dynamic-linker", "/lib64/ld-linux-x86-64.so.2")
+            .addArg("-L", "/usr/lib")
+            .addArg(linuxSysPath + "/crt1.o")
+            .addArg(linuxSysPath + "/crti.o")
+            .addPath("-o", output);
+
+        for (const auto& obj : objFiles) {
+            linker.addPath(obj.m_path);
+        }
+
+        linker.addArg("-lc");
+        linker.addArg(linuxSysPath + "/crtn.o");
     } else {
         fatalError("Compilation not this platform not supported");
     }
 
-    linker.addPath("-o", output);
     if (linker.execute() != EXIT_SUCCESS) {
         fatalError("Failed generate '"s + output.string() + "'");
     }
@@ -249,12 +272,14 @@ void Driver::compileSources() {
         if (ID == ~0U) {
             fatalError("Failed to load '"s + source.m_path.string() + "'");
         }
-
         compileSource(source.m_path, ID);
     }
 }
 
 void Driver::compileSource(const fs::path& path, unsigned int ID) {
+    if (m_context.isVerbose()) {
+        std::cout << "Compile: " << path << '\n';
+    }
     Parser parser{ m_context, ID };
     auto ast = parser.parse();
     if (!ast) {
