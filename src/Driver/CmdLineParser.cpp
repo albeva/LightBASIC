@@ -79,6 +79,14 @@ void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
             showError("Toolchain path is missing");
         }
         processToolchainPath(args[index]);
+    } else if (arg == "-main") {
+        index++;
+        if (index >= args.size()) {
+            showError("file path missing.");
+        }
+        m_context.setMainFile(args[index]);
+    } else if (arg == "-no-main") {
+        m_context.setImplicitMain(false);
     } else {
         showError("Unrecognized option "s + string(arg) + ".");
     }
@@ -128,6 +136,8 @@ OPTIONS:
     -m32             Generate 32bit i386 code
     -m64             Generate 64bit x86-64 code
     -toolchain <Dir> Path to LLVM toolchain
+    -main <file>     File which will have implicit `main` function
+    -no-main         Do not generate implicit `main` function
 )HELP";
     std::exit(EXIT_SUCCESS);
 }

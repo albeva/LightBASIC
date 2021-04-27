@@ -30,6 +30,7 @@ private:
     bool move(int steps);
     [[nodiscard]] bool isValid() const;
     [[nodiscard]] char peek(int ahead = 1) const;
+    void handleLineEnd();
 
     Context& m_context;
     unsigned m_fileID;
@@ -37,7 +38,6 @@ private:
     const char* m_input;
     char m_char;
     bool m_hasStmt;
-    void handleLineEnd();
 };
 
 } // namespace lbc

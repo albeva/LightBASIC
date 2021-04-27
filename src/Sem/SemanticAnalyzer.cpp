@@ -124,6 +124,9 @@ void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* ast) {
     ast->symbol = symbol;
 }
 
+void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* /*ast*/) {
+}
+
 void SemanticAnalyzer::visitAttributeList(AstAttributeList* ast) {
     for (auto& attrib : ast->attribs) {
         visitAttribute(attrib.get());

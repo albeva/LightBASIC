@@ -8,8 +8,11 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-Parser::Parser(Context& context, unsigned int fileId)
-: m_context{ context }, m_fileID{ fileId } {
+Parser::Parser(Context& context, unsigned int fileId, bool isMain)
+: m_context{ context },
+  m_fileID{ fileId },
+  m_isMain{ isMain },
+  m_scope{ Scope::Root } {
     m_lexer = make_unique<Lexer>(m_context, fileId);
     m_token = m_lexer->next();
     m_next = m_lexer->next();
@@ -42,7 +45,11 @@ unique_ptr<AstStmtList> Parser::stmtList() {
 }
 
 /**
- * statement = VAR
+ * statement = Attributes
+ *           | VAR
+ *           | DECLARE
+ *           | FUNCTION
+ *           | SUB
  *           | assignStmt
  *           | callStmt
  *           .
@@ -54,6 +61,9 @@ unique_ptr<AstStmt> Parser::statement() {
     case TokenKind::Declare:
         return declaration();
     case TokenKind::Identifier:
+        if (!m_isMain && m_scope == Scope::Root) {
+            error("expressions are not allowed at the top level");
+        }
         if (m_next && m_next->kind() == TokenKind::Assign) {
             return assignStmt();
         }
@@ -108,6 +118,9 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
 /**
  * DeclFirst = [ '[' attributeList '] ]
  *      ( VAR
+ *      | DECLARE
+ *      | FUNCTION
+ *      | SUB
  *      )
  *      .
  */
@@ -286,6 +299,11 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
 }
 
 //----------------------------------------
+// Function
+//----------------------------------------
+
+
+//----------------------------------------
 // Types
 //----------------------------------------
 
@@ -400,10 +418,10 @@ unique_ptr<Token> Parser::accept(TokenKind kind) {
 unique_ptr<Token> Parser::expect(TokenKind kind) {
     if (!match(kind)) {
         error(llvm::Twine("Expected '")
-                  .concat(view_to_stringRef(Token::description(kind)))
-                  .concat("' got '")
-                  .concat(view_to_stringRef(m_token->description()))
-                  .concat("'"));
+            + llvm::StringRef{ Token::description(kind) }
+            + "' got '"
+            + llvm::StringRef{ m_token->description() }
+            + "'");
     }
     return move();
 }
@@ -416,10 +434,15 @@ unique_ptr<Token> Parser::move() {
 }
 
 [[noreturn]] void Parser::error(const llvm::Twine& message) {
+    string output;
+    llvm::raw_string_ostream stream{ output };
+
     m_context.getSourceMrg().PrintMessage(
+        stream,
         m_token->loc(),
         llvm::SourceMgr::DK_Error,
         message,
         m_token->range());
-    std::exit(EXIT_FAILURE);
+
+    fatalError(output, false);
 }

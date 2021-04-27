@@ -38,7 +38,7 @@ void AstPrinter::visitExprStmt(AstExprStmt* ast) {
 }
 
 void AstPrinter::visitVarDecl(AstVarDecl* ast) {
-    m_os << indent() << "AstVarDecl \"" << view_to_stringRef(ast->token->lexeme()) << '\"' << '\n';
+    m_os << indent() << "AstVarDecl \"" << ast->token->lexeme() << '\"' << '\n';
     m_indent++;
     if (ast->attributes) {
         visitAttributeList(ast->attributes.get());
@@ -53,7 +53,7 @@ void AstPrinter::visitVarDecl(AstVarDecl* ast) {
 }
 
 void AstPrinter::visitFuncDecl(AstFuncDecl* ast) {
-    m_os << indent() << "AstFuncDecl \"" << view_to_stringRef(ast->token->lexeme()) << '\"' << '\n';
+    m_os << indent() << "AstFuncDecl \"" << ast->token->lexeme() << '\"' << '\n';
     m_indent++;
     if (ast->attributes) {
         visitAttributeList(ast->attributes.get());
@@ -70,13 +70,17 @@ void AstPrinter::visitFuncDecl(AstFuncDecl* ast) {
 }
 
 void AstPrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
-    m_os << indent() << "AstFuncParamDecl \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
+    m_os << indent() << "AstFuncParamDecl \"" << ast->token->lexeme() << '"' << '\n';
     m_indent++;
     if (ast->attributes) {
         visitAttributeList(ast->attributes.get());
     }
     visitTypeExpr(ast->typeExpr.get());
     m_indent--;
+}
+
+void AstPrinter::visitFuncStmt(AstFuncStmt*  /*ast*/) {
+    m_os << indent() << "AstFuncStmt";
 }
 
 void AstPrinter::visitAttributeList(AstAttributeList* ast) {
@@ -99,11 +103,11 @@ void AstPrinter::visitAttribute(AstAttribute* ast) {
 }
 
 void AstPrinter::visitTypeExpr(AstTypeExpr* ast) {
-    m_os << indent() << "AstTypeExpr \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
+    m_os << indent() << "AstTypeExpr \"" << ast->token->lexeme() << '"' << '\n';
 }
 
 void AstPrinter::visitIdentExpr(AstIdentExpr* ast) {
-    m_os << indent() << "AstIdentExpr \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
+    m_os << indent() << "AstIdentExpr \"" << ast->token->lexeme() << '"' << '\n';
 }
 
 void AstPrinter::visitCallExpr(AstCallExpr* ast) {
@@ -117,7 +121,7 @@ void AstPrinter::visitCallExpr(AstCallExpr* ast) {
 }
 
 void AstPrinter::visitLiteralExpr(AstLiteralExpr* ast) {
-    m_os << indent() << "AstLiteralExpr \"" << view_to_stringRef(ast->token->lexeme()) << '"' << '\n';
+    m_os << indent() << "AstLiteralExpr \"" << ast->token->lexeme() << '"' << '\n';
 }
 
 string AstPrinter::indent() const {

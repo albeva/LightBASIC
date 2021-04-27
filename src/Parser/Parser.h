@@ -14,10 +14,15 @@ AST_FORWARD_DECLARE()
 
 class Parser final : private NonCopyable {
 public:
-    Parser(Context& context, unsigned int fileId);
+    Parser(Context& context, unsigned int fileId, bool isMain);
     unique_ptr<AstProgram> parse();
 
 private:
+    enum class Scope {
+        Root,
+        Function
+    };
+
     unique_ptr<AstStmtList> stmtList();
     unique_ptr<AstStmt> statement();
     unique_ptr<AstExpr> expression();
@@ -61,6 +66,8 @@ private:
 
     Context& m_context;
     unsigned m_fileID;
+    bool m_isMain;
+    Scope m_scope;
     unique_ptr<Lexer> m_lexer;
     unique_ptr<Token> m_token;
     unique_ptr<Token> m_next;

@@ -165,3 +165,22 @@ fs::path Context::resolveFilePath(const fs::path& path) const {
 
     return true;
 }
+
+bool Context::isMainFile(const fs::path& file) const { // NOLINT
+    if (!m_implicitMain) {
+        return false;
+    }
+
+    if (auto main = m_mainPath) {
+        if (resolveFilePath(*main) == file) {
+            return true;
+        }
+    }
+
+    const auto& sources = getInputFiles(FileType::Source);
+    if (sources.empty()) {
+        return false;
+    }
+
+    return resolveFilePath(sources[0]) == file;
+}

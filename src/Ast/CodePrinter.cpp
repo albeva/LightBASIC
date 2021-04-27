@@ -66,7 +66,7 @@ void CodePrinter::visitAttribute(AstAttribute* ast) {
 }
 
 void CodePrinter::visitTypeExpr(AstTypeExpr* ast) {
-    m_os << view_to_stringRef(ast->token->lexeme());
+    m_os << ast->token->lexeme();
 }
 
 // Declarations
@@ -78,7 +78,7 @@ void CodePrinter::visitVarDecl(AstVarDecl* ast) {
     }
 
     m_os << "VAR ";
-    m_os << view_to_stringRef(ast->token->lexeme());
+    m_os << ast->token->lexeme();
 
     if (ast->typeExpr) {
         m_os << " AS ";
@@ -102,7 +102,7 @@ void CodePrinter::visitFuncDecl(AstFuncDecl* ast) {
     } else {
         m_os << "SUB ";
     }
-    m_os << view_to_stringRef(ast->token->lexeme());
+    m_os << ast->token->lexeme();
 
     if (!ast->paramDecls.empty()) {
         m_os << "(";
@@ -125,15 +125,19 @@ void CodePrinter::visitFuncDecl(AstFuncDecl* ast) {
 }
 
 void CodePrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
-    m_os << view_to_stringRef(ast->token->lexeme());
+    m_os << ast->token->lexeme();
     m_os << " AS ";
     visitTypeExpr(ast->typeExpr.get());
+}
+
+void CodePrinter::visitFuncStmt(AstFuncStmt* ast) {
+    m_os << indent() << "AstFuncStmt";
 }
 
 // Expressions
 
 void CodePrinter::visitIdentExpr(AstIdentExpr* ast) {
-    m_os << view_to_stringRef(ast->token->lexeme());
+    m_os << ast->token->lexeme();
 }
 
 void CodePrinter::visitCallExpr(AstCallExpr* ast) {
@@ -154,9 +158,9 @@ void CodePrinter::visitCallExpr(AstCallExpr* ast) {
 
 void CodePrinter::visitLiteralExpr(AstLiteralExpr* ast) {
     if (ast->token->kind() == TokenKind::StringLiteral) {
-        m_os << '"' << view_to_stringRef(ast->token->lexeme()) << '"';
+        m_os << '"' << ast->token->lexeme() << '"';
     } else {
-        m_os << view_to_stringRef(ast->token->lexeme());
+        m_os << ast->token->lexeme();
     }
 }
 

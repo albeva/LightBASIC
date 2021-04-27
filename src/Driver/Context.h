@@ -60,6 +60,22 @@ public:
     void setVerbose(bool verbose) { m_verbose = verbose; }
     [[nodiscard]] bool isVerbose() const { return m_verbose; }
 
+    void setImplicitMain(bool implicitMain) { m_implicitMain = implicitMain; }
+    [[nodiscard]] bool getImplicitMain() const { return m_implicitMain; }
+
+    void setMainFile(const fs::path& file) {
+        if (file.extension() != getFileExt(FileType::Source)) {
+            fatalError("main file must have '"s + getFileExt(FileType::Source) + "' extension");
+        }
+        m_mainPath = file;
+        m_implicitMain = true;
+        addInputFile(file);
+    }
+
+    [[nodiscard]] const std::optional<fs::path>& getMainFile() const {
+        return m_mainPath;
+    }
+
     void addInputFile(const fs::path& path);
     [[nodiscard]] const std::vector<fs::path>& getInputFiles(FileType type) const;
 
@@ -93,6 +109,11 @@ public:
     }
 
     /**
+     * Return true if given source file should have an implicit main
+     */
+    [[nodiscard]] bool isMainFile(const fs::path& file) const;
+
+    /**
      * Resolve input file path to corresponding output path.
      *
      * @param path input file that exists and needs output to be mapped
@@ -114,6 +135,8 @@ private:
     CompilationTarget m_compilationTarget = CompilationTarget::Executable;
     OptimizationLevel m_optimizationLevel = OptimizationLevel::O2;
     bool m_isDebug = false;
+    bool m_implicitMain = true;
+    std::optional<fs::path> m_mainPath{};
 
     std::array<std::vector<fs::path>, fileTypeCount> m_inputFiles{};
 

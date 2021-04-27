@@ -25,11 +25,7 @@ public:
     NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
-inline llvm::StringRef view_to_stringRef(const string_view& view) {
-    return llvm::StringRef(view.data(), view.size());
-}
-
-[[noreturn]] void fatalError(const string& message);
+[[noreturn]] void fatalError(const string& message, bool prefix = true);
 
 /**
  * Helper class that restores variable value when existing scope

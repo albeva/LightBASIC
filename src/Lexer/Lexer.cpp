@@ -6,18 +6,20 @@
 #include "Token.h"
 using namespace lbc;
 
+namespace {
 using llvm::isAlpha;
 
-static inline bool isWhiteSpace(char ch) {
-    return ch == ' ' || ch == '\t';
+inline bool isWhiteSpace(char ch) {
+    return ch == ' ' || ch == '\t' || ch == '\f' || ch == '\v';
 }
 
-static inline bool isLineEnd(char ch) {
+inline bool isLineEnd(char ch) {
     return ch == '\n';
 }
 
-static inline llvm::SMLoc getLoc(const char* ptr) {
+inline llvm::SMLoc getLoc(const char* ptr) {
     return llvm::SMLoc::getFromPointer(ptr);
+}
 }
 
 Lexer::Lexer(Context& context, unsigned fileID)

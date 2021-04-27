@@ -189,6 +189,10 @@ DECLARE_AST(FuncParamDecl, Decl)
     unique_ptr<AstTypeExpr> typeExpr;
 DECLARE_END
 
+DECLARE_AST(FuncStmt, Decl)
+    bool retVoid = false;
+DECLARE_END
+
 //----------------------------------------
 // Types
 //----------------------------------------

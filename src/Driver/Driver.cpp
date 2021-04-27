@@ -204,8 +204,12 @@ void Driver::emitExecutable() {
 
     if (triple.isOSWindows()) {
         if (output.empty()) {
-            const auto& sources = getArtifacts(Context::FileType::Source);
-            output = m_context.resolveOutputPath(sources[0].m_path, "exe");
+            const auto& sources = m_context.getInputFiles(Context::FileType::Source);
+            if (sources.empty()) {
+                output = m_context.getWorkingDir() / "a.exe";
+            } else {
+                output = m_context.getWorkingDir() / sources[0].stem().replace_extension("exe");
+            }
         }
 
         auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
@@ -280,7 +284,9 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
     if (m_context.isVerbose()) {
         std::cout << "Compile: " << path << '\n';
     }
-    Parser parser{ m_context, ID };
+
+    bool isMain = m_context.isMainFile(path);
+    Parser parser{ m_context, ID, isMain };
     auto ast = parser.parse();
     if (!ast) {
         fatalError("Failed to parse '"s + path.string() + "'");

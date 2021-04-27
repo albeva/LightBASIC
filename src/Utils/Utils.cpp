@@ -4,9 +4,13 @@
 #include "Utils.h"
 #include "Driver/TempFileCache.h"
 
-[[noreturn]] void lbc::fatalError(const string& message) {
+[[noreturn]] void lbc::fatalError(const string& message, bool prefix) {
     TempFileCache::removeTemporaryFiles();
 
-    std::cerr << "lbc: error: " << message << '\n';
+    if (prefix) {
+        std::cerr << "lbc: error: ";
+    }
+    std::cerr << message << std::endl;
+
     std::exit(EXIT_FAILURE);
 }
