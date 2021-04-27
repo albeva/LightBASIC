@@ -130,7 +130,7 @@ void CodePrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
     visitTypeExpr(ast->typeExpr.get());
 }
 
-void CodePrinter::visitFuncStmt(AstFuncStmt* ast) {
+void CodePrinter::visitFuncStmt(AstFuncStmt* /*ast*/) {
     m_os << indent() << "AstFuncStmt";
 }
 

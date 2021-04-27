@@ -111,15 +111,15 @@ public:
 
 #undef IS_AST_CLASSOF
 
-#define DECLARE_AST(KIND, BASE)                    \
-    class Ast##KIND final : public Ast##BASE {     \
-    public:                                        \
-        Ast##KIND(): Ast##BASE{ AstKind::KIND } {} \
-        static bool classof(const AstRoot* ast) {  \
-            return ast->kind() == AstKind::KIND;   \
-        }                                          \
-        static unique_ptr<Ast##KIND> create() {    \
-            return make_unique<Ast##KIND>();       \
+#define DECLARE_AST(KIND, BASE)                     \
+    class Ast##KIND final : public Ast##BASE {      \
+    public:                                         \
+        Ast##KIND() : Ast##BASE{ AstKind::KIND } {} \
+        static bool classof(const AstRoot* ast) {   \
+            return ast->kind() == AstKind::KIND;    \
+        }                                           \
+        static unique_ptr<Ast##KIND> create() {     \
+            return make_unique<Ast##KIND>();        \
         }
 
 #define DECLARE_END \

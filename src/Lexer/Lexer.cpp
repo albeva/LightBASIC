@@ -20,7 +20,7 @@ inline bool isLineEnd(char ch) {
 inline llvm::SMLoc getLoc(const char* ptr) {
     return llvm::SMLoc::getFromPointer(ptr);
 }
-}
+} // namespace
 
 Lexer::Lexer(Context& context, unsigned fileID)
 : m_context{ context },

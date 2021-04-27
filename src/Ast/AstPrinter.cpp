@@ -79,7 +79,7 @@ void AstPrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
     m_indent--;
 }
 
-void AstPrinter::visitFuncStmt(AstFuncStmt*  /*ast*/) {
+void AstPrinter::visitFuncStmt(AstFuncStmt* /*ast*/) {
     m_os << indent() << "AstFuncStmt";
 }
 

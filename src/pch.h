@@ -28,9 +28,14 @@ namespace fs = std::filesystem;
 using namespace std::literals::string_literals;
 
 // LLVM
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-#pragma clang diagnostic ignored "-Wcomma"
+#if defined(__clang__)
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wconversion"
+#    pragma clang diagnostic ignored "-Wcomma"
+#elif defined(_MSC_VER)
+#    pragma warning(push)
+#    pragma warning(disable: 4242 4244 4245 4267 4100 4458 4996 4324 4456 4624 4310 4127)
+#endif
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/Triple.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
@@ -49,7 +54,11 @@ using namespace std::literals::string_literals;
 #include <llvm/Support/Program.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>
-#pragma clang diagnostic pop
+#if defined(__clang__)
+#    pragma clang diagnostic pop
+#elif defined(_MSC_VER)
+#    pragma warning(pop)
+#endif
 
 using llvm::dyn_cast;
 using llvm::isa;
