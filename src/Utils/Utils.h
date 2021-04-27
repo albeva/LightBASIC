@@ -25,6 +25,12 @@ public:
     NonCopyable& operator=(const NonCopyable&) = delete;
 };
 
+/**
+ * End compilation error with the message, clear the state and exit with error
+ *
+ * @param message to print
+ * @param prefix add standard prefix befor ethe message
+ */
 [[noreturn]] void fatalError(const string& message, bool prefix = true);
 
 /**
