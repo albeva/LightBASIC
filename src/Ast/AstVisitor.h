@@ -177,7 +177,7 @@ public:
     using ModuleRetTy = RetTy;
 
     ModuleRetTy visit(AstModule* ast) {
-        return static_cast<ImplClass*>(this)->visit(static_cast<AstModule*>(ast));
+        return static_cast<ImplClass*>(this)->visit(ast);
     }
 };
 

@@ -78,9 +78,9 @@ unique_ptr<AstStmt> Parser::statement() {
     }
 
     if (attribs) {
-        error(llvm::Twine("Expected SUB, FUNCTION, DECLARE or VAR got '"
-            + llvm::StringRef{ m_token->description() }
-            + "'"));
+        error(llvm::Twine("Expected SUB, FUNCTION, DECLARE or VAR got '")
+            + m_token->description()
+            + "'");
     }
 
     if (!m_isMain && m_scope == Scope::Root) {
@@ -447,9 +447,9 @@ unique_ptr<Token> Parser::accept(TokenKind kind) {
 unique_ptr<Token> Parser::expect(TokenKind kind) {
     if (!match(kind)) {
         error(llvm::Twine("Expected '")
-            + llvm::StringRef{ Token::description(kind) }
+            + Token::description(kind)
             + "' got '"
-            + llvm::StringRef{ m_token->description() }
+            + m_token->description()
             + "'");
     }
     return move();

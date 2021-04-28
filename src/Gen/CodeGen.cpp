@@ -115,7 +115,7 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
             false,
             llvm::GlobalValue::PrivateLinkage,
             exprValue,
-            llvm::StringRef{ ast->symbol->identifier() });
+            ast->symbol->identifier());
         if (generateStoreInCtror) {
             new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
         }
@@ -137,7 +137,7 @@ void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
     auto* fn = llvm::Function::Create(
         fnTy,
         llvm::GlobalValue::ExternalLinkage,
-        llvm::StringRef{ ast->symbol->identifier() },
+        ast->symbol->identifier(),
         *m_module);
     fn->setCallingConv(llvm::CallingConv::C);
     ast->symbol->setValue(fn);
@@ -213,7 +213,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         } else {
             constant = llvm::ConstantDataArray::getString(
                 m_llvmContext,
-                llvm::StringRef{ lexeme },
+                lexeme,
                 true);
 
             auto* value = new llvm::GlobalVariable(
