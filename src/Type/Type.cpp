@@ -52,8 +52,7 @@ const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
         INTEGER_TYPES(CASE_INTEGER)
         FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
     default:
-        std::cerr << "Unknown typeExpr "s + string(Token::description(kind));
-        std::exit(EXIT_FAILURE);
+        fatalError("Unknown typeExpr "s + string(Token::description(kind)), false);
     }
 
 #undef TO_PRIMITIVE_TYPE
@@ -120,8 +119,7 @@ const TypeInteger* TypeInteger::get(unsigned bits, bool isSigned) {
     INTEGER_TYPES(USE_TYPE)
 #undef USE_TYPE
 
-    std::cerr << "Invalid integer type size: " << bits << '\n';
-    std::exit(EXIT_FAILURE);
+    fatalError("Invalid integer type size: "s + std::to_string(bits), false);
 }
 
 llvm::Type* TypeInteger::genLlvmType(llvm::LLVMContext& context) const {
@@ -138,8 +136,7 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
         FLOATINGPOINT_TYPES(USE_TYPE)
 #undef USE_TYPE
     default:
-        std::cerr << "Invalid floating point type size: " << bits << '\n';
-        std::exit(EXIT_FAILURE);
+        fatalError("Invalid floating point type size: "s + std::to_string(bits), false);
     }
 }
 
@@ -150,8 +147,7 @@ llvm::Type* TypeFloatingPoint::genLlvmType(llvm::LLVMContext& context) const {
     case 64: // NOLINT
         return llvm::Type::getDoubleTy(context);
     default:
-        std::cerr << "Invalid floating point type size: " << bits() << '\n';
-        std::exit(EXIT_FAILURE);
+        fatalError("Invalid floating point type size: "s + std::to_string(bits()), false);
     }
 }
 

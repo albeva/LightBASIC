@@ -6,8 +6,8 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-void AstPrinter::visitProgram(AstProgram* ast) {
-    m_os << indent() << "AstProgram" << '\n';
+void AstPrinter::visit(AstModule* ast) {
+    m_os << indent() << "AstModule" << '\n';
     m_indent++;
     visitStmtList(ast->stmtList.get());
     m_indent--;

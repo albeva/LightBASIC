@@ -173,9 +173,16 @@ class AstVisitor
 , public AstAttrVisitor<ImplClass, AttrRetTy>
 , public AstTypeVisitor<ImplClass, TypeRetTy>
 , public AstDeclVisitor<ImplClass, DeclRetTy> {
+public:
+    using ModuleRetTy = RetTy;
+
+    ModuleRetTy visit(AstModule* ast) {
+        return static_cast<ImplClass*>(this)->visit(static_cast<AstModule*>(ast));
+    }
 };
 
 #define AST_DECLARE_ALL_ROOT_VISIT_METHODS() \
+    ModuleRetTy visit(AstModule* ast);       \
     AST_DECLARE_ALL_STMT_VISIT_METHODS()     \
     AST_DECLARE_ALL_EXPR_VISIT_METHODS()     \
     AST_DECLARE_ALL_ATTR_VISIT_METHODS()     \

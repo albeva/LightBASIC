@@ -34,7 +34,7 @@ using namespace std::literals::string_literals;
 #    pragma clang diagnostic ignored "-Wcomma"
 #elif defined(_MSC_VER)
 #    pragma warning(push)
-#    pragma warning(disable: 4242 4244 4245 4267 4100 4458 4996 4324 4456 4624 4310 4127)
+#    pragma warning(disable : 4242 4244 4245 4267 4100 4458 4996 4324 4456 4624 4310 4127)
 #endif
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/Triple.h>

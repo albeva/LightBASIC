@@ -19,7 +19,7 @@ public:
 
     [[nodiscard]] SymbolTable* parent() const { return m_parent; }
 
-    Symbol* insert(unique_ptr<Symbol>&& symbol);
+    Symbol* insert(const std::string_view& name);
 
     [[nodiscard]] bool exists(const string_view& name, bool recursive = false) const;
     [[nodiscard]] Symbol* find(const string_view& id, bool recursive = true) const;

@@ -6,7 +6,7 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-void CodePrinter::visitProgram(AstProgram* ast) {
+void CodePrinter::visit(AstModule* ast) {
     visitStmtList(ast->stmtList.get());
 }
 

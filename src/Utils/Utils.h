@@ -14,15 +14,18 @@
 
 namespace lbc {
 
+#define NO_COPY_AND_MOVE(Class)         \
+    Class(Class&&) = delete;            \
+    Class(const Class&) = delete;       \
+    Class& operator=(Class&&) = delete; \
+    Class& operator=(const Class&) = delete;
+
 class NonCopyable {
 public:
     constexpr NonCopyable() = default;
     ~NonCopyable() = default;
 
-    NonCopyable(NonCopyable&&) = delete;
-    NonCopyable(const NonCopyable&) = delete;
-    NonCopyable& operator=(NonCopyable&&) = delete;
-    NonCopyable& operator=(const NonCopyable&) = delete;
+    NO_COPY_AND_MOVE(NonCopyable)
 };
 
 /**
@@ -47,24 +50,17 @@ public:
  *    assert(foo == 5);
  */
 template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
-struct ValueRestorer {
-public:
+struct ValueRestorer final {
     explicit ValueRestorer(T& value) : m_target{ value }, m_value{ value } {}
 
-    // restore
     ~ValueRestorer() {
         m_target = m_value;
     }
 
-    ValueRestorer(ValueRestorer&&) = delete;
-    ValueRestorer(const ValueRestorer&) = delete;
-    ValueRestorer& operator=(ValueRestorer&&) = delete;
-    ValueRestorer& operator=(const ValueRestorer&) = delete;
-
-    // members
+    NO_COPY_AND_MOVE(ValueRestorer)
 private:
     T& m_target;
-    T m_value;
+    const T m_value;
 };
 
 #define CONCATENATE_DETAIL(x, y) x##y

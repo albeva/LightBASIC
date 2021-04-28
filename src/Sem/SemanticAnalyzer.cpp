@@ -9,11 +9,12 @@
 #include "Type/Type.h"
 using namespace lbc;
 
-SemanticAnalyzer::SemanticAnalyzer(Context& context, unsigned fileId)
-: m_context{ context },
-  m_fileId{ fileId } {}
+SemanticAnalyzer::SemanticAnalyzer(Context& context)
+: m_context{ context } {}
 
-void SemanticAnalyzer::visitProgram(AstProgram* ast) {
+void SemanticAnalyzer::visit(AstModule* ast) {
+    m_astRootModule = ast;
+    m_fileId = ast->fileId;
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
     m_rootTable = m_table = ast->symbolTable.get();
@@ -78,14 +79,14 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
  * Analyze function declaration
  */
 void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
-    auto* symbol = createNewSymbol(ast->token.get(), m_rootTable);
+    auto* symbol = createNewSymbol(ast->token.get());
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
     paramTypes.reserve(ast->paramDecls.size());
     {
         RESTORE_ON_EXIT(m_table)
-        ast->symbolTable = make_unique<SymbolTable>(nullptr);
+        ast->symbolTable = make_unique<SymbolTable>(m_table);
         m_table = ast->symbolTable.get();
         for (auto& param : ast->paramDecls) {
             visitFuncParamDecl(param.get());
@@ -124,7 +125,18 @@ void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* ast) {
     ast->symbol = symbol;
 }
 
-void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* /*ast*/) {
+void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
+    visitFuncDecl(ast->decl.get());
+
+    auto sym = ast->decl->symbol;
+    if (!m_astRootModule->hasImplicitMain && sym->name() == "MAIN" && sym->alias().empty()) {
+        sym->setAlias("main");
+    }
+
+    RESTORE_ON_EXIT(m_table);
+    m_table = ast->decl->symbolTable.get();
+
+    visitStmtList(ast->stmtList.get());
 }
 
 void SemanticAnalyzer::visitAttributeList(AstAttributeList* ast) {
@@ -211,16 +223,9 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
     }
 }
 
-Symbol* SemanticAnalyzer::createNewSymbol(Token* token, SymbolTable* table) {
-    if (table == nullptr) {
-        table = m_table;
-    }
-
-    auto* symbol = table->find(token->lexeme(), false);
-    if (symbol != nullptr) {
+Symbol* SemanticAnalyzer::createNewSymbol(Token* token) {
+    if (m_table->find(token->lexeme(), false) != nullptr) {
         fatalError("Redefinition of " + string(token->lexeme()));
     }
-
-    symbol = table->insert(make_unique<Symbol>(token->lexeme()));
-    return symbol;
+    return m_table->insert(token->lexeme());
 }

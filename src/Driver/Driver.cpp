@@ -293,12 +293,12 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
     }
 
     // Analyze
-    SemanticAnalyzer sem{ m_context, ID };
-    sem.visitStmt(ast.get());
+    SemanticAnalyzer sem{ m_context };
+    sem.visit(ast.get());
 
     // generate IR
-    CodeGen gen{ m_context, ID };
-    gen.visitStmt(ast.get());
+    CodeGen gen{ m_context };
+    gen.visit(ast.get());
 
     // done
     if (!gen.validate()) {

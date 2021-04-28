@@ -15,14 +15,15 @@ class Context;
 
 class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
-    SemanticAnalyzer(Context& context, unsigned fileId);
+    SemanticAnalyzer(Context& context);
 
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
 private:
-    [[nodiscard]] Symbol* createNewSymbol(Token* identExpr, SymbolTable* table = nullptr);
+    [[nodiscard]] Symbol* createNewSymbol(Token* identExpr);
 
     Context& m_context;
-    unsigned m_fileId;
+    unsigned int m_fileId = ~0U;
+    AstModule* m_astRootModule = nullptr;
     SymbolTable* m_table = nullptr;
     SymbolTable* m_rootTable = nullptr;
 };

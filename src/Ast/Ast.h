@@ -127,13 +127,19 @@ public:
     ;
 
 //----------------------------------------
-// Statements
+// Module
 //----------------------------------------
 
-DECLARE_AST(Program, Stmt)
+DECLARE_AST(Module, Root)
+    unsigned int fileId = ~0U;
+    bool hasImplicitMain = false;
     unique_ptr<SymbolTable> symbolTable;
     unique_ptr<AstStmtList> stmtList;
 DECLARE_END
+
+//----------------------------------------
+// Statements
+//----------------------------------------
 
 DECLARE_AST(StmtList, Stmt)
     std::vector<unique_ptr<AstStmt>> stmts;
@@ -146,6 +152,11 @@ DECLARE_END
 DECLARE_AST(AssignStmt, Stmt)
     unique_ptr<AstIdentExpr> identExpr;
     unique_ptr<AstExpr> expr;
+DECLARE_END
+
+DECLARE_AST(FuncStmt, Stmt)
+    unique_ptr<AstFuncDecl> decl;
+    unique_ptr<AstStmtList> stmtList;
 DECLARE_END
 
 //----------------------------------------
@@ -187,10 +198,6 @@ DECLARE_END
 DECLARE_AST(FuncParamDecl, Decl)
     unique_ptr<Token> token;
     unique_ptr<AstTypeExpr> typeExpr;
-DECLARE_END
-
-DECLARE_AST(FuncStmt, Decl)
-    bool retVoid = false;
 DECLARE_END
 
 //----------------------------------------

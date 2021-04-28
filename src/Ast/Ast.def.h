@@ -15,13 +15,13 @@
  * Statements
  */
 #define AST_STMT_NODES(_) \
-    _( Program    ) \
     _( StmtList   ) \
     _( AssignStmt ) \
-    _( ExprStmt   )
+    _( ExprStmt   ) \
+    _( FuncStmt   )
 
 // include declarations
-#define AST_STMT_RANGE(_) _(Program, FuncParamDecl)
+#define AST_STMT_RANGE(_) _(StmtList, FuncStmt)
 
 /**
  * Declarations
@@ -29,10 +29,9 @@
 #define AST_DECL_NODES(_) \
     _( VarDecl       ) \
     _( FuncDecl      ) \
-    _( FuncParamDecl ) \
-    _( FuncStmt      )
+    _( FuncParamDecl )
 
-#define AST_DECL_RANGE(_) _(VarDecl, FuncStmt)
+#define AST_DECL_RANGE(_) _(VarDecl, FuncParamDecl)
 
 /**
  * Attributes
@@ -65,6 +64,7 @@
  * Combined
  */
 #define AST_CONTENT_NODES(_) \
+    _(Module)                \
     AST_STMT_NODES(_)        \
     AST_DECL_NODES(_)        \
     AST_ATTRIB_NODES(_)      \
@@ -75,6 +75,6 @@
  * Handy macro to forward declare all ast classes
  */
 #define AST_FORWARD_DECLARE_IMPL(C) class Ast##C;
-#define AST_FORWARD_DECLARE()           \
+#define AST_FORWARD_DECLARE()                \
     AST_ROOT_NODES(AST_FORWARD_DECLARE_IMPL) \
     AST_CONTENT_NODES(AST_FORWARD_DECLARE_IMPL)
