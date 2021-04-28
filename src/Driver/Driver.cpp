@@ -215,7 +215,8 @@ void Driver::emitExecutable() {
         auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
         linker
             .addArg("-subsystem", "console")
-            .addPath("-L", sysLibPath);
+            .addPath("-L", sysLibPath)
+            .addPath("-o", output);
 
         for (const auto& obj : objFiles) {
             linker.addPath(obj.m_path);
