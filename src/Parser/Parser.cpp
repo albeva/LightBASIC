@@ -10,7 +10,7 @@ using namespace lbc;
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain)
 : m_context{ context },
-  m_fileID{ fileId },
+  m_fileId{ fileId },
   m_isMain{ isMain },
   m_scope{ Scope::Root } {
     m_lexer = make_unique<Lexer>(m_context, fileId);
@@ -21,11 +21,13 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain)
 /**
  * Program = stmtList .
  */
-unique_ptr<AstProgram> Parser::parse() {
-    auto program = AstProgram::create();
-    program->stmtList = stmtList();
-
-    return program;
+unique_ptr<AstModule> Parser::parse() {
+    auto module = AstModule::create();
+    module->fileId = m_fileId;
+    module->hasImplicitMain = m_isMain;
+    module->stmtList = stmtList();
+    expect(TokenKind::EndOfFile);
+    return module;
 }
 
 //----------------------------------------
@@ -37,33 +39,57 @@ unique_ptr<AstProgram> Parser::parse() {
  */
 unique_ptr<AstStmtList> Parser::stmtList() {
     auto list = AstStmtList::create();
-    while (isValid()) {
+    while (isValid() && !match(TokenKind::End)) {
         list->stmts.emplace_back(statement());
         expect(TokenKind::EndOfStmt);
     }
+
     return list;
 }
 
 /**
- * statement = Attributes
- *           | VAR
- *           | DECLARE
- *           | FUNCTION
- *           | SUB
+ * statement =
+ *           ( [ attributeList ]
+ *             ( VAR
+ *             | DECLARE
+ *             | FUNCTION
+ *             | SUB
+ *             )
+ *           )
  *           | assignStmt
  *           | callStmt
  *           .
  */
 unique_ptr<AstStmt> Parser::statement() {
+    unique_ptr<AstAttributeList> attribs;
+    if (m_token->kind() == TokenKind::BracketOpen) {
+        attribs = attributeList();
+    }
+
     switch (m_token->kind()) {
-    case TokenKind::BracketOpen:
     case TokenKind::Var:
+        return kwVar(std::move(attribs));
     case TokenKind::Declare:
-        return declaration();
+        return kwDeclare(std::move(attribs));
+    case TokenKind::Function:
+    case TokenKind::Sub:
+        return kwFunction(std::move(attribs));
+    default:
+        break;
+    }
+
+    if (attribs) {
+        error(llvm::Twine("Expected SUB, FUNCTION, DECLARE or VAR got '"
+            + llvm::StringRef{ m_token->description() }
+            + "'"));
+    }
+
+    if (!m_isMain && m_scope == Scope::Root) {
+        error("expressions are not allowed at the top level");
+    }
+
+    switch (m_token->kind()) {
     case TokenKind::Identifier:
-        if (!m_isMain && m_scope == Scope::Root) {
-            error("expressions are not allowed at the top level");
-        }
         if (m_next && m_next->kind() == TokenKind::Assign) {
             return assignStmt();
         }
@@ -111,41 +137,38 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
     return stmt;
 }
 
-//----------------------------------------
-// Declarations
-//----------------------------------------
-
 /**
- * DeclFirst = [ '[' attributeList '] ]
- *      ( VAR
- *      | DECLARE
- *      | FUNCTION
- *      | SUB
- *      )
- *      .
+ *  funcStmt = funcSignature <EoS>
+ *             stmtList
+ *             "END" ("FUNCTION" | "SUB")
  */
-unique_ptr<AstDecl> Parser::declaration() {
-    unique_ptr<AstDecl> decl;
-
-    unique_ptr<AstAttributeList> attribs = nullptr;
-    if (*m_token == TokenKind::BracketOpen) {
-        attribs = attributeList();
+unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs) {
+    if (m_scope != Scope::Root) {
+        error("Nested SUBs/FUNCTIONs not allowed");
     }
 
-    switch (m_token->kind()) {
-    case TokenKind::Var:
-        decl = kwVar();
-        break;
-    case TokenKind::Declare:
-        decl = kwDeclare();
-        break;
-    default:
-        error("Expected declaration");
+    auto func = AstFuncStmt::create();
+    func->decl = funcSignature(std::move(attribs));
+    expect(TokenKind::EndOfStmt);
+
+    RESTORE_ON_EXIT(m_scope);
+    m_scope = Scope::Function;
+
+    func->stmtList = stmtList();
+
+    expect(TokenKind::End);
+    if (func->decl->retTypeExpr == nullptr) {
+        expect(TokenKind::Sub);
+    } else {
+        expect(TokenKind::Function);
     }
 
-    decl->attributes = std::move(attribs);
-    return decl;
+    return func;
 }
+
+//----------------------------------------
+// Attributes
+//----------------------------------------
 
 /**
  *  attributeList = '[' Attribute { ','  Attribute } ']' .
@@ -197,13 +220,17 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
     return args;
 }
 
+//----------------------------------------
+// Declarations
+//----------------------------------------
+
 /**
  * var = identifier
  *     ( "=" expression
  *     | "AS" TypeExpr [ "=" expression ]
  *     ) .
  */
-unique_ptr<AstVarDecl> Parser::kwVar() {
+unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) {
     expect(TokenKind::Var);
 
     auto id = expect(TokenKind::Identifier);
@@ -222,6 +249,7 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
     }
 
     auto var = AstVarDecl::create();
+    var->attributes = std::move(attribs);
     var->token = std::move(id);
     var->typeExpr = std::move(type);
     var->expr = std::move(expr);
@@ -229,20 +257,27 @@ unique_ptr<AstVarDecl> Parser::kwVar() {
 }
 
 /**
- * DeclFunc = "DECLARE"
- *          ( "FUNCTION" id [ "(" ParamList ")" ] "AS" TypeExpr
- *          | "SUB" id [ "(" ParamList ")" ]
- *          ) .
+ * kwDeclare = "DECLARE" funcSignature .
  */
-unique_ptr<AstDecl> Parser::kwDeclare() {
-    auto func = AstFuncDecl::create();
+unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) {
+    if (m_scope != Scope::Root) {
+        error("Nested declarations not allowed");
+    }
     expect(TokenKind::Declare);
+    return funcSignature(std::move(attribs));
+}
 
-    bool isFunc = false;
-    if (accept(TokenKind::Function)) {
-        isFunc = true;
-    } else {
-        isFunc = false;
+/**
+ * funcSignature = ( "FUNCTION" id [ "(" funcParams ")" ] "AS" TypeExpr
+ *                 | "SUB" id [ "(" funcParams ")" ]
+ *                 ) .
+ */
+unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attribs) {
+    auto func = AstFuncDecl::create();
+    func->attributes = std::move(attribs);
+
+    bool isFunc = accept(TokenKind::Function) != nullptr;
+    if (!isFunc) {
         expect(TokenKind::Sub);
     }
 
@@ -264,10 +299,10 @@ unique_ptr<AstDecl> Parser::kwDeclare() {
 }
 
 /**
- *  ParamList = <empty>
- *            | Param { "," Param } [ "," "..." ]
- *            | "..."
- *            .
+ *  funcParams = <empty>
+ *             | Param { "," Param } [ "," "..." ]
+ *             | "..."
+ *             .
  *  Param = id "AS" TypeExpr .
  */
 std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
@@ -297,11 +332,6 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
     }
     return params;
 }
-
-//----------------------------------------
-// Function
-//----------------------------------------
-
 
 //----------------------------------------
 // Types

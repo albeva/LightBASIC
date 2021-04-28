@@ -15,7 +15,7 @@ AST_FORWARD_DECLARE()
 class Parser final : private NonCopyable {
 public:
     Parser(Context& context, unsigned int fileId, bool isMain);
-    unique_ptr<AstProgram> parse();
+    unique_ptr<AstModule> parse();
 
 private:
     enum class Scope {
@@ -33,15 +33,17 @@ private:
     unique_ptr<AstCallExpr> callExpr();
     std::vector<unique_ptr<AstExpr>> expressionList();
 
-    unique_ptr<AstDecl> declaration();
     unique_ptr<AstAttributeList> attributeList();
     unique_ptr<AstAttribute> attribute();
     unique_ptr<AstLiteralExpr> literal();
     std::vector<unique_ptr<AstLiteralExpr>> attributeArgumentList();
 
-    unique_ptr<AstVarDecl> kwVar();
-    unique_ptr<AstDecl> kwDeclare();
+    unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs);
+    unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs);
+    unique_ptr<AstFuncDecl> funcSignature(unique_ptr<AstAttributeList> attribs);
     std::vector<unique_ptr<AstFuncParamDecl>> funcParams(bool& isVariadic);
+    unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs);
+
     unique_ptr<AstTypeExpr> typeExpr();
 
     // return true if has more content to parse
@@ -65,7 +67,7 @@ private:
     [[noreturn]] void error(const llvm::Twine& message);
 
     Context& m_context;
-    unsigned m_fileID;
+    unsigned m_fileId;
     bool m_isMain;
     Scope m_scope;
     unique_ptr<Lexer> m_lexer;

@@ -5,8 +5,8 @@
 #include "Symbol.h"
 using namespace lbc;
 
-Symbol* SymbolTable::insert(unique_ptr<Symbol>&& symbol) {
-    return m_symbols.emplace(symbol->name(), std::move(symbol)).first->second.get();
+Symbol* SymbolTable::insert(const std::string_view& name) {
+    return m_symbols.emplace(name, make_unique<Symbol>(name)).first->second.get();
 }
 
 bool SymbolTable::exists(const string_view& name, bool recursive) const {

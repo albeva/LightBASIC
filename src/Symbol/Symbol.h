@@ -11,7 +11,7 @@ class TypeRoot;
 class Symbol final : private NonCopyable {
 public:
     explicit Symbol(const string_view& name, const TypeRoot* type = nullptr)
-    : m_name{ name }, m_type{ type }, m_alias{ name } {}
+    : m_name{ name }, m_type{ type }, m_alias{ "" } {}
 
     [[nodiscard]] const TypeRoot* type() const { return m_type; }
     void setType(const TypeRoot* type) { m_type = type; }
@@ -23,6 +23,13 @@ public:
 
     [[nodiscard]] const string_view& alias() const { return m_alias; }
     void setAlias(const string_view& alias) { m_alias = alias; }
+
+    [[nodiscard]] const string_view& identifier() const {
+        if (m_alias.empty()) {
+            return m_name;
+        }
+        return m_alias;
+    }
 
 private:
     const string_view m_name;
