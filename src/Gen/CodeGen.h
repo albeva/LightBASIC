@@ -36,8 +36,7 @@ private:
         Function
     };
 
-    using LiteralMap = std::unordered_map<string_view, llvm::Constant*>;
-
+    using LiteralMap = llvm::StringMap<llvm::Constant*>;
     static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
 
     Context& m_context;

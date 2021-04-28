@@ -5,11 +5,11 @@
 #include "Symbol.h"
 using namespace lbc;
 
-Symbol* SymbolTable::insert(const std::string_view& name) {
-    return m_symbols.emplace(name, make_unique<Symbol>(name)).first->second.get();
+Symbol* SymbolTable::insert(const llvm::StringRef& name) {
+    return m_symbols.insert({name, make_unique<Symbol>(name)}).first->second.get();
 }
 
-bool SymbolTable::exists(const string_view& name, bool recursive) const {
+bool SymbolTable::exists(const llvm::StringRef& name, bool recursive) const {
     if (m_symbols.find(name) != m_symbols.end()) {
         return true;
     }
@@ -17,7 +17,7 @@ bool SymbolTable::exists(const string_view& name, bool recursive) const {
     return recursive && m_parent != nullptr && m_parent->exists(name, recursive);
 }
 
-Symbol* SymbolTable::find(const string_view& id, bool recursive) const {
+Symbol* SymbolTable::find(const llvm::StringRef& id, bool recursive) const {
     if (auto iter = m_symbols.find(id); iter != m_symbols.end()) {
         return iter->second.get();
     }

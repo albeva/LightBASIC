@@ -64,12 +64,12 @@ int ToolTask::execute() {
     }
 
     if (m_context.isVerbose()) {
-        std::cout << m_path.string();
+        std::cout << program;
         for (const auto& arg : m_args) {
             std::cout << " " << arg;
         }
         std::cout << std::endl;
     }
 
-    return llvm::sys::ExecuteAndWait(m_path.string(), args);
+    return llvm::sys::ExecuteAndWait(program, args);
 }

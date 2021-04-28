@@ -9,7 +9,7 @@ namespace lbc {
 
 class SymbolTable final : private NonCopyable {
 public:
-    using Storage = std::unordered_map<string_view, unique_ptr<Symbol>>;
+    using Storage = llvm::StringMap<unique_ptr<Symbol>>;
     using iterator = Storage::iterator;
 
     explicit SymbolTable(SymbolTable* parent = nullptr) : m_parent{ parent } {}
@@ -19,10 +19,10 @@ public:
 
     [[nodiscard]] SymbolTable* parent() const { return m_parent; }
 
-    Symbol* insert(const std::string_view& name);
+    Symbol* insert(const llvm::StringRef& name);
 
-    [[nodiscard]] bool exists(const string_view& name, bool recursive = false) const;
-    [[nodiscard]] Symbol* find(const string_view& id, bool recursive = true) const;
+    [[nodiscard]] bool exists(const llvm::StringRef& name, bool recursive = false) const;
+    [[nodiscard]] Symbol* find(const llvm::StringRef& id, bool recursive = true) const;
 
 private:
     SymbolTable* m_parent;

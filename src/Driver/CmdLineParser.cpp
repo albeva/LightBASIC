@@ -36,7 +36,7 @@ void CmdLineParser::parse(const Args& args) noexcept {
 }
 
 void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
-    const string_view arg{ args[index] };
+    const llvm::StringRef arg{ args[index] };
     if (arg == "-v") {
         m_context.setVerbose(true);
     } else if (arg == "-o") {

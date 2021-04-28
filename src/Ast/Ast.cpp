@@ -5,7 +5,7 @@
 #include "AstVisitor.h"
 using namespace lbc;
 
-const Token* AstAttributeList::getStringLiteral(const string_view& key) const {
+const Token* AstAttributeList::getStringLiteral(const llvm::StringRef& key) const {
     for (const auto& attr : attribs) {
         if (attr->identExpr->token->lexeme() == key) {
             if (attr->argExprs.size() != 1) {

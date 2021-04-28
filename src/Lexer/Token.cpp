@@ -9,14 +9,14 @@ using std::unordered_set;
 namespace {
 
 namespace literals {
-#define IMPL_LITERAL(id, kw, ...) constexpr string_view Str##id{ kw };
+#define IMPL_LITERAL(id, kw, ...) constexpr llvm::StringLiteral Str##id{ kw };
     ALL_TOKENS(IMPL_LITERAL)
     KEYWORD_TOKEN_MAP(IMPL_LITERAL)
 #undef IMPL_LITERAL
 } // namespace literals
 
 /// Map string literal to TokenKind
-const std::unordered_map<string_view, TokenKind> keywordsToKind {
+const llvm::StringMap<TokenKind> keywordsToKind {
 #define IMPL_LITERAL(id, ...) { literals::Str##id, TokenKind::id },
     TOKEN_SYMBOLS(IMPL_LITERAL)
     TOKEN_OPERATORS(IMPL_LITERAL)
@@ -35,37 +35,37 @@ constexpr std::array kindToDescription {
 };
 
 unordered_set<string> uppercasedIds;
-unordered_set<string> literalStrings;
+llvm::StringSet literalStrings;
 
 } // namespace
 
-const string_view& Token::description(TokenKind kind) {
+const llvm::StringRef& Token::description(TokenKind kind) {
     auto index = static_cast<size_t>(kind);
     return kindToDescription.at(index);
 }
 
-unique_ptr<Token> Token::create(const string_view& lexeme, const llvm::SMLoc& loc) {
+unique_ptr<Token> Token::create(const llvm::StringRef& lexeme, const llvm::SMLoc& loc) {
     // all identifiers in lb are upper cased
     string uppercased;
-    std::transform(lexeme.cbegin(), lexeme.cend(), std::back_inserter(uppercased), llvm::toUpper);
+    std::transform(lexeme.begin(), lexeme.end(), std::back_inserter(uppercased), llvm::toUpper);
 
     // is there a matching keyword?
     auto iter = keywordsToKind.find(uppercased);
     if (iter != keywordsToKind.end()) {
-        return Token::create(iter->second, iter->first, loc);
+        return Token::create(iter->second, iter->first(), loc);
     }
 
-    // tokens store string_view instances, therefore we need to keep
+    // tokens store llvm::StringRef instances, therefore we need to keep
     // actual string data around. Hence storing all identifiers in a set
-    auto entry = uppercasedIds.insert(std::move(uppercased));
+    auto entry = uppercasedIds.insert(uppercased);
     return Token::create(TokenKind::Identifier, *entry.first, loc);
 }
 
-unique_ptr<Token> Token::create(TokenKind kind, const string_view& lexeme, const llvm::SMLoc& loc) {
+unique_ptr<Token> Token::create(TokenKind kind, const llvm::StringRef& lexeme, const llvm::SMLoc& loc) {
     // literal string may have been processed for escape sequences. Store a local copy
     if (kind == TokenKind::StringLiteral) {
-        auto entry = literalStrings.insert(string{ lexeme });
-        return make_unique<Token>(kind, *entry.first, loc);
+        auto entry = literalStrings.insert(lexeme);
+        return make_unique<Token>(kind, entry.first->first(), loc);
     }
     return make_unique<Token>(kind, lexeme, loc);
 }
@@ -88,7 +88,7 @@ llvm::SMRange Token::range() const {
     return { m_loc, llvm::SMLoc::getFromPointer(end) };
 }
 
-const string_view& Token::description() const {
+const llvm::StringRef& Token::description() const {
     if (m_kind == TokenKind::Identifier) {
         return m_lexeme;
     }

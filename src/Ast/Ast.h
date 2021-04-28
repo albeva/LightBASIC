@@ -163,7 +163,7 @@ DECLARE_END
 // Attributes
 //----------------------------------------
 DECLARE_AST(AttributeList, Attr)
-    [[nodiscard]] const Token* getStringLiteral(const string_view& key) const;
+    [[nodiscard]] const Token* getStringLiteral(const llvm::StringRef& key) const;
     std::vector<unique_ptr<AstAttribute>> attribs;
 DECLARE_END
 

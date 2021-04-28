@@ -157,7 +157,7 @@ void Driver::emitAssembly(bool temporary) {
         task.reset();
         task.addArg("-filetype=asm");
         task.addPath("-o", output);
-        task.addPath(input.m_path.string());
+        task.addPath(input.m_path);
 
         if (task.execute() != EXIT_SUCCESS) {
             fatalError("Failed emit '"s + output.string() + "'");
@@ -182,7 +182,7 @@ void Driver::emitObjects(bool temporary) {
         task.reset();
         task.addArg("-filetype=obj");
         task.addPath("-o", output);
-        task.addPath(input.m_path.string());
+        task.addPath(input.m_path);
 
         if (task.execute() != EXIT_SUCCESS) {
             fatalError("Failed emit '"s + output.string() + "'");

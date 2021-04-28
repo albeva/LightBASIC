@@ -235,7 +235,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             };
 
             constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
-            m_stringLiterals.emplace(lexeme, constant);
+            m_stringLiterals.insert({lexeme, constant});
         }
         break;
     }

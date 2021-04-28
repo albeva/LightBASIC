@@ -22,7 +22,6 @@
 
 using std::make_unique;
 using std::string;
-using std::string_view;
 using std::unique_ptr;
 namespace fs = std::filesystem;
 using namespace std::literals::string_literals;
@@ -38,6 +37,9 @@ using namespace std::literals::string_literals;
 #endif
 #include <llvm/ADT/SmallVector.h>
 #include <llvm/ADT/Triple.h>
+#include <llvm/ADT/StringRef.h>
+#include <llvm/ADT/StringMap.h>
+#include <llvm/ADT/StringSet.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Config/llvm-config.h>
 #include <llvm/IR/BasicBlock.h>

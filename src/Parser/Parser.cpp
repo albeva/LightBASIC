@@ -43,7 +43,6 @@ unique_ptr<AstStmtList> Parser::stmtList() {
         list->stmts.emplace_back(statement());
         expect(TokenKind::EndOfStmt);
     }
-
     return list;
 }
 
