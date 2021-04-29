@@ -49,7 +49,12 @@ public:
     void setCompilationTarget(CompilationTarget target) { m_compilationTarget = target; }
 
     [[nodiscard]] OutputType getOutputType() const { return m_outputType; }
-    void setOutputType(OutputType outputType) { m_outputType = outputType; }
+    void setOutputType(OutputType outputType) {
+        m_outputType = outputType;
+        if (m_compilationTarget == CompilationTarget::Executable) {
+            setCompilationTarget(CompilationTarget::Assembly);
+        }
+    }
 
     [[nodiscard]] OptimizationLevel getOptimizationLevel() const { return m_optimizationLevel; }
     void setOptimizationLevel(OptimizationLevel level) { m_optimizationLevel = level; }

@@ -11,7 +11,7 @@ class Context;
 
 class CodeGen final : public AstVisitor<CodeGen> {
 public:
-    CodeGen(Context& context);
+    explicit CodeGen(Context& context);
 
     /**
      * Give up ownership of the generated module.

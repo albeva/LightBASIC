@@ -15,7 +15,7 @@ class Context;
 
 class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
-    SemanticAnalyzer(Context& context);
+    explicit SemanticAnalyzer(Context& context);
 
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
 private:

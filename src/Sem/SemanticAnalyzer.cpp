@@ -223,10 +223,10 @@ Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) {
     if (m_table->find(token->lexeme(), false) != nullptr) {
         fatalError("Redefinition of "_t + token->lexeme());
     }
-    auto symbol = m_table->insert(token->lexeme());
+    auto *symbol = m_table->insert(token->lexeme());
 
     // alias?
-    if (ast != nullptr && ast->attributes) {
+    if (ast->attributes) {
         if (const auto* alias = ast->attributes->getStringLiteral("ALIAS")) {
             symbol->setAlias(alias->lexeme());
         }
