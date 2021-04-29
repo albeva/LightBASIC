@@ -169,12 +169,17 @@ void Driver::emitAssembly(bool temporary) {
 
 void Driver::emitObjects(bool temporary) {
     const auto& bcFiles = getArtifacts(Context::FileType::BitCode);
+    const auto& llFiles = getArtifacts(Context::FileType::LLVMIr);
     auto& objFiles = getArtifacts(Context::FileType::Object);
-    objFiles.reserve(objFiles.size() + bcFiles.size());
+    objFiles.reserve(objFiles.size() + bcFiles.size() + llFiles.size());
+
+    std::vector<Artefact> files(bcFiles);
+    files.reserve(bcFiles.size() + llFiles.size());
+    files.insert(files.end(), llFiles.begin(), llFiles.end());
 
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
     task.reserve(4);
-    for (const auto& input : bcFiles) {
+    for (const auto& input : files) {
         auto output = temporary
             ? TempFileCache::createUniquePath(getOrigin(input), ".obj")
             : m_context.resolveOutputPath(getOrigin(input), ".obj");
@@ -195,23 +200,25 @@ void Driver::emitObjects(bool temporary) {
 void Driver::emitExecutable() {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
     auto objFiles = getArtifacts(Context::FileType::Object);
-    auto output = m_context.getOutputPath();
     const auto& triple = m_context.getTriple();
+
+    if (objFiles.empty()) {
+        fatalError("No objects to link");
+    }
 
     if (triple.isArch32Bit()) {
         fatalError("32bit is not implemented yet");
     }
 
-    if (triple.isOSWindows()) {
-        if (output.empty()) {
-            const auto& sources = m_context.getInputFiles(Context::FileType::Source);
-            if (sources.empty()) {
-                output = m_context.getWorkingDir() / "a.exe";
-            } else {
-                output = m_context.getWorkingDir() / sources[0].stem().replace_extension("exe");
-            }
+    auto output = m_context.getOutputPath();
+    if (output.empty()) {
+        output = m_context.getWorkingDir() / getOrigin(objFiles[0]).stem();
+        if (triple.isOSWindows()) {
+            output.replace_extension(".exe");
         }
+    }
 
+    if (triple.isOSWindows()) {
         auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
         linker
             .addArg("-m", "i386pep")
@@ -237,10 +244,6 @@ void Driver::emitExecutable() {
                 "-)" })
             .addPath(sysLibPath / "crtend.o");
     } else if (triple.isMacOSX()) {
-        if (output.empty()) {
-            output = m_context.getWorkingDir() / "a.out";
-        }
-
         linker
             .addPath("-L", "/usr/local/lib")
             .addPath("-syslibroot", "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk")
@@ -251,10 +254,6 @@ void Driver::emitExecutable() {
             linker.addPath(obj.m_path);
         }
     } else if (triple.isOSLinux()) {
-        if (output.empty()) {
-            output = m_context.getWorkingDir() / "a.out";
-        }
-
         string linuxSysPath = "/usr/lib/x86_64-linux-gnu";
         linker
             .addArg("-m", "elf_x86_64")
