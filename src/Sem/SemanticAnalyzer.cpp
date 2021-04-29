@@ -85,7 +85,7 @@ void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
     std::vector<const TypeRoot*> paramTypes;
     paramTypes.reserve(ast->paramDecls.size());
     {
-        RESTORE_ON_EXIT(m_table)
+        RESTORE_ON_EXIT(m_table);
         ast->symbolTable = make_unique<SymbolTable>(m_table);
         m_table = ast->symbolTable.get();
         for (auto& param : ast->paramDecls) {

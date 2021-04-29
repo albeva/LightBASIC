@@ -13,7 +13,7 @@
     _( ZString,  "ZSTRING",  ZString )
 
 //     ID        STR         Kind,    Bits  Signed
-#define INTEGER_TYPES(_) \
+#define INTEGRAL_TYPES(_) \
     _( Byte,     "BYTE",     Integral, 8,   true  ) \
     _( UByte,    "UBYTE",    Integral, 8,   false ) \
     _( Short,    "SHORT",    Integral, 16,  true  ) \
@@ -30,5 +30,5 @@
 
 #define ALL_TYPES(_)   \
     PRIMITIVE_TYPES(_) \
-    INTEGER_TYPES(_)   \
+    INTEGRAL_TYPES(_)   \
     FLOATINGPOINT_TYPES(_)

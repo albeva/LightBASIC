@@ -150,7 +150,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
     func->decl = funcSignature(std::move(attribs));
     expect(TokenKind::EndOfStmt);
 
-    RESTORE_ON_EXIT(m_scope)
+    RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
 
     func->stmtList = stmtList();

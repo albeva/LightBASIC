@@ -98,12 +98,12 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
             exprValue = constExpr;
             exprType = exprValue->getType();
         } else {
-            exprType = ast->expr->type->llvmType(m_llvmContext);
+            exprType = ast->expr->type->llvmType(m_context);
             exprValue = llvm::Constant::getNullValue(exprType);
             generateStoreInCtror = true;
         }
     } else {
-        exprType = ast->typeExpr->type->llvmType(m_llvmContext);
+        exprType = ast->typeExpr->type->llvmType(m_context);
         exprValue = llvm::Constant::getNullValue(exprType);
     }
 
@@ -133,7 +133,7 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
 }
 
 void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
-    auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_llvmContext));
+    auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_context));
     auto* fn = llvm::Function::Create(
         fnTy,
         llvm::GlobalValue::ExternalLinkage,
@@ -176,7 +176,7 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
 
     auto* sym = ast->symbol;
     ast->llvmValue = new llvm::LoadInst(
-        sym->type()->llvmType(m_llvmContext),
+        sym->type()->llvmType(m_context),
         sym->value(),
         "",
         m_block);
@@ -243,7 +243,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         uint64_t result = 0;
         std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), result); // NOLINT
         constant = llvm::ConstantInt::get(
-            ast->type->llvmType(m_llvmContext),
+            ast->type->llvmType(m_context),
             result,
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
         break;
@@ -251,14 +251,14 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     case TokenKind::BooleanLiteral: {
         uint64_t value = lexeme == "TRUE" ? 1 : 0;
         constant = llvm::ConstantInt::get(
-            ast->type->llvmType(m_llvmContext),
+            ast->type->llvmType(m_context),
             value,
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
         break;
     }
     case TokenKind::NullLiteral:
         constant = llvm::ConstantPointerNull::get(
-            llvm::cast<llvm::PointerType>(ast->type->llvmType(m_llvmContext)));
+            llvm::cast<llvm::PointerType>(ast->type->llvmType(m_context)));
         break;
     default:
         fatalError("Invalid literal type");

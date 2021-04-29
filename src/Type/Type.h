@@ -30,6 +30,7 @@ class TypeIntegral;
 class TypeFloatingPoint;
 class TypeFunction;
 class TypeZString;
+class Context;
 enum class TokenKind;
 
 /**
@@ -41,7 +42,7 @@ class TypeRoot : private NonCopyable {
 public:
     [[nodiscard]] TypeFamily kind() const { return m_kind; }
 
-    [[nodiscard]] llvm::Type* llvmType(llvm::LLVMContext& context) const {
+    [[nodiscard]] llvm::Type* llvmType(Context& context) const {
         if (m_llvmType == nullptr) {
             m_llvmType = genLlvmType(context);
         }
@@ -53,7 +54,7 @@ public:
 protected:
     explicit TypeRoot(TypeFamily kind) : m_kind{ kind } {}
 
-    [[nodiscard]] virtual llvm::Type* genLlvmType(llvm::LLVMContext& context) const = 0;
+    [[nodiscard]] virtual llvm::Type* genLlvmType(Context& context) const = 0;
 
 private:
     mutable llvm::Type* m_llvmType = nullptr;
@@ -74,7 +75,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -90,7 +91,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -110,7 +111,7 @@ public:
     [[nodiscard]] const TypeRoot* base() const { return m_base; }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 
 private:
     const TypeRoot* m_base;
@@ -152,7 +153,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -170,7 +171,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -188,7 +189,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -213,7 +214,7 @@ public:
     [[nodiscard]] bool variadic() const { return m_variadic; }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 
 private:
     const TypeRoot* m_retType;
@@ -236,7 +237,7 @@ public:
     }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(llvm::LLVMContext& context) const final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 } // namespace lbc

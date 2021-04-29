@@ -3,6 +3,7 @@
 //
 #include "Type.h"
 #include "Lexer/Token.h"
+#include "Driver/Context.h"
 using namespace lbc;
 
 namespace {
@@ -25,7 +26,7 @@ PRIMITIVE_TYPES(DEFINE_TYPE)
 // integers
 #define DEFINE_TYPE(id, str, kind, bits, isSigned) \
     const Type##kind id##Ty{ bits, isSigned };
-INTEGER_TYPES(DEFINE_TYPE)
+INTEGRAL_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 // Floating Points
@@ -49,7 +50,7 @@ const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
 
     switch (kind) {
         PRIMITIVE_TYPES(CASE_PRIMITIVE)
-        INTEGER_TYPES(CASE_INTEGER)
+        INTEGRAL_TYPES(CASE_INTEGER)
         FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
     default:
         fatalError("Unknown typeExpr "_t + Token::description(kind), false);
@@ -66,9 +67,9 @@ const TypeVoid* TypeVoid::get() {
     return &voidTy;
 }
 
-llvm::Type* TypeVoid::genLlvmType(llvm::LLVMContext& context) const {
+llvm::Type* TypeVoid::genLlvmType(Context& context) const {
     // should never be called?
-    return llvm::Type::getVoidTy(context);
+    return llvm::Type::getVoidTy(context.getLlvmContext());
 }
 
 // Any
@@ -76,8 +77,8 @@ const TypeAny* TypeAny::get() {
     return &anyTy;
 }
 
-llvm::Type* TypeAny::genLlvmType(llvm::LLVMContext& context) const {
-    return llvm::Type::getInt8Ty(context);
+llvm::Type* TypeAny::genLlvmType(Context& context) const {
+    return llvm::Type::getInt8Ty(context.getLlvmContext());
 }
 
 // Pointer
@@ -96,7 +97,7 @@ const TypePointer* TypePointer::get(const TypeRoot* base) {
     return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
 }
 
-llvm::Type* TypePointer::genLlvmType(llvm::LLVMContext& context) const {
+llvm::Type* TypePointer::genLlvmType(Context& context) const {
     return llvm::PointerType::get(m_base->llvmType(context), 0);
 }
 
@@ -106,8 +107,8 @@ const TypeBoolean* TypeBoolean::get() {
     return &BoolTy;
 }
 
-llvm::Type* TypeBoolean::genLlvmType(llvm::LLVMContext& context) const {
-    return llvm::Type::getInt1Ty(context);
+llvm::Type* TypeBoolean::genLlvmType(Context& context) const {
+    return llvm::Type::getInt1Ty(context.getLlvmContext());
 }
 
 // Integer
@@ -116,14 +117,14 @@ const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) {
 #define USE_TYPE(id, str, kind, BITS, IS_SIGNED) \
     if (bits == BITS && isSigned == IS_SIGNED)   \
         return &id##Ty;
-    INTEGER_TYPES(USE_TYPE)
+    INTEGRAL_TYPES(USE_TYPE)
 #undef USE_TYPE
 
     fatalError("Invalid integer type size: "_t + Twine(bits), false);
 }
 
-llvm::Type* TypeIntegral::genLlvmType(llvm::LLVMContext& context) const {
-    return llvm::IntegerType::get(context, bits());
+llvm::Type* TypeIntegral::genLlvmType(Context& context) const {
+    return llvm::IntegerType::get(context.getLlvmContext(), bits());
 }
 
 // Floating Point
@@ -140,12 +141,12 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
     }
 }
 
-llvm::Type* TypeFloatingPoint::genLlvmType(llvm::LLVMContext& context) const {
+llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const {
     switch (bits()) {
     case 32: // NOLINT
-        return llvm::Type::getFloatTy(context);
+        return llvm::Type::getFloatTy(context.getLlvmContext());
     case 64: // NOLINT
-        return llvm::Type::getDoubleTy(context);
+        return llvm::Type::getDoubleTy(context.getLlvmContext());
     default:
         fatalError("Invalid floating point type size: "_t + Twine(bits()), false);
     }
@@ -164,7 +165,7 @@ const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const
     return declaredFunc.emplace_back(std::move(ty)).get();
 }
 
-llvm::Type* TypeFunction::genLlvmType(llvm::LLVMContext& context) const {
+llvm::Type* TypeFunction::genLlvmType(Context& context) const {
     auto* retTy = m_retType->llvmType(context);
 
     std::vector<llvm::Type*> params;
@@ -181,6 +182,6 @@ const TypeZString* TypeZString::get() {
     return &ZStringTy;
 }
 
-llvm::Type* TypeZString::genLlvmType(llvm::LLVMContext& context) const {
-    return llvm::Type::getInt8PtrTy(context);
+llvm::Type* TypeZString::genLlvmType(Context& context) const {
+    return llvm::Type::getInt8PtrTy(context.getLlvmContext());
 }
