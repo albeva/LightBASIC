@@ -41,7 +41,7 @@ void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
 }
 
 void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
-    auto* symbol = createNewSymbol(ast->token.get());
+    auto* symbol = createNewSymbol(ast, ast->token.get());
 
     // m_type expr?
     const TypeRoot* type = nullptr;
@@ -79,7 +79,7 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
  * Analyze function declaration
  */
 void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
-    auto* symbol = createNewSymbol(ast->token.get());
+    auto* symbol = createNewSymbol(ast, ast->token.get());
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
@@ -94,11 +94,19 @@ void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
         }
     }
 
+    bool coarceToMain = false;
+    if (!m_astRootModule->hasImplicitMain && symbol->name() == "MAIN" && symbol->alias().empty()) {
+        symbol->setAlias("main");
+        coarceToMain = true;
+    }
+
     // return typeExpr. subs don't have one so default to Void
     const TypeRoot* retType = nullptr;
     if (ast->retTypeExpr) {
         visitTypeExpr(ast->retTypeExpr.get());
         retType = ast->retTypeExpr->type;
+    } else if (coarceToMain) {
+        retType = TypeRoot::fromTokenKind(TokenKind::Integer);
     } else {
         retType = TypeVoid::get();
     }
@@ -107,17 +115,10 @@ void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
     const auto* type = TypeFunction::get(retType, std::move(paramTypes), ast->variadic);
     symbol->setType(type);
     ast->symbol = symbol;
-
-    // alias?
-    if (ast->attributes) {
-        if (const auto* token = ast->attributes->getStringLiteral("ALIAS")) {
-            symbol->setAlias(token->lexeme());
-        }
-    }
 }
 
 void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* ast) {
-    auto* symbol = createNewSymbol(ast->token.get());
+    auto* symbol = createNewSymbol(ast, ast->token.get());
 
     visitTypeExpr(ast->typeExpr.get());
     symbol->setType(ast->typeExpr->type);
@@ -127,11 +128,6 @@ void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* ast) {
 
 void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
     visitFuncDecl(ast->decl.get());
-
-    auto sym = ast->decl->symbol;
-    if (!m_astRootModule->hasImplicitMain && sym->name() == "MAIN" && sym->alias().empty()) {
-        sym->setAlias("main");
-    }
 
     RESTORE_ON_EXIT(m_table);
     m_table = ast->decl->symbolTable.get();
@@ -223,9 +219,18 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
     }
 }
 
-Symbol* SemanticAnalyzer::createNewSymbol(Token* token) {
+Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) {
     if (m_table->find(token->lexeme(), false) != nullptr) {
         fatalError("Redefinition of "_t + token->lexeme());
     }
-    return m_table->insert(token->lexeme());
+    auto symbol = m_table->insert(token->lexeme());
+
+    // alias?
+    if (ast != nullptr && ast->attributes) {
+        if (const auto* alias = ast->attributes->getStringLiteral("ALIAS")) {
+            symbol->setAlias(alias->lexeme());
+        }
+    }
+
+    return symbol;
 }

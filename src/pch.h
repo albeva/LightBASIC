@@ -36,10 +36,10 @@ using namespace std::literals::string_literals;
 #    pragma warning(disable : 4242 4244 4245 4267 4100 4458 4996 4324 4456 4624 4310 4127)
 #endif
 #include <llvm/ADT/SmallVector.h>
-#include <llvm/ADT/Triple.h>
-#include <llvm/ADT/StringRef.h>
 #include <llvm/ADT/StringMap.h>
+#include <llvm/ADT/StringRef.h>
 #include <llvm/ADT/StringSet.h>
+#include <llvm/ADT/Triple.h>
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Config/llvm-config.h>
 #include <llvm/IR/BasicBlock.h>

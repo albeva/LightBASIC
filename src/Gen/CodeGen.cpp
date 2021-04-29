@@ -120,11 +120,10 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
             new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
         }
     } else {
-        llvm::IRBuilder<> builder(m_block);
         value = new llvm::AllocaInst(
             exprType,
             0,
-            "",
+            ast->symbol->identifier(),
             m_block);
         new llvm::StoreInst(exprValue, value, m_block);
     }
@@ -140,7 +139,15 @@ void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
         ast->symbol->identifier(),
         *m_module);
     fn->setCallingConv(llvm::CallingConv::C);
+    fn->setDSOLocal(true);
     ast->symbol->setValue(fn);
+
+    auto iter = fn->arg_begin();
+    for (const auto& param : ast->paramDecls) {
+        iter->setName(param->symbol->identifier());
+        param->symbol->setValue(iter);
+        iter++;
+    }
 }
 
 void CodeGen::visitFuncParamDecl(AstFuncParamDecl* /*ast*/) {
@@ -154,10 +161,33 @@ void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
     m_function = llvm::cast<llvm::Function>(ast->decl->symbol->value());
     m_block = llvm::BasicBlock::Create(m_llvmContext, "", m_function);
 
+    for (const auto& param : ast->decl->paramDecls) {
+        auto* sym = param->symbol;
+        auto* value = sym->value();
+        sym->setValue(new llvm::AllocaInst(
+            sym->type()->llvmType(m_context),
+            0,
+            sym->identifier() + ".addr",
+            m_block));
+        new llvm::StoreInst(value, sym->value(), m_block);
+    }
+
     visitStmtList(ast->stmtList.get());
 
     if (!m_block->getTerminator()) {
-        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
+        auto* retType = m_function->getReturnType();
+        llvm::Value* retValue;
+        if (retType->isVoidTy()) {
+            retValue = nullptr;
+        } else if (retType->isIntegerTy()) {
+            retValue = llvm::ConstantInt::get(
+                m_function->getReturnType(),
+                0,
+                true);
+        } else {
+            fatalError("Trying to generate unknown implicit function return value");
+        }
+        llvm::ReturnInst::Create(m_llvmContext, retValue, m_block);
     }
 }
 
@@ -178,7 +208,7 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
     ast->llvmValue = new llvm::LoadInst(
         sym->type()->llvmType(m_context),
         sym->value(),
-        "",
+        ast->symbol->identifier(),
         m_block);
 }
 
@@ -235,7 +265,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             };
 
             constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
-            m_stringLiterals.insert({lexeme, constant});
+            m_stringLiterals.insert({ lexeme, constant });
         }
         break;
     }

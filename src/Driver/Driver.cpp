@@ -214,15 +214,28 @@ void Driver::emitExecutable() {
 
         auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
         linker
+            .addArg("-m", "i386pep")
+            .addPath("-o", output)
             .addArg("-subsystem", "console")
+            .addArg("-s")
             .addPath("-L", sysLibPath)
-            .addPath("-o", output);
+            .addPath(sysLibPath / "crt2.o")
+            .addPath(sysLibPath / "crtbegin.o");
 
         for (const auto& obj : objFiles) {
             linker.addPath(obj.m_path);
         }
 
-        linker.addArg("-lmsvcrt");
+        linker
+            .addArgs({ "-(",
+                "-lgcc",
+                "-lmsvcrt",
+                "-lkernel32",
+                "-luser32",
+                "-lmingw32",
+                "-lmingwex",
+                "-)" })
+            .addPath(sysLibPath / "crtend.o");
     } else if (triple.isMacOSX()) {
         if (output.empty()) {
             output = m_context.getWorkingDir() / "a.out";

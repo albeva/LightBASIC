@@ -19,7 +19,7 @@ public:
 
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
 private:
-    [[nodiscard]] Symbol* createNewSymbol(Token* identExpr);
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, Token* identExpr);
 
     Context& m_context;
     unsigned int m_fileId = ~0U;
