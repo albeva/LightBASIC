@@ -19,10 +19,10 @@ public:
 
     [[nodiscard]] SymbolTable* parent() const { return m_parent; }
 
-    Symbol* insert(const llvm::StringRef& name);
+    Symbol* insert(const StringRef& name);
 
-    [[nodiscard]] bool exists(const llvm::StringRef& name, bool recursive = false) const;
-    [[nodiscard]] Symbol* find(const llvm::StringRef& id, bool recursive = true) const;
+    [[nodiscard]] bool exists(const StringRef& name, bool recursive = false) const;
+    [[nodiscard]] Symbol* find(const StringRef& id, bool recursive = true) const;
 
 private:
     SymbolTable* m_parent;

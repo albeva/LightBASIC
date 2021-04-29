@@ -160,7 +160,7 @@ void Driver::emitAssembly(bool temporary) {
         task.addPath(input.m_path);
 
         if (task.execute() != EXIT_SUCCESS) {
-            fatalError("Failed emit '"s + output.string() + "'");
+            fatalError("Failed emit '"_t + output.string() + "'");
         }
 
         asmFiles.emplace_back(input.m_origin, output);
@@ -185,7 +185,7 @@ void Driver::emitObjects(bool temporary) {
         task.addPath(input.m_path);
 
         if (task.execute() != EXIT_SUCCESS) {
-            fatalError("Failed emit '"s + output.string() + "'");
+            fatalError("Failed emit '"_t + output.string() + "'");
         }
 
         objFiles.emplace_back(input.m_origin, output);
@@ -262,7 +262,7 @@ void Driver::emitExecutable() {
     }
 
     if (linker.execute() != EXIT_SUCCESS) {
-        fatalError("Failed generate '"s + output.string() + "'");
+        fatalError("Failed generate '"_t + output.string() + "'");
     }
 }
 
@@ -275,7 +275,7 @@ void Driver::compileSources() {
         string included;
         auto ID = m_context.getSourceMrg().AddIncludeFile(source.m_path.string(), {}, included);
         if (ID == ~0U) {
-            fatalError("Failed to load '"s + source.m_path.string() + "'");
+            fatalError("Failed to load '"_t + source.m_path.string() + "'");
         }
         compileSource(source.m_path, ID);
     }
@@ -290,7 +290,7 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
     Parser parser{ m_context, ID, isMain };
     auto ast = parser.parse();
     if (!ast) {
-        fatalError("Failed to parse '"s + path.string() + "'");
+        fatalError("Failed to parse '"_t + path.string() + "'");
     }
 
     // Analyze
@@ -303,7 +303,7 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
 
     // done
     if (!gen.validate()) {
-        fatalError("Failed to compile '"s + path.string() + "'");
+        fatalError("Failed to compile '"_t + path.string() + "'");
     }
 
     // Happy Days

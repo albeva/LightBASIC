@@ -64,7 +64,7 @@ private:
     unique_ptr<Token> move();
 
     // show error and terminate compilation
-    [[noreturn]] void error(const llvm::Twine& message);
+    [[noreturn]] void error(const Twine& message);
 
     Context& m_context;
     unsigned m_fileId;

@@ -65,7 +65,7 @@ public:
 
     void setMainFile(const fs::path& file) {
         if (file.extension() != getFileExt(FileType::Source)) {
-            fatalError("main file must have '"s + getFileExt(FileType::Source) + "' extension");
+            fatalError("main file must have '"_t + getFileExt(FileType::Source) + "' extension");
         }
         m_mainPath = file;
         m_implicitMain = true;

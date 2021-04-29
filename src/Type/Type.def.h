@@ -9,19 +9,19 @@
 
 //     ID        STR         Kind
 #define PRIMITIVE_TYPES(_) \
-    _( Bool,     "BOOL",     Bool    )  \
+    _( Bool,     "BOOL",     Boolean )  \
     _( ZString,  "ZSTRING",  ZString )
 
-//     ID        STR         Kind,    Bits Signed
+//     ID        STR         Kind,    Bits  Signed
 #define INTEGER_TYPES(_) \
-    _( Byte,     "BYTE",     Integer, 8,   true  ) \
-    _( UByte,    "UBYTE",    Integer, 8,   false ) \
-    _( Short,    "SHORT",    Integer, 16,  true  ) \
-    _( UShort,   "USHORT",   Integer, 16,  false ) \
-    _( Integer,  "INTEGER",  Integer, 32,  true  ) \
-    _( UInteger, "UINTEGER", Integer, 32,  false ) \
-    _( Long,     "LONG",     Integer, 64,  true  ) \
-    _( ULong,    "ULONG",    Integer, 64,  false )
+    _( Byte,     "BYTE",     Integral, 8,   true  ) \
+    _( UByte,    "UBYTE",    Integral, 8,   false ) \
+    _( Short,    "SHORT",    Integral, 16,  true  ) \
+    _( UShort,   "USHORT",   Integral, 16,  false ) \
+    _( Integer,  "INTEGER",  Integral, 32,  true  ) \
+    _( UInteger, "UINTEGER", Integral, 32,  false ) \
+    _( Long,     "LONG",     Integral, 64,  true  ) \
+    _( ULong,    "ULONG",    Integral, 64,  false )
 
 //     ID        STR         Kind           Bits
 #define FLOATINGPOINT_TYPES(_) \

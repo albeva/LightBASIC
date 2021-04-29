@@ -245,7 +245,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         constant = llvm::ConstantInt::get(
             ast->type->llvmType(m_llvmContext),
             result,
-            llvm::cast<TypeNumber>(ast->type)->isSigned());
+            llvm::cast<TypeNumeric>(ast->type)->isSigned());
         break;
     }
     case TokenKind::BooleanLiteral: {
@@ -253,7 +253,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         constant = llvm::ConstantInt::get(
             ast->type->llvmType(m_llvmContext),
             value,
-            llvm::cast<TypeNumber>(ast->type)->isSigned());
+            llvm::cast<TypeNumeric>(ast->type)->isSigned());
         break;
     }
     case TokenKind::NullLiteral:

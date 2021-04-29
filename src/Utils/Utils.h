@@ -6,35 +6,38 @@
 
 #define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
 
-#ifdef __PRETTY_FUNCTION__
-#    define LBC_FUNCTION __PRETTY_FUNCTION__
-#else
-#    define LBC_FUNCTION __FUNCTION__
-#endif
-
-namespace lbc {
-
 #define NO_COPY_AND_MOVE(Class)         \
     Class(Class&&) = delete;            \
     Class(const Class&) = delete;       \
     Class& operator=(Class&&) = delete; \
     Class& operator=(const Class&) = delete;
 
-class NonCopyable {
-public:
+#define CONCATENATE_DETAIL(x, y) x##y
+#define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
+#define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
+
+namespace lbc {
+
+struct NonCopyable {
     constexpr NonCopyable() = default;
     ~NonCopyable() = default;
-
     NO_COPY_AND_MOVE(NonCopyable)
 };
 
 /**
- * End compilation error with the message, clear the state and exit with error
+ * Get Twine from "literal"_t
+ */
+inline Twine operator"" _t(const char* s, size_t len) {
+    return {StringRef{s, len}};
+}
+
+/**
+ * End compilation with the error message, clear the state and exit with error
  *
  * @param message to print
  * @param prefix add standard prefix befor ethe message
  */
-[[noreturn]] void fatalError(const string& message, bool prefix = true);
+[[noreturn]] void fatalError(const Twine& message, bool prefix = true);
 
 /**
  * Helper class that restores variable value when existing scope
@@ -63,9 +66,6 @@ private:
     const T m_value;
 };
 
-#define CONCATENATE_DETAIL(x, y) x##y
-#define CONCATENATE(x, y) CONCATENATE_DETAIL(x, y)
-#define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
 #define RESTORE_ON_EXIT(V) ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_){ V };
 
 } // namespace lbc

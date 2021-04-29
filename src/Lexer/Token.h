@@ -18,12 +18,12 @@ public:
     /**
      * Create either identifier or a keyword token from string literal
      */
-    static unique_ptr<Token> create(const llvm::StringRef& lexeme, const llvm::SMLoc& loc);
+    static unique_ptr<Token> create(const StringRef& lexeme, const llvm::SMLoc& loc);
 
     /**
      * Create token with given kind and lexeme
      */
-    static unique_ptr<Token> create(TokenKind kind, const llvm::StringRef& lexeme, const llvm::SMLoc& loc);
+    static unique_ptr<Token> create(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc);
 
     /**
      * Create token with given kind and use description for lexeme
@@ -33,18 +33,18 @@ public:
     /**
      * Get TokenKind string representation
      */
-    static const llvm::StringRef& description(TokenKind kind);
+    static const StringRef& description(TokenKind kind);
 
-    Token(TokenKind kind, const llvm::StringRef& lexeme, const llvm::SMLoc& loc)
+    Token(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc)
     : m_kind{ kind }, m_lexeme{ lexeme }, m_loc{ loc } {}
 
     [[nodiscard]] inline TokenKind kind() const { return m_kind; }
-    [[nodiscard]] inline const llvm::StringRef& lexeme() const { return m_lexeme; }
+    [[nodiscard]] inline const StringRef& lexeme() const { return m_lexeme; }
 
     [[nodiscard]] inline const llvm::SMLoc& loc() const { return m_loc; }
     [[nodiscard]] llvm::SMRange range() const;
 
-    [[nodiscard]] const llvm::StringRef& description() const;
+    [[nodiscard]] const StringRef& description() const;
 
     [[nodiscard]] bool isGeneral() const;
     [[nodiscard]] bool isLiteral() const;
@@ -68,7 +68,7 @@ public:
 
 private:
     const TokenKind m_kind;
-    const llvm::StringRef m_lexeme;
+    const StringRef m_lexeme;
     const llvm::SMLoc m_loc;
 };
 

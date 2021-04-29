@@ -30,7 +30,7 @@ fs::path Toolchain::getPath(ToolKind tool) {
         llvm_unreachable("Invalid ToolKind ID");
     }
     if (!fs::exists(path)) {
-        fatalError("ToolKind "s + path.string() + " not found!");
+        fatalError("ToolKind "_t + path.string() + " not found!");
     }
     return path;
 }

@@ -39,12 +39,12 @@ llvm::StringSet literalStrings;
 
 } // namespace
 
-const llvm::StringRef& Token::description(TokenKind kind) {
+const StringRef& Token::description(TokenKind kind) {
     auto index = static_cast<size_t>(kind);
     return kindToDescription.at(index);
 }
 
-unique_ptr<Token> Token::create(const llvm::StringRef& lexeme, const llvm::SMLoc& loc) {
+unique_ptr<Token> Token::create(const StringRef& lexeme, const llvm::SMLoc& loc) {
     // all identifiers in lb are upper cased
     string uppercased;
     std::transform(lexeme.begin(), lexeme.end(), std::back_inserter(uppercased), llvm::toUpper);
@@ -55,13 +55,13 @@ unique_ptr<Token> Token::create(const llvm::StringRef& lexeme, const llvm::SMLoc
         return Token::create(iter->second, iter->first(), loc);
     }
 
-    // tokens store llvm::StringRef instances, therefore we need to keep
+    // tokens store StringRef instances, therefore we need to keep
     // actual string data around. Hence storing all identifiers in a set
     auto entry = uppercasedIds.insert(uppercased);
     return Token::create(TokenKind::Identifier, *entry.first, loc);
 }
 
-unique_ptr<Token> Token::create(TokenKind kind, const llvm::StringRef& lexeme, const llvm::SMLoc& loc) {
+unique_ptr<Token> Token::create(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc) {
     // literal string may have been processed for escape sequences. Store a local copy
     if (kind == TokenKind::StringLiteral) {
         auto entry = literalStrings.insert(lexeme);
@@ -88,7 +88,7 @@ llvm::SMRange Token::range() const {
     return { m_loc, llvm::SMLoc::getFromPointer(end) };
 }
 
-const llvm::StringRef& Token::description() const {
+const StringRef& Token::description() const {
     if (m_kind == TokenKind::Identifier) {
         return m_lexeme;
     }

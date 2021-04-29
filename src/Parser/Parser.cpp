@@ -78,7 +78,7 @@ unique_ptr<AstStmt> Parser::statement() {
     }
 
     if (attribs) {
-        error(llvm::Twine("Expected SUB, FUNCTION, DECLARE or VAR got '")
+        error("Expected SUB, FUNCTION, DECLARE or VAR got '"_t
             + m_token->description()
             + "'");
     }
@@ -446,7 +446,7 @@ unique_ptr<Token> Parser::accept(TokenKind kind) {
 
 unique_ptr<Token> Parser::expect(TokenKind kind) {
     if (!match(kind)) {
-        error(llvm::Twine("Expected '")
+        error("Expected '"_t
             + Token::description(kind)
             + "' got '"
             + m_token->description()
@@ -462,7 +462,7 @@ unique_ptr<Token> Parser::move() {
     return current;
 }
 
-[[noreturn]] void Parser::error(const llvm::Twine& message) {
+[[noreturn]] void Parser::error(const Twine& message) {
     string output;
     llvm::raw_string_ostream stream{ output };
 

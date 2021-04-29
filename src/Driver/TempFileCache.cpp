@@ -22,7 +22,7 @@ fs::path TempFileCache::createUniquePath(const string& suffix) {
 fs::path TempFileCache::createUniquePath(const fs::path& file, const string& suffix) {
     filenameCache.clear();
     llvm::sys::fs::createUniquePath(
-        llvm::Twine("lbc-") + file.stem().string() + "-%%%%%%%%%%%%" + suffix,
+        "lbc-"_t + file.stem().string() + "-%%%%%%%%%%%%" + suffix,
         filenameCache,
         true);
     return tempFiles.emplace_back(filenameCache.begin(), filenameCache.end());

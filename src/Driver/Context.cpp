@@ -122,13 +122,13 @@ void Context::setOutputFilePath(const fs::path& path) {
 
 fs::path Context::resolveOutputPath(const fs::path& path, const string& ext) const {
     if (!fs::exists(path)) {
-        fatalError("File '"s + path.string() + "' not found");
+        fatalError("File '"_t + path.string() + "' not found");
     }
     if (!path.is_absolute()) {
-        fatalError("Path '"s + path.string() + "' is not absolute");
+        fatalError("Path '"_t + path.string() + "' is not absolute");
     }
     if (fs::is_directory(path)) {
-        fatalError("Path '"s + path.string() + "' is not a file");
+        fatalError("Path '"_t + path.string() + "' is not a file");
     }
 
     if (m_outputFilePath.empty()) {
@@ -151,7 +151,7 @@ fs::path Context::resolveFilePath(const fs::path& path) const {
         return relToCompiler;
     }
 
-    fatalError("File '"s + path.string() + "' not found");
+    fatalError("File '"_t + path.string() + "' not found");
 }
 
 [[nodiscard]] bool Context::validateFile(const fs::path& path) {
@@ -160,7 +160,7 @@ fs::path Context::resolveFilePath(const fs::path& path) const {
     }
 
     if (!fs::is_regular_file(path)) {
-        fatalError("File '"s + path.string() + "' is not regular");
+        fatalError("File '"_t + path.string() + "' is not regular");
     }
 
     return true;

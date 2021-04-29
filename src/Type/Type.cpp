@@ -52,7 +52,7 @@ const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
         INTEGER_TYPES(CASE_INTEGER)
         FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
     default:
-        fatalError("Unknown typeExpr "s + string(Token::description(kind)), false);
+        fatalError("Unknown typeExpr "_t + Token::description(kind), false);
     }
 
 #undef TO_PRIMITIVE_TYPE
@@ -102,27 +102,27 @@ llvm::Type* TypePointer::genLlvmType(llvm::LLVMContext& context) const {
 
 // Bool
 
-const TypeBool* TypeBool::get() {
+const TypeBoolean* TypeBoolean::get() {
     return &BoolTy;
 }
 
-llvm::Type* TypeBool::genLlvmType(llvm::LLVMContext& context) const {
+llvm::Type* TypeBoolean::genLlvmType(llvm::LLVMContext& context) const {
     return llvm::Type::getInt1Ty(context);
 }
 
 // Integer
 
-const TypeInteger* TypeInteger::get(unsigned bits, bool isSigned) {
+const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) {
 #define USE_TYPE(id, str, kind, BITS, IS_SIGNED) \
     if (bits == BITS && isSigned == IS_SIGNED)   \
         return &id##Ty;
     INTEGER_TYPES(USE_TYPE)
 #undef USE_TYPE
 
-    fatalError("Invalid integer type size: "s + std::to_string(bits), false);
+    fatalError("Invalid integer type size: "_t + Twine(bits), false);
 }
 
-llvm::Type* TypeInteger::genLlvmType(llvm::LLVMContext& context) const {
+llvm::Type* TypeIntegral::genLlvmType(llvm::LLVMContext& context) const {
     return llvm::IntegerType::get(context, bits());
 }
 
@@ -136,7 +136,7 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
         FLOATINGPOINT_TYPES(USE_TYPE)
 #undef USE_TYPE
     default:
-        fatalError("Invalid floating point type size: "s + std::to_string(bits), false);
+        fatalError("Invalid floating point type size: "_t + Twine(bits), false);
     }
 }
 
@@ -147,7 +147,7 @@ llvm::Type* TypeFloatingPoint::genLlvmType(llvm::LLVMContext& context) const {
     case 64: // NOLINT
         return llvm::Type::getDoubleTy(context);
     default:
-        fatalError("Invalid floating point type size: "s + std::to_string(bits()), false);
+        fatalError("Invalid floating point type size: "_t + Twine(bits()), false);
     }
 }
 

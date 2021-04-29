@@ -160,11 +160,11 @@ void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
     auto* symbol = m_table->find(name, true);
 
     if (symbol == nullptr) {
-        fatalError("Unknown identifier "s + string(name));
+        fatalError("Unknown identifier "_t + name);
     }
 
     if (symbol->type() == nullptr) {
-        fatalError("Identifier "s + string(name) + " has unresolved m_type");
+        fatalError("Identifier "_t + name + " has unresolved m_type");
     }
 
     ast->symbol = symbol;
@@ -178,7 +178,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
 
     const auto* type = dyn_cast<TypeFunction>(symbol->type());
     if (type == nullptr) {
-        fatalError("Identifier "s + string(symbol->name()) + " is not a callable m_type"s);
+        fatalError("Identifier "_t + symbol->name() + " is not a callable m_type");
     }
 
     const auto& paramTypes = type->paramTypes();
@@ -210,7 +210,7 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
         ast->type = TypeZString::get();
         break;
     case TokenKind::BooleanLiteral:
-        ast->type = TypeBool::get();
+        ast->type = TypeBoolean::get();
         break;
     case TokenKind::NullLiteral:
         ast->type = TypePointer::get(TypeAny::get());
@@ -225,7 +225,7 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
 
 Symbol* SemanticAnalyzer::createNewSymbol(Token* token) {
     if (m_table->find(token->lexeme(), false) != nullptr) {
-        fatalError("Redefinition of " + string(token->lexeme()));
+        fatalError("Redefinition of "_t + token->lexeme());
     }
     return m_table->insert(token->lexeme());
 }

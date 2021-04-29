@@ -64,6 +64,8 @@ using namespace std::literals::string_literals;
 
 using llvm::dyn_cast;
 using llvm::isa;
+using llvm::StringRef;
+using llvm::Twine;
 
 // APP
 #include "Utils/Utils.h"

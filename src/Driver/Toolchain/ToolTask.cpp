@@ -53,7 +53,7 @@ ToolTask& ToolTask::addArgs(std::initializer_list<string> args) {
 }
 
 int ToolTask::execute() {
-    std::vector<llvm::StringRef> args;
+    std::vector<StringRef> args;
     args.reserve(m_args.size() + 1);
 
     auto program = m_path.string();
