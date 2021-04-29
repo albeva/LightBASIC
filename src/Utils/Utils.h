@@ -27,8 +27,8 @@ struct NonCopyable {
 /**
  * Get Twine from "literal"_t
  */
-inline Twine operator"" _t(const char* s, size_t len) {
-    return {StringRef{s, len}};
+inline Twine operator"" _t(const char* s, size_t /*len*/) {
+    return {s};
 }
 
 /**
