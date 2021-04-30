@@ -129,7 +129,7 @@ OPTIONS:
     --version        Show version information
     -v               Show verbose output
     -c               Only run compile and assemble steps
-    -S               Only execute compilation steps
+    -S               Only drive compilation steps
     -emit-llvm       Use the LLVM representation for assembler and object files
     -o <file>        Write output to <file>
     -O<number>       Set optimization. Valid options: O0, OS, O1, O2, O3

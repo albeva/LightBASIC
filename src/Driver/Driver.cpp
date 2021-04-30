@@ -13,7 +13,7 @@
 
 using namespace lbc;
 
-int Driver::execute() noexcept {
+int Driver::drive() noexcept {
     processInputs();
     compileSources();
 

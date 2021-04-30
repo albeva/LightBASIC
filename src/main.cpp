@@ -12,6 +12,5 @@ int main(int argc, const char* argv[]) {
     cmdLineParser.parse({ argv, static_cast<size_t>(argc) });
     context.validate();
 
-    Driver driver{ context };
-    return driver.execute();
+    return Driver{ context }.drive();
 }
