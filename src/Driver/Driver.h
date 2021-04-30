@@ -30,6 +30,7 @@ private:
     void emitBitCode(bool temporary) noexcept;
     void emitAssembly(bool temporary) noexcept;
     void emitObjects(bool temporary) noexcept;
+    void assemble(Context::FileType type, bool temporary) noexcept;
     void emitExecutable() noexcept;
 
     void compileSources() noexcept;

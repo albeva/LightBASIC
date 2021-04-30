@@ -112,7 +112,9 @@ void Driver::emitBitCode(bool temporary) noexcept {
             errors,
             llvm::sys::fs::OpenFlags::OF_None
         };
+
         llvm::WriteBitcodeToFile(*module.first, stream);
+
         stream.flush();
         stream.close();
 
@@ -121,46 +123,33 @@ void Driver::emitBitCode(bool temporary) noexcept {
 }
 
 void Driver::emitAssembly(bool temporary) noexcept {
-    const auto& bcFiles = getSources(Context::FileType::BitCode);
-    auto& asmFiles = getSources(Context::FileType::Assembly);
-    asmFiles.reserve(asmFiles.size() + bcFiles.size());
-
-    auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
-    for (const auto& source : bcFiles) {
-        auto output = deriveSource(*source, Context::FileType::Assembly, temporary);
-
-        task.reset();
-        task.addArg("-filetype=asm");
-        task.addPath("-o", output->path);
-        task.addPath(source->path);
-
-        if (task.execute() != EXIT_SUCCESS) {
-            fatalError("Failed emit '"_t + output->path.string() + "'");
-        }
-
-        asmFiles.emplace_back(std::move(output));
-    }
+    assemble(Context::FileType::Assembly, temporary);
 }
 
 void Driver::emitObjects(bool temporary) noexcept {
+    assemble(Context::FileType::Object, temporary);
+}
+
+void Driver::assemble(Context::FileType type, bool temporary) noexcept {
     const auto& bcFiles = getSources(Context::FileType::BitCode);
-    auto& objFiles = getSources(Context::FileType::Object);
-    objFiles.reserve(objFiles.size() + bcFiles.size());
+    auto& dstFiles = getSources(type);
+    auto filetype = "-filetype="s + (type == Context::FileType::Object ? "obj" : "asm");
+    dstFiles.reserve(dstFiles.size() + bcFiles.size());
 
-    auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
+    auto assembler = m_context.getToolchain().createTask(ToolKind::Assembler);
     for (const auto& source : bcFiles) {
-        auto output = deriveSource(*source, Context::FileType::Object, temporary);
+        auto output = deriveSource(*source, type, temporary);
 
-        task.reset();
-        task.addArg("-filetype=obj");
-        task.addPath("-o", output->path);
-        task.addPath(source->path);
+        assembler.reset();
+        assembler.addArg(filetype);
+        assembler.addPath("-o", output->path);
+        assembler.addPath(source->path);
 
-        if (task.execute() != EXIT_SUCCESS) {
+        if (assembler.execute() != EXIT_SUCCESS) {
             fatalError("Failed emit '"_t + output->path.string() + "'");
         }
 
-        objFiles.emplace_back(std::move(output));
+        dstFiles.emplace_back(std::move(output));
     }
 }
 
