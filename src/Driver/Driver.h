@@ -28,9 +28,10 @@ private:
 
     void emitLLVMIr(bool temporary) noexcept;
     void emitBitCode(bool temporary) noexcept;
+    void emitLlvm(Context::FileType type, bool temporary, void (*generator)(llvm::raw_fd_ostream&, llvm::Module&)) noexcept;
     void emitAssembly(bool temporary) noexcept;
     void emitObjects(bool temporary) noexcept;
-    void assemble(Context::FileType type, bool temporary) noexcept;
+    void emitNative(Context::FileType type, bool temporary) noexcept;
     void emitExecutable() noexcept;
 
     void compileSources() noexcept;

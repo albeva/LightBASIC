@@ -74,37 +74,25 @@ std::unique_ptr<Source> Driver::deriveSource(const Source& source, Context::File
 }
 
 void Driver::emitLLVMIr(bool temporary) noexcept {
-    auto& irFiles = getSources(Context::FileType::LLVMIr);
-    irFiles.reserve(irFiles.size() + m_modules.size());
-
-    for (auto& module : m_modules) {
-        const auto& source = module.second;
-        auto output = deriveSource(*source, Context::FileType::LLVMIr, temporary);
-
-        std::error_code errors{};
-        llvm::raw_fd_ostream stream{
-            output->path.string(),
-            errors,
-            llvm::sys::fs::OpenFlags::OF_None
-        };
-
+    emitLlvm(Context::FileType::LLVMIr, temporary, [](auto& stream, auto& module) {
         auto* printer = llvm::createPrintModulePass(stream);
-        printer->runOnModule(*module.first);
-
-        stream.flush();
-        stream.close();
-
-        irFiles.emplace_back(std::move(output));
-    }
+        printer->runOnModule(module);
+    });
 }
 
 void Driver::emitBitCode(bool temporary) noexcept {
-    auto& bcFiles = getSources(Context::FileType::BitCode);
-    bcFiles.reserve(bcFiles.size() + m_modules.size());
+    emitLlvm(Context::FileType::BitCode, temporary, [](auto& stream, auto& module) {
+        llvm::WriteBitcodeToFile(module, stream);
+    });
+}
+
+void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(llvm::raw_fd_ostream&, llvm::Module&)) noexcept {
+    auto& dstFiles = getSources(type);
+    dstFiles.reserve(dstFiles.size() + m_modules.size());
 
     for (auto& module : m_modules) {
         const auto& source = module.second;
-        auto output = deriveSource(*source, Context::FileType::BitCode, temporary);
+        auto output = deriveSource(*source, type, temporary);
 
         std::error_code errors{};
         llvm::raw_fd_ostream stream{
@@ -113,24 +101,24 @@ void Driver::emitBitCode(bool temporary) noexcept {
             llvm::sys::fs::OpenFlags::OF_None
         };
 
-        llvm::WriteBitcodeToFile(*module.first, stream);
+        generator(stream, *module.first);
 
         stream.flush();
         stream.close();
 
-        bcFiles.emplace_back(std::move(output));
+        dstFiles.emplace_back(std::move(output));
     }
 }
 
 void Driver::emitAssembly(bool temporary) noexcept {
-    assemble(Context::FileType::Assembly, temporary);
+    emitNative(Context::FileType::Assembly, temporary);
 }
 
 void Driver::emitObjects(bool temporary) noexcept {
-    assemble(Context::FileType::Object, temporary);
+    emitNative(Context::FileType::Object, temporary);
 }
 
-void Driver::assemble(Context::FileType type, bool temporary) noexcept {
+void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
     const auto& bcFiles = getSources(Context::FileType::BitCode);
     auto& dstFiles = getSources(type);
     auto filetype = "-filetype="s + (type == Context::FileType::Object ? "obj" : "asm");
