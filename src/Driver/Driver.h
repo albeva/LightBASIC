@@ -4,6 +4,7 @@
 #pragma once
 #include "pch.h"
 #include "Context.h"
+#include "Source.h"
 #include "Toolchain/Toolchain.h"
 
 namespace lbc {
@@ -19,7 +20,11 @@ public:
     [[nodiscard]] Context& getContext() { return m_context; }
 
 private:
+    using SourceContainer = std::vector<unique_ptr<Source>>;
+
     void processInputs();
+    [[nodiscard]] std::unique_ptr<Source> deriveSource(const Source& source, Context::FileType type, bool temporary) const noexcept;
+
     void emitLLVMIr(bool temporary);
     void emitBitCode(bool temporary);
     void emitAssembly(bool temporary);
@@ -27,39 +32,15 @@ private:
     void emitExecutable();
 
     void compileSources();
-    void compileSource(const fs::path& path, unsigned ID);
+    void compileSource(const Source* source, unsigned ID);
 
-    struct Origin final { // NOLINT
-        Context::FileType m_type;
-        size_t m_index;
-        Origin(Context::FileType type, size_t index)
-        : m_type{ type }, m_index{ index } {}
-    };
-
-    struct Artefact final { // NOLINT
-        Origin m_origin;
-        fs::path m_path;
-        Artefact(Context::FileType type, size_t index, fs::path path)
-        : m_origin{ type, index }, m_path{ std::move(path) } {}
-
-        Artefact(Origin origin, fs::path path)
-        : m_origin{ origin }, m_path{ std::move(path) } {}
-    };
-
-    std::vector<Artefact>& getArtifacts(Context::FileType type) {
-        return m_inputs.at(static_cast<size_t>(type));
+    SourceContainer& getSources(Context::FileType type) {
+        return m_sources.at(static_cast<size_t>(type));
     }
-
-    const fs::path& getOrigin(const Artefact& artefact) {
-        return getArtifacts(artefact.m_origin.m_type)[artefact.m_origin.m_index].m_path;
-    }
-
-    Artefact* findArtifact(Context::FileType type, const fs::path&);
-    Artefact* findArtifact(const fs::path& path);
 
     Context& m_context;
-    std::vector<unique_ptr<llvm::Module>> m_modules{};
-    std::array<std::vector<Artefact>, Context::fileTypeCount> m_inputs;
+    std::array<SourceContainer, Context::fileTypeCount> m_sources;
+    std::vector<std::pair<unique_ptr<llvm::Module>, const Source*>> m_modules{};
 };
 
 } // namespace lbc

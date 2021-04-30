@@ -61,145 +61,118 @@ int Driver::execute() {
 void Driver::processInputs() {
     for (size_t index = 0; index < Context::fileTypeCount; index++) {
         auto type = static_cast<Context::FileType>(index);
-        auto& dst = getArtifacts(type);
+        auto& dst = getSources(type);
         for (const auto& path : m_context.getInputFiles(type)) {
-            auto resolved = m_context.resolveFilePath(path);
-            dst.emplace_back(type, dst.size(), resolved);
+            dst.emplace_back(Source::create(type, m_context.resolveFilePath(path), false));
         }
     }
 }
 
-Driver::Artefact* Driver::findArtifact(Context::FileType type, const fs::path& path) {
-    auto& inputs = getArtifacts(type);
-    auto result = std::find_if(inputs.begin(), inputs.end(), [&](const Artefact& v) {
-        return v.m_path == path;
-    });
-    if (result != inputs.end()) {
-        return &*result;
-    }
-    return nullptr;
-}
-
-Driver::Artefact* Driver::findArtifact(const fs::path& path) {
-    for (size_t index = 0; index < Context::fileTypeCount; index++) {
-        if (auto* artifact = findArtifact(static_cast<Context::FileType>(index), path)) {
-            return artifact;
-        }
-    }
-    return nullptr;
+std::unique_ptr<Source> Driver::deriveSource(const Source& source, Context::FileType type, bool temporary) const noexcept {
+    const auto& original = source.origin.path;
+    const auto ext = Context::getFileExt(type);
+    const auto path = temporary
+        ? TempFileCache::createUniquePath(original, ext)
+        : m_context.resolveOutputPath(original, ext);
+    return source.derive(type, path);
 }
 
 void Driver::emitLLVMIr(bool temporary) {
-    auto& irFiles = getArtifacts(Context::FileType::LLVMIr);
+    auto& irFiles = getSources(Context::FileType::LLVMIr);
     irFiles.reserve(irFiles.size() + m_modules.size());
 
     for (auto& module : m_modules) {
-        auto* file = findArtifact(module->getSourceFileName());
-        assert(file != nullptr); // NOLINT
-        auto output = temporary
-            ? TempFileCache::createUniquePath(getOrigin(*file), ".ll")
-            : m_context.resolveOutputPath(getOrigin(*file), ".ll");
+        const auto& source = module.second;
+        auto output = deriveSource(*source, Context::FileType::LLVMIr, temporary);
 
         std::error_code errors{};
         llvm::raw_fd_ostream stream{
-            output.string(),
+            output->path.string(),
             errors,
             llvm::sys::fs::OpenFlags::OF_None
         };
 
         auto* printer = llvm::createPrintModulePass(stream);
-        printer->runOnModule(*module);
+        printer->runOnModule(*module.first);
 
         stream.flush();
         stream.close();
 
-        irFiles.emplace_back(file->m_origin, output);
+        irFiles.emplace_back(std::move(output));
     }
 }
 
 void Driver::emitBitCode(bool temporary) {
-    auto& bcFiles = getArtifacts(Context::FileType::BitCode);
+    auto& bcFiles = getSources(Context::FileType::BitCode);
     bcFiles.reserve(bcFiles.size() + m_modules.size());
 
     for (auto& module : m_modules) {
-        auto* file = findArtifact(module->getSourceFileName());
-        assert(file != nullptr); // NOLINT
-        auto output = temporary
-            ? TempFileCache::createUniquePath(getOrigin(*file), ".bc")
-            : m_context.resolveOutputPath(getOrigin(*file), ".bc");
+        const auto& source = module.second;
+        auto output = deriveSource(*source, Context::FileType::BitCode, temporary);
 
         std::error_code errors{};
         llvm::raw_fd_ostream stream{
-            output.string(),
+            output->path.string(),
             errors,
             llvm::sys::fs::OpenFlags::OF_None
         };
-        llvm::WriteBitcodeToFile(*module, stream);
+        llvm::WriteBitcodeToFile(*module.first, stream);
         stream.flush();
         stream.close();
 
-        bcFiles.emplace_back(file->m_origin, output);
+        bcFiles.emplace_back(std::move(output));
     }
 }
 
 void Driver::emitAssembly(bool temporary) {
-    const auto& bcFiles = getArtifacts(Context::FileType::BitCode);
-    auto& asmFiles = getArtifacts(Context::FileType::Assembly);
+    const auto& bcFiles = getSources(Context::FileType::BitCode);
+    auto& asmFiles = getSources(Context::FileType::Assembly);
     asmFiles.reserve(asmFiles.size() + bcFiles.size());
 
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
     task.reserve(4);
-    for (const auto& input : bcFiles) {
-        auto output = temporary
-            ? TempFileCache::createUniquePath(getOrigin(input), ".s")
-            : m_context.resolveOutputPath(getOrigin(input), ".s");
+    for (const auto& source : bcFiles) {
+        auto output = deriveSource(*source, Context::FileType::Assembly, temporary);
 
         task.reset();
         task.addArg("-filetype=asm");
-        task.addPath("-o", output);
-        task.addPath(input.m_path);
+        task.addPath("-o", output->path);
+        task.addPath(source->path);
 
         if (task.execute() != EXIT_SUCCESS) {
-            fatalError("Failed emit '"_t + output.string() + "'");
+            fatalError("Failed emit '"_t + output->path.string() + "'");
         }
 
-        asmFiles.emplace_back(input.m_origin, output);
+        asmFiles.emplace_back(std::move(output));
     }
 }
 
 void Driver::emitObjects(bool temporary) {
-    const auto& bcFiles = getArtifacts(Context::FileType::BitCode);
-    const auto& llFiles = getArtifacts(Context::FileType::LLVMIr);
-    auto& objFiles = getArtifacts(Context::FileType::Object);
-    objFiles.reserve(objFiles.size() + bcFiles.size() + llFiles.size());
-
-    std::vector<Artefact> files(bcFiles);
-    files.reserve(bcFiles.size() + llFiles.size());
-    files.insert(files.end(), llFiles.begin(), llFiles.end());
+    const auto& bcFiles = getSources(Context::FileType::BitCode);
+    auto& objFiles = getSources(Context::FileType::Object);
+    objFiles.reserve(objFiles.size() + bcFiles.size());
 
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
     task.reserve(4);
-    for (const auto& input : files) {
-        auto output = temporary
-            ? TempFileCache::createUniquePath(getOrigin(input), ".obj")
-            : m_context.resolveOutputPath(getOrigin(input), ".obj");
+    for (const auto& source : bcFiles) {
+        auto output = deriveSource(*source, Context::FileType::Object, temporary);
 
         task.reset();
         task.addArg("-filetype=obj");
-        task.addPath("-o", output);
-        task.addPath(input.m_path);
+        task.addPath("-o", output->path);
+        task.addPath(source->path);
 
         if (task.execute() != EXIT_SUCCESS) {
-            fatalError("Failed emit '"_t + output.string() + "'");
+            fatalError("Failed emit '"_t + output->path.string() + "'");
         }
 
-        objFiles.emplace_back(input.m_origin, output);
+        objFiles.emplace_back(std::move(output));
     }
 }
 
 void Driver::emitExecutable() {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
-    auto objFiles = getArtifacts(Context::FileType::Object);
+    const auto& objFiles = getSources(Context::FileType::Object);
     const auto& triple = m_context.getTriple();
 
     if (objFiles.empty()) {
@@ -212,7 +185,7 @@ void Driver::emitExecutable() {
 
     auto output = m_context.getOutputPath();
     if (output.empty()) {
-        output = m_context.getWorkingDir() / getOrigin(objFiles[0]).stem();
+        output = m_context.getWorkingDir() / objFiles[0]->origin.path.stem();
         if (triple.isOSWindows()) {
             output.replace_extension(".exe");
         }
@@ -230,7 +203,7 @@ void Driver::emitExecutable() {
             .addPath(sysLibPath / "crtbegin.o");
 
         for (const auto& obj : objFiles) {
-            linker.addPath(obj.m_path);
+            linker.addPath(obj->path);
         }
 
         linker
@@ -251,7 +224,7 @@ void Driver::emitExecutable() {
             .addPath("-o", output);
 
         for (const auto& obj : objFiles) {
-            linker.addPath(obj.m_path);
+            linker.addPath(obj->path);
         }
     } else if (triple.isOSLinux()) {
         string linuxSysPath = "/usr/lib/x86_64-linux-gnu";
@@ -264,7 +237,7 @@ void Driver::emitExecutable() {
             .addPath("-o", output);
 
         for (const auto& obj : objFiles) {
-            linker.addPath(obj.m_path);
+            linker.addPath(obj->path);
         }
 
         linker.addArg("-lc");
@@ -281,19 +254,20 @@ void Driver::emitExecutable() {
 // Compile
 
 void Driver::compileSources() {
-    const auto& sources = getArtifacts(Context::FileType::Source);
+    const auto& sources = getSources(Context::FileType::Source);
     m_modules.reserve(m_modules.size() + sources.size());
     for (const auto& source : sources) {
         string included;
-        auto ID = m_context.getSourceMrg().AddIncludeFile(source.m_path.string(), {}, included);
+        auto ID = m_context.getSourceMrg().AddIncludeFile(source->path.string(), {}, included);
         if (ID == ~0U) {
-            fatalError("Failed to load '"_t + source.m_path.string() + "'");
+            fatalError("Failed to load '"_t + source->path.string() + "'");
         }
-        compileSource(source.m_path, ID);
+        compileSource(source.get(), ID);
     }
 }
 
-void Driver::compileSource(const fs::path& path, unsigned int ID) {
+void Driver::compileSource(const Source* source, unsigned int ID) {
+    const auto& path = source->path;
     if (m_context.isVerbose()) {
         std::cout << "Compile: " << path << '\n';
     }
@@ -319,5 +293,5 @@ void Driver::compileSource(const fs::path& path, unsigned int ID) {
     }
 
     // Happy Days
-    m_modules.emplace_back(gen.getModule());
+    m_modules.emplace_back(gen.getModule(), source);
 }

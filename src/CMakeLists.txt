@@ -18,6 +18,7 @@ add_executable(
     Driver/Context.h
     Driver/Driver.cpp
     Driver/Driver.h
+    Driver/Source.h
     Driver/TempFileCache.cpp
     Driver/TempFileCache.h
     Driver/Toolchain/ToolTask.cpp
