@@ -14,7 +14,7 @@ struct Source final : private NonCopyable {
     Source(Context::FileType ty, const fs::path& p, bool gen, const Source* o) noexcept
     : type{ ty }, path{ p }, isGenerated{ gen }, origin{ o == nullptr ? *this : *o } {}
 
-    [[nodiscard]] static unique_ptr<Source> create(Context::FileType type, const fs::path& path, bool generated, const Source* origin = nullptr) {
+    [[nodiscard]] static unique_ptr<Source> create(Context::FileType type, const fs::path& path, bool generated, const Source* origin = nullptr) noexcept {
         return make_unique<Source>(type, path, generated, origin);
     }
 
@@ -26,7 +26,7 @@ struct Source final : private NonCopyable {
     /**
      * Derive new generated Source with the same origin
      */
-    [[nodiscard]] unique_ptr<Source> derive(Context::FileType ty, const fs::path& p) const {
+    [[nodiscard]] unique_ptr<Source> derive(Context::FileType ty, const fs::path& p) const noexcept {
         return create(ty, p, true, &origin);
     }
 };

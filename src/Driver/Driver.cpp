@@ -13,11 +13,7 @@
 
 using namespace lbc;
 
-Driver::Driver(Context& context)
-: m_context{ context } {
-}
-
-int Driver::execute() {
+int Driver::execute() noexcept {
     processInputs();
     compileSources();
 
@@ -58,7 +54,7 @@ int Driver::execute() {
  * Process provided input files from the context, resolve their path,
  * ansure they exost and store in driver paths structure
  */
-void Driver::processInputs() {
+void Driver::processInputs() noexcept {
     for (size_t index = 0; index < Context::fileTypeCount; index++) {
         auto type = static_cast<Context::FileType>(index);
         auto& dst = getSources(type);
@@ -77,7 +73,7 @@ std::unique_ptr<Source> Driver::deriveSource(const Source& source, Context::File
     return source.derive(type, path);
 }
 
-void Driver::emitLLVMIr(bool temporary) {
+void Driver::emitLLVMIr(bool temporary) noexcept {
     auto& irFiles = getSources(Context::FileType::LLVMIr);
     irFiles.reserve(irFiles.size() + m_modules.size());
 
@@ -102,7 +98,7 @@ void Driver::emitLLVMIr(bool temporary) {
     }
 }
 
-void Driver::emitBitCode(bool temporary) {
+void Driver::emitBitCode(bool temporary) noexcept {
     auto& bcFiles = getSources(Context::FileType::BitCode);
     bcFiles.reserve(bcFiles.size() + m_modules.size());
 
@@ -124,7 +120,7 @@ void Driver::emitBitCode(bool temporary) {
     }
 }
 
-void Driver::emitAssembly(bool temporary) {
+void Driver::emitAssembly(bool temporary) noexcept {
     const auto& bcFiles = getSources(Context::FileType::BitCode);
     auto& asmFiles = getSources(Context::FileType::Assembly);
     asmFiles.reserve(asmFiles.size() + bcFiles.size());
@@ -147,7 +143,7 @@ void Driver::emitAssembly(bool temporary) {
     }
 }
 
-void Driver::emitObjects(bool temporary) {
+void Driver::emitObjects(bool temporary) noexcept {
     const auto& bcFiles = getSources(Context::FileType::BitCode);
     auto& objFiles = getSources(Context::FileType::Object);
     objFiles.reserve(objFiles.size() + bcFiles.size());
@@ -170,7 +166,7 @@ void Driver::emitObjects(bool temporary) {
     }
 }
 
-void Driver::emitExecutable() {
+void Driver::emitExecutable() noexcept {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
     const auto& objFiles = getSources(Context::FileType::Object);
     const auto& triple = m_context.getTriple();
@@ -253,7 +249,7 @@ void Driver::emitExecutable() {
 
 // Compile
 
-void Driver::compileSources() {
+void Driver::compileSources() noexcept {
     const auto& sources = getSources(Context::FileType::Source);
     m_modules.reserve(m_modules.size() + sources.size());
     for (const auto& source : sources) {
@@ -266,7 +262,7 @@ void Driver::compileSources() {
     }
 }
 
-void Driver::compileSource(const Source* source, unsigned int ID) {
+void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
     const auto& path = source->path;
     if (m_context.isVerbose()) {
         std::cout << "Compile: " << path << '\n';
