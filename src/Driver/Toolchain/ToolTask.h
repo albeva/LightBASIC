@@ -12,21 +12,22 @@ enum class ToolKind;
 
 class ToolTask final : private NonCopyable {
 public:
-    ToolTask(Context& context, ToolKind kind, fs::path path);
-    ToolTask& reserve(size_t newCap);
+    ToolTask(Context& context, const fs::path& path) noexcept
+    : m_context{ context }, m_path{ path } {}
 
-    ToolTask& reset();
-    ToolTask& addArg(string arg);
-    ToolTask& addArg(string name, string value);
-    ToolTask& addPath(const fs::path& path);
-    ToolTask& addPath(string name, const fs::path& value);
-    ToolTask& addArgs(std::initializer_list<string> arghs);
-    int execute();
+    ToolTask& reset() noexcept;
+
+    ToolTask& addArg(string arg) noexcept;
+    ToolTask& addArg(string name, string value) noexcept;
+    ToolTask& addPath(const fs::path& path) noexcept;
+    ToolTask& addPath(string name, const fs::path& value) noexcept;
+    ToolTask& addArgs(std::initializer_list<string> arghs) noexcept;
+
+    [[nodiscard]] int execute() const noexcept;
 
 private:
     std::vector<string> m_args;
     Context& m_context;
-    const ToolKind m_kind;
     const fs::path m_path;
 };
 

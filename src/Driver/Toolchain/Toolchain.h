@@ -10,9 +10,9 @@ class ToolTask;
 class Context;
 
 enum class ToolKind {
-    Optimizer, // optimizer
-    Assembler, // assembler
-    Linker,    // linker
+    Optimizer,
+    Assembler,
+    Linker
 };
 
 /**
@@ -23,21 +23,14 @@ enum class ToolKind {
  */
 class Toolchain final : private NonCopyable {
 public:
-    explicit Toolchain(Context& context) : m_context{ context } {}
+    explicit Toolchain(Context& context) noexcept : m_context{ context } {}
 
-    /**
-     * Set toolchain base path
-     * @param path to llvm toolchain
-     */
-    void setBasePath(fs::path path) { m_basePath = path; }
-    const fs::path& getBasePath() const { return m_basePath; }
+    void setBasePath(fs::path path) noexcept { m_basePath = path; }
+    [[nodiscard]] const fs::path& getBasePath() const noexcept { return m_basePath; }
 
-    /**
-     * Get path for the given tool
-     */
-    [[nodiscard]] fs::path getPath(ToolKind tool);
+    [[nodiscard]] fs::path getPath(ToolKind tool) const noexcept;
 
-    ToolTask createTask(ToolKind kind);
+    [[nodiscard]] ToolTask createTask(ToolKind kind) const noexcept;
 
 private:
     fs::path m_basePath{};

@@ -2,7 +2,7 @@
 // Created by Albert Varaksin on 07/02/2021.
 //
 
-fs::path Toolchain::getPath(ToolKind tool) {
+fs::path Toolchain::getPath(ToolKind tool) const noexcept {
     fs::path path;
     switch (tool) {
     case ToolKind::Optimizer:

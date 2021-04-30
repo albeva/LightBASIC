@@ -19,8 +19,8 @@ struct Source final : private NonCopyable {
     }
 
     const Context::FileType type;
-    const bool isGenerated;
     const fs::path path;
+    const bool isGenerated;
     const Source& origin;
 
     /**

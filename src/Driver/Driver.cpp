@@ -126,7 +126,6 @@ void Driver::emitAssembly(bool temporary) noexcept {
     asmFiles.reserve(asmFiles.size() + bcFiles.size());
 
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
-    task.reserve(4);
     for (const auto& source : bcFiles) {
         auto output = deriveSource(*source, Context::FileType::Assembly, temporary);
 
@@ -149,7 +148,6 @@ void Driver::emitObjects(bool temporary) noexcept {
     objFiles.reserve(objFiles.size() + bcFiles.size());
 
     auto task = m_context.getToolchain().createTask(ToolKind::Assembler);
-    task.reserve(4);
     for (const auto& source : bcFiles) {
         auto output = deriveSource(*source, Context::FileType::Object, temporary);
 

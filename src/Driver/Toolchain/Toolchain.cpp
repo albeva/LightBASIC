@@ -6,8 +6,8 @@
 
 using namespace lbc;
 
-ToolTask Toolchain::createTask(ToolKind kind) {
-    return ToolTask(m_context, kind, getPath(kind));
+ToolTask Toolchain::createTask(ToolKind kind) const noexcept{
+    return ToolTask(m_context, getPath(kind));
 }
 
 #if __APPLE__ || __linux__ || __unix__

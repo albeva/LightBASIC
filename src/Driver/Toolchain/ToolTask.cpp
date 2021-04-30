@@ -8,43 +8,34 @@
 
 using namespace lbc;
 
-ToolTask::ToolTask(Context& context, ToolKind kind, fs::path path)
-: m_context{ context }, m_kind{ kind }, m_path{ std::move(path) } {
-}
-
-ToolTask& ToolTask::reset() {
+ToolTask& ToolTask::reset() noexcept {
     m_args.clear();
     return *this;
 }
 
-ToolTask& ToolTask::reserve(size_t newCap) {
-    m_args.reserve(newCap + 1);
-    return *this;
-}
-
-ToolTask& ToolTask::addArg(string arg) {
+ToolTask& ToolTask::addArg(string arg) noexcept {
     m_args.push_back(std::move(arg));
     return *this;
 }
 
-ToolTask& ToolTask::addArg(string name, string value) {
+ToolTask& ToolTask::addArg(string name, string value) noexcept {
     m_args.push_back(name);
     m_args.push_back(value);
     return *this;
 }
 
-ToolTask& ToolTask::addPath(const fs::path& path) {
+ToolTask& ToolTask::addPath(const fs::path& path) noexcept {
     addArg(path.string());
     return *this;
 }
 
-ToolTask& ToolTask::addPath(string name, const fs::path& value) {
+ToolTask& ToolTask::addPath(string name, const fs::path& value) noexcept {
     m_args.push_back(name);
     addPath(value);
     return *this;
 }
 
-ToolTask& ToolTask::addArgs(std::initializer_list<string> args) {
+ToolTask& ToolTask::addArgs(std::initializer_list<string> args) noexcept {
     if (m_args.capacity() < m_args.size() + args.size()) {
         m_args.reserve(m_args.size() + args.size());
     }
@@ -52,7 +43,7 @@ ToolTask& ToolTask::addArgs(std::initializer_list<string> args) {
     return *this;
 }
 
-int ToolTask::execute() {
+int ToolTask::execute() const noexcept {
     std::vector<StringRef> args;
     args.reserve(m_args.size() + 1);
 
