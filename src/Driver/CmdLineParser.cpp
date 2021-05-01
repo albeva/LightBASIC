@@ -6,9 +6,6 @@
 #include <llvm/Support/FileSystem.h>
 using namespace lbc;
 
-CmdLineParser::CmdLineParser(lbc::Context& context) noexcept
-: m_context{ context } {}
-
 void CmdLineParser::parse(const Args& args) noexcept {
     if (args.size() < 2) {
         showError("no input.");
@@ -19,10 +16,6 @@ void CmdLineParser::parse(const Args& args) noexcept {
         args[0],
         reinterpret_cast<void*>(showHelp)); // NOLINT
     m_context.setCompilerPath(executable);
-
-    // current working directory
-    auto workingDir = fs::current_path();
-    m_context.setWorkingDir(workingDir);
 
     // lbc ( option | <file> )+
     size_t index = 1;

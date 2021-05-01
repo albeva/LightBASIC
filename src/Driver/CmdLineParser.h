@@ -16,7 +16,7 @@ class CmdLineParser final : private NonCopyable {
 public:
     using Args = llvm::ArrayRef<const char*>;
 
-    explicit CmdLineParser(Context& context) noexcept;
+    explicit CmdLineParser(Context& context) noexcept : m_context{ context } {}
     void parse(const Args& args) noexcept;
 
 private:

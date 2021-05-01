@@ -6,7 +6,6 @@
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
 #include "TempFileCache.h"
-#include "Toolchain/Toolchain.h"
 #include "Toolchain/ToolTask.h"
 #include "Toolchain/Toolchain.h"
 #include <llvm/IR/IRPrintingPasses.h>
@@ -150,7 +149,7 @@ void Driver::emitExecutable() noexcept {
     if (objFiles.empty()) {
         fatalError("No objects to link");
     }
-    
+
     if (!triple.isX86()) {
         fatalError("Currently only x86 is supported");
     }

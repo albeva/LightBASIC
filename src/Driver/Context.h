@@ -146,7 +146,7 @@ private:
     std::array<std::vector<fs::path>, fileTypeCount> m_inputFiles{};
 
     Toolchain m_toolchain{ *this };
-    fs::path m_workingDir{};
+    fs::path m_workingDir;
     fs::path m_compilerPath{};
     fs::path m_outputFilePath{};
 
