@@ -14,7 +14,7 @@ namespace lbc {
 class Driver final : private NonCopyable {
 public:
     explicit Driver(Context& context) noexcept : m_context{ context } {}
-    int drive() noexcept;
+    [[nodiscard]] int drive() noexcept;
 
 private:
     using SourceVector = std::vector<unique_ptr<Source>>;
