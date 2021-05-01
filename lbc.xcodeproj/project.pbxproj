@@ -91,6 +91,7 @@
 		506FBF3A2638E1C300063AC6 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		506FBF512638E1E200063AC6 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		50D7A24B262E002B0047D48E /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
+		50F2ACD2263CFF9F009ABAE3 /* Source.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Source.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +146,7 @@
 				506FBF122638E1C300063AC6 /* Driver.cpp */,
 				506FBF0D2638E1C300063AC6 /* Driver.h */,
 				506FBF102638E1C300063AC6 /* README.md */,
+				50F2ACD2263CFF9F009ABAE3 /* Source.h */,
 				506FBF0F2638E1C300063AC6 /* TempFileCache.cpp */,
 				506FBF0E2638E1C300063AC6 /* TempFileCache.h */,
 			);

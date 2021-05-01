@@ -5,7 +5,6 @@
 #include "pch.h"
 #include "Context.h"
 #include "Source.h"
-#include "Toolchain/Toolchain.h"
 
 namespace lbc {
 
@@ -22,7 +21,7 @@ private:
 
     void processInputs() noexcept;
     [[nodiscard]] std::unique_ptr<Source> deriveSource(const Source& source, Context::FileType type, bool temporary) const noexcept;
-    SourceVector& getSources(Context::FileType type) noexcept {
+    [[nodiscard]] SourceVector& getSources(Context::FileType type) noexcept {
         return m_sources.at(static_cast<size_t>(type));
     }
 

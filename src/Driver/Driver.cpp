@@ -6,6 +6,7 @@
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
 #include "TempFileCache.h"
+#include "Toolchain/Toolchain.h"
 #include "Toolchain/ToolTask.h"
 #include "Toolchain/Toolchain.h"
 #include <llvm/IR/IRPrintingPasses.h>
@@ -149,6 +150,10 @@ void Driver::emitExecutable() noexcept {
     if (objFiles.empty()) {
         fatalError("No objects to link");
     }
+    
+    if (!triple.isX86()) {
+        fatalError("Currently only x86 is supported");
+    }
 
     if (triple.isArch32Bit()) {
         fatalError("32bit is not implemented yet");
@@ -160,6 +165,8 @@ void Driver::emitExecutable() noexcept {
         if (triple.isOSWindows()) {
             output.replace_extension(".exe");
         }
+    } else if (output.is_relative()) {
+        output = fs::absolute(m_context.getWorkingDir() / output);
     }
 
     if (triple.isOSWindows()) {
