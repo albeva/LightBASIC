@@ -5,6 +5,7 @@
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
 using namespace lbc;
+using namespace Sem;
 
 FuncDeclarerPass::FuncDeclarerPass(Context& context) noexcept
 : m_context{ context } {
@@ -12,7 +13,7 @@ FuncDeclarerPass::FuncDeclarerPass(Context& context) noexcept
 
 void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     m_table = ast->symbolTable.get();
-    for (const auto& stmt: ast->stmtList->stmts) {
+    for (const auto& stmt : ast->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
             visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()));

@@ -4,10 +4,10 @@
 #include "SemanticAnalyzer.h"
 #include "Ast/Ast.h"
 #include "Lexer/Token.h"
+#include "Passes/FuncDeclarerPass.h"
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
-#include "Passes/FuncDeclarerPass.h"
 using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context)
@@ -18,7 +18,7 @@ void SemanticAnalyzer::visit(AstModule* ast) {
     m_fileId = ast->fileId;
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
-    FuncDeclarerPass(m_context).visit(ast);
+    Sem::FuncDeclarerPass(m_context).visit(ast);
 
     m_rootTable = m_table = ast->symbolTable.get();
     visitStmtList(ast->stmtList.get());

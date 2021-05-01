@@ -12,19 +12,26 @@ class SymbolTable;
 class Symbol;
 class Token;
 
-class FuncDeclarerPass: private NonCopyable {
-public:
-    explicit FuncDeclarerPass(Context& context) noexcept;
-    void visit(AstModule* ast) noexcept;
+namespace Sem {
 
-private:
-    void visitFuncDecl(AstFuncDecl* ast) noexcept;
-    void visitFuncParamDecl(AstFuncParamDecl* ast) noexcept;
-    void visitTypeExpr(AstTypeExpr* ast) noexcept;
-    [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl* ast) noexcept;
+    /**
+     * Semantic pass that declares all the functions
+     * and declarations in the ast
+     */
+    class FuncDeclarerPass : private NonCopyable {
+    public:
+        explicit FuncDeclarerPass(Context& context) noexcept;
+        void visit(AstModule* ast) noexcept;
 
-    SymbolTable* m_table;
-    Context& m_context;
-};
+    private:
+        void visitFuncDecl(AstFuncDecl* ast) noexcept;
+        void visitFuncParamDecl(AstFuncParamDecl* ast) noexcept;
+        void visitTypeExpr(AstTypeExpr* ast) noexcept;
+        [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl* ast) noexcept;
 
+        SymbolTable* m_table;
+        Context& m_context;
+    };
+
+} // namespace Sem
 } // namespace lbc
