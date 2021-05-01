@@ -37,6 +37,9 @@ private:
     };
 
     using LiteralMap = llvm::StringMap<llvm::Constant*>;
+
+    void declareFuncs() noexcept;
+    void declareFunc(AstFuncDecl* ast) noexcept;
     static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
 
     Context& m_context;
@@ -44,7 +47,7 @@ private:
     AstModule* m_astRootModule = nullptr;
     unsigned int m_fileId = ~0U;
     Scope m_scope = Scope::Root;
-    llvm::IRBuilder<> m_builder;
+    // llvm::IRBuilder<> m_builder;
     unique_ptr<llvm::Module> m_module;
     llvm::Value* m_value = nullptr;
     llvm::Function* m_function = nullptr;

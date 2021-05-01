@@ -14,8 +14,7 @@ using namespace lbc;
 
 CodeGen::CodeGen(Context& context)
 : m_context{ context },
-  m_llvmContext{ context.getLlvmContext() },
-  m_builder{ m_llvmContext } {
+  m_llvmContext{ context.getLlvmContext() } {
 }
 
 bool CodeGen::validate() const {
@@ -38,7 +37,17 @@ void CodeGen::visit(AstModule* ast) {
     m_module = make_unique<llvm::Module>(file, m_llvmContext);
     m_module->setTargetTriple(m_context.getTriple().str());
 
-    if (ast->hasImplicitMain) {
+    declareFuncs();
+
+    bool hasMainDefined = false;
+    if (auto* main = ast->symbolTable->find("MAIN")) {
+        if (main->alias() == "main") {
+            hasMainDefined = true;
+        }
+    }
+    bool generateMain = !hasMainDefined && ast->hasImplicitMain;
+
+    if (generateMain) {
         m_function = llvm::Function::Create(
             llvm::FunctionType::get(llvm::Type::getInt32Ty(m_llvmContext), false),
             llvm::Function::ExternalLinkage,
@@ -51,13 +60,12 @@ void CodeGen::visit(AstModule* ast) {
     } else {
         m_block = llvm::BasicBlock::Create(m_llvmContext);
     }
-    m_builder.SetInsertPoint(m_block);
 
     // parse statements
     visitStmtList(ast->stmtList.get());
 
     // close main
-    if (ast->hasImplicitMain) {
+    if (generateMain) {
         auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_llvmContext));
         llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
     }
@@ -72,7 +80,7 @@ void CodeGen::visitStmtList(AstStmtList* ast) {
 void CodeGen::visitAssignStmt(AstAssignStmt* ast) {
     auto* dstValue = getStoreValue(ast->identExpr.get());
     visitExpr(ast->expr.get());
-    m_builder.CreateStore(ast->expr->llvmValue, dstValue);
+    new llvm::StoreInst(ast->expr->llvmValue, dstValue, m_block);
 }
 
 llvm::Value* CodeGen::getStoreValue(AstIdentExpr* identExpr) {
@@ -132,6 +140,25 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
 }
 
 void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
+    // NOOP
+}
+
+void CodeGen::declareFuncs() noexcept {
+    for (const auto& stmt: m_astRootModule->stmtList->stmts) {
+        switch (stmt->kind()) {
+        case AstKind::FuncDecl:
+            declareFunc(static_cast<AstFuncDecl*>(stmt.get()));
+            break;
+        case AstKind::FuncStmt:
+            declareFunc(static_cast<AstFuncStmt*>(stmt.get())->decl.get());
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void CodeGen::declareFunc(AstFuncDecl* ast) noexcept {
     auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_context));
     auto* fn = llvm::Function::Create(
         fnTy,
@@ -151,10 +178,10 @@ void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
 }
 
 void CodeGen::visitFuncParamDecl(AstFuncParamDecl* /*ast*/) {
+    llvm_unreachable("visitFuncParamDecl");
 }
 
 void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
-    visitFuncDecl(ast->decl.get());
     RESTORE_ON_EXIT(m_function);
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
@@ -190,15 +217,17 @@ void CodeGen::visitReturnStmt(AstReturnStmt* ast) {
     if (ast->expr) {
         visitExpr(ast->expr.get());
         llvm::ReturnInst::Create(m_llvmContext, ast->expr->llvmValue, m_block);
-        return;
+    } else {
+        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
     }
-    llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
 }
 
 void CodeGen::visitAttributeList(AstAttributeList* /*ast*/) {
+    llvm_unreachable("visitAttributeList");
 }
 
 void CodeGen::visitAttribute(AstAttribute* /*ast*/) {
+    llvm_unreachable("visitAttribute");
 }
 
 void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
@@ -217,6 +246,7 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
 }
 
 void CodeGen::visitTypeExpr(AstTypeExpr* /*ast*/) {
+    llvm_unreachable("visitTypeExpr");
 }
 
 void CodeGen::visitCallExpr(AstCallExpr* ast) {

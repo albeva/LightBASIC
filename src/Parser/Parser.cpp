@@ -159,10 +159,10 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
     func->stmtList = stmtList();
 
     expect(TokenKind::End);
-    if (func->decl->retTypeExpr == nullptr) {
-        expect(TokenKind::Sub);
-    } else {
+    if (func->decl->retTypeExpr) {
         expect(TokenKind::Function);
+    } else {
+        expect(TokenKind::Sub);
     }
 
     return func;

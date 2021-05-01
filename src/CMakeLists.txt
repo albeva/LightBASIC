@@ -34,6 +34,8 @@ add_executable(
     Lexer/Token.h
     Parser/Parser.cpp
     Parser/Parser.h
+    Sem/Passes/FuncDeclarerPass.cpp
+    Sem/Passes/FuncDeclarerPass.h
     Sem/SemanticAnalyzer.cpp
     Sem/SemanticAnalyzer.h
     Symbol/Symbol.cpp

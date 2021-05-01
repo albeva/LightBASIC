@@ -7,6 +7,7 @@
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
+#include "Passes/FuncDeclarerPass.h"
 using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context)
@@ -16,6 +17,8 @@ void SemanticAnalyzer::visit(AstModule* ast) {
     m_astRootModule = ast;
     m_fileId = ast->fileId;
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
+
+    FuncDeclarerPass(m_context).visit(ast);
 
     m_rootTable = m_table = ast->symbolTable.get();
     visitStmtList(ast->stmtList.get());
@@ -78,58 +81,19 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
 /**
  * Analyze function declaration
  */
-void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
-    auto* symbol = createNewSymbol(ast, ast->token.get());
-
-    // parameters
-    std::vector<const TypeRoot*> paramTypes;
-    paramTypes.reserve(ast->paramDecls.size());
-    {
-        RESTORE_ON_EXIT(m_table);
-        ast->symbolTable = make_unique<SymbolTable>(m_table);
-        m_table = ast->symbolTable.get();
-        for (auto& param : ast->paramDecls) {
-            visitFuncParamDecl(param.get());
-            paramTypes.emplace_back(param->symbol->type());
-        }
-    }
-
-    if (!m_astRootModule->hasImplicitMain && symbol->name() == "MAIN" && symbol->alias().empty()) {
-        symbol->setAlias("main");
-    }
-
-    // return typeExpr. subs don't have one so default to Void
-    const TypeRoot* retType = nullptr;
-    if (ast->retTypeExpr) {
-        visitTypeExpr(ast->retTypeExpr.get());
-        retType = ast->retTypeExpr->type;
-    } else {
-        retType = TypeVoid::get();
-    }
-
-    // create function symbol
-    const auto* type = TypeFunction::get(retType, std::move(paramTypes), ast->variadic);
-    symbol->setType(type);
-    ast->symbol = symbol;
+void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* /*ast*/) {
+    // NOOP
 }
 
-void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* ast) {
-    auto* symbol = createNewSymbol(ast, ast->token.get());
-
-    visitTypeExpr(ast->typeExpr.get());
-    symbol->setType(ast->typeExpr->type);
-
-    ast->symbol = symbol;
+void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* /*ast*/) {
+    llvm_unreachable("visitFuncParamDecl");
 }
 
 void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
-    visitFuncDecl(ast->decl.get());
-
     RESTORE_ON_EXIT(m_table);
     RESTORE_ON_EXIT(m_function);
     m_function = ast->decl.get();
     m_table = ast->decl->symbolTable.get();
-
     visitStmtList(ast->stmtList.get());
 }
 
@@ -155,16 +119,12 @@ void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
     }
 }
 
-void SemanticAnalyzer::visitAttributeList(AstAttributeList* ast) {
-    for (auto& attrib : ast->attribs) {
-        visitAttribute(attrib.get());
-    }
+void SemanticAnalyzer::visitAttributeList(AstAttributeList* /*ast*/) {
+    llvm_unreachable("visitAttributeList");
 }
 
-void SemanticAnalyzer::visitAttribute(AstAttribute* ast) {
-    for (auto& arg : ast->argExprs) {
-        visitLiteralExpr(arg.get());
-    }
+void SemanticAnalyzer::visitAttribute(AstAttribute* /*ast*/) {
+    llvm_unreachable("visitAttribute");
 }
 
 void SemanticAnalyzer::visitTypeExpr(AstTypeExpr* ast) {
