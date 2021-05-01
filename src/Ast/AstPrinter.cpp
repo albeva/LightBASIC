@@ -83,6 +83,10 @@ void AstPrinter::visitFuncStmt(AstFuncStmt* /*ast*/) {
     m_os << indent() << "AstFuncStmt";
 }
 
+void AstPrinter::visitReturnStmt(AstReturnStmt* ast) {
+    m_os << indent() << "AstReturnStmt";
+}
+
 void AstPrinter::visitAttributeList(AstAttributeList* ast) {
     m_os << indent() << "AstAttributeList" << '\n';
     m_indent++;

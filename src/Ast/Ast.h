@@ -159,6 +159,10 @@ DECLARE_AST(FuncStmt, Stmt)
     unique_ptr<AstStmtList> stmtList;
 DECLARE_END
 
+DECLARE_AST(ReturnStmt, Stmt)
+    unique_ptr<AstExpr> expr;
+DECLARE_END
+
 //----------------------------------------
 // Attributes
 //----------------------------------------

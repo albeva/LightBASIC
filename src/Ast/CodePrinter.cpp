@@ -134,6 +134,10 @@ void CodePrinter::visitFuncStmt(AstFuncStmt* /*ast*/) {
     m_os << indent() << "AstFuncStmt";
 }
 
+void CodePrinter::visitReturnStmt(AstReturnStmt* /*ast*/) {
+    m_os << indent() << "RETURN";
+}
+
 // Expressions
 
 void CodePrinter::visitIdentExpr(AstIdentExpr* ast) {

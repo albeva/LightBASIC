@@ -8,7 +8,7 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-Parser::Parser(Context& context, unsigned int fileId, bool isMain)
+Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
 : m_context{ context },
   m_fileId{ fileId },
   m_isMain{ isMain },
@@ -21,7 +21,7 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain)
 /**
  * Program = stmtList .
  */
-unique_ptr<AstModule> Parser::parse() {
+unique_ptr<AstModule> Parser::parse() noexcept {
     auto module = AstModule::create();
     module->fileId = m_fileId;
     module->hasImplicitMain = m_isMain;
@@ -37,7 +37,7 @@ unique_ptr<AstModule> Parser::parse() {
 /**
  * stmtList = { statement } .
  */
-unique_ptr<AstStmtList> Parser::stmtList() {
+unique_ptr<AstStmtList> Parser::stmtList() noexcept {
     auto list = AstStmtList::create();
     while (isValid() && !match(TokenKind::End)) {
         list->stmts.emplace_back(statement());
@@ -57,9 +57,10 @@ unique_ptr<AstStmtList> Parser::stmtList() {
  *           )
  *           | assignStmt
  *           | callStmt
+ *           | RETURN
  *           .
  */
-unique_ptr<AstStmt> Parser::statement() {
+unique_ptr<AstStmt> Parser::statement() noexcept {
     unique_ptr<AstAttributeList> attribs;
     if (m_token->kind() == TokenKind::BracketOpen) {
         attribs = attributeList();
@@ -93,6 +94,8 @@ unique_ptr<AstStmt> Parser::statement() {
             return assignStmt();
         }
         return callStmt();
+    case TokenKind::Return:
+        return kwReturn();
     default:
         error("Expected statement");
     }
@@ -101,7 +104,7 @@ unique_ptr<AstStmt> Parser::statement() {
 /**
  * assignStmt = identExpr '=' expression .
  */
-unique_ptr<AstAssignStmt> Parser::assignStmt() {
+unique_ptr<AstAssignStmt> Parser::assignStmt() noexcept {
     auto ident = identifier();
     expect(TokenKind::Assign);
     auto expr = expression();
@@ -119,7 +122,7 @@ unique_ptr<AstAssignStmt> Parser::assignStmt() {
  *          )
  *          .
  */
-unique_ptr<AstExprStmt> Parser::callStmt() {
+unique_ptr<AstExprStmt> Parser::callStmt() noexcept {
     auto call = AstCallExpr::create();
     call->identExpr = identifier();
 
@@ -137,11 +140,11 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
 }
 
 /**
- *  funcStmt = funcSignature <EoS>
+ *  FUNCTION = funcSignature <EoS>
  *             stmtList
  *             "END" ("FUNCTION" | "SUB")
  */
-unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs) {
+unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs) noexcept {
     if (m_scope != Scope::Root) {
         error("Nested SUBs/FUNCTIONs not allowed");
     }
@@ -165,6 +168,23 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
     return func;
 }
 
+/**
+ * RETURN = "RETURN" [ expression ] .
+ */
+unique_ptr<AstStmt> Parser::kwReturn() noexcept {
+    if (m_scope == Scope::Root) {
+        error("Unexpected RETURN outside SUB / FUNCTION body");
+    }
+    expect(TokenKind::Return);
+
+    auto ret = AstReturnStmt::create();
+    if (!match(TokenKind::EndOfStmt)) {
+        ret->expr = expression();
+    }
+
+    return ret;
+}
+
 //----------------------------------------
 // Attributes
 //----------------------------------------
@@ -172,7 +192,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
 /**
  *  attributeList = '[' Attribute { ','  Attribute } ']' .
  */
-unique_ptr<AstAttributeList> Parser::attributeList() {
+unique_ptr<AstAttributeList> Parser::attributeList() noexcept {
     auto list = AstAttributeList::create();
 
     expect(TokenKind::BracketOpen);
@@ -187,7 +207,7 @@ unique_ptr<AstAttributeList> Parser::attributeList() {
 /**
  * attribute = "id" [AttributeArgList] .
  */
-unique_ptr<AstAttribute> Parser::attribute() {
+unique_ptr<AstAttribute> Parser::attribute() noexcept {
     auto attrib = AstAttribute::create();
     attrib->identExpr = identifier();
 
@@ -203,7 +223,7 @@ unique_ptr<AstAttribute> Parser::attribute() {
  *                  | '(' [ literalExpr { ',' literal } ] ')'
  *                  .
  */
-std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
+std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() noexcept {
     std::vector<unique_ptr<AstLiteralExpr>> args;
     if (accept(TokenKind::Assign)) {
         args.emplace_back(literal());
@@ -224,12 +244,12 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() {
 //----------------------------------------
 
 /**
- * var = identifier
+ * VAR = identifier
  *     ( "=" expression
  *     | "AS" TypeExpr [ "=" expression ]
  *     ) .
  */
-unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) {
+unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexcept {
     expect(TokenKind::Var);
 
     auto id = expect(TokenKind::Identifier);
@@ -256,9 +276,9 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) {
 }
 
 /**
- * kwDeclare = "DECLARE" funcSignature .
+ * DECLARE = "DECLARE" funcSignature .
  */
-unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) {
+unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept {
     if (m_scope != Scope::Root) {
         error("Nested declarations not allowed");
     }
@@ -271,7 +291,7 @@ unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) 
  *                 | "SUB" id [ "(" funcParams ")" ]
  *                 ) .
  */
-unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attribs) {
+unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attribs) noexcept {
     auto func = AstFuncDecl::create();
     func->attributes = std::move(attribs);
 
@@ -304,7 +324,7 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attri
  *             .
  *  Param = id "AS" TypeExpr .
  */
-std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
+std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) noexcept {
     std::vector<unique_ptr<AstFuncParamDecl>> params;
 
     while (isValid() && *m_token != TokenKind::ParenClose) {
@@ -336,7 +356,7 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) {
 // Types
 //----------------------------------------
 
-unique_ptr<AstTypeExpr> Parser::typeExpr() {
+unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
 #define TYPE_KEYWORD(id, ...) case TokenKind::id:
     switch (m_token->kind()) {
         ALL_TYPES(TYPE_KEYWORD)
@@ -361,7 +381,7 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() {
  *            | callExpr
  *            .
  */
-unique_ptr<AstExpr> Parser::expression() {
+unique_ptr<AstExpr> Parser::expression() noexcept {
     // literal
     if (m_token->isLiteral()) {
         return literal();
@@ -380,7 +400,7 @@ unique_ptr<AstExpr> Parser::expression() {
 /**
  * identExpr = identifier .
  */
-unique_ptr<AstIdentExpr> Parser::identifier() {
+unique_ptr<AstIdentExpr> Parser::identifier() noexcept {
     auto id = AstIdentExpr::create();
     id->token = expect(TokenKind::Identifier);
     return id;
@@ -389,7 +409,7 @@ unique_ptr<AstIdentExpr> Parser::identifier() {
 /**
  * callExpr = identifier "(" argList ")" .
  */
-unique_ptr<AstCallExpr> Parser::callExpr() {
+unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
     auto call = AstCallExpr::create();
     call->identExpr = identifier();
 
@@ -400,7 +420,15 @@ unique_ptr<AstCallExpr> Parser::callExpr() {
     return call;
 }
 
-unique_ptr<AstLiteralExpr> Parser::literal() {
+/**
+ * literal = stringLiteral
+ *         | numberLiteral
+ *         | "TRUE"
+ *         | "FALSE"
+ *         | "NULL"
+ *         .
+ */
+unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
     if (!m_token->isLiteral()) {
         error("Expected literal");
     }
@@ -412,7 +440,7 @@ unique_ptr<AstLiteralExpr> Parser::literal() {
 /**
  * Parse comma separated list of expressionds
  */
-std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
+std::vector<unique_ptr<AstExpr>> Parser::expressionList() noexcept {
     std::vector<unique_ptr<AstExpr>> exprs;
 
     while (isValid() && !match(TokenKind::ParenClose) && !match(TokenKind::EndOfStmt)) {
@@ -429,22 +457,22 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
 // Helpers
 //----------------------------------------
 
-bool Parser::isValid() const {
+bool Parser::isValid() const noexcept {
     return *m_token != TokenKind::EndOfFile;
 }
 
-bool Parser::match(TokenKind kind) const {
+bool Parser::match(TokenKind kind) const noexcept {
     return *m_token == kind;
 }
 
-unique_ptr<Token> Parser::accept(TokenKind kind) {
+unique_ptr<Token> Parser::accept(TokenKind kind) noexcept {
     if (match(kind)) {
         return move();
     }
     return nullptr;
 }
 
-unique_ptr<Token> Parser::expect(TokenKind kind) {
+unique_ptr<Token> Parser::expect(TokenKind kind) noexcept {
     if (!match(kind)) {
         error("Expected '"_t
             + Token::description(kind)
@@ -455,14 +483,14 @@ unique_ptr<Token> Parser::expect(TokenKind kind) {
     return move();
 }
 
-unique_ptr<Token> Parser::move() {
+unique_ptr<Token> Parser::move() noexcept {
     auto current = std::move(m_token);
     m_token = std::move(m_next);
     m_next = m_lexer->next();
     return current;
 }
 
-[[noreturn]] void Parser::error(const Twine& message) {
+[[noreturn]] void Parser::error(const Twine& message) noexcept {
     string output;
     llvm::raw_string_ostream stream{ output };
 

@@ -24,6 +24,7 @@ private:
     Context& m_context;
     unsigned int m_fileId = ~0U;
     AstModule* m_astRootModule = nullptr;
+    AstFuncDecl* m_function = nullptr;
     SymbolTable* m_table = nullptr;
     SymbolTable* m_rootTable = nullptr;
 };

@@ -37,7 +37,7 @@ FLOATINGPOINT_TYPES(DEFINE_TYPE)
 
 } // namespace
 
-const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
+const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) noexcept {
 #define CASE_PRIMITIVE(id, str, KIND, ...) \
     case TokenKind::id:                    \
         return Type##KIND::get();
@@ -63,27 +63,35 @@ const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
 
 // Void
 
-const TypeVoid* TypeVoid::get() {
+const TypeVoid* TypeVoid::get() noexcept {
     return &voidTy;
 }
 
-llvm::Type* TypeVoid::genLlvmType(Context& context) const {
+llvm::Type* TypeVoid::genLlvmType(Context& context) const noexcept {
     // should never be called?
     return llvm::Type::getVoidTy(context.getLlvmContext());
 }
 
+string TypeVoid::asString() const noexcept {
+    return "VOID";
+}
+
 // Any
-const TypeAny* TypeAny::get() {
+const TypeAny* TypeAny::get() noexcept {
     return &anyTy;
 }
 
-llvm::Type* TypeAny::genLlvmType(Context& context) const {
+llvm::Type* TypeAny::genLlvmType(Context& context) const noexcept {
     return llvm::Type::getInt8Ty(context.getLlvmContext());
+}
+
+string TypeAny::asString() const noexcept {
+    return "ANY";
 }
 
 // Pointer
 
-const TypePointer* TypePointer::get(const TypeRoot* base) {
+const TypePointer* TypePointer::get(const TypeRoot* base) noexcept {
     if (base == &anyTy) {
         return &anyPtrTy;
     }
@@ -97,23 +105,31 @@ const TypePointer* TypePointer::get(const TypeRoot* base) {
     return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
 }
 
-llvm::Type* TypePointer::genLlvmType(Context& context) const {
+llvm::Type* TypePointer::genLlvmType(Context& context) const noexcept {
     return llvm::PointerType::get(m_base->llvmType(context), 0);
+}
+
+string TypePointer::asString() const noexcept {
+    return m_base->asString() + " PTR";
 }
 
 // Bool
 
-const TypeBoolean* TypeBoolean::get() {
+const TypeBoolean* TypeBoolean::get() noexcept {
     return &BoolTy;
 }
 
-llvm::Type* TypeBoolean::genLlvmType(Context& context) const {
+llvm::Type* TypeBoolean::genLlvmType(Context& context) const noexcept {
     return llvm::Type::getInt1Ty(context.getLlvmContext());
+}
+
+string TypeBoolean::asString() const noexcept {
+    return "BOOL";
 }
 
 // Integer
 
-const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) {
+const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) noexcept {
 #define USE_TYPE(id, str, kind, BITS, IS_SIGNED) \
     if (bits == BITS && isSigned == IS_SIGNED)   \
         return &id##Ty;
@@ -123,13 +139,23 @@ const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) {
     fatalError("Invalid integer type size: "_t + Twine(bits), false);
 }
 
-llvm::Type* TypeIntegral::genLlvmType(Context& context) const {
+llvm::Type* TypeIntegral::genLlvmType(Context& context) const noexcept {
     return llvm::IntegerType::get(context.getLlvmContext(), bits());
+}
+
+string TypeIntegral::asString() const noexcept {
+#define GET_TYPE(id, str, kind, BITS, SIGNED)   \
+    if (bits() == BITS && isSigned() == SIGNED) \
+        return str;
+    INTEGRAL_TYPES(GET_TYPE)
+#undef GET_TYPE
+
+    llvm_unreachable("something very wrong, unable to detect type");
 }
 
 // Floating Point
 
-const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
+const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) noexcept {
     switch (bits) {
 #define USE_TYPE(id, str, kind, BITS) \
     case BITS:                        \
@@ -141,7 +167,7 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
     }
 }
 
-llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const {
+llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const noexcept {
     switch (bits()) {
     case 32: // NOLINT
         return llvm::Type::getFloatTy(context.getLlvmContext());
@@ -152,9 +178,19 @@ llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const {
     }
 }
 
+string TypeFloatingPoint::asString() const noexcept {
+#define GET_TYPE(id, str, kind, BITS) \
+    if (bits() == BITS)               \
+        return str;
+    FLOATINGPOINT_TYPES(GET_TYPE)
+#undef GET_TYPE
+
+    llvm_unreachable("something very wrong, unable to detect type");
+}
+
 // Function
 
-const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) {
+const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) noexcept {
     for (const auto& ptr : declaredFunc) {
         if (ptr->retType() == retType && ptr->paramTypes() == paramTypes && ptr->variadic() == variadic) {
             return ptr.get();
@@ -165,7 +201,7 @@ const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const
     return declaredFunc.emplace_back(std::move(ty)).get();
 }
 
-llvm::Type* TypeFunction::genLlvmType(Context& context) const {
+llvm::Type* TypeFunction::genLlvmType(Context& context) const noexcept {
     auto* retTy = m_retType->llvmType(context);
 
     std::vector<llvm::Type*> params;
@@ -177,11 +213,30 @@ llvm::Type* TypeFunction::genLlvmType(Context& context) const {
     return llvm::FunctionType::get(retTy, params, m_variadic);
 }
 
+string TypeFunction::asString() const noexcept {
+    string out = m_retType ? "FUNCTION(" : "SUB(";
+    for (size_t i = 0; i < m_paramTypes.size(); i++) {
+        if (i > 0) {
+            out += ", ";
+        }
+        out += m_paramTypes[i]->asString();
+    }
+    out += ")";
+    if (m_retType) {
+        out += " AS " + m_retType->asString();
+    }
+    return out;
+}
+
 // ZString
-const TypeZString* TypeZString::get() {
+const TypeZString* TypeZString::get() noexcept {
     return &ZStringTy;
 }
 
-llvm::Type* TypeZString::genLlvmType(Context& context) const {
+llvm::Type* TypeZString::genLlvmType(Context& context) const noexcept {
     return llvm::Type::getInt8PtrTy(context.getLlvmContext());
+}
+
+string TypeZString::asString() const noexcept {
+    return "ZSTRING";
 }

@@ -94,10 +94,8 @@ void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
         }
     }
 
-    bool coarceToMain = false;
     if (!m_astRootModule->hasImplicitMain && symbol->name() == "MAIN" && symbol->alias().empty()) {
         symbol->setAlias("main");
-        coarceToMain = true;
     }
 
     // return typeExpr. subs don't have one so default to Void
@@ -105,8 +103,6 @@ void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* ast) {
     if (ast->retTypeExpr) {
         visitTypeExpr(ast->retTypeExpr.get());
         retType = ast->retTypeExpr->type;
-    } else if (coarceToMain) {
-        retType = TypeRoot::fromTokenKind(TokenKind::Integer);
     } else {
         retType = TypeVoid::get();
     }
@@ -130,9 +126,33 @@ void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
     visitFuncDecl(ast->decl.get());
 
     RESTORE_ON_EXIT(m_table);
+    RESTORE_ON_EXIT(m_function);
+    m_function = ast->decl.get();
     m_table = ast->decl->symbolTable.get();
 
     visitStmtList(ast->stmtList.get());
+}
+
+void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
+    auto retType = m_function->retTypeExpr->type;
+    auto isVoid = isa<TypeVoid>(retType);
+    if (!ast->expr) {
+        if (!isVoid) {
+            fatalError("Expected expression");
+        }
+        return;
+    } else if (isVoid) {
+        fatalError("Unexpected expression for SUB");
+    }
+
+    visitExpr(ast->expr.get());
+
+    if (ast->expr->type != retType) {
+        fatalError(
+            "Return expression type mismatch."_t
+            + " Expected (" + retType->asString() + ")"
+            + " got (" + ast->expr->type->asString() + ")");
+    }
 }
 
 void SemanticAnalyzer::visitAttributeList(AstAttributeList* ast) {

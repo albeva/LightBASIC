@@ -179,16 +179,20 @@ void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
         llvm::Value* retValue;
         if (retType->isVoidTy()) {
             retValue = nullptr;
-        } else if (retType->isIntegerTy()) {
-            retValue = llvm::ConstantInt::get(
-                m_function->getReturnType(),
-                0,
-                true);
         } else {
-            fatalError("Trying to generate unknown implicit function return value");
+            fatalError("No RETURN statement");
         }
-        llvm::ReturnInst::Create(m_llvmContext, retValue, m_block);
+        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
     }
+}
+
+void CodeGen::visitReturnStmt(AstReturnStmt* ast) {
+    if (ast->expr) {
+        visitExpr(ast->expr.get());
+        llvm::ReturnInst::Create(m_llvmContext, ast->expr->llvmValue, m_block);
+        return;
+    }
+    llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
 }
 
 void CodeGen::visitAttributeList(AstAttributeList* /*ast*/) {
@@ -229,6 +233,7 @@ void CodeGen::visitCallExpr(AstCallExpr* ast) {
 
     auto* inst = llvm::CallInst::Create(llvm::FunctionCallee(fn), args, "", m_block);
     inst->setTailCall(false);
+    ast->llvmValue = inst;
 }
 
 void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {

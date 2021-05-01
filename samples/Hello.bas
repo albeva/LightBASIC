@@ -2,14 +2,10 @@
 [Alias = "puts", DiscardableResult] _
 declare function print(str as zstring) as integer
 
-sub say(message as zstring)
-    print message
-end sub
+function getMessage(from as zstring) as zstring
+    return from
+end function
 
 sub main
-    ' deduce type of message from value
-    var message = "Hello World!"
-
-    ' no need for braces when function call is not inside expression
-    say message
+    print getMessage("Hello World")
 end sub
