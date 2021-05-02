@@ -19,6 +19,7 @@ public:
 private:
     [[nodiscard]] unique_ptr<Token> ellipsis();
     [[nodiscard]] unique_ptr<Token> identifier();
+    [[nodiscard]] unique_ptr<Token> number();
     [[nodiscard]] unique_ptr<Token> string();
     [[nodiscard]] unique_ptr<Token> character(TokenKind kind);
     [[nodiscard]] unique_ptr<Token> endOfStatement();

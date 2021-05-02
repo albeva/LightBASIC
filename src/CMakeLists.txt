@@ -57,6 +57,7 @@ llvm_map_components_to_libnames(
     core
     support
     bitwriter
+    transformUtils
 )
 
 target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})

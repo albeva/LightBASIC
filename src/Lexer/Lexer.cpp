@@ -8,6 +8,7 @@ using namespace lbc;
 
 namespace {
 using llvm::isAlpha;
+using llvm::isDigit;
 
 inline bool isWhiteSpace(char ch) {
     return ch == ' ' || ch == '\t' || ch == '\f' || ch == '\v';
@@ -62,6 +63,11 @@ unique_ptr<Token> Lexer::next() {
         // identifier
         if (isAlpha(m_char)) {
             return identifier();
+        }
+
+        // number
+        if (isDigit(m_char)) {
+            return number();
         }
 
         switch (m_char) {
@@ -147,13 +153,20 @@ unique_ptr<Token> Lexer::ellipsis() {
 
 unique_ptr<Token> Lexer::identifier() {
     const auto* start = m_input;
-
     size_t length = 1;
     while (move() && isAlpha(m_char)) {
         length++;
     }
-
     return Token::create({ start, length }, getLoc(start));
+}
+
+unique_ptr<Token> Lexer::number() {
+    const auto* start = m_input;
+    size_t len = 1;
+    while(move() && isDigit(m_char)) {
+        len++;
+    }
+    return Token::create(TokenKind::NumberLiteral, {start, len}, getLoc(start));
 }
 
 unique_ptr<Token> Lexer::string() {
@@ -237,3 +250,4 @@ char Lexer::peek(int ahead) const {
     }
     return 0;
 }
+

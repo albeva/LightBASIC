@@ -10,6 +10,7 @@
 #include "Toolchain/Toolchain.h"
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Support/FileSystem.h>
+#include "Ast/AstPrinter.h"
 
 using namespace lbc;
 

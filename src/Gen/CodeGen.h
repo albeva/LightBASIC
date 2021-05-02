@@ -36,10 +36,12 @@ private:
         Function
     };
 
-    using LiteralMap = llvm::StringMap<llvm::Constant*>;
+    llvm::BasicBlock* getGlobalCtorBlock() noexcept;
 
     void declareFuncs() noexcept;
     void declareFunc(AstFuncDecl* ast) noexcept;
+    void declareGlobalVar(AstVarDecl* ast) noexcept;
+    void declareLocalVar(AstVarDecl* ast) noexcept;
     static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
 
     Context& m_context;
@@ -52,7 +54,8 @@ private:
     llvm::Value* m_value = nullptr;
     llvm::Function* m_function = nullptr;
     llvm::BasicBlock* m_block = nullptr;
-    LiteralMap m_stringLiterals;
+    llvm::BasicBlock* m_globalCtorBlock = nullptr;
+    llvm::StringMap<llvm::Constant*> m_stringLiterals;
 };
 
 } // namespace lbc

@@ -10,6 +10,7 @@
 #include "Type/Type.h"
 #include <charconv>
 #include <llvm/IR/IRPrintingPasses.h>
+#include <llvm/Transforms/Utils/ModuleUtils.h>
 using namespace lbc;
 
 CodeGen::CodeGen(Context& context)
@@ -67,8 +68,26 @@ void CodeGen::visit(AstModule* ast) {
     // close main
     if (generateMain) {
         auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_llvmContext));
-        llvm::ReturnInst::Create(m_module->getContext(), retValue, m_block);
+        llvm::ReturnInst::Create(m_llvmContext, retValue, m_block);
     }
+
+    if (m_globalCtorBlock != nullptr && !m_globalCtorBlock->getTerminator()) {
+        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_globalCtorBlock);
+    }
+}
+
+llvm::BasicBlock* CodeGen::getGlobalCtorBlock() noexcept {
+    if (m_globalCtorBlock == nullptr) {
+        auto* ctorFn = llvm::Function::Create(
+            llvm::FunctionType::get(llvm::Type::getVoidTy(m_llvmContext), false),
+            llvm::Function::ExternalLinkage,
+            "__lbc_global_var_init",
+            *m_module);
+        ctorFn->setSection(".text.startup");
+        llvm::appendToGlobalCtors(*m_module, ctorFn, 0, nullptr);
+        m_globalCtorBlock = llvm::BasicBlock::Create(m_llvmContext, "", ctorFn);
+    }
+    return m_globalCtorBlock;
 }
 
 void CodeGen::visitStmtList(AstStmtList* ast) {
@@ -91,55 +110,80 @@ void CodeGen::visitExprStmt(AstExprStmt* ast) {
     visitExpr(ast->expr.get());
 }
 
-void CodeGen::visitVarDecl(AstVarDecl* ast) {
-    // process resulting type
-    visitTypeExpr(ast->typeExpr.get());
+// Variables
 
-    llvm::Constant* exprValue = nullptr;
-    llvm::Type* exprType = nullptr;
+void CodeGen::visitVarDecl(AstVarDecl* ast) {
+    if (m_scope == Scope::Root) {
+        declareGlobalVar(ast);
+    } else {
+        declareLocalVar(ast);
+    }
+}
+
+void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
+    llvm::Constant* constant = nullptr;
+    llvm::Type* exprType = ast->symbol->type()->llvmType(m_context);
     bool generateStoreInCtror = false;
 
     // has an init expr?
     if (ast->expr) {
-        visitExpr(ast->expr.get());
-        if (auto* constExpr = dyn_cast<llvm::Constant>(ast->expr->llvmValue)) {
-            exprValue = constExpr;
-            exprType = exprValue->getType();
+        if (auto* literalExpr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+            visitLiteralExpr(literalExpr);
+            constant = dyn_cast<llvm::Constant>(literalExpr->llvmValue);
         } else {
-            exprType = ast->expr->type->llvmType(m_context);
-            exprValue = llvm::Constant::getNullValue(exprType);
             generateStoreInCtror = true;
         }
-    } else {
-        exprType = ast->typeExpr->type->llvmType(m_context);
-        exprValue = llvm::Constant::getNullValue(exprType);
     }
 
     llvm::Value* value;
-    if (m_scope == Scope::Root) {
-        value = new llvm::GlobalVariable(
-            *m_module,
-            exprType,
-            false,
-            llvm::GlobalValue::PrivateLinkage,
-            exprValue,
-            ast->symbol->identifier());
-        if (generateStoreInCtror) {
-            new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
-        }
-    } else {
-        value = new llvm::AllocaInst(
-            exprType,
-            0,
-            ast->symbol->identifier(),
-            m_block);
+
+    if (!constant) {
+        constant = llvm::Constant::getNullValue(exprType);
+    }
+    value = new llvm::GlobalVariable(
+        *m_module,
+        exprType,
+        false,
+        llvm::GlobalValue::PrivateLinkage,
+        constant,
+        ast->symbol->identifier());
+
+    if (generateStoreInCtror) {
+        RESTORE_ON_EXIT(m_block);
+        m_block = getGlobalCtorBlock();
+        visitExpr(ast->expr.get());
+        new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
+    }
+
+    ast->symbol->setValue(value);
+}
+
+void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
+    llvm::Value* exprValue = nullptr;
+    llvm::Type* exprType = ast->symbol->type()->llvmType(m_context);
+
+    // has an init expr?
+    if (ast->expr) {
+        visitExpr(ast->expr.get());
+        exprValue = ast->expr->llvmValue;
+    }
+
+    auto* value = new llvm::AllocaInst(
+        exprType,
+        0,
+        ast->symbol->identifier(),
+        m_block);
+
+    if (exprValue) {
         new llvm::StoreInst(exprValue, value, m_block);
     }
 
     ast->symbol->setValue(value);
 }
 
-void CodeGen::visitFuncDecl(AstFuncDecl* ast) {
+// Functions
+
+void CodeGen::visitFuncDecl(AstFuncDecl* /*ast*/) {
     // NOOP
 }
 
@@ -246,7 +290,7 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
 }
 
 void CodeGen::visitTypeExpr(AstTypeExpr* /*ast*/) {
-    llvm_unreachable("visitTypeExpr");
+    // NOOP
 }
 
 void CodeGen::visitCallExpr(AstCallExpr* ast) {
