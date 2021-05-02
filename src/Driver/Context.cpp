@@ -7,7 +7,8 @@ using namespace lbc;
 
 Context::Context()
 : m_workingDir{ fs::current_path() },
-  m_triple{ llvm::sys::getDefaultTargetTriple() } {}
+  m_triple{ llvm::sys::getDefaultTargetTriple() } {
+}
 
 void Context::validate() const noexcept {
     size_t count = std::accumulate(m_inputFiles.begin(), m_inputFiles.end(), size_t{}, [](auto cnt, const auto& vec) {
@@ -183,4 +184,16 @@ bool Context::isMainFile(const fs::path& file) const { // NOLINT
     }
 
     return resolveFilePath(sources[0]) == file;
+}
+
+void Context::setCompilerPath(const fs::path& path) {
+    m_compilerPath = path;
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    if (m_toolchain.getBasePath().empty()) {
+        auto toolchainPath = getCompilerDir() / "toolchain";
+        if (fs::exists(toolchainPath)) {
+            m_toolchain.setBasePath(toolchainPath);
+        }
+    }
+#endif
 }

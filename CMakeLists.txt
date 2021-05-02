@@ -49,3 +49,6 @@ endif()
 
 # Source Code
 add_subdirectory(src)
+
+# Copy compiled binary
+set_target_properties(lbc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)

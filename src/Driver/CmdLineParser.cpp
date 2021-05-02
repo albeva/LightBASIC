@@ -94,7 +94,7 @@ void CmdLineParser::processToolchainPath(const fs::path& path) noexcept {
         showError("Toolchain path not found");
     }
 
-    if (auto rel = fs::absolute(m_context.getCompilerPath() / path); fs::exists(rel)) {
+    if (auto rel = fs::absolute(m_context.getCompilerDir() / path); fs::exists(rel)) {
         m_context.getToolchain().setBasePath(rel);
         return;
     }

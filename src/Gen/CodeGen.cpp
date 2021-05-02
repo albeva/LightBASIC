@@ -68,7 +68,8 @@ void CodeGen::visit(AstModule* ast) {
     // close main
     if (generateMain) {
         auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_llvmContext));
-        llvm::ReturnInst::Create(m_llvmContext, retValue, m_block);
+        auto& lastBlock = m_function->getBasicBlockList().back();
+        llvm::ReturnInst::Create(m_llvmContext, retValue, &lastBlock);
     }
 
     if (m_globalCtorBlock != nullptr && !m_globalCtorBlock->getTerminator()) {

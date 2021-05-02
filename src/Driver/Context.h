@@ -87,8 +87,9 @@ public:
     void setWorkingDir(const fs::path& path);
     [[nodiscard]] const fs::path& getWorkingDir() const { return m_workingDir; }
 
-    void setCompilerPath(const fs::path& path) { m_compilerPath = path; }
+    void setCompilerPath(const fs::path& path);
     [[nodiscard]] const fs::path& getCompilerPath() const { return m_compilerPath; }
+    [[nodiscard]] fs::path getCompilerDir() const { return m_compilerPath.parent_path(); }
 
     void setOutputFilePath(const fs::path& path);
     [[nodiscard]] const fs::path& getOutputPath() const { return m_outputFilePath; }
