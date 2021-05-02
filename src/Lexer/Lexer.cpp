@@ -163,10 +163,10 @@ unique_ptr<Token> Lexer::identifier() {
 unique_ptr<Token> Lexer::number() {
     const auto* start = m_input;
     size_t len = 1;
-    while(move() && isDigit(m_char)) {
+    while (move() && isDigit(m_char)) {
         len++;
     }
-    return Token::create(TokenKind::NumberLiteral, {start, len}, getLoc(start));
+    return Token::create(TokenKind::NumberLiteral, { start, len }, getLoc(start));
 }
 
 unique_ptr<Token> Lexer::string() {
@@ -250,4 +250,3 @@ char Lexer::peek(int ahead) const {
     }
     return 0;
 }
-

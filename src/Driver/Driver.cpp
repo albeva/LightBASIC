@@ -2,6 +2,7 @@
 // Created by Albert Varaksin on 13/07/2020.
 //
 #include "Driver.h"
+#include "Ast/AstPrinter.h"
 #include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
@@ -10,7 +11,6 @@
 #include "Toolchain/Toolchain.h"
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Support/FileSystem.h>
-#include "Ast/AstPrinter.h"
 
 using namespace lbc;
 

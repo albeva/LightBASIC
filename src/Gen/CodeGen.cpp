@@ -246,12 +246,9 @@ void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
 
     visitStmtList(ast->stmtList.get());
 
-    if (!m_block->getTerminator()) {
+    if (m_block->getTerminator() == nullptr) {
         auto* retType = m_function->getReturnType();
-        llvm::Value* retValue;
-        if (retType->isVoidTy()) {
-            retValue = nullptr;
-        } else {
+        if (!retType->isVoidTy()) {
             fatalError("No RETURN statement");
         }
         llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
