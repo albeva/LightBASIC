@@ -3,11 +3,11 @@ green='\033[32m'
 reset='\033[0m'
 
 if [[ "$(< /proc/version)" == *@(Microsoft|WSL)* ]]; then
-  LBC=../../bin/lbc.exe
-  FILECHECK=../../bin/toolchain/bin/FileCheck.exe
+    LBC=../../bin/lbc.exe
+    FILECHECK=../../bin/toolchain/bin/FileCheck.exe
 else
-  LBC=../../bin/lbc
-  FILECHECK=FileCheck
+    LBC=../../bin/lbc
+    FILECHECK=FileCheck
 fi
 
 #
