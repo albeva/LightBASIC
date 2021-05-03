@@ -46,6 +46,7 @@ CMakeSettings.json
 _deps
 
 # lbc
-/toolchain
 *.exe
 *.obj
+/samples/[^\.]*
+
