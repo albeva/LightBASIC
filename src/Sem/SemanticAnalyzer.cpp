@@ -45,6 +45,7 @@ void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
 
 void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
     auto* symbol = createNewSymbol(ast, ast->token.get());
+    symbol->setExternal(false);
 
     // m_type expr?
     const TypeRoot* type = nullptr;

@@ -4,7 +4,7 @@
 '' - declare local functions
 '' - call functions
 '' - pass arguments
-'' - return value
+'' - return getLlvmValue
 ''
 '' CHECK: Hello, World!
 ''------------------------------------------------------------------------------

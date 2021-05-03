@@ -81,12 +81,12 @@ llvm::BasicBlock* CodeGen::getGlobalCtorBlock() noexcept {
     if (m_globalCtorBlock == nullptr) {
         auto* ctorFn = llvm::Function::Create(
             llvm::FunctionType::get(llvm::Type::getVoidTy(m_llvmContext), false),
-            llvm::Function::ExternalLinkage,
+            llvm::Function::InternalLinkage,
             "__lbc_global_var_init",
             *m_module);
-        if (m_context.getTriple().isMacOSX()) {
+        if (m_context.getTriple().isOSBinFormatMachO()) {
             ctorFn->setSection("__TEXT,__StaticInit,regular,pure_instructions");
-        } else {
+        } else if (m_context.getTriple().isOSBinFormatELF()) {
             ctorFn->setSection(".text.startup");
         }
         llvm::appendToGlobalCtors(*m_module, ctorFn, 0, nullptr);
@@ -108,7 +108,7 @@ void CodeGen::visitAssignStmt(AstAssignStmt* ast) {
 }
 
 llvm::Value* CodeGen::getStoreValue(AstIdentExpr* identExpr) {
-    return identExpr->symbol->value();
+    return identExpr->symbol->getLlvmValue();
 }
 
 void CodeGen::visitExprStmt(AstExprStmt* ast) {
@@ -126,8 +126,9 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
 }
 
 void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
+    auto* sym = ast->symbol;
     llvm::Constant* constant = nullptr;
-    llvm::Type* exprType = ast->symbol->type()->llvmType(m_context);
+    llvm::Type* exprType = sym->type()->llvmType(m_context);
     bool generateStoreInCtror = false;
 
     // has an init expr?
@@ -149,7 +150,7 @@ void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
         *m_module,
         exprType,
         false,
-        llvm::GlobalValue::PrivateLinkage,
+        sym->getLlvmLinkage(),
         constant,
         ast->symbol->identifier());
 
@@ -160,7 +161,7 @@ void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
         new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
     }
 
-    ast->symbol->setValue(value);
+    sym->setLlvmValue(value);
 }
 
 void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
@@ -183,7 +184,7 @@ void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
         new llvm::StoreInst(exprValue, value, m_block);
     }
 
-    ast->symbol->setValue(value);
+    ast->symbol->setLlvmValue(value);
 }
 
 // Functions
@@ -208,20 +209,21 @@ void CodeGen::declareFuncs() noexcept {
 }
 
 void CodeGen::declareFunc(AstFuncDecl* ast) noexcept {
+    auto* sym = ast->symbol;
     auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_context));
     auto* fn = llvm::Function::Create(
         fnTy,
-        llvm::GlobalValue::ExternalLinkage,
+        sym->getLlvmLinkage(),
         ast->symbol->identifier(),
         *m_module);
     fn->setCallingConv(llvm::CallingConv::C);
     fn->setDSOLocal(true);
-    ast->symbol->setValue(fn);
+    ast->symbol->setLlvmValue(fn);
 
     auto iter = fn->arg_begin();
     for (const auto& param : ast->paramDecls) {
         iter->setName(param->symbol->identifier());
-        param->symbol->setValue(iter);
+        param->symbol->setLlvmValue(iter);
         iter++;
     }
 }
@@ -234,18 +236,18 @@ void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
     RESTORE_ON_EXIT(m_function);
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
-    m_function = llvm::cast<llvm::Function>(ast->decl->symbol->value());
+    m_function = llvm::cast<llvm::Function>(ast->decl->symbol->getLlvmValue());
     m_block = llvm::BasicBlock::Create(m_llvmContext, "", m_function);
 
     for (const auto& param : ast->decl->paramDecls) {
         auto* sym = param->symbol;
-        auto* value = sym->value();
-        sym->setValue(new llvm::AllocaInst(
+        auto* value = sym->getLlvmValue();
+        sym->setLlvmValue(new llvm::AllocaInst(
             sym->type()->llvmType(m_context),
             0,
             sym->identifier() + ".addr",
             m_block));
-        new llvm::StoreInst(value, sym->value(), m_block);
+        new llvm::StoreInst(value, sym->getLlvmValue(), m_block);
     }
 
     visitStmtList(ast->stmtList.get());
@@ -279,14 +281,14 @@ void CodeGen::visitAttribute(AstAttribute* /*ast*/) {
 void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
     const auto* type = ast->type;
     if (isa<TypeFunction>(type)) {
-        ast->llvmValue = ast->symbol->value();
+        ast->llvmValue = ast->symbol->getLlvmValue();
         return;
     }
 
     auto* sym = ast->symbol;
     ast->llvmValue = new llvm::LoadInst(
         sym->type()->llvmType(m_context),
-        sym->value(),
+        sym->getLlvmValue(),
         ast->symbol->identifier(),
         m_block);
 }

@@ -40,7 +40,7 @@ inline Twine operator"" _t(const char* s, size_t /*len*/) {
 [[noreturn]] void fatalError(const Twine& message, bool prefix = true);
 
 /**
- * Helper class that restores variable value when existing scope
+ * Helper class that restores variable getLlvmValue when existing scope
  *
  * Example usage:
  *

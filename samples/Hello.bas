@@ -1,5 +1,5 @@
-' Declare func from C std lib: int puts(const char*);
-[Alias = "printf"] _
-declare function printf(str as zstring, ...) as integer
+var a = 0
+var b = a
 
-printf "Hello\n"
+sub test
+end sub

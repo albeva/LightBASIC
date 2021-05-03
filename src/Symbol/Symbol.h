@@ -16,10 +16,13 @@ public:
     [[nodiscard]] const TypeRoot* type() const { return m_type; }
     void setType(const TypeRoot* type) { m_type = type; }
 
+    [[nodiscard]] bool isExternal() const { return m_external; }
+    void setExternal(bool external) { m_external = external; }
+
     [[nodiscard]] const StringRef& name() const { return m_name; }
 
-    [[nodiscard]] llvm::Value* value() const { return m_value; }
-    void setValue(llvm::Value* value) { m_value = value; }
+    [[nodiscard]] llvm::Value* getLlvmValue() const { return m_llvmValue; }
+    void setLlvmValue(llvm::Value* value) { m_llvmValue = value; }
 
     [[nodiscard]] const StringRef& alias() const { return m_alias; }
     void setAlias(const StringRef& alias) { m_alias = alias; }
@@ -31,12 +34,20 @@ public:
         return m_alias;
     }
 
+    [[nodiscard]] llvm::GlobalValue::LinkageTypes getLlvmLinkage() const {
+        if (m_external) {
+            return llvm::GlobalValue::LinkageTypes::ExternalLinkage;
+        }
+        return llvm::GlobalValue::LinkageTypes::InternalLinkage;
+    }
+
 private:
     const StringRef m_name;
     const TypeRoot* m_type;
 
     StringRef m_alias;
-    llvm::Value* m_value = nullptr;
+    llvm::Value* m_llvmValue = nullptr;
+    bool m_external = false;
 };
 
 } // namespace lbc

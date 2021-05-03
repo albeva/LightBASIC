@@ -16,10 +16,10 @@ void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     for (const auto& stmt : ast->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
-            visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()));
+            visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()), true);
             break;
         case AstKind::FuncStmt:
-            visitFuncDecl(static_cast<AstFuncStmt*>(stmt.get())->decl.get());
+            visitFuncDecl(static_cast<AstFuncStmt*>(stmt.get())->decl.get(), false);
             break;
         default:
             break;
@@ -27,7 +27,7 @@ void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     }
 }
 
-void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast) noexcept {
+void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
     const auto& name = ast->token->lexeme();
     if (m_table->exists(name)) {
         fatalError("Redefinition of "_t + name);
@@ -43,6 +43,9 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast) noexcept {
 
     if (symbol->name() == "MAIN" && symbol->alias().empty()) {
         symbol->setAlias("main");
+        symbol->setExternal(true);
+    } else {
+        symbol->setExternal(external);
     }
 
     // parameters

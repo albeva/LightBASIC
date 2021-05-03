@@ -24,7 +24,7 @@ namespace Sem {
         void visit(AstModule* ast) noexcept;
 
     private:
-        void visitFuncDecl(AstFuncDecl* ast) noexcept;
+        void visitFuncDecl(AstFuncDecl* ast, bool external) noexcept;
         void visitFuncParamDecl(AstFuncParamDecl* ast) noexcept;
         void visitTypeExpr(AstTypeExpr* ast) noexcept;
         [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl* ast) noexcept;
