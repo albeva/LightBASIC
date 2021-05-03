@@ -422,7 +422,8 @@ unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
 
 /**
  * literal = stringLiteral
- *         | numberLiteral
+ *         | IntegerLiteral
+ *         | FloatingPointLiteral
  *         | "TRUE"
  *         | "FALSE"
  *         | "NULL"

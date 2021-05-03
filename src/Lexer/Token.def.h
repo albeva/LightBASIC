@@ -13,10 +13,11 @@
     _( Identifier,      "Identifier"  )
 
 #define TOKEN_LITERALS(_) \
-    _( StringLiteral,   "String-Literal"  ) \
-    _( NumberLiteral,   "Number-Literal"  ) \
-    _( BooleanLiteral,  "Boolean-Literal" ) \
-    _( NullLiteral,     "Null-Literal"    )
+    _( StringLiteral,        "String-Literal"         ) \
+    _( IntegerLiteral ,      "Number-Literal"         ) \
+    _( FloatingPointLiteral, "Floating-point-literal" ) \
+    _( BooleanLiteral,       "Boolean-Literal"        ) \
+    _( NullLiteral,          "Null-Literal"           )
 
 #define TOKEN_SYMBOLS(_) \
     _( Assign,          "="   ) \

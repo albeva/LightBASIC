@@ -1,5 +1,5 @@
-var a = 0
-var b = a
+[alias="printf"] _
+declare function printf(fmt as zstring, ...) as integer
 
-sub test
-end sub
+var pi = 3.14 ' double
+printf "pi = %lf\n", pi

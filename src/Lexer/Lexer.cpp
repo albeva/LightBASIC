@@ -66,7 +66,7 @@ unique_ptr<Token> Lexer::next() {
         }
 
         // number
-        if (isDigit(m_char)) {
+        if (isDigit(m_char) || m_char == '.' && isDigit(peek())) {
             return number();
         }
 
@@ -161,12 +161,25 @@ unique_ptr<Token> Lexer::identifier() {
 }
 
 unique_ptr<Token> Lexer::number() {
+    bool isFloatingPoint = m_char == '.';
+
     const auto* start = m_input;
     size_t len = 1;
-    while (move() && isDigit(m_char)) {
+    while (move()) {
+        if (m_char == '.') {
+            if (isFloatingPoint) {
+                return invalid(m_input);
+            }
+            isFloatingPoint = true;
+        } else if (!isDigit(m_char)) {
+            break;
+        }
         len++;
     }
-    return Token::create(TokenKind::NumberLiteral, { start, len }, getLoc(start));
+    auto kind = isFloatingPoint
+        ? TokenKind::FloatingPointLiteral
+        : TokenKind::IntegerLiteral;
+    return Token::create(kind, { start, len }, getLoc(start));
 }
 
 unique_ptr<Token> Lexer::string() {

@@ -186,17 +186,20 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
     case TokenKind::StringLiteral:
         ast->type = TypeZString::get();
         break;
+    case TokenKind::IntegerLiteral:
+        ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
+        break;
+    case TokenKind::FloatingPointLiteral:
+        ast->type = TypeRoot::fromTokenKind(TokenKind::Double);
+        break;
     case TokenKind::BooleanLiteral:
         ast->type = TypeBoolean::get();
         break;
     case TokenKind::NullLiteral:
         ast->type = TypePointer::get(TypeAny::get());
         break;
-    case TokenKind::NumberLiteral:
-        ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
-        break;
     default:
-        fatalError("Unsupported literal m_type");
+        fatalError("Unsupported literal type");
     }
 }
 

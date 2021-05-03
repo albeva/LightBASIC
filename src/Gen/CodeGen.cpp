@@ -352,13 +352,19 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         }
         break;
     }
-    case TokenKind::NumberLiteral: {
+    case TokenKind::IntegerLiteral: {
         uint64_t result = 0;
-        std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), result); // NOLINT
+        std::from_chars(lexeme.data(), lexeme.end(), result); // NOLINT
         constant = llvm::ConstantInt::get(
             ast->type->getLlvmType(m_context),
             result,
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
+        break;
+    }
+    case TokenKind::FloatingPointLiteral: {
+        // double result = 0;
+        // std::from_chars(lexeme.data(), lexeme.end(), result);
+        constant = llvm::ConstantFP::get(ast->type->getLlvmType(m_context), lexeme);
         break;
     }
     case TokenKind::BooleanLiteral: {
