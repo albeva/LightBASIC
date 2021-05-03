@@ -158,10 +158,10 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
         fatalError("Identifier "_t + symbol->name() + " is not a callable m_type");
     }
 
-    const auto& paramTypes = type->paramTypes();
+    const auto& paramTypes = type->getParams();
     auto& args = ast->argExprs;
 
-    if (type->variadic()) {
+    if (type->isVariadic()) {
         if (paramTypes.size() > args.size()) {
             fatalError("Argument count mismatch");
         }
@@ -178,7 +178,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
         }
     }
 
-    ast->type = type->retType();
+    ast->type = type->getReturn();
 }
 
 void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {

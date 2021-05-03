@@ -140,12 +140,12 @@ const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) noexcept {
 }
 
 llvm::Type* TypeIntegral::genLlvmType(Context& context) const noexcept {
-    return llvm::IntegerType::get(context.getLlvmContext(), bits());
+    return llvm::IntegerType::get(context.getLlvmContext(), getBits());
 }
 
 string TypeIntegral::asString() const noexcept {
 #define GET_TYPE(id, str, kind, BITS, SIGNED)   \
-    if (bits() == BITS && isSigned() == SIGNED) \
+    if (getBits() == BITS && isSigned() == SIGNED) \
         return str;
     INTEGRAL_TYPES(GET_TYPE)
 #undef GET_TYPE
@@ -168,19 +168,19 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) noexcept {
 }
 
 llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const noexcept {
-    switch (bits()) {
+    switch (getBits()) {
     case 32: // NOLINT
         return llvm::Type::getFloatTy(context.getLlvmContext());
     case 64: // NOLINT
         return llvm::Type::getDoubleTy(context.getLlvmContext());
     default:
-        fatalError("Invalid floating point type size: "_t + Twine(bits()), false);
+        fatalError("Invalid floating point type size: "_t + Twine(getBits()), false);
     }
 }
 
 string TypeFloatingPoint::asString() const noexcept {
 #define GET_TYPE(id, str, kind, BITS) \
-    if (bits() == BITS)               \
+    if (getBits() == BITS)               \
         return str;
     FLOATINGPOINT_TYPES(GET_TYPE)
 #undef GET_TYPE
@@ -192,7 +192,7 @@ string TypeFloatingPoint::asString() const noexcept {
 
 const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) noexcept {
     for (const auto& ptr : declaredFunc) {
-        if (ptr->retType() == retType && ptr->paramTypes() == paramTypes && ptr->variadic() == variadic) {
+        if (ptr->getReturn() == retType && ptr->getParams() == paramTypes && ptr->isVariadic() == variadic) {
             return ptr.get();
         }
     }
