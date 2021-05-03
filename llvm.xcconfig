@@ -1,4 +1,4 @@
 // Configuration file for LLVM settings. Auto generated during a build phase.
 OTHER_CPLUSPLUSFLAGS = $(inherited) -I/usr/local/include -std=c++17   -fno-exceptions -fno-rtti -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS
-OTHER_LDFLAGS = $(inherited) -L/usr/local/lib -Wl,-search_paths_first -Wl,-headerpad_max_install_names -lLLVMBitWriter -lLLVMAnalysis -lLLVMProfileData -lLLVMObject -lLLVMTextAPI -lLLVMMCParser -lLLVMMC -lLLVMDebugInfoCodeView -lLLVMDebugInfoMSF -lLLVMBitReader -lLLVMCore -lLLVMRemarks -lLLVMBitstreamReader -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -lm -lz -lcurses -lxml2
+OTHER_LDFLAGS = $(inherited) -L/usr/local/lib -Wl,-search_paths_first -Wl,-headerpad_max_install_names -lLLVMTransformUtils -lLLVMBitWriter -lLLVMAnalysis -lLLVMProfileData -lLLVMObject -lLLVMTextAPI -lLLVMMCParser -lLLVMMC -lLLVMDebugInfoCodeView -lLLVMDebugInfoMSF -lLLVMBitReader -lLLVMCore -lLLVMRemarks -lLLVMBitstreamReader -lLLVMBinaryFormat -lLLVMSupport -lLLVMDemangle -lm -lz -lcurses -lxml2
 OTHER_CFLAGS = $(inherited) -I/usr/local/include  -D_DEBUG -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS

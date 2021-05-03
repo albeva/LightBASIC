@@ -27,6 +27,7 @@
 		506FBF4E2638E1C300063AC6 /* CodePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF352638E1C300063AC6 /* CodePrinter.cpp */; };
 		506FBF4F2638E1C300063AC6 /* AstPrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF392638E1C300063AC6 /* AstPrinter.cpp */; };
 		506FBF502638E1C300063AC6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF3A2638E1C300063AC6 /* main.cpp */; };
+		50F2ACDD264002D0009ABAE3 /* FuncDeclarerPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -90,8 +91,11 @@
 		506FBF392638E1C300063AC6 /* AstPrinter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AstPrinter.cpp; sourceTree = "<group>"; };
 		506FBF3A2638E1C300063AC6 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		506FBF512638E1E200063AC6 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
+		50B67551264010F500D0B2EF /* samples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = samples; sourceTree = "<group>"; };
 		50D7A24B262E002B0047D48E /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
 		50F2ACD2263CFF9F009ABAE3 /* Source.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Source.h; sourceTree = "<group>"; };
+		50F2ACDB264002D0009ABAE3 /* FuncDeclarerPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FuncDeclarerPass.h; sourceTree = "<group>"; };
+		50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FuncDeclarerPass.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +173,7 @@
 		506FBF1A2638E1C300063AC6 /* Sem */ = {
 			isa = PBXGroup;
 			children = (
+				50F2ACDA264002D0009ABAE3 /* Passes */,
 				506FBF1C2638E1C300063AC6 /* SemanticAnalyzer.cpp */,
 				506FBF1B2638E1C300063AC6 /* SemanticAnalyzer.h */,
 			);
@@ -244,6 +249,7 @@
 			isa = PBXGroup;
 			children = (
 				506FBF512638E1E200063AC6 /* llvm.xcconfig */,
+				50B67551264010F500D0B2EF /* samples */,
 				506FBF002638E1C300063AC6 /* src */,
 				50D7A24C262E002B0047D48E /* Products */,
 			);
@@ -257,6 +263,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		50F2ACDA264002D0009ABAE3 /* Passes */ = {
+			isa = PBXGroup;
+			children = (
+				50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */,
+				50F2ACDB264002D0009ABAE3 /* FuncDeclarerPass.h */,
+			);
+			path = Passes;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -268,6 +283,7 @@
 				50D7A247262E002B0047D48E /* Sources */,
 				50D7A248262E002B0047D48E /* Frameworks */,
 				50D7A249262E002B0047D48E /* CopyFiles */,
+				50B6755026400B8800D0B2EF /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -310,6 +326,23 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		50B6755026400B8800D0B2EF /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# cp $BUILT_PRODUCTS_DIR/lbc $SRCROOT/bin/\n";
+		};
 		50FE7AB6262E028300564218 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -326,7 +359,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# run llvm-config\nLIBS=\"core support bitwriter\"\nLLVM_CONFIG=\"/usr/local/bin/llvm-config\"\n\nLLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags`\nLLVM_CFLAGS=`$LLVM_CONFIG --cflags`\nLLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`\nLLVM_LIBS=`$LLVM_CONFIG --libs $LIBS`\" \"`$LLVM_CONFIG --system-libs`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings. Auto generated during a build phase.\" > $LLVM_XCCONFIG\necho \"OTHER_CPLUSPLUSFLAGS = \\$(inherited) $LLVM_CXXFLAGS\" >> $LLVM_XCCONFIG\necho \"OTHER_LDFLAGS = \\$(inherited) $LLVM_LDFLAGS $LLVM_LIBS\" >> $LLVM_XCCONFIG\necho \"OTHER_CFLAGS = \\$(inherited) $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\n";
+			shellScript = "# run llvm-config\nLIBS=\"core support bitwriter transformUtils\"\nLLVM_CONFIG=\"/usr/local/bin/llvm-config\"\n\nLLVM_CXXFLAGS=`$LLVM_CONFIG --cxxflags`\nLLVM_CFLAGS=`$LLVM_CONFIG --cflags`\nLLVM_LDFLAGS=`$LLVM_CONFIG --ldflags`\nLLVM_LIBS=`$LLVM_CONFIG --libs $LIBS`\" \"`$LLVM_CONFIG --system-libs`\n\n# Generate the xcode config file\nLLVM_XCCONFIG=\"llvm.xcconfig\"\necho \"// Configuration file for LLVM settings. Auto generated during a build phase.\" > $LLVM_XCCONFIG\necho \"OTHER_CPLUSPLUSFLAGS = \\$(inherited) $LLVM_CXXFLAGS\" >> $LLVM_XCCONFIG\necho \"OTHER_LDFLAGS = \\$(inherited) $LLVM_LDFLAGS $LLVM_LIBS\" >> $LLVM_XCCONFIG\necho \"OTHER_CFLAGS = \\$(inherited) $LLVM_CFLAGS\" >> $LLVM_XCCONFIG\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -353,6 +386,7 @@
 				506FBF4B2638E1C300063AC6 /* Type.cpp in Sources */,
 				506FBF402638E1C300063AC6 /* Driver.cpp in Sources */,
 				506FBF3B2638E1C300063AC6 /* Lexer.cpp in Sources */,
+				50F2ACDD264002D0009ABAE3 /* FuncDeclarerPass.cpp in Sources */,
 				506FBF4D2638E1C300063AC6 /* AstVisitor.cpp in Sources */,
 				506FBF492638E1C300063AC6 /* CodeGen.cpp in Sources */,
 				506FBF3C2638E1C300063AC6 /* Token.cpp in Sources */,
@@ -395,6 +429,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CONFIGURATION_BUILD_DIR = $SRCROOT/bin;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -460,6 +495,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CONFIGURATION_BUILD_DIR = $SRCROOT/bin;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;

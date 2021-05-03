@@ -57,10 +57,6 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "-no-main"
-            isEnabled = "YES">
-         </CommandLineArgument>
-         <CommandLineArgument
             argument = "-v"
             isEnabled = "YES">
          </CommandLineArgument>
