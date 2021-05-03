@@ -66,7 +66,7 @@ unique_ptr<Token> Lexer::next() {
         }
 
         // number
-        if (isDigit(m_char) || m_char == '.' && isDigit(peek())) {
+        if (isDigit(m_char) || (m_char == '.' && isDigit(peek()))) {
             return number();
         }
 

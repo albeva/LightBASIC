@@ -38,7 +38,7 @@ do
         ./$output | $FILECHECK $file --dump-input=never
         if [ $? = 0 ]; then
             $ECHO "$reset\c"
-            $ECHO "$file: ${green}Ok$reset"
+            printf "%s%*s${green}Ok$reset\n" $file "$((25-${#file}))";
         else
             $ECHO "$reset\c"
         fi
