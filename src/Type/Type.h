@@ -140,7 +140,7 @@ public:
 
 protected:
     TypeNumeric(TypeFamily kind, unsigned bits, bool isSigned) noexcept
-        : TypeRoot{ kind }, m_bits{ bits }, m_isSigned{ isSigned } {}
+    : TypeRoot{ kind }, m_bits{ bits }, m_isSigned{ isSigned } {}
 
 private:
     const unsigned m_bits;

@@ -144,7 +144,7 @@ llvm::Type* TypeIntegral::genLlvmType(Context& context) const noexcept {
 }
 
 string TypeIntegral::asString() const noexcept {
-#define GET_TYPE(id, str, kind, BITS, SIGNED)   \
+#define GET_TYPE(id, str, kind, BITS, SIGNED)      \
     if (getBits() == BITS && isSigned() == SIGNED) \
         return str;
     INTEGRAL_TYPES(GET_TYPE)
@@ -180,7 +180,7 @@ llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const noexcept {
 
 string TypeFloatingPoint::asString() const noexcept {
 #define GET_TYPE(id, str, kind, BITS) \
-    if (getBits() == BITS)               \
+    if (getBits() == BITS)            \
         return str;
     FLOATINGPOINT_TYPES(GET_TYPE)
 #undef GET_TYPE
