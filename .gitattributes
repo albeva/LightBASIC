@@ -1,0 +1,5 @@
+* text=auto
+*.cpp text
+*.h text
+*.bas text
+*.sh text eol=lf

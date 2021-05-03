@@ -2,10 +2,10 @@ red='\033[31m'
 green='\033[32m'
 reset='\033[0m'
 
-if grep -q Microsoft <<< `uname -a`; then
+if grep -q microsoft <<< `uname -a`; then
     LBC=../../bin/lbc.exe
     FILECHECK=../../bin/toolchain/bin/FileCheck.exe
-    ECHO=echo -e
+    ECHO="echo -e"
 else
     LBC=../../bin/lbc
     FILECHECK=FileCheck
