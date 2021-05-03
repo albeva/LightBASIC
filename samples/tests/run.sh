@@ -2,12 +2,14 @@ red='\033[31m'
 green='\033[32m'
 reset='\033[0m'
 
-if [[ "$(< /proc/version)" == *@(Microsoft|WSL)* ]]; then
+if grep -q Microsoft <<< `uname -a`; then
     LBC=../../bin/lbc.exe
     FILECHECK=../../bin/toolchain/bin/FileCheck.exe
+    ECHO=echo -e
 else
     LBC=../../bin/lbc
     FILECHECK=FileCheck
+    ECHO=echo
 fi
 
 #
@@ -24,17 +26,17 @@ do
         rm $output
     fi
     # compile
-    echo -e "$red\c"
+    $ECHO "$red\c"
     $LBC $file -o $output
-    echo -e "$reset\c"
+    $ECHO "$reset\c"
     if [ -e $output ]; then
-        echo -e "$red\c"
+        $ECHO "$red\c"
         ./$output | $FILECHECK $file --dump-input=never
         if [ $? = 0 ]; then
-            echo -e "$reset\c"
-            echo -e "$file: ${green}Ok$reset"
+            $ECHO "$reset\c"
+            $ECHO "$file: ${green}Ok$reset"
         else
-            echo -e "$reset\c"
+            $ECHO "$reset\c"
         fi
         rm $output
     fi

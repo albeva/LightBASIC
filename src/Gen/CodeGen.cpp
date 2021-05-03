@@ -84,7 +84,11 @@ llvm::BasicBlock* CodeGen::getGlobalCtorBlock() noexcept {
             llvm::Function::ExternalLinkage,
             "__lbc_global_var_init",
             *m_module);
-        ctorFn->setSection(".text.startup");
+        if (m_context.getTriple().isMacOSX()) {
+            ctorFn->setSection("__TEXT,__StaticInit,regular,pure_instructions");
+        } else {
+            ctorFn->setSection(".text.startup");
+        }
         llvm::appendToGlobalCtors(*m_module, ctorFn, 0, nullptr);
         m_globalCtorBlock = llvm::BasicBlock::Create(m_llvmContext, "", ctorFn);
     }
