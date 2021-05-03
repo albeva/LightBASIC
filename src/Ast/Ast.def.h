@@ -57,7 +57,8 @@
 #define AST_EXPR_NODES(_) \
     _( IdentExpr   ) \
     _( CallExpr    ) \
-    _( LiteralExpr )
+    _( LiteralExpr ) \
+    _( UnaryExpr   )
 
 #define AST_EXPR_RANGE(_) _(IdentExpr, LiteralExpr)
 
@@ -65,11 +66,11 @@
  * Combined
  */
 #define AST_CONTENT_NODES(_) \
-    _(Module)                \
-    AST_STMT_NODES(_)        \
-    AST_DECL_NODES(_)        \
-    AST_ATTRIB_NODES(_)      \
-    AST_TYPE_NODES(_)        \
+    _(Module)           \
+    AST_STMT_NODES(_)   \
+    AST_DECL_NODES(_)   \
+    AST_ATTRIB_NODES(_) \
+    AST_TYPE_NODES(_)   \
     AST_EXPR_NODES(_)
 
 /**

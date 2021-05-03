@@ -168,6 +168,10 @@ void CodePrinter::visitLiteralExpr(AstLiteralExpr* ast) {
     }
 }
 
+void CodePrinter::visitUnaryExpr(AstUnaryExpr* /*ast*/) {
+    // TODO
+}
+
 string CodePrinter::indent() const {
     return string(m_indent * SPACES, ' ');
 }

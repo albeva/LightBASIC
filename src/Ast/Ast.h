@@ -81,6 +81,7 @@ public:
 
     const TypeRoot* type = nullptr;
     llvm::Value* llvmValue = nullptr;
+    bool constant = false;
 };
 
 /**
@@ -227,6 +228,11 @@ DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
     unique_ptr<Token> token;
+DECLARE_END
+
+DECLARE_AST(UnaryExpr, Expr)
+    unique_ptr<Token> token;
+    unique_ptr<AstExpr> expr;
 DECLARE_END
 
 #undef DECLARE_AST

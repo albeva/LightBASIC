@@ -379,6 +379,7 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
  * expression = literal
  *            | identifier
  *            | callExpr
+ *            | "-" expression
  *            .
  */
 unique_ptr<AstExpr> Parser::expression() noexcept {
@@ -387,11 +388,18 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
         return literal();
     }
 
-    if (*m_token == TokenKind::Identifier) {
+    if (match(TokenKind::Identifier)) {
         if (m_next && *m_next == TokenKind::ParenOpen) {
             return callExpr();
         }
         return identifier();
+    }
+
+    if (match(TokenKind::Minus)) {
+        auto unary = AstUnaryExpr::create();
+        unary->token = move();
+        unary->expr = expression();
+        return unary;
     }
 
     error("Expected expression");

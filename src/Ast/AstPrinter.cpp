@@ -128,6 +128,10 @@ void AstPrinter::visitLiteralExpr(AstLiteralExpr* ast) {
     m_os << indent() << "AstLiteralExpr \"" << ast->token->lexeme() << '"' << '\n';
 }
 
+void AstPrinter::visitUnaryExpr(AstUnaryExpr* /*ast*/) {
+    m_os << indent() << "visitUnaryExpr\n";
+}
+
 string AstPrinter::indent() const {
     return string(m_indent * SPACES, ' ');
 }

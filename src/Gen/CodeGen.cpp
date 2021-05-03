@@ -133,9 +133,9 @@ void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
 
     // has an init expr?
     if (ast->expr) {
-        if (auto* literalExpr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
-            visitLiteralExpr(literalExpr);
-            constant = dyn_cast<llvm::Constant>(literalExpr->llvmValue);
+        if (ast->expr->constant) {
+            visitExpr(ast->expr.get());
+            constant = dyn_cast<llvm::Constant>(ast->expr->llvmValue);
         } else {
             generateStoreInCtror = true;
         }
@@ -362,8 +362,6 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         break;
     }
     case TokenKind::FloatingPointLiteral: {
-        // double result = 0;
-        // std::from_chars(lexeme.data(), lexeme.end(), result);
         constant = llvm::ConstantFP::get(ast->type->getLlvmType(m_context), lexeme);
         break;
     }
@@ -384,6 +382,41 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     }
 
     ast->llvmValue = constant;
+}
+
+void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {
+    switch (ast->token->kind()) {
+    case TokenKind::Minus: {
+        auto* expr = ast->expr.get();
+        visitExpr(expr);
+
+        if (auto* intValue = dyn_cast<llvm::ConstantInt>(expr->llvmValue)) {
+            auto value = -intValue->getValue();
+            ast->llvmValue = llvm::ConstantInt::get(intValue->getType(), value);
+            return;
+        }
+
+        if (auto* fpValue = dyn_cast<llvm::ConstantFP>(expr->llvmValue)) {
+            auto value = -fpValue->getValue();
+            ast->llvmValue = llvm::ConstantFP::get(fpValue->getType(), value);
+            return;
+        }
+
+        if (expr->llvmValue->getType()->isIntegerTy()) {
+            ast->llvmValue = llvm::BinaryOperator::CreateNeg(expr->llvmValue, "", m_block);
+            return;
+        }
+
+        if (expr->llvmValue->getType()->isFloatingPointTy()) {
+            ast->llvmValue = llvm::UnaryOperator::CreateFNeg(expr->llvmValue, "", m_block);
+            return;
+        }
+
+        break;
+    }
+    default:
+        fatalError("Unsupported unary operator: '"_t + ast->token->lexeme() + "'");
+    }
 }
 
 unique_ptr<llvm::Module> CodeGen::getModule() {

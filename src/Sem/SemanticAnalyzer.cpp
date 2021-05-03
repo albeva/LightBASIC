@@ -60,7 +60,7 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
 
         if (type != nullptr) {
             if (type != ast->expr->type) {
-                fatalError("TypeFirst mismatch");
+                fatalError("Type mismatch");
             }
         } else {
             type = ast->expr->type;
@@ -200,6 +200,16 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
         break;
     default:
         fatalError("Unsupported literal type");
+    }
+    ast->constant = true;
+}
+
+void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
+    visitExpr(ast->expr.get());
+    ast->type = ast->expr->type;
+    ast->constant = ast->expr->constant;
+    if (!isa<TypeNumeric>(ast->type)) {
+        fatalError("Applying unary - to non numeric type");
     }
 }
 
