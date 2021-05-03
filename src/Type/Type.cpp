@@ -106,7 +106,7 @@ const TypePointer* TypePointer::get(const TypeRoot* base) noexcept {
 }
 
 llvm::Type* TypePointer::genLlvmType(Context& context) const noexcept {
-    return llvm::PointerType::get(m_base->llvmType(context), 0);
+    return llvm::PointerType::get(m_base->getLlvmType(context), 0);
 }
 
 string TypePointer::asString() const noexcept {
@@ -150,7 +150,7 @@ string TypeIntegral::asString() const noexcept {
     INTEGRAL_TYPES(GET_TYPE)
 #undef GET_TYPE
 
-    llvm_unreachable("something very wrong, unable to detect type");
+    llvm_unreachable("unknown integer type");
 }
 
 // Floating Point
@@ -185,7 +185,7 @@ string TypeFloatingPoint::asString() const noexcept {
     FLOATINGPOINT_TYPES(GET_TYPE)
 #undef GET_TYPE
 
-    llvm_unreachable("something very wrong, unable to detect type");
+    llvm_unreachable("unknown floating point type");
 }
 
 // Function
@@ -202,12 +202,12 @@ const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const
 }
 
 llvm::Type* TypeFunction::genLlvmType(Context& context) const noexcept {
-    auto* retTy = m_retType->llvmType(context);
+    auto* retTy = m_retType->getLlvmType(context);
 
     std::vector<llvm::Type*> params;
     params.reserve(m_paramTypes.size());
     for (const auto& p : m_paramTypes) {
-        params.emplace_back(p->llvmType(context));
+        params.emplace_back(p->getLlvmType(context));
     }
 
     return llvm::FunctionType::get(retTy, params, m_variadic);

@@ -128,7 +128,7 @@ void CodeGen::visitVarDecl(AstVarDecl* ast) {
 void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
     auto* sym = ast->symbol;
     llvm::Constant* constant = nullptr;
-    llvm::Type* exprType = sym->type()->llvmType(m_context);
+    llvm::Type* exprType = sym->type()->getLlvmType(m_context);
     bool generateStoreInCtror = false;
 
     // has an init expr?
@@ -166,7 +166,7 @@ void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
 
 void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
     llvm::Value* exprValue = nullptr;
-    llvm::Type* exprType = ast->symbol->type()->llvmType(m_context);
+    llvm::Type* exprType = ast->symbol->type()->getLlvmType(m_context);
 
     // has an init expr?
     if (ast->expr) {
@@ -210,7 +210,7 @@ void CodeGen::declareFuncs() noexcept {
 
 void CodeGen::declareFunc(AstFuncDecl* ast) noexcept {
     auto* sym = ast->symbol;
-    auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->llvmType(m_context));
+    auto* fnTy = llvm::cast<llvm::FunctionType>(ast->symbol->type()->getLlvmType(m_context));
     auto* fn = llvm::Function::Create(
         fnTy,
         sym->getLlvmLinkage(),
@@ -243,7 +243,7 @@ void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
         auto* sym = param->symbol;
         auto* value = sym->getLlvmValue();
         sym->setLlvmValue(new llvm::AllocaInst(
-            sym->type()->llvmType(m_context),
+            sym->type()->getLlvmType(m_context),
             0,
             sym->identifier() + ".addr",
             m_block));
@@ -287,7 +287,7 @@ void CodeGen::visitIdentExpr(AstIdentExpr* ast) {
 
     auto* sym = ast->symbol;
     ast->llvmValue = new llvm::LoadInst(
-        sym->type()->llvmType(m_context),
+        sym->type()->getLlvmType(m_context),
         sym->getLlvmValue(),
         ast->symbol->identifier(),
         m_block);
@@ -356,7 +356,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
         uint64_t result = 0;
         std::from_chars(lexeme.data(), lexeme.data() + lexeme.size(), result); // NOLINT
         constant = llvm::ConstantInt::get(
-            ast->type->llvmType(m_context),
+            ast->type->getLlvmType(m_context),
             result,
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
         break;
@@ -364,14 +364,14 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     case TokenKind::BooleanLiteral: {
         uint64_t value = lexeme == "TRUE" ? 1 : 0;
         constant = llvm::ConstantInt::get(
-            ast->type->llvmType(m_context),
+            ast->type->getLlvmType(m_context),
             value,
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
         break;
     }
     case TokenKind::NullLiteral:
         constant = llvm::ConstantPointerNull::get(
-            llvm::cast<llvm::PointerType>(ast->type->llvmType(m_context)));
+            llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         break;
     default:
         fatalError("Invalid literal type");

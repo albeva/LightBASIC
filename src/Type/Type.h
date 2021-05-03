@@ -42,7 +42,7 @@ class TypeRoot : private NonCopyable {
 public:
     [[nodiscard]] TypeFamily kind() const noexcept { return m_kind; }
 
-    [[nodiscard]] llvm::Type* llvmType(Context& context) const noexcept {
+    [[nodiscard]] llvm::Type* getLlvmType(Context& context) const noexcept {
         if (m_llvmType == nullptr) {
             m_llvmType = genLlvmType(context);
         }
