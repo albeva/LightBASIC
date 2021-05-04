@@ -33,6 +33,8 @@ public:
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
     [[nodiscard]] AstKind kind() const { return m_kind; }
 
+    [[nodiscard]] const llvm::StringLiteral& describe() const noexcept;
+
 private:
     const AstKind m_kind;
 };
@@ -233,6 +235,11 @@ DECLARE_END
 DECLARE_AST(UnaryExpr, Expr)
     unique_ptr<Token> token;
     unique_ptr<AstExpr> expr;
+DECLARE_END
+
+DECLARE_AST(CastExpr, Expr)
+    unique_ptr<AstExpr> expr;
+    unique_ptr<AstTypeExpr> typeExpr;
 DECLARE_END
 
 #undef DECLARE_AST

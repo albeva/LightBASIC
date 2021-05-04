@@ -20,6 +20,7 @@ public:
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
 private:
     [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, Token* identExpr);
+    void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
 
     Context& m_context;
     unsigned int m_fileId = ~0U;

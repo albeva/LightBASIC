@@ -132,6 +132,10 @@ void AstPrinter::visitUnaryExpr(AstUnaryExpr* /*ast*/) {
     m_os << indent() << "visitUnaryExpr\n";
 }
 
+void AstPrinter::visitCastExpr(AstCastExpr* /*ast*/) {
+    m_os << indent() << "AstCastExpr" << '\n';
+}
+
 string AstPrinter::indent() const {
     return string(m_indent * SPACES, ' ');
 }

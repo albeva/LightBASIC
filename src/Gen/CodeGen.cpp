@@ -419,6 +419,39 @@ void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {
     }
 }
 
+void CodeGen::visitCastExpr(AstCastExpr* ast) {
+    visitExpr(ast->expr.get());
+
+    bool srcIsSigned;
+    if (const auto* src = dyn_cast<TypeIntegral>(ast->expr->type)) {
+        srcIsSigned = src->isSigned();
+    } else {
+        srcIsSigned = false;
+    }
+
+    bool dstIsSigned;
+    if (const auto* dst = dyn_cast<TypeIntegral>(ast->type)) {
+        dstIsSigned = dst->isSigned();
+    } else {
+        dstIsSigned = false;
+    }
+
+    auto opcode = llvm::CastInst::getCastOpcode(
+        ast->expr->llvmValue,
+        srcIsSigned,
+        ast->type->getLlvmType(m_context),
+        dstIsSigned);
+
+    auto* value = llvm::CastInst::Create(
+        opcode,
+        ast->expr->llvmValue,
+        ast->type->getLlvmType(m_context),
+        "",
+        m_block);
+
+    ast->llvmValue = value;
+}
+
 unique_ptr<llvm::Module> CodeGen::getModule() {
     return std::move(m_module);
 }

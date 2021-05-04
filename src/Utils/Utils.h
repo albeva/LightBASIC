@@ -35,9 +35,16 @@ inline Twine operator"" _t(const char* s, size_t /*len*/) {
  * End compilation with the error message, clear the state and exit with error
  *
  * @param message to print
- * @param prefix add standard prefix befor ethe message
+ * @param prefix add standard prefix before the message
  */
-[[noreturn]] void fatalError(const Twine& message, bool prefix = true);
+[[noreturn]] void fatalError(const Twine& message, bool prefix = true) noexcept;
+
+/**
+ * Emit compiler warning, but continue compilation process
+ * @param message to print
+ * @param prefix add standard prefix before the message
+ */
+void warning(const Twine& message, bool prefix = true) noexcept;
 
 /**
  * Helper class that restores variable getLlvmValue when existing scope

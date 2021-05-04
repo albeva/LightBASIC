@@ -33,10 +33,7 @@ void SemanticAnalyzer::visitStmtList(AstStmtList* ast) {
 void SemanticAnalyzer::visitAssignStmt(AstAssignStmt* ast) {
     visitIdentExpr(ast->identExpr.get());
     visitExpr(ast->expr.get());
-
-    if (ast->identExpr->type != ast->expr->type) {
-        fatalError("Tye mismatch in assignment");
-    }
+    coerce(ast->expr, ast->identExpr->type);
 }
 
 void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
@@ -57,11 +54,8 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
     // expression?
     if (ast->expr) {
         visitExpr(ast->expr.get());
-
         if (type != nullptr) {
-            if (type != ast->expr->type) {
-                fatalError("Type mismatch");
-            }
+            coerce(ast->expr, type);
         } else {
             type = ast->expr->type;
         }
@@ -172,9 +166,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
     for (size_t index = 0; index < args.size(); index++) {
         visitExpr(args[index].get());
         if (index < paramTypes.size()) {
-            if (paramTypes[index] != args[index]->type) {
-                fatalError("TypeFirst mismatch");
-            }
+            coerce(args[index], args[index]->type);
         }
     }
 
@@ -187,7 +179,7 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
         ast->type = TypeZString::get();
         break;
     case TokenKind::IntegerLiteral:
-        ast->type = TypeRoot::fromTokenKind(TokenKind::Integer);
+        ast->type = TypeRoot::fromTokenKind(TokenKind::Long);
         break;
     case TokenKind::FloatingPointLiteral:
         ast->type = TypeRoot::fromTokenKind(TokenKind::Double);
@@ -206,11 +198,19 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
 
 void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
     visitExpr(ast->expr.get());
-    ast->type = ast->expr->type;
-    ast->constant = ast->expr->constant;
-    if (!isa<TypeNumeric>(ast->type)) {
+    if (!isa<TypeNumeric>(ast->expr->type)) {
         fatalError("Applying unary - to non numeric type");
     }
+
+    ast->type = ast->expr->type;
+    ast->constant = ast->expr->constant;
+}
+
+void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
+    fatalError("CAST not implemented");
+    // visitExpr(ast->expr.get());
+    // visitTypeExpr(ast->typeExpr.get());
+    // if (!ast->typeExpr->type->isConvertible(
 }
 
 Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) {
@@ -227,4 +227,60 @@ Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) {
     }
 
     return symbol;
+}
+
+void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
+    if (ast->type == type) {
+        return;
+    }
+
+    // to integral
+    if (const auto* dst = dyn_cast<TypeIntegral>(type)) {
+        if (const auto* src = dyn_cast<TypeIntegral>(ast->type)) {
+            //  if (src->getBits() > dst->getBits()) {
+            //      warning(
+            //          "implicit conversion loses integer precision:"_t
+            //          + " '" + src->asString() + "'"
+            //          + " to '" + dst->asString() + "'");
+            //  } else if (src->isSigned() != dst->isSigned()) {
+            //      warning(
+            //          "implicit conversion changes signedness:"_t
+            //          + " '" + src->asString() + "'"
+            //          + " to '" + dst->asString() + "'");
+            //  }
+            goto cast;
+        }
+        if (const auto* src = dyn_cast<TypeFloatingPoint>(ast->type)) {
+            goto cast;
+        }
+        goto error;
+    }
+
+    if (const auto* dst = dyn_cast<TypeFloatingPoint>(type)) {
+        if (const auto* src = dyn_cast<TypeFloatingPoint>(ast->type)) {
+            // if (src->getBits() > dst->getBits()) {
+            //     warning(
+            //         "implicit conversion loses floating-point precision:"_t
+            //         + " '" + src->asString() + "'"
+            //         + " to '" + dst->asString() + "'");
+            // }
+            goto cast;
+        }
+        if (const auto* src = dyn_cast<TypeIntegral>(ast->type)) {
+            goto cast;
+        }
+        goto error;
+    }
+
+error:
+    fatalError(
+        "Type mismatch."_t
+        + " Expected '" + type->asString() + "'"
+        + " got '" + ast->type->asString() + "'");
+
+cast:
+    auto* cast = new AstCastExpr();
+    cast->expr.reset(ast.release());
+    cast->type = type;
+    ast.reset(cast);
 }

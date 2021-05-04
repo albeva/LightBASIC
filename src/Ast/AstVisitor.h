@@ -27,7 +27,7 @@ public:
             AST_STMT_NODES(AST_VISITOR) // NOLINT
             AST_DECL_NODES(AST_VISITOR) // NOLINT
         default:
-            llvm_unreachable("Invalid ast visit kind");
+            llvm_unreachable(("visitStmt: Unmatched AST node: "_t + ast->describe()).str().c_str());
         }
 #undef AST_VISITOR
     }
@@ -52,12 +52,12 @@ public:
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
-
         switch (ast->kind()) {
             AST_EXPR_NODES(AST_VISITOR) // NOLINT
         default:
-            llvm_unreachable("Invalid ast visit kind");
+            llvm_unreachable(("visitExpr: Unmatched AST node: "_t + ast->describe()).str().c_str());
         }
+
 #undef AST_VISITOR
     }
 };
@@ -85,7 +85,7 @@ public:
         switch (ast->kind()) {
             AST_ATTRIB_NODES(AST_VISITOR) // NOLINT
         default:
-            llvm_unreachable("Invalid ast visit kind");
+            llvm_unreachable(("visitAttr: Unmatched AST node: "_t + ast->describe()).str().c_str());
         }
 #undef AST_VISITOR
     }
@@ -114,7 +114,7 @@ public:
         switch (ast->kind()) {
             AST_TYPE_NODES(AST_VISITOR) // NOLINT
         default:
-            llvm_unreachable("Invalid ast visit kind");
+            llvm_unreachable(("visitType: Unmatched AST node: "_t + ast->describe()).str().c_str());
         }
 #undef AST_VISITOR
     }
@@ -143,7 +143,7 @@ public:
         switch (ast->kind()) {
             AST_DECL_NODES(AST_VISITOR) // NOLINT
         default:
-            llvm_unreachable("Invalid ast visit kind");
+            llvm_unreachable(("visitDecl: Unmatched AST node: "_t + ast->describe()).str().c_str());
         }
 #undef AST_VISITOR
     }

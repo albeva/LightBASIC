@@ -5,6 +5,20 @@
 #include "AstVisitor.h"
 using namespace lbc;
 
+namespace literals {
+constexpr std::array nodes {
+#define KIND_ENUM(id, ...) llvm::StringLiteral{ "Ast" #id },
+    AST_CONTENT_NODES(KIND_ENUM)
+#undef KIND_ENUM
+};
+} // namespace literals
+
+const llvm::StringLiteral& AstRoot::describe() const noexcept {
+    auto index = static_cast<size_t>(kind());
+    assert(index < literals::nodes.size());
+    return literals::nodes[index];
+}
+
 const Token* AstAttributeList::getStringLiteral(const StringRef& key) const {
     for (const auto& attr : attribs) {
         if (attr->identExpr->token->lexeme() == key) {
