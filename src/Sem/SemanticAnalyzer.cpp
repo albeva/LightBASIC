@@ -235,41 +235,24 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
     }
 
     // to integral
-    if (const auto* dst = dyn_cast<TypeIntegral>(type)) {
-        if (const auto* src = dyn_cast<TypeIntegral>(ast->type)) {
-            //  if (src->getBits() > dst->getBits()) {
-            //      warning(
-            //          "implicit conversion loses integer precision:"_t
-            //          + " '" + src->asString() + "'"
-            //          + " to '" + dst->asString() + "'");
-            //  } else if (src->isSigned() != dst->isSigned()) {
-            //      warning(
-            //          "implicit conversion changes signedness:"_t
-            //          + " '" + src->asString() + "'"
-            //          + " to '" + dst->asString() + "'");
-            //  }
-            goto cast;
+    if (isa<TypeIntegral>(type)) {
+        if (isa<TypeIntegral>(ast->type)) {
+            goto cast; // NOLINT
         }
-        if (const auto* src = dyn_cast<TypeFloatingPoint>(ast->type)) {
-            goto cast;
+        if (isa<TypeFloatingPoint>(ast->type)) {
+            goto cast; // NOLINT
         }
-        goto error;
+        goto error; // NOLINT
     }
 
-    if (const auto* dst = dyn_cast<TypeFloatingPoint>(type)) {
-        if (const auto* src = dyn_cast<TypeFloatingPoint>(ast->type)) {
-            // if (src->getBits() > dst->getBits()) {
-            //     warning(
-            //         "implicit conversion loses floating-point precision:"_t
-            //         + " '" + src->asString() + "'"
-            //         + " to '" + dst->asString() + "'");
-            // }
-            goto cast;
+    if (isa<TypeFloatingPoint>(type)) {
+        if (isa<TypeFloatingPoint>(ast->type)) {
+            goto cast; // NOLINT
         }
-        if (const auto* src = dyn_cast<TypeIntegral>(ast->type)) {
-            goto cast;
+        if (isa<TypeIntegral>(ast->type)) {
+            goto cast; // NOLINT
         }
-        goto error;
+        goto error; // NOLINT
     }
 
 error:
@@ -279,8 +262,8 @@ error:
         + " got '" + ast->type->asString() + "'");
 
 cast:
-    auto* cast = new AstCastExpr();
-    cast->expr.reset(ast.release());
+    auto cast = AstCastExpr::create();
+    cast->expr.swap(ast);
     cast->type = type;
-    ast.reset(cast);
+    ast.reset(cast.release()); // NOLINT
 }
