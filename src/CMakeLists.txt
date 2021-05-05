@@ -50,7 +50,7 @@ add_executable(
     Utils/Utils.cpp
     Utils/Utils.h
     Utils/Version.h
-    )
+)
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)

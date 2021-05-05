@@ -4,6 +4,7 @@
 #pragma once
 #include "pch.h"
 #include "Ast/AstVisitor.h"
+#include "Passes/ConstantFoldingPass.h"
 
 namespace lbc {
 
@@ -15,11 +16,11 @@ class Context;
 
 class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
-    explicit SemanticAnalyzer(Context& context);
+    explicit SemanticAnalyzer(Context& context) noexcept;
 
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
 private:
-    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, Token* identExpr);
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, Token* identExpr) noexcept;
     static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
     static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
 
@@ -29,6 +30,7 @@ private:
     AstFuncDecl* m_function = nullptr;
     SymbolTable* m_table = nullptr;
     SymbolTable* m_rootTable = nullptr;
+    Sem::ConstantFoldingPass m_constantFolder;
 };
 
 } // namespace lbc

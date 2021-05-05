@@ -11,8 +11,9 @@
 #include <charconv>
 using namespace lbc;
 
-SemanticAnalyzer::SemanticAnalyzer(Context& context)
-: m_context{ context } {}
+SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
+: m_context{ context },
+  m_constantFolder{ context } {}
 
 void SemanticAnalyzer::visit(AstModule* ast) {
     m_astRootModule = ast;
@@ -234,7 +235,7 @@ void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
     fatalError("CAST not implemented");
 }
 
-Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) {
+Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) noexcept {
     if (m_table->find(token->lexeme(), false) != nullptr) {
         fatalError("Redefinition of "_t + token->lexeme());
     }
