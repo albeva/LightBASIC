@@ -8,6 +8,7 @@
 #include "Symbol/Symbol.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
+#include <charconv>
 using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context)
@@ -178,15 +179,39 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
     case TokenKind::StringLiteral:
         ast->type = TypeZString::get();
         break;
-    case TokenKind::IntegerLiteral:
-        ast->type = TypeRoot::fromTokenKind(TokenKind::Long);
+    case TokenKind::IntegerLiteral: {
+        ast->type = TypeRoot::fromTokenKind(TokenKind::ULong);
+        uint64_t value;
+        const auto& lexeme = ast->token->lexeme();
+        if (std::from_chars(lexeme.begin(), lexeme.end(), value, 10).ec != std::errc()) {
+            fatalError("Failed to parse number: "_t + lexeme);
+        }
+        ast->value.uint64 = value;
         break;
-    case TokenKind::FloatingPointLiteral:
+    }
+    case TokenKind::FloatingPointLiteral: {
         ast->type = TypeRoot::fromTokenKind(TokenKind::Double);
+        const auto& lexeme = ast->token->lexeme();
+        char* end;
+        double value = std::strtod(lexeme.begin(), &end);
+        if (end == lexeme.begin()) {
+            fatalError("Failed to parse number: "_t + lexeme);
+        }
+        ast->value.dbl = value;
         break;
-    case TokenKind::BooleanLiteral:
+    }
+    case TokenKind::BooleanLiteral: {
         ast->type = TypeBoolean::get();
+        const auto& lexeme = ast->token->lexeme();
+        if (lexeme == "TRUE") {
+            ast->value.b = true;
+        } else if (lexeme == "FALSE") {
+            ast->value.b = false;
+        } else {
+            fatalError("Failed to parse boolean: "_t + lexeme);
+        }
         break;
+    }
     case TokenKind::NullLiteral:
         ast->type = TypePointer::get(TypeAny::get());
         break;
@@ -201,7 +226,6 @@ void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
     if (!isa<TypeNumeric>(ast->expr->type)) {
         fatalError("Applying unary - to non numeric type");
     }
-
     ast->type = ast->expr->type;
     ast->constant = ast->expr->constant;
 }
