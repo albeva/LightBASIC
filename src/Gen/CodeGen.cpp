@@ -385,30 +385,14 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
 
 void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {
     switch (ast->token->kind()) {
-    case TokenKind::Minus: {
+    case TokenKind::Negate: {
         auto* expr = ast->expr.get();
         visitExpr(expr);
 
-        if (auto* intValue = dyn_cast<llvm::ConstantInt>(expr->llvmValue)) {
-            auto value = -intValue->getValue();
-            ast->llvmValue = llvm::ConstantInt::get(intValue->getType(), value);
-            return;
-        }
-
-        if (auto* fpValue = dyn_cast<llvm::ConstantFP>(expr->llvmValue)) {
-            auto value = -fpValue->getValue();
-            ast->llvmValue = llvm::ConstantFP::get(fpValue->getType(), value);
-            return;
-        }
-
         if (expr->llvmValue->getType()->isIntegerTy()) {
             ast->llvmValue = llvm::BinaryOperator::CreateNeg(expr->llvmValue, "", m_block);
-            return;
-        }
-
-        if (expr->llvmValue->getType()->isFloatingPointTy()) {
+        } else if (expr->llvmValue->getType()->isFloatingPointTy()) {
             ast->llvmValue = llvm::UnaryOperator::CreateFNeg(expr->llvmValue, "", m_block);
-            return;
         }
 
         break;

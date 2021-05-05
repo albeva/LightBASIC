@@ -34,12 +34,11 @@ void SemanticAnalyzer::visitStmtList(AstStmtList* ast) {
 
 void SemanticAnalyzer::visitAssignStmt(AstAssignStmt* ast) {
     visitIdentExpr(ast->identExpr.get());
-    visitExpr(ast->expr.get());
-    coerce(ast->expr, ast->identExpr->type);
+    expression(ast->expr, ast->identExpr->type);
 }
 
 void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
-    visitExpr(ast->expr.get());
+    expression(ast->expr);
 }
 
 void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
@@ -55,10 +54,8 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
 
     // expression?
     if (ast->expr) {
-        visitExpr(ast->expr.get());
-        if (type != nullptr) {
-            coerce(ast->expr, type);
-        } else {
+        expression(ast->expr, type);
+        if (type == nullptr) {
             type = ast->expr->type;
         }
     }
@@ -74,6 +71,10 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
         }
     }
 }
+
+//----------------------------------------
+// Functions
+//----------------------------------------
 
 /**
  * Analyze function declaration
@@ -106,7 +107,7 @@ void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
         fatalError("Unexpected expression for SUB");
     }
 
-    visitExpr(ast->expr.get());
+    expression(ast->expr);
 
     if (ast->expr->type != retType) {
         fatalError(
@@ -116,6 +117,10 @@ void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
     }
 }
 
+//----------------------------------------
+// Attributes
+//----------------------------------------
+
 void SemanticAnalyzer::visitAttributeList(AstAttributeList* /*ast*/) {
     llvm_unreachable("visitAttributeList");
 }
@@ -124,8 +129,24 @@ void SemanticAnalyzer::visitAttribute(AstAttribute* /*ast*/) {
     llvm_unreachable("visitAttribute");
 }
 
+//----------------------------------------
+// Types
+//----------------------------------------
+
 void SemanticAnalyzer::visitTypeExpr(AstTypeExpr* ast) {
     ast->type = TypeRoot::fromTokenKind(ast->token->kind());
+}
+
+//----------------------------------------
+// Expressions
+//----------------------------------------
+
+void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
+    visitExpr(ast.get());
+    if (type != nullptr) {
+        coerce(ast, type);
+    }
+    m_constantFolder.fold(ast);
 }
 
 void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
@@ -166,9 +187,10 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
     }
 
     for (size_t index = 0; index < args.size(); index++) {
-        visitExpr(args[index].get());
         if (index < paramTypes.size()) {
-            coerce(args[index], args[index]->type);
+            expression(args[index], args[index]->type);
+        } else {
+            expression(args[index]);
         }
     }
 
@@ -223,7 +245,7 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
 }
 
 void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
-    visitExpr(ast->expr.get());
+    expression(ast->expr);
     if (!isa<TypeNumeric>(ast->expr->type)) {
         fatalError("Applying unary - to non numeric type");
     }
@@ -234,6 +256,10 @@ void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
 void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
     fatalError("CAST not implemented");
 }
+
+//----------------------------------------
+// Utils
+//----------------------------------------
 
 Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) noexcept {
     if (m_table->find(token->lexeme(), false) != nullptr) {
@@ -273,3 +299,4 @@ void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noex
     cast->implicit = true;
     ast.reset(cast.release()); // NOLINT
 }
+

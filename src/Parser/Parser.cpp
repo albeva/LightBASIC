@@ -397,7 +397,7 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
 
     if (match(TokenKind::Minus)) {
         auto unary = AstUnaryExpr::create();
-        unary->token = move();
+        unary->token = move()->map(TokenKind::Negate);
         unary->expr = expression();
         return unary;
     }

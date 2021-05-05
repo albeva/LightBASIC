@@ -18,7 +18,7 @@ class AstStmtVisitor {
 public:
     using StmtRetTy = RetTy;
 
-    virtual StmtRetTy visitStmt(AstStmt* ast) {
+    StmtRetTy visitStmt(AstStmt* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -48,7 +48,7 @@ class AstExprVisitor {
 public:
     using ExprRetTy = RetTy;
 
-    virtual ExprRetTy visitExpr(AstExpr* ast) {
+    ExprRetTy visitExpr(AstExpr* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -77,7 +77,7 @@ class AstAttrVisitor {
 public:
     using AttrRetTy = RetTy;
 
-    virtual AttrRetTy visitAttr(AstAttr* ast) {
+    AttrRetTy visitAttr(AstAttr* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -106,7 +106,7 @@ class AstTypeVisitor {
 public:
     using TypeRetTy = RetTy;
 
-    virtual TypeRetTy visitType(AstType* ast) {
+    TypeRetTy visitType(AstType* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));
@@ -135,7 +135,7 @@ class AstDeclVisitor {
 public:
     using DeclRetTy = RetTy;
 
-    virtual DeclRetTy visitDecl(AstDecl* ast) {
+    DeclRetTy visitDecl(AstDecl* ast) {
 #define AST_VISITOR(KIND) \
     case AstKind::KIND:   \
         return static_cast<ImplClass*>(this)->visit##KIND(static_cast<Ast##KIND*>(ast));

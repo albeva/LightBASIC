@@ -38,6 +38,10 @@ public:
     Token(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc)
     : m_kind{ kind }, m_lexeme{ lexeme }, m_loc{ loc } {}
 
+    [[nodiscard]] unique_ptr<Token> map(TokenKind kind) const noexcept {
+        return create(kind, m_loc);
+    }
+
     [[nodiscard]] inline TokenKind kind() const { return m_kind; }
     [[nodiscard]] inline const StringRef& lexeme() const { return m_lexeme; }
 
