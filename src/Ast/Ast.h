@@ -77,13 +77,29 @@ class AstExpr : public AstRoot {
 public:
     using AstRoot::AstRoot;
 
+    union Value {
+        bool b;
+        int8_t int8;
+        uint8_t uint8;
+        int16_t int16;
+        uint16_t uint16;
+        int32_t int32;
+        uint32_t uint32;
+        int64_t int64;
+        uint64_t uint64;
+        float fl;
+        double dbl;
+    };
+
     static bool classof(const AstRoot* ast) {
         return AST_EXPR_RANGE(IS_AST_CLASSOF)
     }
 
     const TypeRoot* type = nullptr;
-    llvm::Value* llvmValue = nullptr;
     bool constant = false;
+    Value value{};
+
+    llvm::Value* llvmValue = nullptr;
 };
 
 /**
