@@ -208,9 +208,6 @@ void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
 
 void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
     fatalError("CAST not implemented");
-    // visitExpr(ast->expr.get());
-    // visitTypeExpr(ast->typeExpr.get());
-    // if (!ast->typeExpr->type->isConvertible(
 }
 
 Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) {
@@ -234,36 +231,20 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
         return;
     }
 
-    // to integral
-    if (isa<TypeIntegral>(type)) {
-        if (isa<TypeIntegral>(ast->type)) {
-            goto cast; // NOLINT
-        }
-        if (isa<TypeFloatingPoint>(ast->type)) {
-            goto cast; // NOLINT
-        }
-        goto error; // NOLINT
+    if (isa<TypeNumeric>(type) && isa<TypeNumeric>(ast->type)) {
+        return cast(ast, type);
     }
 
-    if (isa<TypeFloatingPoint>(type)) {
-        if (isa<TypeFloatingPoint>(ast->type)) {
-            goto cast; // NOLINT
-        }
-        if (isa<TypeIntegral>(ast->type)) {
-            goto cast; // NOLINT
-        }
-        goto error; // NOLINT
-    }
-
-error:
     fatalError(
         "Type mismatch."_t
         + " Expected '" + type->asString() + "'"
         + " got '" + ast->type->asString() + "'");
+}
 
-cast:
+void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
     auto cast = AstCastExpr::create();
     cast->expr.swap(ast);
     cast->type = type;
+    cast->implicit = true;
     ast.reset(cast.release()); // NOLINT
 }

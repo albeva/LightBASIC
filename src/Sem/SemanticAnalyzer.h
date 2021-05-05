@@ -21,6 +21,7 @@ public:
 private:
     [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, Token* identExpr);
     static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
+    static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
 
     Context& m_context;
     unsigned int m_fileId = ~0U;

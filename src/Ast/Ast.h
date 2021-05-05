@@ -240,6 +240,7 @@ DECLARE_END
 DECLARE_AST(CastExpr, Expr)
     unique_ptr<AstExpr> expr;
     unique_ptr<AstTypeExpr> typeExpr;
+    bool implicit = false;
 DECLARE_END
 
 #undef DECLARE_AST
