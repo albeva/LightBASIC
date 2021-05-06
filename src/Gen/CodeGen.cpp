@@ -133,20 +133,18 @@ void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
 
     // has an init expr?
     if (ast->expr) {
-        if (ast->expr->constant) {
-            visitExpr(ast->expr.get());
-            constant = dyn_cast<llvm::Constant>(ast->expr->llvmValue);
+        if (auto* litExpr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+            visitLiteralExpr(litExpr);
+            constant = llvm::cast<llvm::Constant>(ast->expr->llvmValue);
         } else {
             generateStoreInCtror = true;
         }
     }
 
-    llvm::Value* value;
-
-    if (!constant) {
+    if (constant == nullptr) {
         constant = llvm::Constant::getNullValue(exprType);
     }
-    value = new llvm::GlobalVariable(
+    llvm::Value* value = new llvm::GlobalVariable(
         *m_module,
         exprType,
         false,
@@ -180,7 +178,7 @@ void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
         ast->symbol->identifier(),
         m_block);
 
-    if (exprValue) {
+    if (exprValue != nullptr) {
         new llvm::StoreInst(exprValue, value, m_block);
     }
 
@@ -197,10 +195,10 @@ void CodeGen::declareFuncs() noexcept {
     for (const auto& stmt : m_astRootModule->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
-            declareFunc(static_cast<AstFuncDecl*>(stmt.get()));
+            declareFunc(llvm::cast<AstFuncDecl>(stmt.get()));
             break;
         case AstKind::FuncStmt:
-            declareFunc(static_cast<AstFuncStmt*>(stmt.get())->decl.get());
+            declareFunc(llvm::cast<AstFuncStmt>(stmt.get())->decl.get());
             break;
         default:
             break;
@@ -220,7 +218,7 @@ void CodeGen::declareFunc(AstFuncDecl* ast) noexcept {
     fn->setDSOLocal(true);
     ast->symbol->setLlvmValue(fn);
 
-    auto iter = fn->arg_begin();
+    auto *iter = fn->arg_begin();
     for (const auto& param : ast->paramDecls) {
         iter->setName(param->symbol->identifier());
         param->symbol->setLlvmValue(iter);
@@ -405,18 +403,14 @@ void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {
 void CodeGen::visitCastExpr(AstCastExpr* ast) {
     visitExpr(ast->expr.get());
 
-    bool srcIsSigned;
+    bool srcIsSigned = false;
     if (const auto* src = dyn_cast<TypeIntegral>(ast->expr->type)) {
         srcIsSigned = src->isSigned();
-    } else {
-        srcIsSigned = false;
     }
 
-    bool dstIsSigned;
+    bool dstIsSigned = false;
     if (const auto* dst = dyn_cast<TypeIntegral>(ast->type)) {
         dstIsSigned = dst->isSigned();
-    } else {
-        dstIsSigned = false;
     }
 
     auto opcode = llvm::CastInst::getCastOpcode(

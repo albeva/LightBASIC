@@ -241,7 +241,6 @@ void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
     default:
         fatalError("Unsupported literal type");
     }
-    ast->constant = true;
 }
 
 void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
@@ -250,7 +249,6 @@ void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
         fatalError("Applying unary - to non numeric type");
     }
     ast->type = ast->expr->type;
-    ast->constant = ast->expr->constant;
 }
 
 void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
