@@ -25,22 +25,22 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitLiteralExpr(AstLiteralExpr* ast) {
 }
 
 unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) {
-    auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get());
-    if (expr == nullptr) {
+    auto* literal = dyn_cast<AstLiteralExpr>(ast->expr.get());
+    if (literal == nullptr) {
         return nullptr;
     }
 
     auto operation = ast->token->kind();
 
     auto replacement = AstLiteralExpr::create();
-    replacement->type = expr->type;
+    replacement->type = literal->type;
 
     if (operation == TokenKind::Negate) {
         if (isa<TypeIntegral>(ast->expr->type)) {
-            replacement->value.uint64 = -(expr->value.uint64); // NOLINT
+            replacement->value.uint64 = -(literal->value.uint64); // NOLINT
             replacement->token = Token::create(TokenKind::IntegerLiteral, ast->token->loc());
-        } else if (isa<TypeFloatingPoint>(expr->type)) {
-            replacement->value.dbl = -(expr->value.dbl);  // NOLINT
+        } else if (isa<TypeFloatingPoint>(literal->type)) {
+            replacement->value.dbl = -(literal->value.dbl);  // NOLINT
             replacement->token = Token::create(TokenKind::FloatingPointLiteral, ast->token->loc());
         }
     } else {
