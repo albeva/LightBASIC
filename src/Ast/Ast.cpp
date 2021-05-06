@@ -27,10 +27,10 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(const StringRef& key
                 fatalError("Attribute "_t + key + " must have 1 value", false);
             }
             if (auto* literal = dyn_cast<AstLiteralExpr>(attr->argExprs[0].get())) {
-                if (!isa<TypeZString>(literal->type)) {
-                    fatalError("Attribute "_t + key + " must be a string literal", false);
+                if (auto* str = std::get_if<StringRef>(&literal->value)) {
+                    return *str;
                 }
-                return literal->value.str; // NOLINT
+                fatalError("Attribute "_t + key + " must be a string literal", false);
             }
         }
     }

@@ -96,7 +96,7 @@ void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
 }
 
 void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
-    const auto *retType = m_function->retTypeExpr->type;
+    const auto* retType = m_function->retTypeExpr->type;
     auto isVoid = isa<TypeVoid>(retType);
     if (!ast->expr) {
         if (!isVoid) {
@@ -200,7 +200,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
 }
 
 void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
-    // NOOP
+    // NOPE
 }
 
 void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
@@ -257,4 +257,3 @@ void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noex
     cast->implicit = true;
     ast.reset(cast.release()); // NOLINT
 }
-

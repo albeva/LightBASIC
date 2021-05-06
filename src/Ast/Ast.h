@@ -225,12 +225,7 @@ DECLARE_AST(CallExpr, Expr)
 DECLARE_END
 
 DECLARE_AST(LiteralExpr, Expr)
-    union Value {
-        bool b;
-        uint64_t uint64;
-        double dbl;
-        StringRef str;
-    };
+    using Value = std::variant<StringRef, uint64_t, double, bool, nullptr_t>;
     Value value{};
 DECLARE_END
 

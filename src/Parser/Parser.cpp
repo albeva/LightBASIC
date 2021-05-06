@@ -445,23 +445,23 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
     switch (m_token->kind()) {
     case TokenKind::StringLiteral:
         typeKind = TokenKind::ZString;
-        lit->value.str = m_token->lexeme(); // NOLINT
+        lit->value = m_token->lexeme();
         break;
     case TokenKind::IntegerLiteral:
         typeKind = TokenKind::ULong;
-        lit->value.uint64 = m_token->getIntegral(); // NOLINT
+        lit->value = m_token->getIntegral();
         break;
     case TokenKind::FloatingPointLiteral:
         typeKind = TokenKind::Double;
-        lit->value.dbl = m_token->getDouble(); // NOLINT
+        lit->value = m_token->getDouble();
         break;
     case TokenKind::BooleanLiteral:
         typeKind = TokenKind::Bool;
-        lit->value.b = m_token->getBool(); // NOLINT
+        lit->value = m_token->getBool();
         break;
     case TokenKind::NullLiteral:
         typeKind = TokenKind::NullLiteral;
-        lit->value.uint64 = 0; // NOLINT
+        lit->value = nullptr;
         break;
     default:
         error("Expected literal");

@@ -36,10 +36,10 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) {
     replacement->type = literal->type;
 
     if (operation == TokenKind::Negate) {
-        if (isa<TypeIntegral>(ast->expr->type)) {
-            replacement->value.uint64 = -(literal->value.uint64); // NOLINT
-        } else if (isa<TypeFloatingPoint>(literal->type)) {
-            replacement->value.dbl = -(literal->value.dbl);  // NOLINT
+        if (auto* integral = std::get_if<uint64_t>(&literal->value)) {
+            replacement->value = -*integral;
+        } else if (auto* fp = std::get_if<double>(&literal->value)) {
+            replacement->value = -*fp;
         }
     } else {
         llvm_unreachable("Unsupported unary operation");

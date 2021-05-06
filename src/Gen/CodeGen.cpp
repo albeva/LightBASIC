@@ -315,61 +315,63 @@ void CodeGen::visitCallExpr(AstCallExpr* ast) {
 void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     llvm::Constant* constant = nullptr;
 
-    if (isa<TypeZString>(ast->type)) {
-        const auto& str = ast->value.str; // NOLINT
-        auto iter = m_stringLiterals.find(str);
-        if (iter != m_stringLiterals.end()) {
-            constant = iter->second;
-        } else {
-            constant = llvm::ConstantDataArray::getString(
-                m_llvmContext,
-                str,
-                true);
+    // clang-format off
+    std::visit(Overloaded{
+        [&](const StringRef& str) {
+            auto iter = m_stringLiterals.find(str);
+            if (iter != m_stringLiterals.end()) {
+                constant = iter->second;
+            } else {
+                constant = llvm::ConstantDataArray::getString(
+                    m_llvmContext,
+                    str,
+                    true);
 
-            auto* value = new llvm::GlobalVariable(
-                *m_module,
-                constant->getType(),
-                true,
-                llvm::GlobalValue::PrivateLinkage,
-                constant,
-                ".str");
-            value->setAlignment(llvm::MaybeAlign(1));
-            value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
+                auto* value = new llvm::GlobalVariable(
+                    *m_module,
+                    constant->getType(),
+                    true,
+                    llvm::GlobalValue::PrivateLinkage,
+                    constant,
+                    ".str");
+                value->setAlignment(llvm::MaybeAlign(1));
+                value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
 
-            llvm::Constant* zero_32 = llvm::Constant::getNullValue(
-                llvm::IntegerType::getInt32Ty(m_llvmContext));
+                llvm::Constant* zero_32 = llvm::Constant::getNullValue(
+                    llvm::IntegerType::getInt32Ty(m_llvmContext));
 
-            std::array indices{
-                zero_32,
-                zero_32
-            };
+                std::array indices{
+                    zero_32,
+                    zero_32
+                };
 
-            constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
-            m_stringLiterals.insert({ str, constant });
+                constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
+                m_stringLiterals.insert({ str, constant });
+            }
+        },
+        [&](uint64_t integral) {
+            constant = llvm::ConstantInt::get(
+                ast->type->getLlvmType(m_context),
+                integral,
+                llvm::cast<TypeNumeric>(ast->type)->isSigned());
+        },
+        [&](double fp) {
+            constant = llvm::ConstantFP::get(
+                ast->type->getLlvmType(m_context),
+                fp);
+        },
+        [&](bool bval) {
+            constant = llvm::ConstantInt::get(
+                ast->type->getLlvmType(m_context),
+                bval,
+                llvm::cast<TypeNumeric>(ast->type)->isSigned());
+        },
+        [&](nullptr_t /*lit*/) {
+            constant = llvm::ConstantPointerNull::get(
+                llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         }
-    }
-    else if (isa<TypeIntegral>(ast->type)) {
-        constant = llvm::ConstantInt::get(
-            ast->type->getLlvmType(m_context),
-            ast->value.uint64, // NOLINT
-            llvm::cast<TypeNumeric>(ast->type)->isSigned());
-    }
-    else if (isa<TypeFloatingPoint>(ast->type)) {
-        constant = llvm::ConstantFP::get(
-            ast->type->getLlvmType(m_context),
-            ast->value.dbl); // NOLINT
-    }
-    else if (isa<TypeBoolean>(ast->type)) {
-        constant = llvm::ConstantInt::get(
-            ast->type->getLlvmType(m_context),
-            ast->value.b, // NOLINT
-            llvm::cast<TypeNumeric>(ast->type)->isSigned());
-    } else if (isa<TypePointer>(ast->type)) {
-        constant = llvm::ConstantPointerNull::get(
-            llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
-    } else {
-        fatalError("Invalid literal type");
-    }
+    }, ast->value);
+    // clang-format on
 
     ast->llvmValue = constant;
 }

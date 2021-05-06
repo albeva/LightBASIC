@@ -24,6 +24,10 @@ struct NonCopyable {
     NO_COPY_AND_MOVE(NonCopyable)
 };
 
+// helper type for std::variant visitors
+template<class... Ts> struct Overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
+
 /**
  * Get Twine from "literal"_t
  */
