@@ -214,7 +214,7 @@ llvm::Type* TypeFunction::genLlvmType(Context& context) const noexcept {
 }
 
 string TypeFunction::asString() const noexcept {
-    string out = m_retType ? "FUNCTION(" : "SUB(";
+    string out = m_retType != nullptr ? "FUNCTION(" : "SUB(";
     for (size_t i = 0; i < m_paramTypes.size(); i++) {
         if (i > 0) {
             out += ", ";
@@ -222,7 +222,7 @@ string TypeFunction::asString() const noexcept {
         out += m_paramTypes[i]->asString();
     }
     out += ")";
-    if (m_retType) {
+    if (m_retType != nullptr) {
         out += " AS " + m_retType->asString();
     }
     return out;

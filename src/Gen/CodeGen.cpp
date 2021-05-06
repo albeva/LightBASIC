@@ -72,7 +72,7 @@ void CodeGen::visit(AstModule* ast) {
         llvm::ReturnInst::Create(m_llvmContext, retValue, &lastBlock);
     }
 
-    if (m_globalCtorBlock != nullptr && !m_globalCtorBlock->getTerminator()) {
+    if ((m_globalCtorBlock != nullptr) && (m_globalCtorBlock->getTerminator() == nullptr)) {
         llvm::ReturnInst::Create(m_llvmContext, nullptr, m_globalCtorBlock);
     }
 }
@@ -222,7 +222,7 @@ void CodeGen::declareFunc(AstFuncDecl* ast) noexcept {
     for (const auto& param : ast->paramDecls) {
         iter->setName(param->symbol->identifier());
         param->symbol->setLlvmValue(iter);
-        iter++;
+        iter++; // NOLINT
     }
 }
 
@@ -240,7 +240,7 @@ void CodeGen::visitFuncStmt(AstFuncStmt* ast) {
     for (const auto& param : ast->decl->paramDecls) {
         auto* sym = param->symbol;
         auto* value = sym->getLlvmValue();
-        sym->setLlvmValue(new llvm::AllocaInst(
+        sym->setLlvmValue(new llvm::AllocaInst( // NOLINT
             sym->type()->getLlvmType(m_context),
             0,
             sym->identifier() + ".addr",
@@ -314,17 +314,16 @@ void CodeGen::visitCallExpr(AstCallExpr* ast) {
 
 void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     llvm::Constant* constant = nullptr;
-    const auto& lexeme = ast->token->lexeme();
 
-    switch (ast->token->kind()) {
-    case TokenKind::StringLiteral: {
-        auto iter = m_stringLiterals.find(lexeme);
+    if (isa<TypeZString>(ast->type)) {
+        const auto& str = ast->value.str; // NOLINT
+        auto iter = m_stringLiterals.find(str);
         if (iter != m_stringLiterals.end()) {
             constant = iter->second;
         } else {
             constant = llvm::ConstantDataArray::getString(
                 m_llvmContext,
-                lexeme,
+                str,
                 true);
 
             auto* value = new llvm::GlobalVariable(
@@ -346,35 +345,29 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             };
 
             constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
-            m_stringLiterals.insert({ lexeme, constant });
+            m_stringLiterals.insert({ str, constant });
         }
-        break;
     }
-    case TokenKind::IntegerLiteral: {
+    else if (isa<TypeIntegral>(ast->type)) {
         constant = llvm::ConstantInt::get(
             ast->type->getLlvmType(m_context),
-            ast->value.uint64,
+            ast->value.uint64, // NOLINT
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
-        break;
     }
-    case TokenKind::FloatingPointLiteral: {
+    else if (isa<TypeFloatingPoint>(ast->type)) {
         constant = llvm::ConstantFP::get(
             ast->type->getLlvmType(m_context),
-            ast->value.dbl);
-        break;
+            ast->value.dbl); // NOLINT
     }
-    case TokenKind::BooleanLiteral: {
+    else if (isa<TypeBoolean>(ast->type)) {
         constant = llvm::ConstantInt::get(
             ast->type->getLlvmType(m_context),
-            ast->value.b,
+            ast->value.b, // NOLINT
             llvm::cast<TypeNumeric>(ast->type)->isSigned());
-        break;
-    }
-    case TokenKind::NullLiteral:
+    } else if (isa<TypePointer>(ast->type)) {
         constant = llvm::ConstantPointerNull::get(
             llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
-        break;
-    default:
+    } else {
         fatalError("Invalid literal type");
     }
 
@@ -382,7 +375,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
 }
 
 void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {
-    switch (ast->token->kind()) {
+    switch (ast->tokenKind) {
     case TokenKind::Negate: {
         auto* expr = ast->expr.get();
         visitExpr(expr);
@@ -396,7 +389,7 @@ void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {
         break;
     }
     default:
-        fatalError("Unsupported unary operator: '"_t + ast->token->lexeme() + "'");
+        fatalError("Unsupported unary operator: '"_t + Token::description(ast->tokenKind) + "'");
     }
 }
 

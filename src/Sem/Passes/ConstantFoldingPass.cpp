@@ -30,7 +30,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) {
         return nullptr;
     }
 
-    auto operation = ast->token->kind();
+    auto operation = ast->tokenKind;
 
     auto replacement = AstLiteralExpr::create();
     replacement->type = literal->type;
@@ -38,10 +38,8 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) {
     if (operation == TokenKind::Negate) {
         if (isa<TypeIntegral>(ast->expr->type)) {
             replacement->value.uint64 = -(literal->value.uint64); // NOLINT
-            replacement->token = Token::create(TokenKind::IntegerLiteral, ast->token->loc());
         } else if (isa<TypeFloatingPoint>(literal->type)) {
             replacement->value.dbl = -(literal->value.dbl);  // NOLINT
-            replacement->token = Token::create(TokenKind::FloatingPointLiteral, ast->token->loc());
         }
     } else {
         llvm_unreachable("Unsupported unary operation");

@@ -7,19 +7,15 @@
 using namespace lbc;
 using namespace Sem;
 
-FuncDeclarerPass::FuncDeclarerPass(Context& context) noexcept
-: m_context{ context } {
-}
-
 void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     m_table = ast->symbolTable.get();
     for (const auto& stmt : ast->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
-            visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()), true);
+            visitFuncDecl(llvm::cast<AstFuncDecl>(stmt.get()), true);
             break;
         case AstKind::FuncStmt:
-            visitFuncDecl(static_cast<AstFuncStmt*>(stmt.get())->decl.get(), false);
+            visitFuncDecl(llvm::cast<AstFuncStmt>(stmt.get())->decl.get(), false);
             break;
         default:
             break;
@@ -28,7 +24,7 @@ void FuncDeclarerPass::visit(AstModule* ast) noexcept {
 }
 
 void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
-    const auto& name = ast->token->lexeme();
+    const auto& name = ast->id;
     if (m_table->exists(name)) {
         fatalError("Redefinition of "_t + name);
     }
@@ -36,8 +32,8 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
 
     // alias?
     if (ast->attributes) {
-        if (const auto* alias = ast->attributes->getStringLiteral("ALIAS")) {
-            symbol->setAlias(alias->lexeme());
+        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+            symbol->setAlias(*alias);
         }
     }
 
@@ -62,7 +58,7 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
     }
 
     // return typeExpr. subs don't have one so default to Void
-    const TypeRoot* retType;
+    const TypeRoot* retType = nullptr;
     if (ast->retTypeExpr) {
         visitTypeExpr(ast->retTypeExpr.get());
         retType = ast->retTypeExpr->type;
@@ -86,11 +82,11 @@ void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl* ast) noexcept {
 }
 
 void FuncDeclarerPass::visitTypeExpr(AstTypeExpr* ast) noexcept {
-    ast->type = TypeRoot::fromTokenKind(ast->token->kind());
+    ast->type = TypeRoot::fromTokenKind(ast->tokenKind);
 }
 
 Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl* ast) noexcept {
-    const auto& name = ast->token->lexeme();
+    const auto& name = ast->id;
     if (m_table->find(name, false) != nullptr) {
         fatalError("Redefinition of "_t + name);
     }
@@ -98,8 +94,8 @@ Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl* ast) noexcept {
 
     // alias?
     if (ast->attributes) {
-        if (const auto* alias = ast->attributes->getStringLiteral("ALIAS")) {
-            symbol->setAlias(alias->lexeme());
+        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+            symbol->setAlias(*alias);
         }
     }
 

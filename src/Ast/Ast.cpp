@@ -3,6 +3,7 @@
 //
 #include "Ast.h"
 #include "AstVisitor.h"
+#include "Type/Type.h"
 using namespace lbc;
 
 namespace literals {
@@ -15,22 +16,23 @@ constexpr std::array nodes {
 
 const llvm::StringLiteral& AstRoot::describe() const noexcept {
     auto index = static_cast<size_t>(kind());
-    assert(index < literals::nodes.size());
-    return literals::nodes[index];
+    assert(index < literals::nodes.size()); // NOLINT
+    return literals::nodes.at(index);
 }
 
-const Token* AstAttributeList::getStringLiteral(const StringRef& key) const {
+std::optional<StringRef> AstAttributeList::getStringLiteral(const StringRef& key) const {
     for (const auto& attr : attribs) {
-        if (attr->identExpr->token->lexeme() == key) {
+        if (attr->identExpr->id == key) {
             if (attr->argExprs.size() != 1) {
-                fatalError("Attribute "_t + key + " must have 1 llvmValue", false);
+                fatalError("Attribute "_t + key + " must have 1 value", false);
             }
-            const auto* token = attr->argExprs[0]->token.get();
-            if (token->kind() != TokenKind::StringLiteral) {
-                fatalError("Attribute "_t + key + " must be a string literal", false);
+            if (auto* literal = dyn_cast<AstLiteralExpr>(attr->argExprs[0].get())) {
+                if (!isa<TypeZString>(literal->type)) {
+                    fatalError("Attribute "_t + key + " must be a string literal", false);
+                }
+                return literal->value.str; // NOLINT
             }
-            return token;
         }
     }
-    return nullptr;
+    return "";
 }

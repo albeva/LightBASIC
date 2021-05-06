@@ -20,16 +20,16 @@ namespace Sem {
      */
     class FuncDeclarerPass : private NonCopyable {
     public:
-        explicit FuncDeclarerPass(Context& context) noexcept;
+        explicit FuncDeclarerPass(Context& context) noexcept: m_context{ context } {}
         void visit(AstModule* ast) noexcept;
 
     private:
         void visitFuncDecl(AstFuncDecl* ast, bool external) noexcept;
         void visitFuncParamDecl(AstFuncParamDecl* ast) noexcept;
-        void visitTypeExpr(AstTypeExpr* ast) noexcept;
+        static void visitTypeExpr(AstTypeExpr* ast) noexcept;
         [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl* ast) noexcept;
 
-        SymbolTable* m_table;
+        SymbolTable* m_table{};
         Context& m_context;
     };
 

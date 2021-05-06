@@ -38,7 +38,7 @@ void AstPrinter::visitExprStmt(AstExprStmt* ast) {
 }
 
 void AstPrinter::visitVarDecl(AstVarDecl* ast) {
-    m_os << indent() << "AstVarDecl \"" << ast->token->lexeme() << '\"' << '\n';
+    m_os << indent() << "AstVarDecl \"" << ast->id << '\"' << '\n';
     m_indent++;
     if (ast->attributes) {
         visitAttributeList(ast->attributes.get());
@@ -53,7 +53,7 @@ void AstPrinter::visitVarDecl(AstVarDecl* ast) {
 }
 
 void AstPrinter::visitFuncDecl(AstFuncDecl* ast) {
-    m_os << indent() << "AstFuncDecl \"" << ast->token->lexeme() << '\"' << '\n';
+    m_os << indent() << "AstFuncDecl \"" << ast->id << '\"' << '\n';
     m_indent++;
     if (ast->attributes) {
         visitAttributeList(ast->attributes.get());
@@ -70,7 +70,7 @@ void AstPrinter::visitFuncDecl(AstFuncDecl* ast) {
 }
 
 void AstPrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
-    m_os << indent() << "AstFuncParamDecl \"" << ast->token->lexeme() << '"' << '\n';
+    m_os << indent() << "AstFuncParamDecl \"" << ast->id << '"' << '\n';
     m_indent++;
     if (ast->attributes) {
         visitAttributeList(ast->attributes.get());
@@ -107,11 +107,11 @@ void AstPrinter::visitAttribute(AstAttribute* ast) {
 }
 
 void AstPrinter::visitTypeExpr(AstTypeExpr* ast) {
-    m_os << indent() << "AstTypeExpr \"" << ast->token->lexeme() << '"' << '\n';
+    m_os << indent() << "AstTypeExpr \"" << Token::description(ast->tokenKind) << '"' << '\n';
 }
 
 void AstPrinter::visitIdentExpr(AstIdentExpr* ast) {
-    m_os << indent() << "AstIdentExpr \"" << ast->token->lexeme() << '"' << '\n';
+    m_os << indent() << "AstIdentExpr \"" << ast->id << '"' << '\n';
 }
 
 void AstPrinter::visitCallExpr(AstCallExpr* ast) {
@@ -124,8 +124,8 @@ void AstPrinter::visitCallExpr(AstCallExpr* ast) {
     m_indent--;
 }
 
-void AstPrinter::visitLiteralExpr(AstLiteralExpr* ast) {
-    m_os << indent() << "AstLiteralExpr \"" << ast->token->lexeme() << '"' << '\n';
+void AstPrinter::visitLiteralExpr(AstLiteralExpr* /*ast*/) {
+    m_os << indent() << "AstLiteralExpr NOT_IMPLEMENTED \n";
 }
 
 void AstPrinter::visitUnaryExpr(AstUnaryExpr* /*ast*/) {

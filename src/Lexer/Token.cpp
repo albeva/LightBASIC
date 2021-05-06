@@ -2,6 +2,7 @@
 // Created by Albert Varaksin on 03/07/2020.
 //
 #include "Token.h"
+#include <charconv>
 using namespace lbc;
 
 using std::unordered_set;
@@ -73,6 +74,31 @@ unique_ptr<Token> Token::create(TokenKind kind, const StringRef& lexeme, const l
 unique_ptr<Token> Token::create(TokenKind kind, const llvm::SMLoc& loc) {
     return create(kind, description(kind), loc);
 }
+
+[[nodiscard]] uint64_t Token::getIntegral() const noexcept {
+    uint64_t value; // NOLINT
+    const int base10 = 10;
+    if (std::from_chars(m_lexeme.begin(), m_lexeme.end(), value, base10).ec != std::errc()) {
+        fatalError("Failed to parse number: "_t + m_lexeme);
+    }
+    return value;
+}
+
+[[nodiscard]] double Token::getDouble() const noexcept {
+    char* end; // NOLINT
+    double value = std::strtod(m_lexeme.begin(), &end);
+    if (end == m_lexeme.begin()) {
+        fatalError("Failed to parse number: "_t + m_lexeme);
+    }
+    return value;
+}
+
+[[nodiscard]] bool Token::getBool() const noexcept {
+    if (m_lexeme == "TRUE") { return true; }
+    if (m_lexeme == "FALSE") { return false; }
+    fatalError("Failed to parse boolean: "_t + m_lexeme);
+}
+
 
 llvm::SMRange Token::range() const {
     if (isGeneral()) {

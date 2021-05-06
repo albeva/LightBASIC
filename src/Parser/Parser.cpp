@@ -6,6 +6,7 @@
 #include "Driver/Context.h"
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
+#include "Type/Type.h"
 using namespace lbc;
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
@@ -269,7 +270,7 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexc
 
     auto var = AstVarDecl::create();
     var->attributes = std::move(attribs);
-    var->token = std::move(id);
+    var->id = id->lexeme();
     var->typeExpr = std::move(type);
     var->expr = std::move(expr);
     return var;
@@ -300,7 +301,7 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attri
         expect(TokenKind::Sub);
     }
 
-    func->token = expect(TokenKind::Identifier);
+    func->id = expect(TokenKind::Identifier)->lexeme();
 
     if (accept(TokenKind::ParenOpen)) {
         bool isVariadic = false;
@@ -341,7 +342,7 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) n
         auto type = typeExpr();
 
         auto param = AstFuncParamDecl::create();
-        param->token = std::move(id);
+        param->id = id->lexeme();
         param->typeExpr = std::move(type);
         params.push_back(std::move(param));
 
@@ -362,7 +363,7 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
         ALL_TYPES(TYPE_KEYWORD)
         {
             auto type = AstTypeExpr::create();
-            type->token = move();
+            type->tokenKind = move()->kind();
             return type;
         }
     default:
@@ -395,9 +396,9 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
         return identifier();
     }
 
-    if (match(TokenKind::Minus)) {
+    if (accept(TokenKind::Minus)) {
         auto unary = AstUnaryExpr::create();
-        unary->token = move()->map(TokenKind::Negate);
+        unary->tokenKind = TokenKind::Negate;
         unary->expr = expression();
         return unary;
     }
@@ -410,7 +411,7 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
  */
 unique_ptr<AstIdentExpr> Parser::identifier() noexcept {
     auto id = AstIdentExpr::create();
-    id->token = expect(TokenKind::Identifier);
+    id->id = expect(TokenKind::Identifier)->lexeme();
     return id;
 }
 
@@ -438,11 +439,36 @@ unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
  *         .
  */
 unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
-    if (!m_token->isLiteral()) {
+    auto lit = AstLiteralExpr::create();
+
+    TokenKind typeKind{};
+    switch (m_token->kind()) {
+    case TokenKind::StringLiteral:
+        typeKind = TokenKind::ZString;
+        lit->value.str = m_token->lexeme(); // NOLINT
+        break;
+    case TokenKind::IntegerLiteral:
+        typeKind = TokenKind::ULong;
+        lit->value.uint64 = m_token->getIntegral(); // NOLINT
+        break;
+    case TokenKind::FloatingPointLiteral:
+        typeKind = TokenKind::Double;
+        lit->value.dbl = m_token->getDouble(); // NOLINT
+        break;
+    case TokenKind::BooleanLiteral:
+        typeKind = TokenKind::Bool;
+        lit->value.b = m_token->getBool(); // NOLINT
+        break;
+    case TokenKind::NullLiteral:
+        typeKind = TokenKind::NullLiteral;
+        lit->value.uint64 = 0; // NOLINT
+        break;
+    default:
         error("Expected literal");
     }
-    auto lit = AstLiteralExpr::create();
-    lit->token = move();
+
+    lit->type = TypeFloatingPoint::fromTokenKind(typeKind);
+    move();
     return lit;
 }
 

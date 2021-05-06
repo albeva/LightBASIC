@@ -42,8 +42,12 @@ public:
         return create(kind, m_loc);
     }
 
-    [[nodiscard]] inline TokenKind kind() const { return m_kind; }
-    [[nodiscard]] inline const StringRef& lexeme() const { return m_lexeme; }
+    [[nodiscard]] TokenKind kind() const { return m_kind; }
+    [[nodiscard]] const StringRef& lexeme() const { return m_lexeme; }
+
+    [[nodiscard]] uint64_t getIntegral() const noexcept;
+    [[nodiscard]] double getDouble() const noexcept;
+    [[nodiscard]] bool getBool() const noexcept;
 
     [[nodiscard]] inline const llvm::SMLoc& loc() const { return m_loc; }
     [[nodiscard]] llvm::SMRange range() const;

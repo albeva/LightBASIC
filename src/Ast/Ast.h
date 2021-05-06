@@ -68,6 +68,7 @@ public:
 
     unique_ptr<AstAttributeList> attributes;
     Symbol* symbol = nullptr;
+    StringRef id;
 };
 
 /**
@@ -169,7 +170,7 @@ DECLARE_END
 // Attributes
 //----------------------------------------
 DECLARE_AST(AttributeList, Attr)
-    [[nodiscard]] const Token* getStringLiteral(const StringRef& key) const;
+    [[nodiscard]] std::optional<StringRef> getStringLiteral(const StringRef& key) const;
     std::vector<unique_ptr<AstAttribute>> attribs;
 DECLARE_END
 
@@ -183,14 +184,11 @@ DECLARE_END
 //----------------------------------------
 
 DECLARE_AST(VarDecl, Decl)
-    unique_ptr<Token> token;
     unique_ptr<AstTypeExpr> typeExpr;
     unique_ptr<AstExpr> expr;
 DECLARE_END
 
 DECLARE_AST(FuncDecl, Decl)
-    // identifier
-    unique_ptr<Token> token;
     // declared parameters
     std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
     // is function variadic?
@@ -202,7 +200,6 @@ DECLARE_AST(FuncDecl, Decl)
 DECLARE_END
 
 DECLARE_AST(FuncParamDecl, Decl)
-    unique_ptr<Token> token;
     unique_ptr<AstTypeExpr> typeExpr;
 DECLARE_END
 
@@ -210,7 +207,7 @@ DECLARE_END
 // Types
 //----------------------------------------
 DECLARE_AST(TypeExpr, Type)
-    unique_ptr<Token> token;
+    TokenKind tokenKind{};
 DECLARE_END
 
 //----------------------------------------
@@ -218,7 +215,7 @@ DECLARE_END
 //----------------------------------------
 
 DECLARE_AST(IdentExpr, Expr)
-    unique_ptr<Token> token;
+    StringRef id;
     Symbol* symbol = nullptr;
 DECLARE_END
 
@@ -235,11 +232,10 @@ DECLARE_AST(LiteralExpr, Expr)
         StringRef str;
     };
     Value value{};
-    unique_ptr<Token> token;
 DECLARE_END
 
 DECLARE_AST(UnaryExpr, Expr)
-    unique_ptr<Token> token;
+    TokenKind tokenKind{0};
     unique_ptr<AstExpr> expr;
 DECLARE_END
 

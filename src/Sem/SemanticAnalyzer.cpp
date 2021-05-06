@@ -42,7 +42,7 @@ void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
 }
 
 void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
-    auto* symbol = createNewSymbol(ast, ast->token.get());
+    auto* symbol = createNewSymbol(ast, ast->id);
     symbol->setExternal(false);
 
     // m_type expr?
@@ -66,8 +66,8 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
 
     // alias?
     if (ast->attributes) {
-        if (const auto* token = ast->attributes->getStringLiteral("ALIAS")) {
-            symbol->setAlias(token->lexeme());
+        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+            symbol->setAlias(*alias);
         }
     }
 }
@@ -96,14 +96,16 @@ void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
 }
 
 void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
-    auto retType = m_function->retTypeExpr->type;
+    const auto *retType = m_function->retTypeExpr->type;
     auto isVoid = isa<TypeVoid>(retType);
     if (!ast->expr) {
         if (!isVoid) {
             fatalError("Expected expression");
         }
         return;
-    } else if (isVoid) {
+    }
+
+    if (isVoid) {
         fatalError("Unexpected expression for SUB");
     }
 
@@ -134,7 +136,7 @@ void SemanticAnalyzer::visitAttribute(AstAttribute* /*ast*/) {
 //----------------------------------------
 
 void SemanticAnalyzer::visitTypeExpr(AstTypeExpr* ast) {
-    ast->type = TypeRoot::fromTokenKind(ast->token->kind());
+    ast->type = TypeRoot::fromTokenKind(ast->tokenKind);
 }
 
 //----------------------------------------
@@ -150,7 +152,7 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
 }
 
 void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
-    const auto& name = ast->token->lexeme();
+    const auto& name = ast->id;
     auto* symbol = m_table->find(name, true);
 
     if (symbol == nullptr) {
@@ -198,49 +200,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
 }
 
 void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
-    switch (ast->token->kind()) {
-    case TokenKind::StringLiteral:
-        ast->type = TypeZString::get();
-        break;
-    case TokenKind::IntegerLiteral: {
-        ast->type = TypeRoot::fromTokenKind(TokenKind::ULong);
-        uint64_t value;
-        const auto& lexeme = ast->token->lexeme();
-        if (std::from_chars(lexeme.begin(), lexeme.end(), value, 10).ec != std::errc()) {
-            fatalError("Failed to parse number: "_t + lexeme);
-        }
-        ast->value.uint64 = value;
-        break;
-    }
-    case TokenKind::FloatingPointLiteral: {
-        ast->type = TypeRoot::fromTokenKind(TokenKind::Double);
-        const auto& lexeme = ast->token->lexeme();
-        char* end;
-        double value = std::strtod(lexeme.begin(), &end);
-        if (end == lexeme.begin()) {
-            fatalError("Failed to parse number: "_t + lexeme);
-        }
-        ast->value.dbl = value;
-        break;
-    }
-    case TokenKind::BooleanLiteral: {
-        ast->type = TypeBoolean::get();
-        const auto& lexeme = ast->token->lexeme();
-        if (lexeme == "TRUE") {
-            ast->value.b = true;
-        } else if (lexeme == "FALSE") {
-            ast->value.b = false;
-        } else {
-            fatalError("Failed to parse boolean: "_t + lexeme);
-        }
-        break;
-    }
-    case TokenKind::NullLiteral:
-        ast->type = TypePointer::get(TypeAny::get());
-        break;
-    default:
-        fatalError("Unsupported literal type");
-    }
+    // NOOP
 }
 
 void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
@@ -259,16 +219,16 @@ void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
 // Utils
 //----------------------------------------
 
-Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, Token* token) noexcept {
-    if (m_table->find(token->lexeme(), false) != nullptr) {
-        fatalError("Redefinition of "_t + token->lexeme());
+Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, const StringRef& id) noexcept {
+    if (m_table->find(id, false) != nullptr) {
+        fatalError("Redefinition of "_t + id);
     }
-    auto* symbol = m_table->insert(token->lexeme());
+    auto* symbol = m_table->insert(id);
 
     // alias?
     if (ast->attributes) {
-        if (const auto* alias = ast->attributes->getStringLiteral("ALIAS")) {
-            symbol->setAlias(alias->lexeme());
+        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+            symbol->setAlias(*alias);
         }
     }
 

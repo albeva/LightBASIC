@@ -62,7 +62,7 @@ private:
     unique_ptr<Token> expect(TokenKind kind) noexcept;
 
     // advance to the next token from the stream
-    [[nodiscard]] unique_ptr<Token> move() noexcept;
+    unique_ptr<Token> move() noexcept;
 
     // show error and terminate compilation
     [[noreturn]] void error(const Twine& message) noexcept;

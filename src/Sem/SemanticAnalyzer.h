@@ -22,7 +22,7 @@ public:
 private:
 
     void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
-    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, Token* identExpr) noexcept;
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, const StringRef& id) noexcept;
     static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
     static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
 
