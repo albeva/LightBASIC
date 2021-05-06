@@ -19,8 +19,10 @@
 namespace lbc {
 
 // helper type for std::variant visitors
-template<class... Ts> struct Overloaded : Ts... { using Ts::operator()...; };
-template<class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
+template<class... Ts>
+struct Overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts>
+Overloaded(Ts...) -> Overloaded<Ts...>;
 
 /**
  * Get Twine from "literal"_t
@@ -71,6 +73,7 @@ private:
     const T m_value;
 };
 
-#define RESTORE_ON_EXIT(V) ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_) { V } /* NOLINT */
+#define RESTORE_ON_EXIT(V) \
+    ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_) { V } /* NOLINT */
 
 } // namespace lbc

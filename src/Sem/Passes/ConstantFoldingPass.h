@@ -12,7 +12,7 @@ class Context;
 
 namespace Sem {
 
-    class ConstantFoldingPass: public AstExprVisitor<ConstantFoldingPass, unique_ptr<AstExpr>> {
+    class ConstantFoldingPass : public AstExprVisitor<ConstantFoldingPass, unique_ptr<AstExpr>> {
     public:
         explicit ConstantFoldingPass(Context& context) noexcept : m_context{ context } {}
         void fold(unique_ptr<AstExpr>& ast) noexcept;

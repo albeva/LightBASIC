@@ -234,7 +234,7 @@ DECLARE_AST(LiteralExpr, Expr)
 DECLARE_END
 
 DECLARE_AST(UnaryExpr, Expr)
-    TokenKind tokenKind{0};
+    TokenKind tokenKind{ 0 };
     unique_ptr<AstExpr> expr;
 DECLARE_END
 

@@ -94,8 +94,12 @@ unique_ptr<Token> Token::create(TokenKind kind, const llvm::SMLoc& loc) {
 }
 
 [[nodiscard]] bool Token::getBool() const noexcept {
-    if (m_lexeme == "TRUE") { return true; }
-    if (m_lexeme == "FALSE") { return false; }
+    if (m_lexeme == "TRUE") {
+        return true;
+    }
+    if (m_lexeme == "FALSE") {
+        return false;
+    }
     fatalError("Failed to parse boolean: "_t + m_lexeme);
 }
 

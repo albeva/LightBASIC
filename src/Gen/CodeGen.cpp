@@ -218,7 +218,7 @@ void CodeGen::declareFunc(AstFuncDecl* ast) noexcept {
     fn->setDSOLocal(true);
     ast->symbol->setLlvmValue(fn);
 
-    auto *iter = fn->arg_begin();
+    auto* iter = fn->arg_begin();
     for (const auto& param : ast->paramDecls) {
         iter->setName(param->symbol->identifier());
         param->symbol->setLlvmValue(iter);

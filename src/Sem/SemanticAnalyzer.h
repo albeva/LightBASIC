@@ -20,7 +20,6 @@ public:
 
     AST_DECLARE_ALL_ROOT_VISIT_METHODS()
 private:
-
     void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
     [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, const StringRef& id) noexcept;
     static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;

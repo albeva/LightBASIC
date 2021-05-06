@@ -51,4 +51,3 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) {
 unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) {
     return nullptr;
 }
-

@@ -17,7 +17,7 @@ public:
     NO_COPY_AND_MOVE(ToolTask)
 
     ToolTask(Context& context, fs::path path) noexcept
-    : m_context{ context }, m_path{std::move( path )} {}
+    : m_context{ context }, m_path{ std::move(path) } {}
 
     ~ToolTask() = default;
 
