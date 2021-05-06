@@ -73,7 +73,7 @@ private:
     const T m_value;
 };
 
-#define RESTORE_ON_EXIT(V) \
+#define RESTORE_ON_EXIT(V) /* NOLINT */ \
     ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_) { V } /* NOLINT */
 
 } // namespace lbc

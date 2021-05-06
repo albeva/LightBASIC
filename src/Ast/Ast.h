@@ -12,17 +12,11 @@ namespace lbc {
 class TypeRoot;
 AST_FORWARD_DECLARE()
 
-// clang-format off
-
-// Enumerate ast content nodes
-// This works with LLVM rtti system
 enum class AstKind {
 #define KIND_ENUM(id, ...) id,
     AST_CONTENT_NODES(KIND_ENUM)
 #undef KIND_ENUM
 };
-
-// clang-format on
 
 /**
  * Root class for all AST nodes. This is an abstract class
@@ -44,79 +38,6 @@ private:
 };
 
 #define IS_AST_CLASSOF(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
-
-/**
- * Base class for all statement nodes
- * Statements also include:
- * - declarations
- */
-class AstStmt : public AstRoot {
-public:
-    using AstRoot::AstRoot;
-
-    static bool classof(const AstRoot* ast) {
-        return AST_STMT_RANGE(IS_AST_CLASSOF)
-    }
-};
-
-/**
- * Base class for declaration nodes
- */
-class AstDecl : public AstStmt {
-public:
-    using AstStmt::AstStmt;
-
-    static bool classof(const AstRoot* ast){
-        return AST_DECL_RANGE(IS_AST_CLASSOF)
-    }
-
-    unique_ptr<AstAttributeList> attributes;
-    Symbol* symbol = nullptr;
-    StringRef id;
-};
-
-/**
- * Base class for all expression nodes
- */
-class AstExpr : public AstRoot {
-public:
-    using AstRoot::AstRoot;
-
-    static bool classof(const AstRoot* ast) {
-        return AST_EXPR_RANGE(IS_AST_CLASSOF)
-    }
-
-    const TypeRoot* type = nullptr;
-    llvm::Value* llvmValue = nullptr;
-};
-
-/**
- * Base class for attribute nodes.
- */
-class AstAttr : public AstRoot {
-public:
-    using AstRoot::AstRoot;
-
-    static bool classof(const AstRoot* ast) {
-        return AST_ATTR_RANGE(IS_AST_CLASSOF)
-    }
-};
-
-/**
- * Base class for type expressions
- */
-class AstType : public AstRoot {
-public:
-    using AstRoot::AstRoot;
-
-    static bool classof(const AstRoot* ast) {
-        return AST_TYPE_RANGE(IS_AST_CLASSOF)
-    }
-
-    const TypeRoot* type = nullptr;
-};
-
-#undef IS_AST_CLASSOF
 
 #define DECLARE_AST(KIND, BASE)                     \
     class Ast##KIND final : public Ast##BASE {      \
@@ -147,6 +68,14 @@ DECLARE_END
 //----------------------------------------
 // Statements
 //----------------------------------------
+class AstStmt : public AstRoot {
+public:
+    using AstRoot::AstRoot;
+
+    static bool classof(const AstRoot* ast) {
+        return AST_STMT_RANGE(IS_AST_CLASSOF)
+    }
+};
 
 DECLARE_AST(StmtList, Stmt)
     std::vector<unique_ptr<AstStmt>> stmts;
@@ -173,6 +102,15 @@ DECLARE_END
 //----------------------------------------
 // Attributes
 //----------------------------------------
+class AstAttr : public AstRoot {
+public:
+    using AstRoot::AstRoot;
+
+    static bool classof(const AstRoot* ast) {
+        return AST_ATTR_RANGE(IS_AST_CLASSOF)
+    }
+};
+
 DECLARE_AST(AttributeList, Attr)
     [[nodiscard]] std::optional<StringRef> getStringLiteral(const StringRef& key) const;
     std::vector<unique_ptr<AstAttribute>> attribs;
@@ -186,6 +124,18 @@ DECLARE_END
 //----------------------------------------
 // Declarations
 //----------------------------------------
+class AstDecl : public AstStmt {
+public:
+    using AstStmt::AstStmt;
+
+    static bool classof(const AstRoot* ast){
+        return AST_DECL_RANGE(IS_AST_CLASSOF)
+    }
+
+    unique_ptr<AstAttributeList> attributes;
+    Symbol* symbol = nullptr;
+    StringRef id;
+};
 
 DECLARE_AST(VarDecl, Decl)
     unique_ptr<AstTypeExpr> typeExpr;
@@ -210,6 +160,17 @@ DECLARE_END
 //----------------------------------------
 // Types
 //----------------------------------------
+class AstType : public AstRoot {
+public:
+    using AstRoot::AstRoot;
+
+    static bool classof(const AstRoot* ast) {
+        return AST_TYPE_RANGE(IS_AST_CLASSOF)
+    }
+
+    const TypeRoot* type = nullptr;
+};
+
 DECLARE_AST(TypeExpr, Type)
     TokenKind tokenKind{};
 DECLARE_END
@@ -217,6 +178,17 @@ DECLARE_END
 //----------------------------------------
 // Expressions
 //----------------------------------------
+class AstExpr : public AstRoot {
+public:
+    using AstRoot::AstRoot;
+
+    static bool classof(const AstRoot* ast) {
+        return AST_EXPR_RANGE(IS_AST_CLASSOF)
+    }
+
+    const TypeRoot* type = nullptr;
+    llvm::Value* llvmValue = nullptr;
+};
 
 DECLARE_AST(IdentExpr, Expr)
     StringRef id;
@@ -246,5 +218,6 @@ DECLARE_END
 
 #undef DECLARE_AST
 #undef DECLARE_END
+#undef IS_AST_CLASSOF
 
 } // namespace lbc
