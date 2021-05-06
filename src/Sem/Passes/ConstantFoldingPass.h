@@ -7,18 +7,23 @@
 #include "Ast/AstVisitor.h"
 
 namespace lbc {
-
 class Context;
 
 namespace Sem {
 
-    class ConstantFoldingPass : public AstExprVisitor<ConstantFoldingPass, unique_ptr<AstExpr>> {
+    class ConstantFoldingPass final {
     public:
+        NO_COPY_AND_MOVE(ConstantFoldingPass)
+
         explicit ConstantFoldingPass(Context& context) noexcept : m_context{ context } {}
+        ~ConstantFoldingPass() = default;
+
         void fold(unique_ptr<AstExpr>& ast) noexcept;
 
-        AST_DECLARE_ALL_EXPR_VISIT_METHODS()
     private:
+        unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;
+        unique_ptr<AstExpr> visitCastExpr(AstCastExpr* ast) noexcept;
+
         Context& m_context;
     };
 

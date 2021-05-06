@@ -366,7 +366,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
                 bval,
                 llvm::cast<TypeNumeric>(ast->type)->isSigned());
         },
-        [&](nullptr_t /*lit*/) {
+        [&](nullptr_t) {
             constant = llvm::ConstantPointerNull::get(
                 llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         }
