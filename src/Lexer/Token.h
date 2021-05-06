@@ -13,8 +13,10 @@ enum class TokenKind {
 #undef IMPL_TOKENS
 };
 
-class Token final : private NonCopyable {
+class Token final {
 public:
+    NO_COPY_AND_MOVE(Token)
+
     /**
      * Create either identifier or a keyword token from string literal
      */
@@ -37,6 +39,8 @@ public:
 
     Token(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc)
     : m_kind{ kind }, m_lexeme{ lexeme }, m_loc{ loc } {}
+
+    ~Token() = default;
 
     [[nodiscard]] unique_ptr<Token> map(TokenKind kind) const noexcept {
         return create(kind, m_loc);

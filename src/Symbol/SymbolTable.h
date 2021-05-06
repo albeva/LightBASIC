@@ -7,12 +7,15 @@
 
 namespace lbc {
 
-class SymbolTable final : private NonCopyable {
+class SymbolTable final {
 public:
+    NO_COPY_AND_MOVE(SymbolTable)
+
     using Storage = llvm::StringMap<unique_ptr<Symbol>>;
     using iterator = Storage::iterator;
 
     explicit SymbolTable(SymbolTable* parent = nullptr) : m_parent{ parent } {}
+    ~SymbolTable() = default;
 
     iterator begin() { return m_symbols.begin(); }
     iterator end() { return m_symbols.end(); }

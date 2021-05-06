@@ -8,10 +8,14 @@ namespace lbc {
 
 class TypeRoot;
 
-class Symbol final : private NonCopyable {
+class Symbol final {
 public:
+    NO_COPY_AND_MOVE(Symbol)
+
     explicit Symbol(const StringRef& name, const TypeRoot* type = nullptr)
     : m_name{ name }, m_type{ type }, m_alias{ "" } {}
+
+    ~Symbol() = default;
 
     [[nodiscard]] const TypeRoot* type() const { return m_type; }
     void setType(const TypeRoot* type) { m_type = type; }

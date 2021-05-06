@@ -38,8 +38,10 @@ enum class TokenKind;
  *
  * It uses llvm custom rtti system
  */
-class TypeRoot : private NonCopyable {
+class TypeRoot {
 public:
+    NO_COPY_AND_MOVE(TypeRoot)
+
     [[nodiscard]] TypeFamily getKind() const noexcept { return m_kind; }
 
     [[nodiscard]] llvm::Type* getLlvmType(Context& context) const noexcept {

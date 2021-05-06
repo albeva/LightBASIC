@@ -28,9 +28,13 @@ enum class AstKind {
  * Root class for all AST nodes. This is an abstract class
  * and should never be used as type for ast node directly
  */
-class AstRoot : private NonCopyable {
+class AstRoot {
 public:
+    NO_COPY_AND_MOVE(AstRoot)
+
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
+    virtual ~AstRoot() = default;
+
     [[nodiscard]] AstKind kind() const { return m_kind; }
 
     [[nodiscard]] const llvm::StringLiteral& describe() const noexcept;

@@ -10,8 +10,10 @@ namespace lbc {
  * Hold information about compilation process
  * configuration, input and expected outputs
  */
-class Context final : private NonCopyable {
+class Context final {
 public:
+    NO_COPY_AND_MOVE(Context)
+
     enum class CompilationTarget {
         Executable,
         Object,
@@ -43,6 +45,8 @@ public:
     [[nodiscard]] static string getFileExt(FileType type);
 
     Context();
+    ~Context() = default;
+
     void validate() const noexcept;
 
     [[nodiscard]] CompilationTarget getCompilationTarget() const { return m_compilationTarget; }

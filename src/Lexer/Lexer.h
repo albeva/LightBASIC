@@ -10,9 +10,12 @@ namespace lbc {
 class Context;
 enum class TokenKind;
 
-class Lexer final : private NonCopyable {
+class Lexer final {
 public:
+    NO_COPY_AND_MOVE(Lexer)
+
     Lexer(Context& context, unsigned fileID);
+    ~Lexer() = default;
 
     [[nodiscard]] unique_ptr<Token> next();
 

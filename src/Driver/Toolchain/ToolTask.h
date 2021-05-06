@@ -2,6 +2,8 @@
 // Created by Albert Varaksin on 07/02/2021.
 //
 #pragma once
+#include <utility>
+
 #include "pch.h"
 
 namespace lbc {
@@ -10,10 +12,14 @@ class Toolchain;
 class Context;
 enum class ToolKind;
 
-class ToolTask final : private NonCopyable {
+class ToolTask final {
 public:
-    ToolTask(Context& context, const fs::path& path) noexcept
-    : m_context{ context }, m_path{ path } {}
+    NO_COPY_AND_MOVE(ToolTask)
+
+    ToolTask(Context& context, fs::path path) noexcept
+    : m_context{ context }, m_path{std::move( path )} {}
+
+    ~ToolTask() = default;
 
     ToolTask& reset() noexcept;
 

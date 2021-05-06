@@ -21,9 +21,12 @@ enum class ToolKind {
  *
  * e.g. a linker
  */
-class Toolchain final : private NonCopyable {
+class Toolchain final {
 public:
+    NO_COPY_AND_MOVE(Toolchain)
+
     explicit Toolchain(Context& context) noexcept : m_context{ context } {}
+    ~Toolchain() = default;
 
     void setBasePath(fs::path path) noexcept { m_basePath = path; }
     [[nodiscard]] const fs::path& getBasePath() const noexcept { return m_basePath; }

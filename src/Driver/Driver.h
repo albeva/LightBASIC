@@ -11,9 +11,13 @@ namespace lbc {
 /**
  * Drive compilation process
  */
-class Driver final : private NonCopyable {
+class Driver final {
 public:
+    NO_COPY_AND_MOVE(Driver)
+
     explicit Driver(Context& context) noexcept : m_context{ context } {}
+    ~Driver() = default;
+
     [[nodiscard]] int drive() noexcept;
 
 private:

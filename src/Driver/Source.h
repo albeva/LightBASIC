@@ -10,9 +10,13 @@ namespace lbc {
 /**
  * Class that represents a source file
  */
-struct Source final : private NonCopyable {
+struct Source final {
+    NO_COPY_AND_MOVE(Source)
+
     Source(Context::FileType ty, const fs::path& p, bool gen, const Source* o) noexcept
     : type{ ty }, path{ p }, isGenerated{ gen }, origin{ o == nullptr ? *this : *o } {}
+
+    ~Source() = default;
 
     [[nodiscard]] static unique_ptr<Source> create(Context::FileType type, const fs::path& path, bool generated, const Source* origin = nullptr) noexcept {
         return make_unique<Source>(type, path, generated, origin);

@@ -12,9 +12,13 @@ class Context;
 enum class TokenKind;
 AST_FORWARD_DECLARE()
 
-class Parser final : private NonCopyable {
+class Parser final {
 public:
+    NO_COPY_AND_MOVE(Parser)
+
     Parser(Context& context, unsigned int fileId, bool isMain) noexcept;
+    ~Parser() = default;
+
     [[nodiscard]] unique_ptr<AstModule> parse() noexcept;
 
 private:

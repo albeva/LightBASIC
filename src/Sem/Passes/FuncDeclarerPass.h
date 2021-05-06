@@ -18,9 +18,13 @@ namespace Sem {
      * Semantic pass that declares all the functions
      * and declarations in the ast
      */
-    class FuncDeclarerPass : private NonCopyable {
+    class FuncDeclarerPass {
     public:
+        NO_COPY_AND_MOVE(FuncDeclarerPass)
+
         explicit FuncDeclarerPass(Context& context) noexcept: m_context{ context } {}
+        ~FuncDeclarerPass() = default;
+
         void visit(AstModule* ast) noexcept;
 
     private:

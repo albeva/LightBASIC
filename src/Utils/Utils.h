@@ -18,12 +18,6 @@
 
 namespace lbc {
 
-struct NonCopyable {
-    constexpr NonCopyable() = default;
-    ~NonCopyable() = default;
-    NO_COPY_AND_MOVE(NonCopyable)
-};
-
 // helper type for std::variant visitors
 template<class... Ts> struct Overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> Overloaded(Ts...) -> Overloaded<Ts...>;
@@ -77,7 +71,6 @@ private:
     const T m_value;
 };
 
-#define RESTORE_ON_EXIT(V) \
-    ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_) { V }
+#define RESTORE_ON_EXIT(V) ValueRestorer<decltype(V)> MAKE_UNIQUE(tmp_restore_onexit_) { V } /* NOLINT */
 
 } // namespace lbc
