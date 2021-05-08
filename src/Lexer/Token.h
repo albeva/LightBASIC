@@ -16,6 +16,7 @@ enum class TokenKind {
 class Token final {
 public:
     NO_COPY_AND_MOVE(Token)
+    using Value = std::variant<std::monostate, StringRef, uint64_t, double, bool>;
 
     // Describe given token kind
     static const StringRef& description(TokenKind kind) noexcept;
@@ -31,7 +32,7 @@ public:
     }
 
     Token(TokenKind kind, const llvm::SMRange& range) noexcept
-    : m_kind{ kind }, m_value{}, m_range{ range } {}
+    : m_kind{ kind }, m_value{ std::monostate{} }, m_range{ range } {}
 
     Token(TokenKind kind, const StringRef& value, const llvm::SMRange& range) noexcept
     : m_kind{ kind }, m_value{ value }, m_range{ range } {}
@@ -51,9 +52,8 @@ public:
 
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
 
-    template<typename T>
-    [[nodiscard]] const T& getValue() const noexcept {
-        return std::get<T>(m_value);
+    [[nodiscard]] const Value& getValue() const noexcept {
+        return m_value;
     }
 
     [[nodiscard]] const llvm::SMRange& range() const noexcept {
@@ -88,7 +88,6 @@ public:
     }
 
 private:
-    using Value = std::variant<StringRef, uint64_t, double, bool>;
 
     const TokenKind m_kind;
     const Value m_value;

@@ -271,7 +271,7 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexc
 
     auto var = AstVarDecl::create();
     var->attributes = std::move(attribs);
-    var->id = id->getValue<StringRef>();
+    var->id = std::get<StringRef>(id->getValue());
     var->typeExpr = std::move(type);
     var->expr = std::move(expr);
     return var;
@@ -302,7 +302,8 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attri
         expect(TokenKind::Sub);
     }
 
-    func->id = expect(TokenKind::Identifier)->getValue<StringRef>();
+    auto id = expect(TokenKind::Identifier);
+    func->id = std::get<StringRef>(id->getValue());
 
     if (accept(TokenKind::ParenOpen)) {
         bool isVariadic = false;
@@ -343,7 +344,7 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) n
         auto type = typeExpr();
 
         auto param = AstFuncParamDecl::create();
-        param->id = id->getValue<StringRef>();
+        param->id = std::get<StringRef>(id->getValue());
         param->typeExpr = std::move(type);
         params.push_back(std::move(param));
 
@@ -411,9 +412,10 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
  * identExpr = identifier .
  */
 unique_ptr<AstIdentExpr> Parser::identifier() noexcept {
-    auto id = AstIdentExpr::create();
-    id->id = expect(TokenKind::Identifier)->getValue<StringRef>();
-    return id;
+    auto ident = AstIdentExpr::create();
+    auto id = expect(TokenKind::Identifier);
+    ident->id = std::get<StringRef>(id->getValue());
+    return ident;
 }
 
 /**
@@ -440,43 +442,33 @@ unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
  *         .
  */
 unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
-    auto lit = AstLiteralExpr::create();
-
-    TokenKind typeKind{};
-    switch (m_token->kind()) {
-    case TokenKind::StringLiteral:
-        typeKind = TokenKind::ZString;
-        lit->value = m_token->getValue<StringRef>();
-        break;
-    case TokenKind::IntegerLiteral: {
-        // TODO: Add support for number suffixes l, ul, etc.
-        auto value = m_token->getValue<uint64_t>();
-        if (static_cast<uint64_t>(std::numeric_limits<int32_t>::max()) >= value) {
-            typeKind = TokenKind::Integer;
-        } else {
-            typeKind = TokenKind::Long;
+    using Ret = std::pair<TokenKind, AstLiteralExpr::Value>;
+    constexpr auto visitor = Visitor{
+        [](const std::monostate&) -> Ret {
+            return {TokenKind::Null, std::monostate{}};
+        },
+        [](const StringRef& value) -> Ret {
+            return {TokenKind::ZString, value};
+        },
+        [](uint64_t value) -> Ret {
+            if (value > static_cast<uint64_t>(std::numeric_limits<int32_t>::max())) {
+                return {TokenKind::Long, value};
+            }
+            return {TokenKind::Integer, value};
+        },
+        [](double value) -> Ret {
+            return {TokenKind::Double, value};
+        },
+        [](bool value) -> Ret {
+            return {TokenKind::Bool, value};
         }
-        lit->value = value;
-        break;
-    }
-    case TokenKind::FloatingPointLiteral:
-        // TODO: Add support for number suffixes f, d
-        typeKind = TokenKind::Double;
-        lit->value = m_token->getValue<double>();
-        break;
-    case TokenKind::BooleanLiteral:
-        typeKind = TokenKind::Bool;
-        lit->value = m_token->getValue<bool>();
-        break;
-    case TokenKind::NullLiteral:
-        typeKind = TokenKind::Null;
-        lit->value = nullptr;
-        break;
-    default:
-        error("Expected literal");
-    }
+    };
+    const auto [typeKind, value] = std::visit(visitor, m_token->getValue());
 
-    lit->type = TypeFloatingPoint::fromTokenKind(typeKind);
+    auto lit = AstLiteralExpr::create();
+    lit->value = value;
+    lit->type = TypeRoot::fromTokenKind(typeKind);
+
     move();
     return lit;
 }

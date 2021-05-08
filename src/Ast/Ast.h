@@ -193,7 +193,7 @@ struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {
 };
 
 struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralExpr> {
-    using Value = std::variant<StringRef, uint64_t, double, bool, nullptr_t>;
+    using Value = Token::Value;
     Value value{};
 };
 

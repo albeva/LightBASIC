@@ -315,6 +315,10 @@ void CodeGen::visit(AstCallExpr* ast) noexcept {
 void CodeGen::visit(AstLiteralExpr* ast) noexcept {
     llvm::Constant* constant = nullptr;
     auto visitor = Visitor{
+        [&](std::monostate) {
+        constant = llvm::ConstantPointerNull::get(
+            llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
+        },
         [&](const StringRef& str) {
             constant = getStringConstant(str);
         },
@@ -334,10 +338,6 @@ void CodeGen::visit(AstLiteralExpr* ast) noexcept {
                 ast->type->getLlvmType(m_context),
                 value,
                 static_cast<const TypeBoolean*>(ast->type)->isSigned());
-        },
-        [&](nullptr_t) {
-            constant = llvm::ConstantPointerNull::get(
-                llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         }
     };
     std::visit(visitor, ast->value);
