@@ -43,13 +43,13 @@ private:
     void declareGlobalVar(AstVarDecl* ast) noexcept;
     void declareLocalVar(AstVarDecl* ast) noexcept;
     static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
+    llvm::Constant* getStringConstant(const StringRef& str) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;
     AstModule* m_astRootModule = nullptr;
     unsigned int m_fileId = ~0U;
     Scope m_scope = Scope::Root;
-    // llvm::IRBuilder<> m_builder;
     unique_ptr<llvm::Module> m_module;
     llvm::Value* m_value = nullptr;
     llvm::Function* m_function = nullptr;

@@ -314,66 +314,69 @@ void CodeGen::visitCallExpr(AstCallExpr* ast) {
 
 void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
     llvm::Constant* constant = nullptr;
-
-    // clang-format off
-    std::visit(Overloaded{
+    auto visitor = Visitor{
         [&](const StringRef& str) {
-            auto iter = m_stringLiterals.find(str);
-            if (iter != m_stringLiterals.end()) {
-                constant = iter->second;
-            } else {
-                constant = llvm::ConstantDataArray::getString(
-                    m_llvmContext,
-                    str,
-                    true);
-
-                auto* value = new llvm::GlobalVariable(
-                    *m_module,
-                    constant->getType(),
-                    true,
-                    llvm::GlobalValue::PrivateLinkage,
-                    constant,
-                    ".str");
-                value->setAlignment(llvm::MaybeAlign(1));
-                value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
-
-                llvm::Constant* zero_32 = llvm::Constant::getNullValue(
-                    llvm::IntegerType::getInt32Ty(m_llvmContext));
-
-                std::array indices{
-                    zero_32,
-                    zero_32
-                };
-
-                constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
-                m_stringLiterals.insert({ str, constant });
-            }
+            constant = getStringConstant(str);
         },
-        [&](uint64_t integral) {
+        [&](uint64_t value) {
             constant = llvm::ConstantInt::get(
                 ast->type->getLlvmType(m_context),
-                integral,
+                value,
                 static_cast<const TypeIntegral*>(ast->type)->isSigned());
         },
-        [&](double fp) {
+        [&](double value) {
             constant = llvm::ConstantFP::get(
                 ast->type->getLlvmType(m_context),
-                fp);
+                value);
         },
-        [&](bool bval) {
+        [&](bool value) {
             constant = llvm::ConstantInt::get(
                 ast->type->getLlvmType(m_context),
-                bval,
+                value,
                 static_cast<const TypeBoolean*>(ast->type)->isSigned());
         },
         [&](nullptr_t) {
             constant = llvm::ConstantPointerNull::get(
                 llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         }
-    }, ast->value);
-    // clang-format on
-
+    };
+    std::visit(visitor, ast->value);
     ast->llvmValue = constant;
+}
+
+llvm::Constant* CodeGen::getStringConstant(const StringRef& str) noexcept {
+    auto iter = m_stringLiterals.find(str);
+    if (iter != m_stringLiterals.end()) {
+        return iter->second;
+    }
+
+    auto* constant = llvm::ConstantDataArray::getString(
+        m_llvmContext,
+        str,
+        true);
+
+    auto* value = new llvm::GlobalVariable(
+        *m_module,
+        constant->getType(),
+        true,
+        llvm::GlobalValue::PrivateLinkage,
+        constant,
+        ".str");
+    value->setAlignment(llvm::MaybeAlign(1));
+    value->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
+
+    llvm::Constant* zero_32 = llvm::Constant::getNullValue(
+        llvm::IntegerType::getInt32Ty(m_llvmContext));
+
+    std::array indices{
+        zero_32,
+        zero_32
+    };
+
+    constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
+    m_stringLiterals.insert({ str, constant });
+
+    return constant;
 }
 
 void CodeGen::visitUnaryExpr(AstUnaryExpr* ast) {

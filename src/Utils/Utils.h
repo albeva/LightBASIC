@@ -19,10 +19,11 @@
 namespace lbc {
 
 // helper type for std::variant visitors
-template<class... Ts>
-struct Overloaded : Ts... { using Ts::operator()...; };
-template<class... Ts>
-Overloaded(Ts...) -> Overloaded<Ts...>;
+template<typename... Base>
+struct Visitor : Base... { using Base::operator()...; };
+
+template<typename... Base>
+Visitor(Base...) -> Visitor<Base...>;
 
 /**
  * Get Twine from "literal"_t

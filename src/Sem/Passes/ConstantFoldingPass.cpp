@@ -9,20 +9,17 @@ using namespace Sem;
 namespace {
 template<typename T>
 inline T castLiteral(AstLiteralExpr* ast) noexcept {
-    T value{};
-    // clang-format off
-    std::visit([&](const auto& val) {
-    using R = std::decay_t<decltype(val)>;
-    if constexpr(std::is_convertible_v<R, T>) {
-        value = static_cast<T>(val);
-    } else {
-        llvm_unreachable("Unsupported type conversion");
-    }
-    }, ast->value);
-    // clang-format on
-    return value;
+    constexpr auto visitor = [](const auto& val) -> T {
+        using R = std::decay_t<decltype(val)>;
+        if constexpr (std::is_convertible_v<R, T>) {
+            return static_cast<T>(val);
+        } else {
+            llvm_unreachable("Unsupported type conversion");
+        }
+    };
+    return std::visit(visitor, ast->value);
 }
-}
+} // namespace
 
 void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     unique_ptr<AstExpr> replace;
@@ -53,19 +50,18 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
     replacement->type = literal->type;
 
     if (ast->tokenKind == TokenKind::Negate) {
-        // clang-format off
-        std::visit(Overloaded{
-            [&](uint64_t integral) {
-                replacement->value = static_cast<uint64_t>(-static_cast<int64_t>(integral));
+        constexpr auto visitor = Visitor{
+            [](uint64_t integral) -> AstLiteralExpr::Value {
+                return static_cast<uint64_t>(-static_cast<int64_t>(integral));
             },
-            [&](double fp) {
-                replacement->value = -fp;
+            [](double fp) -> AstLiteralExpr::Value {
+                return -fp;
             },
-            [&](auto) {
+            [](auto) -> AstLiteralExpr::Value {
                 llvm_unreachable("Non supported type");
             }
-        }, literal->value);
-        // clang-format on
+        };
+        replacement->value = std::visit(visitor, literal->value);
     } else {
         llvm_unreachable("Unsupported unary operation");
     }
