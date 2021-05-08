@@ -7,6 +7,7 @@
 #include "Lexer/Lexer.h"
 #include "Lexer/Token.h"
 #include "Type/Type.h"
+#include <limits>
 using namespace lbc;
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
@@ -447,11 +448,19 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
         typeKind = TokenKind::ZString;
         lit->value = m_token->getValue<StringRef>();
         break;
-    case TokenKind::IntegerLiteral:
-        typeKind = TokenKind::ULong;
-        lit->value = m_token->getValue<uint64_t>();
+    case TokenKind::IntegerLiteral: {
+        // TODO: Add support for number suffixes l, ul, etc.
+        auto value = m_token->getValue<uint64_t>();
+        if (std::numeric_limits<int32_t>::max() >= value) {
+            typeKind = TokenKind::Integer;
+        } else {
+            typeKind = TokenKind::Long;
+        }
+        lit->value = value;
         break;
+    }
     case TokenKind::FloatingPointLiteral:
+        // TODO: Add support for number suffixes f, d
         typeKind = TokenKind::Double;
         lit->value = m_token->getValue<double>();
         break;

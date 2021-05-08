@@ -7,8 +7,8 @@ using namespace lbc;
 using namespace Sem;
 
 namespace {
-template<typename T>
-inline T castLiteral(AstLiteralExpr* ast) noexcept {
+template<typename BASE, typename T>
+inline BASE castLiteral(AstLiteralExpr* ast) noexcept {
     constexpr auto visitor = [](const auto& val) -> T {
         using R = std::decay_t<decltype(val)>;
         if constexpr (std::is_convertible_v<R, T>) {
@@ -17,7 +17,7 @@ inline T castLiteral(AstLiteralExpr* ast) noexcept {
             llvm_unreachable("Unsupported type conversion");
         }
     };
-    return std::visit(visitor, ast->value);
+    return static_cast<BASE>(std::visit(visitor, ast->value));
 }
 } // namespace
 
@@ -80,23 +80,22 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcep
 
     // clang-format off
     if (const auto* integral = dyn_cast<TypeIntegral>(ast->type)) {
-        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                             \
-            else if (integral->getBits() == BITS && integral->isSigned() == SIGNED) {   \
-                replacement->value = static_cast<uint64_t>(castLiteral<TYPE>(literal)); \
+        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                      \
+            if (integral->getBits() == BITS && integral->isSigned() == SIGNED) { \
+                replacement->value = castLiteral<uint64_t, TYPE>(literal);       \
+                return replacement;                                              \
             }
-        if (false) {} INTEGRAL_TYPES(INTEGRAL)
+        INTEGRAL_TYPES(INTEGRAL)
         #undef INTEGRAL
     } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(ast->type)) {
-        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                              \
-            else if (integral->getBits() == BITS) {                                   \
-                replacement->value = static_cast<double>(castLiteral<TYPE>(literal)); \
+        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                 \
+            if (fp->getBits() == BITS) {                                 \
+                replacement->value = castLiteral<double, TYPE>(literal); \
+                return replacement;                                      \
             }
-        if (false) {} FLOATINGPOINT_TYPES(FLOATINGPOINT)
+        FLOATINGPOINT_TYPES(FLOATINGPOINT)
         #undef INTEGRAL
-    } else {
-        llvm_unreachable("Unsupported castLiteral");
     }
     // clang-format on
-
-    return replacement;
+    llvm_unreachable("Unsupported castLiteral");
 }

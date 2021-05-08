@@ -20,6 +20,11 @@ public:
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
+    /**
+     * Process expression. if `type` is provided then coerce the type (implicit cast)
+     * If `literal` is true, then coerce type only for literal value. E.g. default integral
+     * to `INTEGER`
+     */
     void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
     [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, const StringRef& id) noexcept;
     static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
