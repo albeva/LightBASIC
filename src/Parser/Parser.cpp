@@ -270,7 +270,7 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexc
 
     auto var = AstVarDecl::create();
     var->attributes = std::move(attribs);
-    var->id = id->lexeme();
+    var->id = id->getString();
     var->typeExpr = std::move(type);
     var->expr = std::move(expr);
     return var;
@@ -301,7 +301,7 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attri
         expect(TokenKind::Sub);
     }
 
-    func->id = expect(TokenKind::Identifier)->lexeme();
+    func->id = expect(TokenKind::Identifier)->getString();
 
     if (accept(TokenKind::ParenOpen)) {
         bool isVariadic = false;
@@ -342,7 +342,7 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) n
         auto type = typeExpr();
 
         auto param = AstFuncParamDecl::create();
-        param->id = id->lexeme();
+        param->id = id->getString();
         param->typeExpr = std::move(type);
         params.push_back(std::move(param));
 
@@ -367,7 +367,7 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
             return type;
         }
     default:
-        error("Expected typeExpr");
+        error("Expected type got "_t + m_token->description());
     }
 #undef TYPE_KEYWORD
 }
@@ -411,7 +411,7 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
  */
 unique_ptr<AstIdentExpr> Parser::identifier() noexcept {
     auto id = AstIdentExpr::create();
-    id->id = expect(TokenKind::Identifier)->lexeme();
+    id->id = expect(TokenKind::Identifier)->getString();
     return id;
 }
 
@@ -445,7 +445,7 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
     switch (m_token->kind()) {
     case TokenKind::StringLiteral:
         typeKind = TokenKind::ZString;
-        lit->value = m_token->lexeme();
+        lit->value = m_token->getString();
         break;
     case TokenKind::IntegerLiteral:
         typeKind = TokenKind::ULong;
@@ -459,8 +459,8 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
         typeKind = TokenKind::Bool;
         lit->value = m_token->getBool();
         break;
-    case TokenKind::NullLiteral:
-        typeKind = TokenKind::NullLiteral;
+    case TokenKind::Null:
+        typeKind = TokenKind::Null;
         lit->value = nullptr;
         break;
     default:
@@ -531,7 +531,7 @@ unique_ptr<Token> Parser::move() noexcept {
 
     m_context.getSourceMrg().PrintMessage(
         stream,
-        m_token->loc(),
+        m_token->range().Start,
         llvm::SourceMgr::DK_Error,
         message,
         m_token->range());

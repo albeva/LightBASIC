@@ -44,7 +44,8 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
                 return;
             }
             replacement->value = value;
-        }, literal->value);
+        },
+            literal->value);
     } else {
         llvm_unreachable("Unsupported unary operation");
     }

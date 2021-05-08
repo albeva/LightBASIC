@@ -16,8 +16,7 @@
     _( StringLiteral,        "String-Literal"         ) \
     _( IntegerLiteral ,      "Number-Literal"         ) \
     _( FloatingPointLiteral, "Floating-point-literal" ) \
-    _( BooleanLiteral,       "Boolean-Literal"        ) \
-    _( NullLiteral,          "Null-Literal"           )
+    _( BooleanLiteral,       "Boolean-Literal"        )
 
 #define TOKEN_SYMBOLS(_) \
     _( Assign,          "="   ) \
@@ -56,12 +55,10 @@
     _( Step,            "STEP"     ) \
     _( Next,            "NEXT"     ) \
     _( Continue,        "CONTINUE" ) \
-    _( Exit,            "EXIT"     )
-
-#define KEYWORD_TOKEN_MAP(_) \
-    _( True,            "TRUE",  BooleanLiteral ) \
-    _( False,           "FALSE", BooleanLiteral ) \
-    _( Null,            "NULL",  NullLiteral    )
+    _( Exit,            "EXIT"     ) \
+    _( True,            "TRUE",    ) \
+    _( False,           "FALSE",   ) \
+    _( Null,            "NULL",    )
 
 // All tokens combined
 #define ALL_TOKENS(_)  \

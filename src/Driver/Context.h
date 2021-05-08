@@ -2,6 +2,7 @@
 // Created by Albert Varaksin on 18/04/2021.
 //
 #pragma once
+#include "pch.h"
 #include "Toolchain/Toolchain.h"
 
 namespace lbc {
@@ -137,6 +138,14 @@ public:
      */
     [[nodiscard]] fs::path resolveFilePath(const fs::path& path) const;
 
+    /**
+     * Retain a copy of the string in the context and return a const StringRef& that
+     * we can pass around safely without worry of it expiring (as long as context lives)
+     * @param str string to retain
+     * @return
+     */
+    [[nodiscard]] const StringRef retainCopy(StringRef str) noexcept;
+
 private:
     [[nodiscard]] static bool validateFile(const fs::path& path);
 
@@ -158,6 +167,8 @@ private:
     llvm::Triple m_triple;
     llvm::SourceMgr m_sourceMgr{};
     llvm::LLVMContext m_llvmContext{};
+
+    llvm::StringSet<> m_retainedStrings{};
 };
 
 } // namespace lbc

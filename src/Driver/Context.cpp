@@ -197,3 +197,7 @@ void Context::setCompilerPath(const fs::path& path) {
     }
 #endif
 }
+
+const StringRef Context::retainCopy(StringRef str) noexcept {
+    return m_retainedStrings.insert(str).first->first();
+}

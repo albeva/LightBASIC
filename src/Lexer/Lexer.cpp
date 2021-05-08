@@ -4,6 +4,7 @@
 #include "Lexer.h"
 #include "Driver/Context.h"
 #include "Token.h"
+#include <charconv>
 using namespace lbc;
 
 namespace {
@@ -18,8 +19,8 @@ inline bool isLineEnd(char ch) {
     return ch == '\n';
 }
 
-inline llvm::SMLoc getLoc(const char* ptr) {
-    return llvm::SMLoc::getFromPointer(ptr);
+inline llvm::SMRange getRange(const char* start, const char* end) {
+    return { llvm::SMLoc::getFromPointer(start), llvm::SMLoc::getFromPointer(end) };
 }
 } // namespace
 
@@ -127,28 +128,26 @@ unique_ptr<Token> Lexer::next() {
 unique_ptr<Token> Lexer::endOfFile() {
     if (m_hasStmt) {
         m_hasStmt = false;
-        return Token::create(
+        return std::make_unique<Token>(
             TokenKind::EndOfStmt,
-            Token::description(TokenKind::EndOfStmt),
-            getLoc(m_buffer->getBufferEnd()));
+            getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
     }
 
-    return Token::create(
+    return std::make_unique<Token>(
         TokenKind::EndOfFile,
-        Token::description(TokenKind::EndOfFile),
-        getLoc(m_buffer->getBufferEnd()));
+        getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
 }
 
 unique_ptr<Token> Lexer::endOfStatement() {
-    auto loc = getLoc(m_input);
+    const auto* start = m_input;
     move();
-    return Token::create(TokenKind::EndOfStmt, loc);
+    return std::make_unique<Token>(TokenKind::EndOfStmt, getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::ellipsis() {
-    auto loc = getLoc(m_input);
+    const auto* start = m_input;
     move(3);
-    return Token::create(TokenKind::Ellipsis, loc);
+    return std::make_unique<Token>(TokenKind::Ellipsis, getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::identifier() {
@@ -157,7 +156,23 @@ unique_ptr<Token> Lexer::identifier() {
     while (move() && isAlpha(m_char)) {
         length++;
     }
-    return Token::create({ start, length }, getLoc(start));
+    auto range = getRange(start, m_input);
+
+    std::string uppercased;
+    uppercased.reserve(length);
+    std::transform(start, start + length, std::back_inserter(uppercased), llvm::toUpper);
+
+    auto kind = Token::findKind(uppercased);
+    switch (kind) {
+    case TokenKind::True:
+        return std::make_unique<Token>(true, range);
+    case TokenKind::False:
+        return std::make_unique<Token>(false, range);
+    case TokenKind::Identifier:
+        return std::make_unique<Token>(kind, m_context.retainCopy(uppercased), range);
+    default:
+        return std::make_unique<Token>(kind, range);
+    }
 }
 
 unique_ptr<Token> Lexer::number() {
@@ -176,10 +191,25 @@ unique_ptr<Token> Lexer::number() {
         }
         len++;
     }
-    auto kind = isFloatingPoint
-        ? TokenKind::FloatingPointLiteral
-        : TokenKind::IntegerLiteral;
-    return Token::create(kind, { start, len }, getLoc(start));
+    const char* end = start + len;
+    auto range = getRange(start, end);
+
+    if (isFloatingPoint) {
+        std::string number{ start, end };
+        std::size_t size;
+        double value = std::stod(number, &size);
+        if (size == 0) {
+            return invalid(start);
+        }
+        return std::make_unique<Token>(value, range);
+    }
+
+    uint64_t value;
+    const int base10 = 10;
+    if (std::from_chars(start, end, value, base10).ec != std::errc()) {
+        return invalid(start);
+    }
+    return std::make_unique<Token>(value, range);
 }
 
 unique_ptr<Token> Lexer::string() {
@@ -215,17 +245,20 @@ unique_ptr<Token> Lexer::string() {
     }
     move();
 
-    return Token::create(TokenKind::StringLiteral, literal, getLoc(start)); // NOLINT
+    return std::make_unique<Token>(
+        TokenKind::StringLiteral,
+        m_context.retainCopy(literal),
+        getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::character(TokenKind kind) {
     const auto* start = m_input;
     move();
-    return Token::create(kind, getLoc(start));
+    return std::make_unique<Token>(kind, getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::invalid(const char* loc) {
-    return Token::create(TokenKind::Invalid, {}, getLoc(loc));
+    return std::make_unique<Token>(TokenKind::Invalid, getRange(loc, loc));
 }
 
 void Lexer::skipUntilLineEnd() {

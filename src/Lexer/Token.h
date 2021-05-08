@@ -17,71 +17,88 @@ class Token final {
 public:
     NO_COPY_AND_MOVE(Token)
 
-    /**
-     * Create either identifier or a keyword token from string literal
-     */
-    static unique_ptr<Token> create(const StringRef& lexeme, const llvm::SMLoc& loc);
+    // Describe given token kind
+    static const StringRef& description(TokenKind kind) noexcept;
 
-    /**
-     * Create token with given kind and lexeme
-     */
-    static unique_ptr<Token> create(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc);
+    // find matching token for string or return TokenKind::Identifier
+    static TokenKind findKind(StringRef str) noexcept;
 
-    /**
-     * Create token with given kind and use description for lexeme
-     */
-    static unique_ptr<Token> create(TokenKind kind, const llvm::SMLoc& loc);
+    // constructors
 
-    /**
-     * Get TokenKind string representation
-     */
-    static const StringRef& description(TokenKind kind);
+    Token(TokenKind kind, const llvm::SMRange& range) noexcept
+    : m_kind{ kind }, m_value{}, m_range{ range } {}
 
-    Token(TokenKind kind, const StringRef& lexeme, const llvm::SMLoc& loc)
-    : m_kind{ kind }, m_lexeme{ lexeme }, m_loc{ loc } {}
+    Token(TokenKind kind, const StringRef& value, const llvm::SMRange& range) noexcept
+    : m_kind{ kind }, m_value{ value }, m_range{ range } {}
+
+    Token(uint64_t value, const llvm::SMRange& range) noexcept
+    : m_kind{ TokenKind::IntegerLiteral }, m_value{ value }, m_range{ range } {}
+
+    Token(double value, const llvm::SMRange& range) noexcept
+    : m_kind{ TokenKind::FloatingPointLiteral }, m_value{ value }, m_range{ range } {}
+
+    Token(bool value, const llvm::SMRange& range) noexcept
+    : m_kind{ TokenKind::BooleanLiteral }, m_value{ value }, m_range{ range } {}
 
     ~Token() = default;
 
-    [[nodiscard]] unique_ptr<Token> map(TokenKind kind) const noexcept {
-        return create(kind, m_loc);
+    // Getters
+
+    [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
+
+    [[nodiscard]] const StringRef& getString() const noexcept {
+        return std::get<StringRef>(m_value);
     }
 
-    [[nodiscard]] TokenKind kind() const { return m_kind; }
-    [[nodiscard]] const StringRef& lexeme() const { return m_lexeme; }
+    [[nodiscard]] uint64_t getIntegral() const noexcept {
+        return std::get<uint64_t>(m_value);
+    }
 
-    [[nodiscard]] uint64_t getIntegral() const noexcept;
-    [[nodiscard]] double getDouble() const noexcept;
-    [[nodiscard]] bool getBool() const noexcept;
+    [[nodiscard]] double getDouble() const noexcept {
+        return std::get<double>(m_value);
+    }
 
-    [[nodiscard]] inline const llvm::SMLoc& loc() const { return m_loc; }
-    [[nodiscard]] llvm::SMRange range() const;
+    [[nodiscard]] bool getBool() const noexcept {
+        return std::get<bool>(m_value);
+    }
 
-    [[nodiscard]] const StringRef& description() const;
+    [[nodiscard]] llvm::SMRange range() const noexcept {
+        return m_range;
+    };
 
-    [[nodiscard]] bool isGeneral() const;
-    [[nodiscard]] bool isLiteral() const;
-    [[nodiscard]] bool isSymbol() const;
-    [[nodiscard]] bool isOperator() const;
-    [[nodiscard]] bool isKeyword() const;
+    [[nodiscard]] const StringRef& description() const noexcept {
+        return description(m_kind);
+    }
 
-    [[nodiscard]] int getPrecedence() const;
-    [[nodiscard]] bool isBinary() const;
-    [[nodiscard]] bool isUnary() const;
-    [[nodiscard]] bool isLeftToRight() const;
-    [[nodiscard]] bool isRightToLeft() const;
+    // Info about operators
 
-    inline bool operator==(TokenKind rhs) const {
+    [[nodiscard]] bool isGeneral() const noexcept;
+    [[nodiscard]] bool isLiteral() const noexcept;
+    [[nodiscard]] bool isSymbol() const noexcept;
+    [[nodiscard]] bool isOperator() const noexcept;
+    [[nodiscard]] bool isKeyword() const noexcept;
+
+    [[nodiscard]] int getPrecedence() const noexcept;
+    [[nodiscard]] bool isBinary() const noexcept;
+    [[nodiscard]] bool isUnary() const noexcept;
+    [[nodiscard]] bool isLeftToRight() const noexcept;
+    [[nodiscard]] bool isRightToLeft() const noexcept;
+
+    // comparisons
+
+    [[nodiscard]] bool operator==(TokenKind rhs) const noexcept {
         return m_kind == rhs;
     }
-
-    inline bool operator!=(TokenKind rhs) const {
+    [[nodiscard]] bool operator!=(TokenKind rhs) const noexcept {
         return m_kind != rhs;
     }
 
 private:
+    using Value = std::variant<StringRef, uint64_t, double, bool>;
+
     const TokenKind m_kind;
-    const StringRef m_lexeme;
-    const llvm::SMLoc m_loc;
+    const llvm::SMRange m_range;
+    const Value m_value;
 };
 
 } // namespace lbc

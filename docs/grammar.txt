@@ -18,8 +18,8 @@ AttribParamList = "=" AttribParam
                 .
 AttribParam     = IntegerLiteral
                 | StringLiteral
-                | BooleanLiteral
-                | NullLiteral
+                | TRUE | FALSE
+                | NULL
                 .
 VAR             = "VAR" identExpr [ "AS" TypeExpr ] "=" Expression
                 .
