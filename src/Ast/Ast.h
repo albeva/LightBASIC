@@ -29,14 +29,11 @@ struct AstRoot {
     virtual ~AstRoot() = default;
 
     [[nodiscard]] constexpr AstKind kind() const noexcept { return m_kind; }
-
     [[nodiscard]] const llvm::StringLiteral& describe() const noexcept;
 
 private:
     const AstKind m_kind;
 };
-
-#define IS_AST_CLASSOF(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
 
 template<typename This, typename Base, AstKind kind>
 struct AstNode : Base {
@@ -50,6 +47,8 @@ struct AstNode : Base {
         return make_unique<This>();
     }
 };
+
+#define IS_AST_CLASSOF(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
 
 //----------------------------------------
 // Module
