@@ -7,13 +7,13 @@
 
 namespace lbc {
 
+template<class This>
+class AstVisitor {
+public:
 #define VISIT_CASE(KIND) \
     case AstKind::KIND: \
         return static_cast<This*>(this)->visit(static_cast<Ast##KIND*>(ast));
 
-template<class This>
-class AstVisitor {
-public:
     void visit(AstStmt* ast) noexcept {
         switch (ast->kind()) {
             AST_STMT_NODES(VISIT_CASE)
@@ -54,6 +54,7 @@ public:
             llvm_unreachable(("visit: Unmatched Expr: "_t + ast->describe()).str().c_str());
         }
     }
+#undef VISIT_CASE
 };
 
 #define VISIT_METHOD_FINAL(KIND) void visit(Ast##KIND*) noexcept;
@@ -61,7 +62,5 @@ public:
 #define AST_VISITOR_DECLARE_CONTENT_FUNCS() \
     using AstVisitor::visit;                \
     AST_CONTENT_NODES(VISIT_METHOD_FINAL)
-
-#undef VISIT_CASE
 
 } // namespace lbc
