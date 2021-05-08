@@ -4,6 +4,8 @@
 #include "AstPrinter.h"
 #include "Ast.h"
 #include "Lexer/Token.h"
+#include "Driver/Context.h"
+#include <llvm/Support/FormatVariadic.h>
 using namespace lbc;
 
 void AstPrinter::visit(AstModule* ast) noexcept {
@@ -14,7 +16,7 @@ void AstPrinter::visit(AstModule* ast) noexcept {
 }
 
 void AstPrinter::visit(AstStmtList* ast) noexcept {
-    m_os << indent() << "AstStmtList" << '\n';
+    m_os << indent() << "AstStmtList " << range(ast) << '\n';
     m_indent++;
     for (const auto& stmt : ast->stmts) {
         visit(stmt.get());
@@ -23,7 +25,7 @@ void AstPrinter::visit(AstStmtList* ast) noexcept {
 }
 
 void AstPrinter::visit(AstAssignStmt* ast) noexcept {
-    m_os << indent() << "AstAssignStmt" << '\n';
+    m_os << indent() << "AstAssignStmt " << range(ast) << '\n';
     m_indent++;
     visit(ast->identExpr.get());
     visit(ast->expr.get());
@@ -31,14 +33,14 @@ void AstPrinter::visit(AstAssignStmt* ast) noexcept {
 }
 
 void AstPrinter::visit(AstExprStmt* ast) noexcept {
-    m_os << indent() << "AstExprStmt" << '\n';
+    m_os << indent() << "AstExprStmt " << range(ast) << '\n';
     m_indent++;
     visit(ast->expr.get());
     m_indent--;
 }
 
 void AstPrinter::visit(AstVarDecl* ast) noexcept {
-    m_os << indent() << "AstVarDecl \"" << ast->id << '\"' << '\n';
+    m_os << indent() << "AstVarDecl \"" << ast->id << "\" " << range(ast) << '\n';
     m_indent++;
     if (ast->attributes) {
         visit(ast->attributes.get());
@@ -53,7 +55,7 @@ void AstPrinter::visit(AstVarDecl* ast) noexcept {
 }
 
 void AstPrinter::visit(AstFuncDecl* ast) noexcept {
-    m_os << indent() << "AstFuncDecl \"" << ast->id << '\"' << '\n';
+    m_os << indent() << "AstFuncDecl \"" << ast->id << "\" " << range(ast) << '\n';
     m_indent++;
     if (ast->attributes) {
         visit(ast->attributes.get());
@@ -70,7 +72,7 @@ void AstPrinter::visit(AstFuncDecl* ast) noexcept {
 }
 
 void AstPrinter::visit(AstFuncParamDecl* ast) noexcept {
-    m_os << indent() << "AstFuncParamDecl \"" << ast->id << '"' << '\n';
+    m_os << indent() << "AstFuncParamDecl \"" << ast->id << "\" " << range(ast) << '\n';
     m_indent++;
     if (ast->attributes) {
         visit(ast->attributes.get());
@@ -79,16 +81,16 @@ void AstPrinter::visit(AstFuncParamDecl* ast) noexcept {
     m_indent--;
 }
 
-void AstPrinter::visit(AstFuncStmt* /*ast*/) noexcept {
-    m_os << indent() << "AstFuncStmt";
+void AstPrinter::visit(AstFuncStmt* ast) noexcept {
+    m_os << indent() << "AstFuncStmt " << range(ast) << '\n';
 }
 
-void AstPrinter::visit(AstReturnStmt* /*ast*/) noexcept {
-    m_os << indent() << "AstReturnStmt";
+void AstPrinter::visit(AstReturnStmt* ast) noexcept {
+    m_os << indent() << "AstReturnStmt " << range(ast) << '\n';
 }
 
 void AstPrinter::visit(AstAttributeList* ast) noexcept {
-    m_os << indent() << "AstAttributeList" << '\n';
+    m_os << indent() << "AstAttributeList " << range(ast) << '\n';
     m_indent++;
     for (const auto& attr : ast->attribs) {
         visit(attr.get());
@@ -97,7 +99,7 @@ void AstPrinter::visit(AstAttributeList* ast) noexcept {
 }
 
 void AstPrinter::visit(AstAttribute* ast) noexcept {
-    m_os << indent() << "AstAttribute" << '\n';
+    m_os << indent() << "AstAttribute " << range(ast) << '\n';
     m_indent++;
     visit(ast->identExpr.get());
     for (const auto& arg : ast->argExprs) {
@@ -107,15 +109,15 @@ void AstPrinter::visit(AstAttribute* ast) noexcept {
 }
 
 void AstPrinter::visit(AstTypeExpr* ast) noexcept {
-    m_os << indent() << "AstTypeExpr \"" << Token::description(ast->tokenKind) << '"' << '\n';
+    m_os << indent() << "AstTypeExpr \"" << Token::description(ast->tokenKind) << "\" " << range(ast) << '\n';
 }
 
 void AstPrinter::visit(AstIdentExpr* ast) noexcept {
-    m_os << indent() << "AstIdentExpr \"" << ast->id << '"' << '\n';
+    m_os << indent() << "AstIdentExpr \"" << ast->id << "\" " << range(ast) << '\n';
 }
 
 void AstPrinter::visit(AstCallExpr* ast) noexcept {
-    m_os << indent() << "AstCallExpr" << '\n';
+    m_os << indent() << "AstCallExpr " << range(ast) << '\n';
     m_indent++;
     visit(ast->identExpr.get());
     for (const auto& arg : ast->argExprs) {
@@ -124,18 +126,28 @@ void AstPrinter::visit(AstCallExpr* ast) noexcept {
     m_indent--;
 }
 
-void AstPrinter::visit(AstLiteralExpr* /*ast*/) noexcept {
-    m_os << indent() << "AstLiteralExpr NOT_IMPLEMENTED \n";
+void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
+    m_os << indent() << "AstLiteralExpr "  << range(ast) << '\n';
 }
 
-void AstPrinter::visit(AstUnaryExpr* /*ast*/) noexcept {
-    m_os << indent() << "visitUnaryExpr\n";
+void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
+    m_os << indent() << "visitUnaryExpr " << range(ast) << '\n';
 }
 
-void AstPrinter::visit(AstCastExpr* /*ast*/) noexcept {
-    m_os << indent() << "AstCastExpr" << '\n';
+void AstPrinter::visit(AstCastExpr* ast) noexcept {
+    m_os << indent() << "AstCastExpr " << range(ast) << '\n';
 }
 
 string AstPrinter::indent() const noexcept {
     return string(m_indent * SPACES, ' ');
+}
+
+string AstPrinter::range(AstRoot* ast) const noexcept {
+    auto [fromLine, fromCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().Start);
+    auto [untilLine, untilCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().End);
+
+    if (fromLine == untilLine) {
+        return llvm::formatv("<line:{0}:{1}, col:{2}>", fromLine, fromCol, untilCol);
+    }
+    return llvm::formatv("<line:{0}:{1}, line:{2}:{3}>", fromLine, fromCol, untilLine, untilCol);
 }

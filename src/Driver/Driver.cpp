@@ -18,6 +18,11 @@ int Driver::drive() noexcept {
     processInputs();
     compileSources();
 
+    if (m_context.getDumpAst()) {
+        dumpAst();
+        return EXIT_SUCCESS;
+    }
+
     switch (m_context.getCompilationTarget()) {
     case Context::CompilationTarget::Executable:
         emitBitCode(true);
@@ -92,7 +97,7 @@ void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(
     dstFiles.reserve(dstFiles.size() + m_modules.size());
 
     for (auto& module : m_modules) {
-        const auto& source = module.second;
+        const auto& source = module->source;
         auto output = deriveSource(*source, type, temporary);
 
         std::error_code errors{};
@@ -102,7 +107,7 @@ void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(
             llvm::sys::fs::OpenFlags::OF_None
         };
 
-        generator(stream, *module.first);
+        generator(stream, *module->llvmModule);
 
         stream.flush();
         stream.close();
@@ -271,5 +276,16 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
     }
 
     // Happy Days
-    m_modules.emplace_back(gen.getModule(), source);
+    m_modules.emplace_back(std::make_unique<TranslationUnit>(
+        std::move(gen.getModule()),
+        source,
+        std::move(ast)));
+}
+
+void Driver::dumpAst() noexcept {
+    AstPrinter printer{m_context, llvm::outs()};
+
+    for (const auto& module: m_modules) {
+        printer.visit(module->ast.get());
+    }
 }

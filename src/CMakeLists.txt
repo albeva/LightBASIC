@@ -47,7 +47,7 @@ add_executable(
     Utils/Utils.cpp
     Utils/Utils.h
     Utils/Version.h
-)
+    Driver/TranslationUnit.h)
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)

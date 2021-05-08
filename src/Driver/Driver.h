@@ -5,6 +5,8 @@
 #include "pch.h"
 #include "Context.h"
 #include "Source.h"
+#include "Ast/Ast.h"
+#include "TranslationUnit.h"
 
 namespace lbc {
 
@@ -39,10 +41,11 @@ private:
 
     void compileSources() noexcept;
     void compileSource(const Source* source, unsigned ID) noexcept;
+    void dumpAst() noexcept;
 
     Context& m_context;
     std::array<SourceVector, Context::fileTypeCount> m_sources;
-    std::vector<std::pair<unique_ptr<llvm::Module>, const Source*>> m_modules{};
+    std::vector<unique_ptr<TranslationUnit>> m_modules{};
 };
 
 } // namespace lbc

@@ -159,7 +159,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
         error("Nested SUBs/FUNCTIONs not allowed");
     }
 
-    auto start = m_token->range().Start;
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
     auto decl = funcSignature(start, std::move(attribs));
     expect(TokenKind::EndOfStmt);
 
@@ -273,7 +273,7 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() noexcept
  *     ) .
  */
 unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexcept {
-    auto start = m_token->range().Start;
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
 
     expect(TokenKind::Var);
     auto id = expect(TokenKind::Identifier);
@@ -306,7 +306,7 @@ unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) 
     if (m_scope != Scope::Root) {
         error("Nested declarations not allowed");
     }
-    auto start = m_token->range().Start;
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
     expect(TokenKind::Declare);
     return funcSignature(start, std::move(attribs));
 }
