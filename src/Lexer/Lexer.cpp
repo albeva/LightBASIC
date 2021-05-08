@@ -11,20 +11,20 @@ namespace {
 using llvm::isAlpha;
 using llvm::isDigit;
 
-inline bool isWhiteSpace(char ch) {
+inline bool isWhiteSpace(char ch) noexcept {
     return ch == ' ' || ch == '\t' || ch == '\f' || ch == '\v';
 }
 
-inline bool isLineEnd(char ch) {
+inline bool isLineEnd(char ch) noexcept {
     return ch == '\n';
 }
 
-inline llvm::SMRange getRange(const char* start, const char* end) {
+inline llvm::SMRange getRange(const char* start, const char* end) noexcept {
     return { llvm::SMLoc::getFromPointer(start), llvm::SMLoc::getFromPointer(end) };
 }
 } // namespace
 
-Lexer::Lexer(Context& context, unsigned fileID)
+Lexer::Lexer(Context& context, unsigned fileID) noexcept
 : m_context{ context },
   m_fileID{ fileID },
   m_buffer{ m_context.getSourceMrg().getMemoryBuffer(fileID) },
@@ -34,7 +34,7 @@ Lexer::Lexer(Context& context, unsigned fileID)
     handleLineEnd();
 }
 
-unique_ptr<Token> Lexer::next() {
+unique_ptr<Token> Lexer::next() noexcept {
     while (isValid()) {
         // skip spaces
         if (isWhiteSpace(m_char)) {
@@ -125,7 +125,7 @@ unique_ptr<Token> Lexer::next() {
  * If `m_hasStmt` is true then return `EndOfLine`
  * before `EndOfFile`
  */
-unique_ptr<Token> Lexer::endOfFile() {
+unique_ptr<Token> Lexer::endOfFile() noexcept {
     if (m_hasStmt) {
         m_hasStmt = false;
         return std::make_unique<Token>(
@@ -138,29 +138,30 @@ unique_ptr<Token> Lexer::endOfFile() {
         getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
 }
 
-unique_ptr<Token> Lexer::endOfStatement() {
+unique_ptr<Token> Lexer::endOfStatement() noexcept {
     const auto* start = m_input;
     move();
     return std::make_unique<Token>(TokenKind::EndOfStmt, getRange(start, m_input));
 }
 
-unique_ptr<Token> Lexer::ellipsis() {
+unique_ptr<Token> Lexer::ellipsis() noexcept {
     const auto* start = m_input;
     move(3);
     return std::make_unique<Token>(TokenKind::Ellipsis, getRange(start, m_input));
 }
 
-unique_ptr<Token> Lexer::identifier() {
+unique_ptr<Token> Lexer::identifier() noexcept {
     const auto* start = m_input;
     size_t length = 1;
     while (move() && isAlpha(m_char)) {
         length++;
     }
+    const auto* end = start + length; // NOLINT
     auto range = getRange(start, m_input);
 
     std::string uppercased;
     uppercased.reserve(length);
-    std::transform(start, start + length, std::back_inserter(uppercased), llvm::toUpper);
+    std::transform(start, end, std::back_inserter(uppercased), llvm::toUpper);
 
     auto kind = Token::findKind(uppercased);
     switch (kind) {
@@ -175,7 +176,7 @@ unique_ptr<Token> Lexer::identifier() {
     }
 }
 
-unique_ptr<Token> Lexer::number() {
+unique_ptr<Token> Lexer::number() noexcept {
     bool isFloatingPoint = m_char == '.';
 
     const auto* start = m_input;
@@ -191,12 +192,12 @@ unique_ptr<Token> Lexer::number() {
         }
         len++;
     }
-    const char* end = start + len;
+    const char* end = start + len; // NOLINT
     auto range = getRange(start, end);
 
     if (isFloatingPoint) {
         std::string number{ start, end };
-        std::size_t size;
+        std::size_t size{};
         double value = std::stod(number, &size);
         if (size == 0) {
             return invalid(start);
@@ -204,7 +205,7 @@ unique_ptr<Token> Lexer::number() {
         return std::make_unique<Token>(value, range);
     }
 
-    uint64_t value;
+    uint64_t value{};
     const int base10 = 10;
     if (std::from_chars(start, end, value, base10).ec != std::errc()) {
         return invalid(start);
@@ -212,7 +213,7 @@ unique_ptr<Token> Lexer::number() {
     return std::make_unique<Token>(value, range);
 }
 
-unique_ptr<Token> Lexer::string() {
+unique_ptr<Token> Lexer::string() noexcept {
     constexpr char visibleFrom = 32;
     const auto* start = m_input;
     std::string literal{};
@@ -251,32 +252,32 @@ unique_ptr<Token> Lexer::string() {
         getRange(start, m_input));
 }
 
-unique_ptr<Token> Lexer::character(TokenKind kind) {
+unique_ptr<Token> Lexer::character(TokenKind kind) noexcept {
     const auto* start = m_input;
     move();
     return std::make_unique<Token>(kind, getRange(start, m_input));
 }
 
-unique_ptr<Token> Lexer::invalid(const char* loc) {
+unique_ptr<Token> Lexer::invalid(const char* loc) noexcept {
     return std::make_unique<Token>(TokenKind::Invalid, getRange(loc, loc));
 }
 
-void Lexer::skipUntilLineEnd() {
+void Lexer::skipUntilLineEnd() noexcept {
     while (move() && m_char != '\n') {}
 }
 
-bool Lexer::move() {
+bool Lexer::move() noexcept {
     m_char = *++m_input; // NOLINT
     handleLineEnd();
     return isValid();
 }
 
-bool Lexer::move(int steps) {
-    while (steps-- > 0 && move()) {};
+bool Lexer::move(int steps) noexcept {
+    while (steps-- > 0 && move()) {}
     return isValid();
 }
 
-void Lexer::handleLineEnd() {
+void Lexer::handleLineEnd() noexcept {
     if (m_char == '\r') {
         if (peek() == '\n') {
             m_input++; // NOLINT
@@ -285,11 +286,11 @@ void Lexer::handleLineEnd() {
     }
 }
 
-bool Lexer::isValid() const {
+bool Lexer::isValid() const noexcept {
     return m_char != 0;
 }
 
-char Lexer::peek(int ahead) const {
+char Lexer::peek(int ahead) const noexcept {
     const auto* next = m_input + ahead; // NOLINT
     if (next < m_buffer->getBufferEnd()) {
         return *next;

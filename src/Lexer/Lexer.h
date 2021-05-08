@@ -14,27 +14,27 @@ class Lexer final {
 public:
     NO_COPY_AND_MOVE(Lexer)
 
-    Lexer(Context& context, unsigned fileID);
+    Lexer(Context& context, unsigned fileID) noexcept;
     ~Lexer() = default;
 
-    [[nodiscard]] unique_ptr<Token> next();
+    [[nodiscard]] unique_ptr<Token> next() noexcept;
 
 private:
-    [[nodiscard]] unique_ptr<Token> ellipsis();
-    [[nodiscard]] unique_ptr<Token> identifier();
-    [[nodiscard]] unique_ptr<Token> number();
-    [[nodiscard]] unique_ptr<Token> string();
-    [[nodiscard]] unique_ptr<Token> character(TokenKind kind);
-    [[nodiscard]] unique_ptr<Token> endOfStatement();
-    [[nodiscard]] unique_ptr<Token> endOfFile();
-    [[nodiscard]] static unique_ptr<Token> invalid(const char* loc);
+    [[nodiscard]] unique_ptr<Token> ellipsis() noexcept;
+    [[nodiscard]] unique_ptr<Token> identifier() noexcept;
+    [[nodiscard]] unique_ptr<Token> number() noexcept;
+    [[nodiscard]] unique_ptr<Token> string() noexcept;
+    [[nodiscard]] unique_ptr<Token> character(TokenKind kind) noexcept;
+    [[nodiscard]] unique_ptr<Token> endOfStatement() noexcept;
+    [[nodiscard]] unique_ptr<Token> endOfFile() noexcept;
+    [[nodiscard]] static unique_ptr<Token> invalid(const char* loc) noexcept;
 
-    void skipUntilLineEnd();
-    bool move();
-    bool move(int steps);
-    [[nodiscard]] bool isValid() const;
-    [[nodiscard]] char peek(int ahead = 1) const;
-    void handleLineEnd();
+    void skipUntilLineEnd() noexcept;
+    bool move() noexcept;
+    bool move(int steps) noexcept;
+    [[nodiscard]] bool isValid() const noexcept;
+    [[nodiscard]] char peek(int ahead = 1) const noexcept;
+    void handleLineEnd() noexcept;
 
     Context& m_context;
     unsigned m_fileID;

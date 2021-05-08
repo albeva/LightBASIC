@@ -4,8 +4,6 @@
 #include "Token.h"
 using namespace lbc;
 
-using std::unordered_set;
-
 namespace {
 
 namespace literals {

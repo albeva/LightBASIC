@@ -62,7 +62,7 @@ public:
         return std::get<bool>(m_value);
     }
 
-    [[nodiscard]] llvm::SMRange range() const noexcept {
+    [[nodiscard]] const llvm::SMRange& range() const noexcept {
         return m_range;
     };
 
@@ -97,8 +97,8 @@ private:
     using Value = std::variant<StringRef, uint64_t, double, bool>;
 
     const TokenKind m_kind;
-    const llvm::SMRange m_range;
     const Value m_value;
+    const llvm::SMRange m_range;
 };
 
 } // namespace lbc

@@ -144,7 +144,7 @@ public:
      * @param str string to retain
      * @return
      */
-    [[nodiscard]] const StringRef retainCopy(StringRef str) noexcept;
+    [[nodiscard]] StringRef retainCopy(StringRef str) noexcept;
 
 private:
     [[nodiscard]] static bool validateFile(const fs::path& path);
