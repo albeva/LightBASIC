@@ -25,6 +25,11 @@ public:
 
     // constructors
 
+    template<typename... Args>
+    static unique_ptr<Token> create(Args&&... args) noexcept {
+        return make_unique<Token>(std::forward<Args>(args)...);
+    }
+
     Token(TokenKind kind, const llvm::SMRange& range) noexcept
     : m_kind{ kind }, m_value{}, m_range{ range } {}
 

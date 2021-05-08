@@ -199,7 +199,7 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
     ast->type = type->getReturn();
 }
 
-void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* ast) {
+void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* /*ast*/) {
     // NOPE
 }
 

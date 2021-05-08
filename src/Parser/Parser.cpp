@@ -459,7 +459,7 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
         typeKind = TokenKind::Bool;
         lit->value = m_token->getValue<bool>();
         break;
-    case TokenKind::Null:
+    case TokenKind::NullLiteral:
         typeKind = TokenKind::Null;
         lit->value = nullptr;
         break;

@@ -128,12 +128,12 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
 unique_ptr<Token> Lexer::endOfFile() noexcept {
     if (m_hasStmt) {
         m_hasStmt = false;
-        return std::make_unique<Token>(
+        return Token::create(
             TokenKind::EndOfStmt,
             getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
     }
 
-    return std::make_unique<Token>(
+    return Token::create(
         TokenKind::EndOfFile,
         getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
 }
@@ -141,13 +141,13 @@ unique_ptr<Token> Lexer::endOfFile() noexcept {
 unique_ptr<Token> Lexer::endOfStatement() noexcept {
     const auto* start = m_input;
     move();
-    return std::make_unique<Token>(TokenKind::EndOfStmt, getRange(start, m_input));
+    return Token::create(TokenKind::EndOfStmt, getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::ellipsis() noexcept {
     const auto* start = m_input;
     move(3);
-    return std::make_unique<Token>(TokenKind::Ellipsis, getRange(start, m_input));
+    return Token::create(TokenKind::Ellipsis, getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::identifier() noexcept {
@@ -166,13 +166,15 @@ unique_ptr<Token> Lexer::identifier() noexcept {
     auto kind = Token::findKind(uppercased);
     switch (kind) {
     case TokenKind::True:
-        return std::make_unique<Token>(true, range);
+        return Token::create(true, range);
     case TokenKind::False:
-        return std::make_unique<Token>(false, range);
+        return Token::create(false, range);
+    case TokenKind::Null:
+        return Token::create(TokenKind::NullLiteral, range);
     case TokenKind::Identifier:
-        return std::make_unique<Token>(kind, m_context.retainCopy(uppercased), range);
+        return Token::create(kind, m_context.retainCopy(uppercased), range);
     default:
-        return std::make_unique<Token>(kind, range);
+        return Token::create(kind, range);
     }
 }
 
@@ -202,7 +204,7 @@ unique_ptr<Token> Lexer::number() noexcept {
         if (size == 0) {
             return invalid(start);
         }
-        return std::make_unique<Token>(value, range);
+        return Token::create(value, range);
     }
 
     uint64_t value{};
@@ -210,7 +212,7 @@ unique_ptr<Token> Lexer::number() noexcept {
     if (std::from_chars(start, end, value, base10).ec != std::errc()) {
         return invalid(start);
     }
-    return std::make_unique<Token>(value, range);
+    return Token::create(value, range);
 }
 
 unique_ptr<Token> Lexer::string() noexcept {
@@ -246,7 +248,7 @@ unique_ptr<Token> Lexer::string() noexcept {
     }
     move();
 
-    return std::make_unique<Token>(
+    return Token::create(
         TokenKind::StringLiteral,
         m_context.retainCopy(literal),
         getRange(start, m_input));
@@ -255,11 +257,11 @@ unique_ptr<Token> Lexer::string() noexcept {
 unique_ptr<Token> Lexer::character(TokenKind kind) noexcept {
     const auto* start = m_input;
     move();
-    return std::make_unique<Token>(kind, getRange(start, m_input));
+    return Token::create(kind, getRange(start, m_input));
 }
 
 unique_ptr<Token> Lexer::invalid(const char* loc) noexcept {
-    return std::make_unique<Token>(TokenKind::Invalid, getRange(loc, loc));
+    return Token::create(TokenKind::Invalid, getRange(loc, loc));
 }
 
 void Lexer::skipUntilLineEnd() noexcept {

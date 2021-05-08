@@ -35,17 +35,19 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
     replacement->type = literal->type;
 
     if (ast->tokenKind == TokenKind::Negate) {
-        std::visit([&](const auto& val) {
-            using T = std::decay_t<decltype(val)>;
-            T value;
-            if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
-                value = -val;
-            } else {
-                return;
+        // clang-format off
+        std::visit(Overloaded{
+            [&](uint64_t integral) {
+                replacement->value = static_cast<uint64_t>(-static_cast<int64_t>(integral));
+            },
+            [&](double fp) {
+                replacement->value = -fp;
+            },
+            [&](auto) {
+                llvm_unreachable("Non supported type");
             }
-            replacement->value = value;
-        },
-            literal->value);
+        }, literal->value);
+        // clang-format on
     } else {
         llvm_unreachable("Unsupported unary operation");
     }

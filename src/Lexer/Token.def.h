@@ -16,7 +16,8 @@
     _( StringLiteral,        "String-Literal"         ) \
     _( IntegerLiteral ,      "Number-Literal"         ) \
     _( FloatingPointLiteral, "Floating-point-literal" ) \
-    _( BooleanLiteral,       "Boolean-Literal"        )
+    _( BooleanLiteral,       "Boolean-Literal"        ) \
+    _( NullLiteral,          "Null-Literal"           )
 
 #define TOKEN_SYMBOLS(_) \
     _( Assign,          "="   ) \

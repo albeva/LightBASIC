@@ -160,7 +160,7 @@ void CodePrinter::visitCallExpr(AstCallExpr* ast) {
     m_os << ")";
 }
 
-void CodePrinter::visitLiteralExpr(AstLiteralExpr* ast) {
+void CodePrinter::visitLiteralExpr(AstLiteralExpr* /*ast*/) {
     // TODO
 }
 
