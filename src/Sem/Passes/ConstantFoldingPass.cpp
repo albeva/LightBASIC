@@ -80,15 +80,15 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcep
 
     // clang-format off
     if (const auto* integral = dyn_cast<TypeIntegral>(ast->type)) {
-        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                           \
-            else if (integral->getBits() == BITS && integral->isSigned() == SIGNED) { \
-                replacement->value = static_cast<uint64_t>(castLiteral<TYPE>(literal));      \
+        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                             \
+            else if (integral->getBits() == BITS && integral->isSigned() == SIGNED) {   \
+                replacement->value = static_cast<uint64_t>(castLiteral<TYPE>(literal)); \
             }
         if (false) {} INTEGRAL_TYPES(INTEGRAL)
         #undef INTEGRAL
     } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(ast->type)) {
-        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                       \
-            else if (integral->getBits() == BITS) {                            \
+        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                              \
+            else if (integral->getBits() == BITS) {                                   \
                 replacement->value = static_cast<double>(castLiteral<TYPE>(literal)); \
             }
         if (false) {} FLOATINGPOINT_TYPES(FLOATINGPOINT)
