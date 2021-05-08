@@ -6,6 +6,24 @@
 using namespace lbc;
 using namespace Sem;
 
+namespace {
+template<typename T>
+inline T castLiteral(AstLiteralExpr* ast) noexcept {
+    T value{};
+    // clang-format off
+    std::visit([&](const auto& val) {
+    using R = std::decay_t<decltype(val)>;
+    if constexpr(std::is_convertible_v<R, T>) {
+        value = static_cast<T>(val);
+    } else {
+        llvm_unreachable("Unsupported type conversion");
+    }
+    }, ast->value);
+    // clang-format on
+    return value;
+}
+}
+
 void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     unique_ptr<AstExpr> replace;
 
@@ -55,6 +73,34 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
     return replacement;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr*  /*ast*/) noexcept {
-    return nullptr;
+unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcept {
+    auto* literal = dyn_cast<AstLiteralExpr>(ast->expr.get());
+    if (literal == nullptr) {
+        return nullptr;
+    }
+
+    auto replacement = AstLiteralExpr::create();
+    replacement->type = ast->type;
+
+    // clang-format off
+    if (const auto* integral = dyn_cast<TypeIntegral>(ast->type)) {
+        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                           \
+            else if (integral->getBits() == BITS && integral->isSigned() == SIGNED) { \
+                replacement->value = static_cast<uint64_t>(cast<TYPE>(literal));      \
+            }
+        if (false) {} INTEGRAL_TYPES(INTEGRAL)
+        #undef INTEGRAL
+    } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(ast->type)) {
+        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                       \
+            else if (integral->getBits() == BITS) {                            \
+                replacement->value = static_cast<double>(cast<TYPE>(literal)); \
+            }
+        if (false) {} FLOATINGPOINT_TYPES(FLOATINGPOINT)
+        #undef INTEGRAL
+    } else {
+        llvm_unreachable("Unsupported castLiteral");
+    }
+    // clang-format on
+
+    return replacement;
 }

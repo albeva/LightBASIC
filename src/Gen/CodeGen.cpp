@@ -195,10 +195,10 @@ void CodeGen::declareFuncs() noexcept {
     for (const auto& stmt : m_astRootModule->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
-            declareFunc(llvm::cast<AstFuncDecl>(stmt.get()));
+            declareFunc(static_cast<AstFuncDecl*>(stmt.get()));
             break;
         case AstKind::FuncStmt:
-            declareFunc(llvm::cast<AstFuncStmt>(stmt.get())->decl.get());
+            declareFunc(static_cast<AstFuncStmt*>(stmt.get())->decl.get());
             break;
         default:
             break;
@@ -353,7 +353,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             constant = llvm::ConstantInt::get(
                 ast->type->getLlvmType(m_context),
                 integral,
-                llvm::cast<TypeNumeric>(ast->type)->isSigned());
+                static_cast<const TypeIntegral*>(ast->type)->isSigned());
         },
         [&](double fp) {
             constant = llvm::ConstantFP::get(
@@ -364,7 +364,7 @@ void CodeGen::visitLiteralExpr(AstLiteralExpr* ast) {
             constant = llvm::ConstantInt::get(
                 ast->type->getLlvmType(m_context),
                 bval,
-                llvm::cast<TypeNumeric>(ast->type)->isSigned());
+                static_cast<const TypeBoolean*>(ast->type)->isSigned());
         },
         [&](nullptr_t) {
             constant = llvm::ConstantPointerNull::get(

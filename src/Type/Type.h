@@ -11,17 +11,14 @@ enum class TypeFamily {
     Void,    // Void, lack of typeExpr
     Any,     // any ptr, null
     Pointer, // Ptr to another typeExpr
+    Boolean, // true / false
 
-    Boolean,       // true / false
     Integral,      // signed / unsigned integer 8, 16, 32, ... bits
     FloatingPoint, // single, double
 
     Function, // function
     ZString,  // nil terminated string, byte ptr / char*
 };
-#define CHECK_TYPE_FAMILY_NUMERIC_RANGE(val) \
-    ((val) >= TypeFamily::Boolean) && ((val) <= TypeFamily::FloatingPoint)
-
 
 class TypePointer;
 class TypeNumeric;
@@ -128,33 +125,11 @@ private:
 };
 
 /**
- * Base for all numeric declaredTypes
- * Bool while conforming, is special getKind
- */
-class TypeNumeric : public TypeRoot {
-public:
-    static bool classof(const TypeRoot* type) noexcept {
-        return CHECK_TYPE_FAMILY_NUMERIC_RANGE(type->getKind());
-    }
-
-    [[nodiscard]] unsigned getBits() const noexcept { return m_bits; }
-    [[nodiscard]] bool isSigned() const noexcept { return m_isSigned; }
-
-protected:
-    TypeNumeric(TypeFamily kind, unsigned bits, bool isSigned) noexcept
-    : TypeRoot{ kind }, m_bits{ bits }, m_isSigned{ isSigned } {}
-
-private:
-    const unsigned m_bits;
-    const bool m_isSigned;
-};
-
-/**
  * Boolean true / false, result of comparison operators
  */
-class TypeBoolean final : public TypeNumeric {
+class TypeBoolean final : public TypeRoot {
 public:
-    TypeBoolean() noexcept : TypeNumeric{ TypeFamily::Boolean, 1, false } {}
+    TypeBoolean() noexcept : TypeRoot{ TypeFamily::Boolean } {}
 
     [[nodiscard]] static const TypeBoolean* get() noexcept;
 
@@ -162,10 +137,34 @@ public:
         return type->getKind() == TypeFamily::Boolean;
     }
 
+    [[nodiscard]] unsigned getBits() const noexcept { return 1; }
+    [[nodiscard]] bool isSigned() const noexcept { return false; }
+
     [[nodiscard]] string asString() const noexcept final;
 
 protected:
     [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+};
+
+/**
+ * Base for all numeric declaredTypes
+ * Bool while conforming, is special getKind
+ */
+class TypeNumeric : public TypeRoot {
+public:
+    static bool classof(const TypeRoot* type) noexcept {
+        auto kind = type->getKind();
+        return kind == TypeFamily::Integral || kind == TypeFamily::FloatingPoint;
+    }
+
+    [[nodiscard]] unsigned getBits() const noexcept { return m_bits; }
+
+protected:
+    TypeNumeric(TypeFamily kind, unsigned bits) noexcept
+    : TypeRoot{ kind }, m_bits{ bits } {}
+
+private:
+    const unsigned m_bits;
 };
 
 /**
@@ -174,7 +173,7 @@ protected:
 class TypeIntegral final : public TypeNumeric {
 public:
     TypeIntegral(unsigned bits, bool isSigned) noexcept
-    : TypeNumeric{ TypeFamily::Integral, bits, isSigned } {}
+    : TypeNumeric{ TypeFamily::Integral, bits }, m_signed{ isSigned } {}
 
     [[nodiscard]] static const TypeIntegral* get(unsigned bits, bool isSigned) noexcept;
 
@@ -182,10 +181,15 @@ public:
         return type->getKind() == TypeFamily::Integral;
     }
 
+    [[nodiscard]] bool isSigned() const noexcept { return m_signed; }
+
     [[nodiscard]] string asString() const noexcept final;
 
 protected:
     [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+
+private:
+    const bool m_signed;
 };
 
 /**
@@ -194,7 +198,7 @@ protected:
 class TypeFloatingPoint final : public TypeNumeric {
 public:
     explicit TypeFloatingPoint(unsigned bits) noexcept
-    : TypeNumeric{ TypeFamily::FloatingPoint, bits, false } {}
+    : TypeNumeric{ TypeFamily::FloatingPoint, bits } {}
 
     [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits) noexcept;
 

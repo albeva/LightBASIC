@@ -1,8 +1,6 @@
 [alias="printf"] _
 declare function printf(fmt as zstring, ...) as integer
 
-var d as double = 3.14
-var s as single = d
-var i as integer = d
+var i as bool = true
 
-printf "%lf, %d", d, i
+printf "%d", i

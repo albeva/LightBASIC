@@ -12,21 +12,21 @@
     _( Bool,     "BOOL",     Boolean )  \
     _( ZString,  "ZSTRING",  ZString )
 
-//     ID        STR         Kind,    Bits  Signed
+//     ID        STR         Kind,    Bits  Signed  C++
 #define INTEGRAL_TYPES(_) \
-    _( Byte,     "BYTE",     Integral, 8,   true  ) \
-    _( UByte,    "UBYTE",    Integral, 8,   false ) \
-    _( Short,    "SHORT",    Integral, 16,  true  ) \
-    _( UShort,   "USHORT",   Integral, 16,  false ) \
-    _( Integer,  "INTEGER",  Integral, 32,  true  ) \
-    _( UInteger, "UINTEGER", Integral, 32,  false ) \
-    _( Long,     "LONG",     Integral, 64,  true  ) \
-    _( ULong,    "ULONG",    Integral, 64,  false )
+    _( Byte,     "BYTE",     Integral, 8,   true,   int8_t   ) \
+    _( UByte,    "UBYTE",    Integral, 8,   false,  uint8_t  ) \
+    _( Short,    "SHORT",    Integral, 16,  true,   int16_t  ) \
+    _( UShort,   "USHORT",   Integral, 16,  false,  uint16_t ) \
+    _( Integer,  "INTEGER",  Integral, 32,  true,   int32_t  ) \
+    _( UInteger, "UINTEGER", Integral, 32,  false,  uint32_t ) \
+    _( Long,     "LONG",     Integral, 64,  true,   int64_t  ) \
+    _( ULong,    "ULONG",    Integral, 64,  false,  uint64_t )
 
-//     ID        STR         Kind           Bits
+//     ID        STR         Kind           Bits    c++
 #define FLOATINGPOINT_TYPES(_) \
-    _( Single,   "SINGLE",   FloatingPoint, 32 ) \
-    _( Double,   "DOUBLE",   FloatingPoint, 64 )
+    _( Single,   "SINGLE",   FloatingPoint, 32,     float  ) \
+    _( Double,   "DOUBLE",   FloatingPoint, 64,     double )
 
 #define ALL_TYPES(_)   \
     PRIMITIVE_TYPES(_) \
