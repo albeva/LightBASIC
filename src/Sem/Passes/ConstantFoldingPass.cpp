@@ -46,7 +46,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
         return nullptr;
     }
 
-    auto replacement = AstLiteralExpr::create();
+    auto replacement = AstLiteralExpr::create(ast->getRange());
     replacement->type = literal->type;
 
     if (ast->tokenKind == TokenKind::Negate) {
@@ -75,7 +75,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcep
         return nullptr;
     }
 
-    auto replacement = AstLiteralExpr::create();
+    auto replacement = AstLiteralExpr::create(ast->getRange());
     replacement->type = ast->type;
 
     // clang-format off

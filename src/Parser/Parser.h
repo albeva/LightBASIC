@@ -45,7 +45,7 @@ private:
 
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParams(bool& isVariadic) noexcept;
     [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;
 
@@ -78,6 +78,7 @@ private:
     unique_ptr<Lexer> m_lexer;
     unique_ptr<Token> m_token;
     unique_ptr<Token> m_next;
+    llvm::SMLoc m_endLoc;
 };
 
 } // namespace lbc

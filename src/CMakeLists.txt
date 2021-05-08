@@ -9,8 +9,6 @@ add_executable(
     Ast/AstPrinter.cpp
     Ast/AstPrinter.h
     Ast/AstVisitor.h
-    Ast/CodePrinter.cpp
-    Ast/CodePrinter.h
     Driver/CmdLineParser.cpp
     Driver/CmdLineParser.h
     Driver/Context.cpp
