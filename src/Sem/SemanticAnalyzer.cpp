@@ -199,8 +199,29 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) noexcept {
     ast->type = type->getReturn();
 }
 
-void SemanticAnalyzer::visit(AstLiteralExpr* /*ast*/) noexcept {
-    // NOPE
+void SemanticAnalyzer::visit(AstLiteralExpr* ast) noexcept {
+    constexpr auto visitor = Visitor{
+        [](const std::monostate&) {
+            return TokenKind::Null;
+        },
+        [](const StringRef&) {
+            return TokenKind::ZString;
+        },
+        [](uint64_t value) {
+            if (value > static_cast<uint64_t>(std::numeric_limits<int32_t>::max())) {
+                return TokenKind::Long;
+            }
+            return TokenKind::Integer;
+        },
+        [](double) {
+            return TokenKind::Double;
+        },
+        [](bool) {
+            return TokenKind::Bool;
+        }
+    };
+    auto typeKind = std::visit(visitor, ast->value);
+    ast->type = TypeRoot::fromTokenKind(typeKind);
 }
 
 void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {

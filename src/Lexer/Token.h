@@ -88,7 +88,6 @@ public:
     }
 
 private:
-
     const TokenKind m_kind;
     const Value m_value;
     const llvm::SMRange m_range;

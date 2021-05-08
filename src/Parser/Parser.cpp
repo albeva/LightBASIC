@@ -442,34 +442,8 @@ unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
  *         .
  */
 unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
-    using Ret = std::pair<TokenKind, AstLiteralExpr::Value>;
-    constexpr auto visitor = Visitor{
-        [](const std::monostate&) -> Ret {
-            return {TokenKind::Null, std::monostate{}};
-        },
-        [](const StringRef& value) -> Ret {
-            return {TokenKind::ZString, value};
-        },
-        [](uint64_t value) -> Ret {
-            if (value > static_cast<uint64_t>(std::numeric_limits<int32_t>::max())) {
-                return {TokenKind::Long, value};
-            }
-            return {TokenKind::Integer, value};
-        },
-        [](double value) -> Ret {
-            return {TokenKind::Double, value};
-        },
-        [](bool value) -> Ret {
-            return {TokenKind::Bool, value};
-        }
-    };
-    const auto [typeKind, value] = std::visit(visitor, m_token->getValue());
-
     auto lit = AstLiteralExpr::create();
-    lit->value = value;
-    lit->type = TypeRoot::fromTokenKind(typeKind);
-
-    move();
+    lit->value = move()->getValue();
     return lit;
 }
 

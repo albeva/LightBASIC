@@ -316,8 +316,8 @@ void CodeGen::visit(AstLiteralExpr* ast) noexcept {
     llvm::Constant* constant = nullptr;
     auto visitor = Visitor{
         [&](std::monostate) {
-        constant = llvm::ConstantPointerNull::get(
-            llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
+            constant = llvm::ConstantPointerNull::get(
+                llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         },
         [&](const StringRef& str) {
             constant = getStringConstant(str);
