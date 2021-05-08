@@ -25,10 +25,10 @@ enum class AstKind {
 struct AstRoot {
     NO_COPY_AND_MOVE(AstRoot)
 
-    explicit AstRoot(AstKind kind) : m_kind{ kind } {}
+    constexpr explicit AstRoot(AstKind kind) noexcept : m_kind{ kind } {}
     virtual ~AstRoot() = default;
 
-    [[nodiscard]] AstKind kind() const { return m_kind; }
+    [[nodiscard]] constexpr AstKind kind() const noexcept { return m_kind; }
 
     [[nodiscard]] const llvm::StringLiteral& describe() const noexcept;
 
@@ -40,13 +40,13 @@ private:
 
 template<typename This, typename Base, AstKind kind>
 struct AstNode : Base {
-    AstNode() noexcept : Base{ kind } {}
+    constexpr AstNode() noexcept : Base{ kind } {}
 
-    static bool classof(const AstRoot* ast) noexcept {
+    static constexpr bool classof(const AstRoot* ast) noexcept {
         return ast->kind() == kind;
     }
 
-    static unique_ptr<This> create() noexcept {
+    constexpr static unique_ptr<This> create() noexcept {
         return make_unique<This>();
     }
 };
@@ -69,7 +69,7 @@ struct AstModule final : AstNode<AstModule, AstRoot, AstKind::Module> {
 struct AstStmt : AstRoot {
     using AstRoot::AstRoot;
 
-    static bool classof(const AstRoot* ast) {
+    static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_STMT_RANGE(IS_AST_CLASSOF)
     }
 };
@@ -102,7 +102,7 @@ struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt
 struct AstAttr : AstRoot {
     using AstRoot::AstRoot;
 
-    static bool classof(const AstRoot* ast) {
+    static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_ATTR_RANGE(IS_AST_CLASSOF)
     }
 };
@@ -123,7 +123,7 @@ struct AstAttribute final : AstNode<AstAttribute, AstAttr, AstKind::Attribute> {
 struct AstDecl : AstStmt {
     using AstStmt::AstStmt;
 
-    static bool classof(const AstRoot* ast){
+    static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_DECL_RANGE(IS_AST_CLASSOF)
     }
 
@@ -158,7 +158,7 @@ struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::Func
 struct AstType : AstRoot {
     using AstRoot::AstRoot;
 
-    static bool classof(const AstRoot* ast) {
+    static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_TYPE_RANGE(IS_AST_CLASSOF)
     }
 
@@ -175,7 +175,7 @@ struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
 struct AstExpr : AstRoot {
     using AstRoot::AstRoot;
 
-    static bool classof(const AstRoot* ast) {
+    static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_EXPR_RANGE(IS_AST_CLASSOF)
     }
 
