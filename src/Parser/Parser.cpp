@@ -451,7 +451,7 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
     case TokenKind::IntegerLiteral: {
         // TODO: Add support for number suffixes l, ul, etc.
         auto value = m_token->getValue<uint64_t>();
-        if (std::numeric_limits<int32_t>::max() >= value) {
+        if (static_cast<uint64_t>(std::numeric_limits<int32_t>::max()) >= value) {
             typeKind = TokenKind::Integer;
         } else {
             typeKind = TokenKind::Long;
