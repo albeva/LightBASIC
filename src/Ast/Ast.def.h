@@ -77,7 +77,7 @@
 /**
  * Handy macro to forward declare all ast classes
  */
-#define AST_FORWARD_DECLARE_IMPL(C) class Ast##C;
+#define AST_FORWARD_DECLARE_IMPL(C) struct Ast##C;
 #define AST_FORWARD_DECLARE()                \
     AST_ROOT_NODES(AST_FORWARD_DECLARE_IMPL) \
     AST_CONTENT_NODES(AST_FORWARD_DECLARE_IMPL)

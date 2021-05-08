@@ -22,8 +22,7 @@ enum class AstKind {
  * Root class for all AST nodes. This is an abstract class
  * and should never be used as type for ast node directly
  */
-class AstRoot {
-public:
+struct AstRoot {
     NO_COPY_AND_MOVE(AstRoot)
 
     explicit AstRoot(AstKind kind) : m_kind{ kind } {}
@@ -40,9 +39,8 @@ private:
 #define IS_AST_CLASSOF(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
 
 template<typename This, typename Base, AstKind kind>
-class AstNode: public Base {
-public:
-    AstNode() noexcept: Base{ kind } {}
+struct AstNode : Base {
+    AstNode() noexcept : Base{ kind } {}
 
     static bool classof(const AstRoot* ast) noexcept {
         return ast->kind() == kind;
@@ -57,8 +55,7 @@ public:
 // Module
 //----------------------------------------
 
-class AstModule final: public AstNode<AstModule, AstRoot, AstKind::Module> {
-public:
+struct AstModule final : AstNode<AstModule, AstRoot, AstKind::Module> {
     unsigned int fileId = ~0U;
     bool hasImplicitMain = false;
     unique_ptr<SymbolTable> symbolTable;
@@ -69,8 +66,7 @@ public:
 // Statements
 //----------------------------------------
 
-class AstStmt : public AstRoot {
-public:
+struct AstStmt : AstRoot {
     using AstRoot::AstRoot;
 
     static bool classof(const AstRoot* ast) {
@@ -78,38 +74,32 @@ public:
     }
 };
 
-class AstStmtList final: public AstNode<AstStmtList, AstStmt, AstKind::StmtList> {
-public:
+struct AstStmtList final : AstNode<AstStmtList, AstStmt, AstKind::StmtList> {
     std::vector<unique_ptr<AstStmt>> stmts;
 };
 
-class AstExprStmt final: public AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
-public:
+struct AstExprStmt final : AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
     unique_ptr<AstExpr> expr;
 };
 
-class AstAssignStmt final: public AstNode<AstAssignStmt, AstStmt, AstKind::AssignStmt> {
-public:
+struct AstAssignStmt final : AstNode<AstAssignStmt, AstStmt, AstKind::AssignStmt> {
     unique_ptr<AstIdentExpr> identExpr;
     unique_ptr<AstExpr> expr;
 };
 
-class AstFuncStmt final: public AstNode<AstFuncStmt, AstStmt, AstKind::FuncStmt> {
-public:
+struct AstFuncStmt final : AstNode<AstFuncStmt, AstStmt, AstKind::FuncStmt> {
     unique_ptr<AstFuncDecl> decl;
     unique_ptr<AstStmtList> stmtList;
 };
 
-class AstReturnStmt final: public AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt> {
-public:
+struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt> {
     unique_ptr<AstExpr> expr;
 };
 
 //----------------------------------------
 // Attributes
 //----------------------------------------
-class AstAttr : public AstRoot {
-public:
+struct AstAttr : AstRoot {
     using AstRoot::AstRoot;
 
     static bool classof(const AstRoot* ast) {
@@ -117,14 +107,12 @@ public:
     }
 };
 
-class AstAttributeList final: public AstNode<AstAttributeList, AstAttr, AstKind::AttributeList> {
-public:
+struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::AttributeList> {
     [[nodiscard]] std::optional<StringRef> getStringLiteral(const StringRef& key) const;
     std::vector<unique_ptr<AstAttribute>> attribs;
 };
 
-class AstAttribute final: public AstNode<AstAttribute, AstAttr, AstKind::Attribute> {
-public:
+struct AstAttribute final : AstNode<AstAttribute, AstAttr, AstKind::Attribute> {
     unique_ptr<AstIdentExpr> identExpr;
     std::vector<unique_ptr<AstLiteralExpr>> argExprs;
 };
@@ -132,8 +120,7 @@ public:
 //----------------------------------------
 // Declarations
 //----------------------------------------
-class AstDecl : public AstStmt {
-public:
+struct AstDecl : AstStmt {
     using AstStmt::AstStmt;
 
     static bool classof(const AstRoot* ast){
@@ -145,14 +132,12 @@ public:
     StringRef id;
 };
 
-class AstVarDecl final: public AstNode<AstVarDecl, AstDecl, AstKind::VarDecl> {
-public:
+struct AstVarDecl final : AstNode<AstVarDecl, AstDecl, AstKind::VarDecl> {
     unique_ptr<AstTypeExpr> typeExpr;
     unique_ptr<AstExpr> expr;
 };
 
-class AstFuncDecl final: public AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
-public:
+struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
     // declared parameters
     std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
     // is function variadic?
@@ -163,16 +148,14 @@ public:
     unique_ptr<SymbolTable> symbolTable;
 };
 
-class AstFuncParamDecl final: public AstNode<AstFuncParamDecl, AstDecl, AstKind::FuncParamDecl> {
-public:
+struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::FuncParamDecl> {
     unique_ptr<AstTypeExpr> typeExpr;
 };
 
 //----------------------------------------
 // Types
 //----------------------------------------
-class AstType : public AstRoot {
-public:
+struct AstType : AstRoot {
     using AstRoot::AstRoot;
 
     static bool classof(const AstRoot* ast) {
@@ -182,16 +165,14 @@ public:
     const TypeRoot* type = nullptr;
 };
 
-class AstTypeExpr final: public AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
-public:
+struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
     TokenKind tokenKind{};
 };
 
 //----------------------------------------
 // Expressions
 //----------------------------------------
-class AstExpr : public AstRoot {
-public:
+struct AstExpr : AstRoot {
     using AstRoot::AstRoot;
 
     static bool classof(const AstRoot* ast) {
@@ -202,32 +183,27 @@ public:
     llvm::Value* llvmValue = nullptr;
 };
 
-class AstIdentExpr final: public AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
-public:
+struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
     StringRef id;
     Symbol* symbol = nullptr;
 };
 
-class AstCallExpr final: public AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {
-public:
+struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {
     unique_ptr<AstIdentExpr> identExpr;
     std::vector<unique_ptr<AstExpr>> argExprs;
 };
 
-class AstLiteralExpr final: public AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralExpr> {
-public:
+struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralExpr> {
     using Value = std::variant<StringRef, uint64_t, double, bool, nullptr_t>;
     Value value{};
 };
 
-class AstUnaryExpr final: public AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
-public:
+struct AstUnaryExpr final : AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
     TokenKind tokenKind{ 0 };
     unique_ptr<AstExpr> expr;
 };
 
-class AstCastExpr final: public AstNode<AstCastExpr, AstExpr, AstKind::CastExpr> {
-public:
+struct AstCastExpr final : AstNode<AstCastExpr, AstExpr, AstKind::CastExpr> {
     unique_ptr<AstExpr> expr;
     unique_ptr<AstTypeExpr> typeExpr;
     bool implicit = false;
