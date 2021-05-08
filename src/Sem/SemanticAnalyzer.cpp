@@ -15,7 +15,7 @@ SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
 : m_context{ context },
   m_constantFolder{ context } {}
 
-void SemanticAnalyzer::visit(AstModule* ast) {
+void SemanticAnalyzer::visit(AstModule* ast) noexcept {
     m_astRootModule = ast;
     m_fileId = ast->fileId;
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
@@ -23,32 +23,32 @@ void SemanticAnalyzer::visit(AstModule* ast) {
     Sem::FuncDeclarerPass(m_context).visit(ast);
 
     m_rootTable = m_table = ast->symbolTable.get();
-    visitStmtList(ast->stmtList.get());
+    visit(ast->stmtList.get());
 }
 
-void SemanticAnalyzer::visitStmtList(AstStmtList* ast) {
+void SemanticAnalyzer::visit(AstStmtList* ast) noexcept {
     for (auto& stmt : ast->stmts) {
-        visitStmt(stmt.get());
+        visit(stmt.get());
     }
 }
 
-void SemanticAnalyzer::visitAssignStmt(AstAssignStmt* ast) {
-    visitIdentExpr(ast->identExpr.get());
+void SemanticAnalyzer::visit(AstAssignStmt* ast) noexcept {
+    visit(ast->identExpr.get());
     expression(ast->expr, ast->identExpr->type);
 }
 
-void SemanticAnalyzer::visitExprStmt(AstExprStmt* ast) {
+void SemanticAnalyzer::visit(AstExprStmt* ast) noexcept {
     expression(ast->expr);
 }
 
-void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
+void SemanticAnalyzer::visit(AstVarDecl* ast) noexcept {
     auto* symbol = createNewSymbol(ast, ast->id);
     symbol->setExternal(false);
 
     // m_type expr?
     const TypeRoot* type = nullptr;
     if (ast->typeExpr) {
-        visitTypeExpr(ast->typeExpr.get());
+        visit(ast->typeExpr.get());
         type = ast->typeExpr->type;
     }
 
@@ -79,23 +79,23 @@ void SemanticAnalyzer::visitVarDecl(AstVarDecl* ast) {
 /**
  * Analyze function declaration
  */
-void SemanticAnalyzer::visitFuncDecl(AstFuncDecl* /*ast*/) {
+void SemanticAnalyzer::visit(AstFuncDecl* /*ast*/) noexcept {
     // NOOP
 }
 
-void SemanticAnalyzer::visitFuncParamDecl(AstFuncParamDecl* /*ast*/) {
+void SemanticAnalyzer::visit(AstFuncParamDecl* /*ast*/) noexcept {
     llvm_unreachable("visitFuncParamDecl");
 }
 
-void SemanticAnalyzer::visitFuncStmt(AstFuncStmt* ast) {
+void SemanticAnalyzer::visit(AstFuncStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_table);
     RESTORE_ON_EXIT(m_function);
     m_function = ast->decl.get();
     m_table = ast->decl->symbolTable.get();
-    visitStmtList(ast->stmtList.get());
+    visit(ast->stmtList.get());
 }
 
-void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
+void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
     const auto* retType = m_function->retTypeExpr->type;
     auto isVoid = isa<TypeVoid>(retType);
     if (!ast->expr) {
@@ -123,11 +123,11 @@ void SemanticAnalyzer::visitReturnStmt(AstReturnStmt* ast) {
 // Attributes
 //----------------------------------------
 
-void SemanticAnalyzer::visitAttributeList(AstAttributeList* /*ast*/) {
+void SemanticAnalyzer::visit(AstAttributeList* /*ast*/) noexcept {
     llvm_unreachable("visitAttributeList");
 }
 
-void SemanticAnalyzer::visitAttribute(AstAttribute* /*ast*/) {
+void SemanticAnalyzer::visit(AstAttribute* /*ast*/) noexcept {
     llvm_unreachable("visitAttribute");
 }
 
@@ -135,7 +135,7 @@ void SemanticAnalyzer::visitAttribute(AstAttribute* /*ast*/) {
 // Types
 //----------------------------------------
 
-void SemanticAnalyzer::visitTypeExpr(AstTypeExpr* ast) {
+void SemanticAnalyzer::visit(AstTypeExpr* ast) noexcept {
     ast->type = TypeRoot::fromTokenKind(ast->tokenKind);
 }
 
@@ -144,14 +144,14 @@ void SemanticAnalyzer::visitTypeExpr(AstTypeExpr* ast) {
 //----------------------------------------
 
 void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
-    visitExpr(ast.get());
+    visit(ast.get());
     if (type != nullptr) {
         coerce(ast, type);
     }
     m_constantFolder.fold(ast);
 }
 
-void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
+void SemanticAnalyzer::visit(AstIdentExpr* ast) noexcept {
     const auto& name = ast->id;
     auto* symbol = m_table->find(name, true);
 
@@ -167,8 +167,8 @@ void SemanticAnalyzer::visitIdentExpr(AstIdentExpr* ast) {
     ast->type = symbol->type();
 }
 
-void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
-    visitIdentExpr(ast->identExpr.get());
+void SemanticAnalyzer::visit(AstCallExpr* ast) noexcept {
+    visit(ast->identExpr.get());
 
     auto* symbol = ast->identExpr->symbol;
 
@@ -199,11 +199,11 @@ void SemanticAnalyzer::visitCallExpr(AstCallExpr* ast) {
     ast->type = type->getReturn();
 }
 
-void SemanticAnalyzer::visitLiteralExpr(AstLiteralExpr* /*ast*/) {
+void SemanticAnalyzer::visit(AstLiteralExpr* /*ast*/) noexcept {
     // NOPE
 }
 
-void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
+void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
     expression(ast->expr);
     if (!isa<TypeNumeric>(ast->expr->type)) {
         fatalError("Applying unary - to non numeric type");
@@ -211,7 +211,7 @@ void SemanticAnalyzer::visitUnaryExpr(AstUnaryExpr* ast) {
     ast->type = ast->expr->type;
 }
 
-void SemanticAnalyzer::visitCastExpr(AstCastExpr* /*ast*/) {
+void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {
     fatalError("CAST not implemented");
 }
 

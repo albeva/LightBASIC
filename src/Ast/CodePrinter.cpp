@@ -6,32 +6,32 @@
 #include "Lexer/Token.h"
 using namespace lbc;
 
-void CodePrinter::visit(AstModule* ast) {
-    visitStmtList(ast->stmtList.get());
+void CodePrinter::visit(AstModule* ast) noexcept {
+    visit(ast->stmtList.get());
 }
 
 // Statements
 
-void CodePrinter::visitStmtList(AstStmtList* ast) {
+void CodePrinter::visit(AstStmtList* ast) noexcept {
     for (const auto& stmt : ast->stmts) {
-        visitStmt(stmt.get());
+        visit(stmt.get());
         m_os << '\n';
     }
 }
 
-void CodePrinter::visitAssignStmt(AstAssignStmt* ast) {
-    visitIdentExpr(ast->identExpr.get());
+void CodePrinter::visit(AstAssignStmt* ast) noexcept {
+    visit(ast->identExpr.get());
     m_os << " = ";
-    visitExpr(ast->expr.get());
+    visit(ast->expr.get());
 }
 
-void CodePrinter::visitExprStmt(AstExprStmt* ast) {
-    visitExpr(ast->expr.get());
+void CodePrinter::visit(AstExprStmt* ast) noexcept {
+    visit(ast->expr.get());
 }
 
 // Attributes
 
-void CodePrinter::visitAttributeList(AstAttributeList* ast) {
+void CodePrinter::visit(AstAttributeList* ast) noexcept {
     m_os << '[';
     bool isFirst = true;
     for (const auto& attr : ast->attribs) {
@@ -40,16 +40,16 @@ void CodePrinter::visitAttributeList(AstAttributeList* ast) {
         } else {
             m_os << ", ";
         }
-        visitAttribute(attr.get());
+        visit(attr.get());
     }
     m_os << "]";
 }
 
-void CodePrinter::visitAttribute(AstAttribute* ast) {
-    visitIdentExpr(ast->identExpr.get());
+void CodePrinter::visit(AstAttribute* ast) noexcept {
+    visit(ast->identExpr.get());
     if (ast->argExprs.size() == 1) {
         m_os << " = ";
-        visitLiteralExpr(ast->argExprs[0].get());
+        visit(ast->argExprs[0].get());
     } else if (ast->argExprs.size() > 1) {
         bool isFirst = true;
         m_os << "(";
@@ -59,21 +59,21 @@ void CodePrinter::visitAttribute(AstAttribute* ast) {
             } else {
                 m_os << ", ";
             }
-            visitLiteralExpr(arg.get());
+            visit(arg.get());
         }
         m_os << ")";
     }
 }
 
-void CodePrinter::visitTypeExpr(AstTypeExpr* ast) {
+void CodePrinter::visit(AstTypeExpr* ast) noexcept {
     m_os << Token::description(ast->tokenKind);
 }
 
 // Declarations
 
-void CodePrinter::visitVarDecl(AstVarDecl* ast) {
+void CodePrinter::visit(AstVarDecl* ast) noexcept {
     if (ast->attributes) {
-        visitAttributeList(ast->attributes.get());
+        visit(ast->attributes.get());
         m_os << " _" << '\n';
     }
 
@@ -82,18 +82,18 @@ void CodePrinter::visitVarDecl(AstVarDecl* ast) {
 
     if (ast->typeExpr) {
         m_os << " AS ";
-        visitTypeExpr(ast->typeExpr.get());
+        visit(ast->typeExpr.get());
     }
 
     if (ast->expr) {
         m_os << " = ";
-        visitExpr(ast->expr.get());
+        visit(ast->expr.get());
     }
 }
 
-void CodePrinter::visitFuncDecl(AstFuncDecl* ast) {
+void CodePrinter::visit(AstFuncDecl* ast) noexcept {
     if (ast->attributes) {
-        visitAttributeList(ast->attributes.get());
+        visit(ast->attributes.get());
         m_os << " _" << '\n';
     }
 
@@ -113,39 +113,39 @@ void CodePrinter::visitFuncDecl(AstFuncDecl* ast) {
             } else {
                 m_os << ", ";
             }
-            visitFuncParamDecl(param.get());
+            visit(param.get());
         }
         m_os << ")";
     }
 
     if (ast->retTypeExpr) {
         m_os << " AS ";
-        visitTypeExpr(ast->retTypeExpr.get());
+        visit(ast->retTypeExpr.get());
     }
 }
 
-void CodePrinter::visitFuncParamDecl(AstFuncParamDecl* ast) {
+void CodePrinter::visit(AstFuncParamDecl* ast) noexcept {
     m_os << ast->id;
     m_os << " AS ";
-    visitTypeExpr(ast->typeExpr.get());
+    visit(ast->typeExpr.get());
 }
 
-void CodePrinter::visitFuncStmt(AstFuncStmt* /*ast*/) {
+void CodePrinter::visit(AstFuncStmt* /*ast*/) noexcept {
     m_os << indent() << "AstFuncStmt";
 }
 
-void CodePrinter::visitReturnStmt(AstReturnStmt* /*ast*/) {
+void CodePrinter::visit(AstReturnStmt* /*ast*/) noexcept {
     m_os << indent() << "RETURN";
 }
 
 // Expressions
 
-void CodePrinter::visitIdentExpr(AstIdentExpr* ast) {
+void CodePrinter::visit(AstIdentExpr* ast) noexcept {
     m_os << ast->id;
 }
 
-void CodePrinter::visitCallExpr(AstCallExpr* ast) {
-    visitIdentExpr(ast->identExpr.get());
+void CodePrinter::visit(AstCallExpr* ast) noexcept {
+    visit(ast->identExpr.get());
     m_os << "(";
     bool isFirst = true;
     for (const auto& arg : ast->argExprs) {
@@ -155,23 +155,23 @@ void CodePrinter::visitCallExpr(AstCallExpr* ast) {
             m_os << ", ";
         }
 
-        visitExpr(arg.get());
+        visit(arg.get());
     }
     m_os << ")";
 }
 
-void CodePrinter::visitLiteralExpr(AstLiteralExpr* /*ast*/) {
+void CodePrinter::visit(AstLiteralExpr* /*ast*/) noexcept {
     // TODO
 }
 
-void CodePrinter::visitUnaryExpr(AstUnaryExpr* /*ast*/) {
+void CodePrinter::visit(AstUnaryExpr* /*ast*/) noexcept {
     // TODO
 }
 
-void CodePrinter::visitCastExpr(AstCastExpr* /*ast*/) {
+void CodePrinter::visit(AstCastExpr* /*ast*/) noexcept {
     // TODO
 }
 
-string CodePrinter::indent() const {
+string CodePrinter::indent() const noexcept {
     return string(m_indent * SPACES, ' ');
 }

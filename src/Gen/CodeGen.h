@@ -11,24 +11,24 @@ class Context;
 
 class CodeGen final : public AstVisitor<CodeGen> {
 public:
-    explicit CodeGen(Context& context);
+    explicit CodeGen(Context& context) noexcept;
 
     /**
      * Give up ownership of the generated module.
      */
-    [[nodiscard]] unique_ptr<llvm::Module> getModule();
+    [[nodiscard]] unique_ptr<llvm::Module> getModule() noexcept;
 
     /**
      * Validate module
      */
-    [[nodiscard]] bool validate() const;
+    [[nodiscard]] bool validate() const noexcept;
 
     /**
      * Print module
      */
-    void print() const;
+    void print() const noexcept;
 
-    AST_DECLARE_ALL_ROOT_VISIT_METHODS()
+    AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
 private:
     enum class Scope {

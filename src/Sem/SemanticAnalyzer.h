@@ -18,7 +18,7 @@ class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
     explicit SemanticAnalyzer(Context& context) noexcept;
 
-    AST_DECLARE_ALL_ROOT_VISIT_METHODS()
+    AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
     void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
     [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, const StringRef& id) noexcept;

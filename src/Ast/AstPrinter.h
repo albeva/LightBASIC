@@ -10,10 +10,11 @@ namespace lbc {
 class AstPrinter final : public AstVisitor<AstPrinter> {
 public:
     explicit AstPrinter(llvm::raw_ostream& os) : m_os{ os } {}
-    AST_DECLARE_ALL_ROOT_VISIT_METHODS()
+
+    AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
 private:
-    [[nodiscard]] string indent() const;
+    [[nodiscard]] string indent() const noexcept;
     size_t m_indent = 0;
     llvm::raw_ostream& m_os;
     static constexpr auto SPACES = 2;
