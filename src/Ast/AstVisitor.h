@@ -31,6 +31,22 @@ public:
         }
     }
 
+    void visit(AstAttr* ast) noexcept {
+        switch (ast->kind()) {
+        AST_ATTRIB_NODES(VISIT_CASE)
+        default:
+            llvm_unreachable(("visit: Unmatched Attr: "_t + ast->describe()).str().c_str());
+        }
+    }
+
+    void visit(AstType* ast) noexcept {
+        switch (ast->kind()) {
+        AST_TYPE_NODES(VISIT_CASE)
+        default:
+            llvm_unreachable(("visit: Unmatched Attr: "_t + ast->describe()).str().c_str());
+        }
+    }
+
     void visit(AstExpr* ast) noexcept {
         switch (ast->kind()) {
         AST_EXPR_NODES(VISIT_CASE)

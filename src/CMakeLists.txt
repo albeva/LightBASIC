@@ -8,7 +8,6 @@ add_executable(
     Ast/Ast.h
     Ast/AstPrinter.cpp
     Ast/AstPrinter.h
-    Ast/AstVisitor.cpp
     Ast/AstVisitor.h
     Ast/CodePrinter.cpp
     Ast/CodePrinter.h
