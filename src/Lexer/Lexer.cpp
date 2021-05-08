@@ -34,7 +34,7 @@ Lexer::Lexer(Context& context, unsigned fileID) noexcept
     handleLineEnd();
 }
 
-unique_ptr<Token> Lexer::next() noexcept {
+unique_ptr<Token> Lexer::next() noexcept { // NOLINT
     while (isValid()) {
         // skip spaces
         if (isWhiteSpace(m_char)) {

@@ -56,9 +56,9 @@
     _( Next,            "NEXT"     ) \
     _( Continue,        "CONTINUE" ) \
     _( Exit,            "EXIT"     ) \
-    _( True,            "TRUE",    ) \
-    _( False,           "FALSE",   ) \
-    _( Null,            "NULL",    )
+    _( True,            "TRUE"     ) \
+    _( False,           "FALSE"    ) \
+    _( Null,            "NULL"     )
 
 // All tokens combined
 #define ALL_TOKENS(_)  \

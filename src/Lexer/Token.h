@@ -46,20 +46,9 @@ public:
 
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
 
-    [[nodiscard]] const StringRef& getString() const noexcept {
-        return std::get<StringRef>(m_value);
-    }
-
-    [[nodiscard]] uint64_t getIntegral() const noexcept {
-        return std::get<uint64_t>(m_value);
-    }
-
-    [[nodiscard]] double getDouble() const noexcept {
-        return std::get<double>(m_value);
-    }
-
-    [[nodiscard]] bool getBool() const noexcept {
-        return std::get<bool>(m_value);
+    template<typename T>
+    [[nodiscard]] const T& getValue() const noexcept {
+        return std::get<T>(m_value);
     }
 
     [[nodiscard]] const llvm::SMRange& range() const noexcept {

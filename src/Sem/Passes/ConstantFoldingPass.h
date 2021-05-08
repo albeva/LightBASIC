@@ -21,8 +21,8 @@ namespace Sem {
         void fold(unique_ptr<AstExpr>& ast) noexcept;
 
     private:
-        unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;
-        unique_ptr<AstExpr> visitCastExpr(AstCastExpr* ast) noexcept;
+        static unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;
+        static unique_ptr<AstExpr> visitCastExpr(AstCastExpr* ast) noexcept;
 
         Context& m_context;
     };

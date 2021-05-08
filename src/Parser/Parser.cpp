@@ -270,7 +270,7 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexc
 
     auto var = AstVarDecl::create();
     var->attributes = std::move(attribs);
-    var->id = id->getString();
+    var->id = id->getValue<StringRef>();
     var->typeExpr = std::move(type);
     var->expr = std::move(expr);
     return var;
@@ -301,7 +301,7 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(unique_ptr<AstAttributeList> attri
         expect(TokenKind::Sub);
     }
 
-    func->id = expect(TokenKind::Identifier)->getString();
+    func->id = expect(TokenKind::Identifier)->getValue<StringRef>();
 
     if (accept(TokenKind::ParenOpen)) {
         bool isVariadic = false;
@@ -342,7 +342,7 @@ std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) n
         auto type = typeExpr();
 
         auto param = AstFuncParamDecl::create();
-        param->id = id->getString();
+        param->id = id->getValue<StringRef>();
         param->typeExpr = std::move(type);
         params.push_back(std::move(param));
 
@@ -411,7 +411,7 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
  */
 unique_ptr<AstIdentExpr> Parser::identifier() noexcept {
     auto id = AstIdentExpr::create();
-    id->id = expect(TokenKind::Identifier)->getString();
+    id->id = expect(TokenKind::Identifier)->getValue<StringRef>();
     return id;
 }
 
@@ -445,19 +445,19 @@ unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
     switch (m_token->kind()) {
     case TokenKind::StringLiteral:
         typeKind = TokenKind::ZString;
-        lit->value = m_token->getString();
+        lit->value = m_token->getValue<StringRef>();
         break;
     case TokenKind::IntegerLiteral:
         typeKind = TokenKind::ULong;
-        lit->value = m_token->getIntegral();
+        lit->value = m_token->getValue<uint64_t>();
         break;
     case TokenKind::FloatingPointLiteral:
         typeKind = TokenKind::Double;
-        lit->value = m_token->getDouble();
+        lit->value = m_token->getValue<double>();
         break;
     case TokenKind::BooleanLiteral:
         typeKind = TokenKind::Bool;
-        lit->value = m_token->getBool();
+        lit->value = m_token->getValue<bool>();
         break;
     case TokenKind::Null:
         typeKind = TokenKind::Null;

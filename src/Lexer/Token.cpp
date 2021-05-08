@@ -57,6 +57,7 @@ bool Token::isLiteral() const noexcept {
 #define CASE_LITERAL(id, ...) case TokenKind::id:
     switch (m_kind) {
         TOKEN_LITERALS(CASE_LITERAL)
+    case TokenKind::Null:
         return true;
     default:
         return false;
