@@ -3,9 +3,9 @@
 //
 #pragma once
 #include "pch.h"
+#include "Ast/Ast.h"
 #include "Context.h"
 #include "Source.h"
-#include "Ast/Ast.h"
 #include "TranslationUnit.h"
 
 namespace lbc {

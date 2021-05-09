@@ -54,6 +54,7 @@ using namespace std::literals::string_literals;
 #include <llvm/IR/Value.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/Support/FormatVariadic.h>
 #include <llvm/Support/Program.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/raw_ostream.h>

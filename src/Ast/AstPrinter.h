@@ -12,7 +12,7 @@ class Context;
 class AstPrinter final : public AstVisitor<AstPrinter> {
 public:
     explicit AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
-    : m_context{context}, m_os{ os } {}
+    : m_context{ context }, m_os{ os } {}
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
@@ -25,7 +25,6 @@ private:
 
     size_t m_indent = 0;
     static constexpr auto SPACES = 2;
-
 };
 
 } // namespace lbc

@@ -283,9 +283,9 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
 }
 
 void Driver::dumpAst() noexcept {
-    AstPrinter printer{m_context, llvm::outs()};
+    AstPrinter printer{ m_context, llvm::outs() };
 
-    for (const auto& module: m_modules) {
+    for (const auto& module : m_modules) {
         printer.visit(module->ast.get());
     }
 }

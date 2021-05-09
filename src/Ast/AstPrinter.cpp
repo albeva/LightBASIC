@@ -3,9 +3,8 @@
 //
 #include "AstPrinter.h"
 #include "Ast.h"
-#include "Lexer/Token.h"
 #include "Driver/Context.h"
-#include <llvm/Support/FormatVariadic.h>
+#include "Lexer/Token.h"
 using namespace lbc;
 
 void AstPrinter::visit(AstModule* ast) noexcept {
@@ -127,7 +126,7 @@ void AstPrinter::visit(AstCallExpr* ast) noexcept {
 }
 
 void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
-    m_os << indent() << "AstLiteralExpr "  << range(ast) << '\n';
+    m_os << indent() << "AstLiteralExpr " << range(ast) << '\n';
 }
 
 void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
