@@ -505,7 +505,7 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         left->rhs = std::move(rhs);
         lhs = std::move(left);
     }
-    return std::move(lhs);
+    return lhs;
 }
 
 /**
