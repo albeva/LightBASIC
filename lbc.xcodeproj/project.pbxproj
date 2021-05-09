@@ -23,10 +23,9 @@
 		506FBF4A2638E1C300063AC6 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF2B2638E1C300063AC6 /* Parser.cpp */; };
 		506FBF4B2638E1C300063AC6 /* Type.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF2F2638E1C300063AC6 /* Type.cpp */; };
 		506FBF4C2638E1C300063AC6 /* Ast.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF322638E1C300063AC6 /* Ast.cpp */; };
-		506FBF4D2638E1C300063AC6 /* AstVisitor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF342638E1C300063AC6 /* AstVisitor.cpp */; };
-		506FBF4E2638E1C300063AC6 /* CodePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF352638E1C300063AC6 /* CodePrinter.cpp */; };
 		506FBF4F2638E1C300063AC6 /* AstPrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF392638E1C300063AC6 /* AstPrinter.cpp */; };
 		506FBF502638E1C300063AC6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF3A2638E1C300063AC6 /* main.cpp */; };
+		50E7A1E22647633900D796BB /* ConstantFoldingPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E7A1E02647633900D796BB /* ConstantFoldingPass.cpp */; };
 		50F2ACDD264002D0009ABAE3 /* FuncDeclarerPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */; };
 /* End PBXBuildFile section */
 
@@ -83,9 +82,6 @@
 		506FBF312638E1C300063AC6 /* AstVisitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AstVisitor.h; sourceTree = "<group>"; };
 		506FBF322638E1C300063AC6 /* Ast.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Ast.cpp; sourceTree = "<group>"; };
 		506FBF332638E1C300063AC6 /* Ast.def.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ast.def.h; sourceTree = "<group>"; };
-		506FBF342638E1C300063AC6 /* AstVisitor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AstVisitor.cpp; sourceTree = "<group>"; };
-		506FBF352638E1C300063AC6 /* CodePrinter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CodePrinter.cpp; sourceTree = "<group>"; };
-		506FBF362638E1C300063AC6 /* CodePrinter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CodePrinter.h; sourceTree = "<group>"; };
 		506FBF372638E1C300063AC6 /* AstPrinter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AstPrinter.h; sourceTree = "<group>"; };
 		506FBF382638E1C300063AC6 /* Ast.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Ast.h; sourceTree = "<group>"; };
 		506FBF392638E1C300063AC6 /* AstPrinter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AstPrinter.cpp; sourceTree = "<group>"; };
@@ -93,6 +89,9 @@
 		506FBF512638E1E200063AC6 /* llvm.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = llvm.xcconfig; sourceTree = "<group>"; };
 		50B67551264010F500D0B2EF /* samples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = samples; sourceTree = "<group>"; };
 		50D7A24B262E002B0047D48E /* lbc */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = lbc; sourceTree = BUILT_PRODUCTS_DIR; };
+		50E7A1DF264762E500D796BB /* TranslationUnit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TranslationUnit.h; sourceTree = "<group>"; };
+		50E7A1E02647633900D796BB /* ConstantFoldingPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ConstantFoldingPass.cpp; sourceTree = "<group>"; };
+		50E7A1E12647633900D796BB /* ConstantFoldingPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConstantFoldingPass.h; sourceTree = "<group>"; };
 		50F2ACD2263CFF9F009ABAE3 /* Source.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Source.h; sourceTree = "<group>"; };
 		50F2ACDB264002D0009ABAE3 /* FuncDeclarerPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FuncDeclarerPass.h; sourceTree = "<group>"; };
 		50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FuncDeclarerPass.cpp; sourceTree = "<group>"; };
@@ -143,16 +142,17 @@
 			isa = PBXGroup;
 			children = (
 				506FBF132638E1C300063AC6 /* Toolchain */,
-				506FBF102638E1C300063AC6 /* README.md */,
 				506FBF112638E1C300063AC6 /* CmdLineParser.cpp */,
 				506FBF0A2638E1C300063AC6 /* CmdLineParser.h */,
 				506FBF0B2638E1C300063AC6 /* Context.cpp */,
 				506FBF0C2638E1C300063AC6 /* Context.h */,
 				506FBF122638E1C300063AC6 /* Driver.cpp */,
 				506FBF0D2638E1C300063AC6 /* Driver.h */,
+				506FBF102638E1C300063AC6 /* README.md */,
 				50F2ACD2263CFF9F009ABAE3 /* Source.h */,
 				506FBF0F2638E1C300063AC6 /* TempFileCache.cpp */,
 				506FBF0E2638E1C300063AC6 /* TempFileCache.h */,
+				50E7A1DF264762E500D796BB /* TranslationUnit.h */,
 			);
 			path = Driver;
 			sourceTree = "<group>";
@@ -237,10 +237,7 @@
 				506FBF382638E1C300063AC6 /* Ast.h */,
 				506FBF392638E1C300063AC6 /* AstPrinter.cpp */,
 				506FBF372638E1C300063AC6 /* AstPrinter.h */,
-				506FBF342638E1C300063AC6 /* AstVisitor.cpp */,
 				506FBF312638E1C300063AC6 /* AstVisitor.h */,
-				506FBF352638E1C300063AC6 /* CodePrinter.cpp */,
-				506FBF362638E1C300063AC6 /* CodePrinter.h */,
 			);
 			path = Ast;
 			sourceTree = "<group>";
@@ -266,6 +263,8 @@
 		50F2ACDA264002D0009ABAE3 /* Passes */ = {
 			isa = PBXGroup;
 			children = (
+				50E7A1E02647633900D796BB /* ConstantFoldingPass.cpp */,
+				50E7A1E12647633900D796BB /* ConstantFoldingPass.h */,
 				50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */,
 				50F2ACDB264002D0009ABAE3 /* FuncDeclarerPass.h */,
 			);
@@ -369,6 +368,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				50E7A1E22647633900D796BB /* ConstantFoldingPass.cpp in Sources */,
 				506FBF3E2638E1C300063AC6 /* TempFileCache.cpp in Sources */,
 				506FBF442638E1C300063AC6 /* Toolchain.cpp in Sources */,
 				506FBF3F2638E1C300063AC6 /* CmdLineParser.cpp in Sources */,
@@ -381,13 +381,11 @@
 				506FBF412638E1C300063AC6 /* ToolTask.cpp in Sources */,
 				506FBF4A2638E1C300063AC6 /* Parser.cpp in Sources */,
 				506FBF462638E1C300063AC6 /* Utils.cpp in Sources */,
-				506FBF4E2638E1C300063AC6 /* CodePrinter.cpp in Sources */,
 				506FBF472638E1C300063AC6 /* Symbol.cpp in Sources */,
 				506FBF4B2638E1C300063AC6 /* Type.cpp in Sources */,
 				506FBF402638E1C300063AC6 /* Driver.cpp in Sources */,
 				506FBF3B2638E1C300063AC6 /* Lexer.cpp in Sources */,
 				50F2ACDD264002D0009ABAE3 /* FuncDeclarerPass.cpp in Sources */,
-				506FBF4D2638E1C300063AC6 /* AstVisitor.cpp in Sources */,
 				506FBF492638E1C300063AC6 /* CodeGen.cpp in Sources */,
 				506FBF3C2638E1C300063AC6 /* Token.cpp in Sources */,
 			);

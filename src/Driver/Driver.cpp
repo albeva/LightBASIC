@@ -277,7 +277,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
 
     // Happy Days
     m_modules.emplace_back(std::make_unique<TranslationUnit>(
-        std::move(gen.getModule()),
+        gen.getModule(),
         source,
         std::move(ast)));
 }

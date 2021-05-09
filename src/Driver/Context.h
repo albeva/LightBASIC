@@ -145,7 +145,6 @@ public:
      * Retain a copy of the string in the context and return a const StringRef& that
      * we can pass around safely without worry of it expiring (as long as context lives)
      * @param str string to retain
-     * @return
      */
     [[nodiscard]] StringRef retainCopy(StringRef str) noexcept;
 
