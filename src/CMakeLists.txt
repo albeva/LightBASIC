@@ -47,7 +47,7 @@ add_executable(
     Utils/Utils.cpp
     Utils/Utils.h
     Utils/Version.h
-    Driver/TranslationUnit.h)
+    Driver/TranslationUnit.h Ast/CodePrinter.cpp Ast/CodePrinter.h)
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)

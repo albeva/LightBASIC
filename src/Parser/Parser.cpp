@@ -408,14 +408,44 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
 //----------------------------------------
 
 /**
- * expression = literal
- *            | identifier
- *            | callExpr
- *            | "-" expression
- *            .
+ * expression = factor { <Binary Op> expression } .
  */
 unique_ptr<AstExpr> Parser::expression() noexcept {
-    // literal
+    auto expr = factor();
+    if (!m_token->isOperator()) {
+        return expr;
+    }
+
+    return expression(std::move(expr), 1);
+}
+
+/**
+ * factor = primary { <Right Unary Op> } .
+ */
+unique_ptr<AstExpr> Parser::factor() noexcept {
+    auto start = m_token->range().Start;
+    auto expr = primary();
+
+    while (m_token->isUnary() && m_token->isRightToLeft()) {
+        auto kind = move()->kind();
+        auto unary = AstUnaryExpr::create({ start, m_endLoc });
+        unary->expr = std::move(expr);
+        unary->tokenKind = kind;
+        expr = std::move(unary);
+    }
+
+    return expr;
+}
+
+/**
+ * primary = literal
+ *         | callExpr
+ *         | identifier
+ *         | "(" expression ")"
+ *         | <Left Unary Op> [ factor { <Binary Op> expression } ]
+  *        .
+ */
+unique_ptr<AstExpr> Parser::primary() noexcept {
     if (m_token->isLiteral()) {
         return literal();
     }
@@ -423,20 +453,59 @@ unique_ptr<AstExpr> Parser::expression() noexcept {
     if (match(TokenKind::Identifier)) {
         if (m_next && *m_next == TokenKind::ParenOpen) {
             return callExpr();
+        } else {
+            return identifier();
         }
-        return identifier();
     }
 
-    auto start = m_token->range().Start;
-    if (accept(TokenKind::Minus)) {
+    if (accept(TokenKind::ParenOpen)) {
         auto expr = expression();
+        expect(TokenKind::ParenClose);
+        return expr;
+    }
+
+    replace(TokenKind::Minus, TokenKind::Negate);
+    if (m_token->isUnary() && m_token->isLeftToRight()) {
+        auto start = m_token->range().Start;
+        auto prec = m_token->getPrecedence();
+        auto kind = move()->kind();
+
+        auto expr = expression(factor(), prec);
+
         auto unary = AstUnaryExpr::create({ start, m_endLoc });
-        unary->tokenKind = TokenKind::Negate;
         unary->expr = std::move(expr);
+        unary->tokenKind = kind;
         return unary;
     }
 
-    error("Expected expression");
+    error("expected primary");
+}
+
+/**
+ * Recursievly climb operator precedence
+ * https://en.wikipedia.org/wiki/Operator-precedence_parser#Precedence_climbing_method
+ */
+[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) noexcept {
+    replace(TokenKind::Assign, TokenKind::Equal);
+    while (m_token->getPrecedence() >= precedence) {
+        auto current = m_token->getPrecedence();
+        auto kind = m_token->kind();
+        move();
+
+        auto rhs = factor();
+        replace(TokenKind::Assign, TokenKind::Equal);
+
+        while (m_token->getPrecedence() > current || (m_token->isRightToLeft() && m_token->getPrecedence() == current)) {
+            rhs = expression(std::move(rhs), m_token->getPrecedence());
+        }
+
+        auto left = AstBinaryExpr::create({ lhs->getRange().Start, m_endLoc });
+        left->tokenKind = kind;
+        left->lhs = std::move(lhs);
+        left->rhs = std::move(rhs);
+        lhs = std::move(left);
+    }
+    return std::move(lhs);
 }
 
 /**
@@ -505,6 +574,13 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() noexcept {
 
 bool Parser::isValid() const noexcept {
     return *m_token != TokenKind::EndOfFile;
+}
+
+void Parser::replace(TokenKind what, TokenKind with) noexcept {
+    if (match(what)) {
+        auto repl = Token::create(with, m_token->range());
+        m_token.reset(repl.release());
+    }
 }
 
 bool Parser::match(TokenKind kind) const noexcept {

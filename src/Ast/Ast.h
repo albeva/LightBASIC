@@ -221,6 +221,13 @@ struct AstUnaryExpr final : AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
     unique_ptr<AstExpr> expr;
 };
 
+struct AstBinaryExpr final : AstNode<AstBinaryExpr, AstExpr, AstKind::BinaryExpr> {
+    using AstNode::AstNode;
+    TokenKind tokenKind{ 0 };
+    unique_ptr<AstExpr> lhs;
+    unique_ptr<AstExpr> rhs;
+};
+
 struct AstCastExpr final : AstNode<AstCastExpr, AstExpr, AstKind::CastExpr> {
     using AstNode::AstNode;
     unique_ptr<AstExpr> expr;

@@ -25,6 +25,12 @@ void Context::validate() const noexcept {
         }
     }
 
+    if (m_codeDump) {
+        if (count != 1 || getInputFiles(FileType::Source).size() != 1) {
+            fatalError("-code-dump takes single input source file");
+        }
+    }
+
     if (count > 1 && !isTargetLinkable() && !m_outputFilePath.empty()) {
         fatalError("cannot specify -o when generating multiple output files.");
     }

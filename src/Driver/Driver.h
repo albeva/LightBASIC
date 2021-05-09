@@ -20,7 +20,7 @@ public:
     explicit Driver(Context& context) noexcept : m_context{ context } {}
     ~Driver() = default;
 
-    [[nodiscard]] int drive() noexcept;
+    void drive() noexcept;
 
 private:
     using SourceVector = std::vector<unique_ptr<Source>>;
@@ -46,6 +46,7 @@ private:
     Context& m_context;
     std::array<SourceVector, Context::fileTypeCount> m_sources;
     std::vector<unique_ptr<TranslationUnit>> m_modules{};
+    void dumpCode();
 };
 
 } // namespace lbc

@@ -86,34 +86,52 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
         case '"':
             return string();
         case '=':
-            return character(TokenKind::Assign);
+            return op(TokenKind::Assign);
         case ',':
-            return character(TokenKind::Comma);
+            return op(TokenKind::Comma);
         case '.':
             if (peek(1) == '.' && peek(2) == '.') {
                 return ellipsis();
             }
-            return character(TokenKind::Period);
+            return op(TokenKind::Period);
         case '(':
-            return character(TokenKind::ParenOpen);
+            return op(TokenKind::ParenOpen);
         case ')':
-            return character(TokenKind::ParenClose);
+            return op(TokenKind::ParenClose);
         case '[':
-            return character(TokenKind::BracketOpen);
+            return op(TokenKind::BracketOpen);
         case ']':
-            return character(TokenKind::BracketClose);
+            return op(TokenKind::BracketClose);
         case '+':
-            return character(TokenKind::Plus);
+            return op(TokenKind::Plus);
         case '-':
-            return character(TokenKind::Minus);
+            return op(TokenKind::Minus);
         case '*':
-            return character(TokenKind::Multiply);
+            return op(TokenKind::Multiply);
         case '/':
-            return character(TokenKind::Divide);
+            return op(TokenKind::Divide);
         case '^':
-            return character(TokenKind::Exponent);
+            return op(TokenKind::Exponent);
         case '!':
-            return character(TokenKind::Factorial);
+            return op(TokenKind::Factorial);
+        case '<': {
+            auto la = peek(1);
+            if (la == '>') {
+                move();
+                return op(TokenKind::NotEqual);
+            }
+            if (la == '=') {
+                move();
+                return op(TokenKind::LessOrEqual);
+            }
+            return op(TokenKind::LessThan);
+        }
+        case '>':
+            if (peek(1) == '=') {
+                move();
+                return op(TokenKind::GreaterOrEqual);
+            }
+            return op(TokenKind::GreaterThan);
         }
 
         return invalid(m_input);
@@ -254,7 +272,7 @@ unique_ptr<Token> Lexer::string() noexcept {
         getRange(start, m_input));
 }
 
-unique_ptr<Token> Lexer::character(TokenKind kind) noexcept {
+unique_ptr<Token> Lexer::op(TokenKind kind) noexcept {
     const auto* start = m_input;
     move();
     return Token::create(kind, getRange(start, m_input));

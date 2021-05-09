@@ -29,7 +29,12 @@ private:
 
     [[nodiscard]] unique_ptr<AstStmtList> stmtList() noexcept;
     [[nodiscard]] unique_ptr<AstStmt> statement() noexcept;
+
     [[nodiscard]] unique_ptr<AstExpr> expression() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
+
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
     [[nodiscard]] unique_ptr<AstAssignStmt> assignStmt() noexcept;
     [[nodiscard]] unique_ptr<AstStmt> kwReturn() noexcept;
@@ -56,6 +61,9 @@ private:
 
     // match current token against kind
     [[nodiscard]] bool match(TokenKind kind) const noexcept;
+
+    // replace token kind with another (e.g. Minus to Negate)
+    void replace(TokenKind what, TokenKind with) noexcept;
 
     // expect token to match, move to next token and return current
     // return nullptr otherwise

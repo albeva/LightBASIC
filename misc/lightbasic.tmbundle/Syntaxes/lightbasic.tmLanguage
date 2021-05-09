@@ -52,7 +52,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(mod))\b</string>
+			<string>\b(?i:(mod|or|and|not))\b</string>
 			<key>name</key>
 			<string>keyword.operator.lbc</string>
 		</dict>

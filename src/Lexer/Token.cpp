@@ -17,7 +17,7 @@ const llvm::StringMap<TokenKind> keywordsToKind {
 #define IMPL_LITERAL(id, ...) { literals::Str##id, TokenKind::id },
     TOKEN_KEYWORDS(IMPL_LITERAL)
     ALL_TYPES(IMPL_LITERAL)
-    { literals::StrModulus, TokenKind::Modulus }
+    TOKEN_OPERAOTR_KEYWORD_MAP(IMPL_LITERAL)
 #undef IMPL_LITERAL
 };
 

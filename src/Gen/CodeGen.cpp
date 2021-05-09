@@ -398,6 +398,10 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
     }
 }
 
+void CodeGen::visit(AstBinaryExpr* ast) noexcept {
+    // TODO
+}
+
 void CodeGen::visit(AstCastExpr* ast) noexcept {
     visit(ast->expr.get());
 

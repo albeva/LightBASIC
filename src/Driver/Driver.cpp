@@ -3,6 +3,7 @@
 //
 #include "Driver.h"
 #include "Ast/AstPrinter.h"
+#include "Ast/CodePrinter.h"
 #include "Gen/CodeGen.h"
 #include "Parser/Parser.h"
 #include "Sem/SemanticAnalyzer.h"
@@ -14,13 +15,18 @@
 
 using namespace lbc;
 
-int Driver::drive() noexcept {
+void Driver::drive() noexcept {
     processInputs();
     compileSources();
 
     if (m_context.getDumpAst()) {
         dumpAst();
-        return EXIT_SUCCESS;
+        return;
+    }
+
+    if (m_context.getDumpCode()) {
+        dumpCode();
+        return;
     }
 
     switch (m_context.getCompilationTarget()) {
@@ -53,7 +59,6 @@ int Driver::drive() noexcept {
     }
 
     TempFileCache::removeTemporaryFiles();
-    return EXIT_SUCCESS;
 }
 
 /**
@@ -262,6 +267,14 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
         fatalError("Failed to parse '"_t + path.string() + "'");
     }
 
+    if (m_context.getDumpAst() || m_context.getDumpCode()) {
+        m_modules.emplace_back(std::make_unique<TranslationUnit>(
+            nullptr,
+            source,
+            std::move(ast)));
+        return;
+    }
+
     // Analyze
     SemanticAnalyzer sem{ m_context };
     sem.visit(ast.get());
@@ -285,6 +298,36 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
 void Driver::dumpAst() noexcept {
     auto print = [&](llvm::raw_ostream& stream) {
         AstPrinter printer{ m_context, stream };
+        for (const auto& module : m_modules) {
+            printer.visit(module->ast.get());
+        }
+    };
+
+    auto output = m_context.getOutputPath();
+    if (output.empty()) {
+        print(llvm::outs());
+    } else {
+        if (output.is_relative()) {
+            output = fs::absolute(m_context.getWorkingDir() / output);
+        }
+
+        std::error_code errors{};
+        llvm::raw_fd_ostream stream{
+            output.string(),
+            errors,
+            llvm::sys::fs::OpenFlags::OF_None
+        };
+
+        print(stream);
+
+        stream.flush();
+        stream.close();
+    }
+}
+
+void Driver::dumpCode() {
+    auto print = [&](llvm::raw_ostream& stream) {
+        CodePrinter printer{ stream };
         for (const auto& module : m_modules) {
             printer.visit(module->ast.get());
         }

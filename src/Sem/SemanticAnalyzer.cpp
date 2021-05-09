@@ -148,9 +148,8 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
     if (type != nullptr) {
         coerce(ast, type);
     }
-    if (!m_context.getDumpAst()) {
-        m_constantFolder.fold(ast);
-    }
+
+    m_constantFolder.fold(ast);
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr* ast) noexcept {
@@ -232,6 +231,16 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
         fatalError("Applying unary - to non numeric type");
     }
     ast->type = ast->expr->type;
+}
+
+void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
+    // TODO
+    //    expression(ast->lhs);
+    //    expression(ast->rhs);
+    //    if (isa<TypeNumeric>(ast->lhs->type) && isa<TypeNumeric>(ast->rhs->type)) {
+    //        ast->type = ast->expr->type;
+    //    }
+    //    fatalError("Applying unary - to non numeric type");
 }
 
 void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {

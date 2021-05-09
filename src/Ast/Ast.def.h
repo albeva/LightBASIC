@@ -59,6 +59,7 @@
     _( CallExpr    ) \
     _( LiteralExpr ) \
     _( UnaryExpr   ) \
+    _( BinaryExpr  ) \
     _( CastExpr    )
 
 #define AST_EXPR_RANGE(_) _(IdentExpr, CastExpr)

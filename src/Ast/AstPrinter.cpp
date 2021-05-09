@@ -11,7 +11,6 @@ AstPrinter::AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
 : m_context{ context }, m_json{ os, 4 } {
 }
 
-
 void AstPrinter::visit(AstModule* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);
@@ -111,7 +110,7 @@ void AstPrinter::visit(AstAttribute* ast) noexcept {
         writeHeader(ast);
         writeIdent(ast->identExpr.get());
         if (!ast->argExprs.empty()) {
-            m_json.attributeArray("args", [&]{
+            m_json.attributeArray("args", [&] {
                 for (const auto& arg : ast->argExprs) {
                     visit(arg.get());
                 }
@@ -139,8 +138,8 @@ void AstPrinter::visit(AstCallExpr* ast) noexcept {
         writeHeader(ast);
         writeIdent(ast->identExpr.get());
         if (!ast->argExprs.empty()) {
-            m_json.attributeArray("args", [&]{
-                for (const auto& arg: ast->argExprs) {
+            m_json.attributeArray("args", [&] {
+                for (const auto& arg : ast->argExprs) {
                     visit(arg.get());
                 }
             });
@@ -149,26 +148,27 @@ void AstPrinter::visit(AstCallExpr* ast) noexcept {
 }
 
 void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
+    using Ret = std::pair<TokenKind, string>;
+    constexpr auto visitor = Visitor{
+        [](std::monostate) -> Ret {
+            return { TokenKind::NullLiteral, "null" };
+        },
+        [](const StringRef& value) -> Ret {
+            return { TokenKind::StringLiteral, value.str() };
+        },
+        [](uint64_t value) -> Ret {
+            return { TokenKind::IntegerLiteral, std::to_string(value) };
+        },
+        [](double value) -> Ret {
+            return { TokenKind::FloatingPointLiteral, std::to_string(value) };
+        },
+        [](bool value) -> Ret {
+            return { TokenKind::BooleanLiteral, value ? "TRUE" : "FALSE" };
+        }
+    };
+
     m_json.object([&] {
         writeHeader(ast);
-        using Ret = std::pair<TokenKind, string>;
-        constexpr auto visitor = Visitor{
-            [](std::monostate) -> Ret {
-                return {TokenKind::NullLiteral, "null"};
-            },
-            [](const StringRef& value) -> Ret {
-                return {TokenKind::StringLiteral, value.str()};
-            },
-            [](uint64_t value) -> Ret {
-                return {TokenKind::IntegerLiteral, std::to_string(value)};
-            },
-            [](double value) -> Ret {
-                return {TokenKind::FloatingPointLiteral, std::to_string(value)};
-            },
-            [](bool value) -> Ret {
-                return {TokenKind::BooleanLiteral, std::to_string(value)};
-            }
-        };
         auto [kind, value] = std::visit(visitor, ast->value);
         m_json.attribute("kind", Token::description(kind));
         m_json.attribute("value", value);
@@ -178,8 +178,17 @@ void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
 void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);
-        m_json.attribute("operation", Token::description(ast->tokenKind));
+        m_json.attribute("op", Token::description(ast->tokenKind));
         writeExpr(ast->expr.get());
+    });
+}
+
+void AstPrinter::visit(AstBinaryExpr* ast) noexcept {
+    m_json.object([&] {
+        writeHeader(ast);
+        m_json.attribute("op", Token::description(ast->tokenKind));
+        writeExpr(ast->lhs.get(), "lhs");
+        writeExpr(ast->rhs.get(), "rhs");
     });
 }
 
@@ -220,11 +229,11 @@ void AstPrinter::writeHeader(AstRoot* ast) noexcept {
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeExpr(AstExpr* ast) noexcept {
+void AstPrinter::writeExpr(AstExpr* ast, const string& name) noexcept {
     if (ast == nullptr) {
         return;
     }
-    m_json.attributeBegin("expr");
+    m_json.attributeBegin(name);
     visit(ast);
     m_json.attributeEnd();
 }

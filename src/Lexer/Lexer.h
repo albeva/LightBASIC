@@ -24,7 +24,7 @@ private:
     [[nodiscard]] unique_ptr<Token> identifier() noexcept;
     [[nodiscard]] unique_ptr<Token> number() noexcept;
     [[nodiscard]] unique_ptr<Token> string() noexcept;
-    [[nodiscard]] unique_ptr<Token> character(TokenKind kind) noexcept;
+    [[nodiscard]] unique_ptr<Token> op(TokenKind kind) noexcept;
     [[nodiscard]] unique_ptr<Token> endOfStatement() noexcept;
     [[nodiscard]] unique_ptr<Token> endOfFile() noexcept;
     [[nodiscard]] static unique_ptr<Token> invalid(const char* loc) noexcept;
