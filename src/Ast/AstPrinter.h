@@ -11,21 +11,21 @@ class Context;
 
 class AstPrinter final : public AstVisitor<AstPrinter> {
 public:
-    explicit AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
-    : m_context{context}, m_os{ os } {}
+    explicit AstPrinter(Context& context, llvm::raw_ostream& os) noexcept;
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
 private:
-    [[nodiscard]] string indent() const noexcept;
-    [[nodiscard]] string range(AstRoot* pList) const noexcept;
+    void writeHeader(AstRoot* ast) noexcept;
+    void writeLocation(AstRoot* ast) noexcept;
+    void writeAttributes(AstAttributeList* ast) noexcept;
+    void writeStmts(AstStmtList* ast) noexcept;
+    void writeExpr(AstExpr* ast) noexcept;
+    void writeIdent(AstIdentExpr* ast) noexcept;
+    void writeType(AstTypeExpr* ast) noexcept;
 
     Context& m_context;
-    llvm::raw_ostream& m_os;
-
-    size_t m_indent = 0;
-    static constexpr auto SPACES = 2;
-
+    llvm::json::OStream m_json;
 };
 
 } // namespace lbc

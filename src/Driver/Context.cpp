@@ -23,9 +23,6 @@ void Context::validate() const noexcept {
         if (count != 1 || getInputFiles(FileType::Source).size() != 1) {
             fatalError("-ast-dump takes single input source file");
         }
-        if (!m_outputFilePath.empty()) {
-            fatalError("-o not supported with -ast-dump option");
-        }
     }
 
     if (count > 1 && !isTargetLinkable() && !m_outputFilePath.empty()) {

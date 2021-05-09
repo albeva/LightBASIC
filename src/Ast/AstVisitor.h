@@ -19,7 +19,7 @@ public:
             AST_STMT_NODES(VISIT_CASE)
             AST_DECL_NODES(VISIT_CASE)
         default:
-            llvm_unreachable(("visit: Unmatched Stmt: "_t + ast->describe()).str().c_str());
+            llvm_unreachable(("visit: Unmatched Stmt: "_t + ast->getClassName()).str().c_str());
         }
     }
 
@@ -27,7 +27,7 @@ public:
         switch (ast->kind()) {
             AST_DECL_NODES(VISIT_CASE)
         default:
-            llvm_unreachable(("visit: Unmatched Decl: "_t + ast->describe()).str().c_str());
+            llvm_unreachable(("visit: Unmatched Decl: "_t + ast->getClassName()).str().c_str());
         }
     }
 
@@ -35,7 +35,7 @@ public:
         switch (ast->kind()) {
             AST_ATTRIB_NODES(VISIT_CASE)
         default:
-            llvm_unreachable(("visit: Unmatched Attr: "_t + ast->describe()).str().c_str());
+            llvm_unreachable(("visit: Unmatched Attr: "_t + ast->getClassName()).str().c_str());
         }
     }
 
@@ -43,7 +43,7 @@ public:
         switch (ast->kind()) {
             AST_TYPE_NODES(VISIT_CASE)
         default:
-            llvm_unreachable(("visit: Unmatched Attr: "_t + ast->describe()).str().c_str());
+            llvm_unreachable(("visit: Unmatched Attr: "_t + ast->getClassName()).str().c_str());
         }
     }
 
@@ -51,7 +51,7 @@ public:
         switch (ast->kind()) {
             AST_EXPR_NODES(VISIT_CASE)
         default:
-            llvm_unreachable(("visit: Unmatched Expr: "_t + ast->describe()).str().c_str());
+            llvm_unreachable(("visit: Unmatched Expr: "_t + ast->getClassName()).str().c_str());
         }
     }
 #undef VISIT_CASE

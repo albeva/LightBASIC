@@ -18,6 +18,7 @@ playground.xcworkspace
 *.o
 *.a
 *.out
+*.json
 
 # 
 bin/

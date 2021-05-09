@@ -283,9 +283,31 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
 }
 
 void Driver::dumpAst() noexcept {
-    AstPrinter printer{m_context, llvm::outs()};
+    auto print = [&](llvm::raw_ostream& stream) {
+        AstPrinter printer{ m_context, stream };
+        for (const auto& module : m_modules) {
+            printer.visit(module->ast.get());
+        }
+    };
 
-    for (const auto& module: m_modules) {
-        printer.visit(module->ast.get());
+    auto output = m_context.getOutputPath();
+    if (output.empty()) {
+        print(llvm::outs());
+    } else {
+        if (output.is_relative()) {
+            output = fs::absolute(m_context.getWorkingDir() / output);
+        }
+
+        std::error_code errors{};
+        llvm::raw_fd_ostream stream{
+            output.string(),
+            errors,
+            llvm::sys::fs::OpenFlags::OF_None
+        };
+
+        print(stream);
+
+        stream.flush();
+        stream.close();
     }
 }

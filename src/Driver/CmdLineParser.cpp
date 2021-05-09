@@ -126,7 +126,7 @@ OPTIONS:
     -c               Only run compile and assemble steps
     -S               Only drive compilation steps
     -emit-llvm       Use the LLVM representation for assembler and object files
-    -ast-dump        Dump AST tree of the parsed source file
+    -ast-dump        Dump AST tree of the parsed source as json
     -o <file>        Write output to <file>
     -O<number>       Set optimization. Valid options: O0, OS, O1, O2, O3
     -m32             Generate 32bit i386 code

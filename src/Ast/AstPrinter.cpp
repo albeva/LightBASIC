@@ -3,151 +3,254 @@
 //
 #include "AstPrinter.h"
 #include "Ast.h"
-#include "Lexer/Token.h"
 #include "Driver/Context.h"
-#include <llvm/Support/FormatVariadic.h>
+#include "Lexer/Token.h"
 using namespace lbc;
 
+AstPrinter::AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
+: m_context{ context }, m_json{ os, 4 } {
+}
+
+
 void AstPrinter::visit(AstModule* ast) noexcept {
-    m_os << indent() << "AstModule" << '\n';
-    m_indent++;
-    visit(ast->stmtList.get());
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeStmts(ast->stmtList.get());
+    });
 }
 
 void AstPrinter::visit(AstStmtList* ast) noexcept {
-    m_os << indent() << "AstStmtList " << range(ast) << '\n';
-    m_indent++;
-    for (const auto& stmt : ast->stmts) {
-        visit(stmt.get());
-    }
-    m_indent--;
+    m_json.array([&] {
+        for (const auto& stmt : ast->stmts) {
+            visit(stmt.get());
+        }
+    });
 }
 
 void AstPrinter::visit(AstAssignStmt* ast) noexcept {
-    m_os << indent() << "AstAssignStmt " << range(ast) << '\n';
-    m_indent++;
-    visit(ast->identExpr.get());
-    visit(ast->expr.get());
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeIdent(ast->identExpr.get());
+        writeExpr(ast->expr.get());
+    });
 }
 
 void AstPrinter::visit(AstExprStmt* ast) noexcept {
-    m_os << indent() << "AstExprStmt " << range(ast) << '\n';
-    m_indent++;
-    visit(ast->expr.get());
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast->expr.get());
+    });
 }
 
 void AstPrinter::visit(AstVarDecl* ast) noexcept {
-    m_os << indent() << "AstVarDecl \"" << ast->id << "\" " << range(ast) << '\n';
-    m_indent++;
-    if (ast->attributes) {
-        visit(ast->attributes.get());
-    }
-    if (ast->typeExpr) {
-        visit(ast->typeExpr.get());
-    }
-    if (ast->expr) {
-        visit(ast->expr.get());
-    }
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeAttributes(ast->attributes.get());
+        m_json.attribute("id", ast->id);
+        writeType(ast->typeExpr.get());
+        writeExpr(ast->expr.get());
+    });
 }
 
 void AstPrinter::visit(AstFuncDecl* ast) noexcept {
-    m_os << indent() << "AstFuncDecl \"" << ast->id << "\" " << range(ast) << '\n';
-    m_indent++;
-    if (ast->attributes) {
-        visit(ast->attributes.get());
-    }
+    m_json.object([&] {
+        writeHeader(ast);
+        m_json.attribute("id", ast->id);
+        writeAttributes(ast->attributes.get());
 
-    for (const auto& param : ast->paramDecls) {
-        visit(param.get());
-    }
+        if (!ast->paramDecls.empty()) {
+            m_json.attributeArray("params", [&] {
+                for (const auto& param : ast->paramDecls) {
+                    visit(param.get());
+                }
+            });
+        }
 
-    if (ast->retTypeExpr) {
-        visit(ast->retTypeExpr.get());
-    }
-    m_indent--;
+        writeType(ast->retTypeExpr.get());
+    });
 }
 
 void AstPrinter::visit(AstFuncParamDecl* ast) noexcept {
-    m_os << indent() << "AstFuncParamDecl \"" << ast->id << "\" " << range(ast) << '\n';
-    m_indent++;
-    if (ast->attributes) {
-        visit(ast->attributes.get());
-    }
-    visit(ast->typeExpr.get());
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeAttributes(ast->attributes.get());
+        m_json.attribute("id", ast->id);
+        writeType(ast->typeExpr.get());
+    });
 }
 
 void AstPrinter::visit(AstFuncStmt* ast) noexcept {
-    m_os << indent() << "AstFuncStmt " << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+
+        m_json.attributeBegin("decl");
+        visit(ast->decl.get());
+        m_json.attributeEnd();
+
+        writeStmts(ast->stmtList.get());
+    });
 }
 
 void AstPrinter::visit(AstReturnStmt* ast) noexcept {
-    m_os << indent() << "AstReturnStmt " << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast->expr.get());
+    });
 }
 
 void AstPrinter::visit(AstAttributeList* ast) noexcept {
-    m_os << indent() << "AstAttributeList " << range(ast) << '\n';
-    m_indent++;
-    for (const auto& attr : ast->attribs) {
-        visit(attr.get());
-    }
-    m_indent--;
+    m_json.array([&] {
+        for (const auto& attr : ast->attribs) {
+            visit(attr.get());
+        }
+    });
 }
 
 void AstPrinter::visit(AstAttribute* ast) noexcept {
-    m_os << indent() << "AstAttribute " << range(ast) << '\n';
-    m_indent++;
-    visit(ast->identExpr.get());
-    for (const auto& arg : ast->argExprs) {
-        visit(arg.get());
-    }
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeIdent(ast->identExpr.get());
+        if (!ast->argExprs.empty()) {
+            m_json.attributeArray("args", [&]{
+                for (const auto& arg : ast->argExprs) {
+                    visit(arg.get());
+                }
+            });
+        }
+    });
 }
 
 void AstPrinter::visit(AstTypeExpr* ast) noexcept {
-    m_os << indent() << "AstTypeExpr \"" << Token::description(ast->tokenKind) << "\" " << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+        m_json.attribute("id", Token::description(ast->tokenKind));
+    });
 }
 
 void AstPrinter::visit(AstIdentExpr* ast) noexcept {
-    m_os << indent() << "AstIdentExpr \"" << ast->id << "\" " << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+        m_json.attribute("id", ast->id);
+    });
 }
 
 void AstPrinter::visit(AstCallExpr* ast) noexcept {
-    m_os << indent() << "AstCallExpr " << range(ast) << '\n';
-    m_indent++;
-    visit(ast->identExpr.get());
-    for (const auto& arg : ast->argExprs) {
-        visit(arg.get());
-    }
-    m_indent--;
+    m_json.object([&] {
+        writeHeader(ast);
+        writeIdent(ast->identExpr.get());
+        if (!ast->argExprs.empty()) {
+            m_json.attributeArray("args", [&]{
+                for (const auto& arg: ast->argExprs) {
+                    visit(arg.get());
+                }
+            });
+        }
+    });
 }
 
 void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
-    m_os << indent() << "AstLiteralExpr "  << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+        using Ret = std::pair<TokenKind, string>;
+        constexpr auto visitor = Visitor{
+            [](std::monostate) -> Ret {
+                return {TokenKind::NullLiteral, "null"};
+            },
+            [](const StringRef& value) -> Ret {
+                return {TokenKind::StringLiteral, value.str()};
+            },
+            [](uint64_t value) -> Ret {
+                return {TokenKind::IntegerLiteral, std::to_string(value)};
+            },
+            [](double value) -> Ret {
+                return {TokenKind::FloatingPointLiteral, std::to_string(value)};
+            },
+            [](bool value) -> Ret {
+                return {TokenKind::BooleanLiteral, std::to_string(value)};
+            }
+        };
+        auto [kind, value] = std::visit(visitor, ast->value);
+        m_json.attribute("kind", Token::description(kind));
+        m_json.attribute("value", value);
+    });
 }
 
 void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
-    m_os << indent() << "visitUnaryExpr " << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast->expr.get());
+    });
 }
 
 void AstPrinter::visit(AstCastExpr* ast) noexcept {
-    m_os << indent() << "AstCastExpr " << range(ast) << '\n';
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast->expr.get());
+    });
 }
 
-string AstPrinter::indent() const noexcept {
-    return string(m_indent * SPACES, ' ');
-}
-
-string AstPrinter::range(AstRoot* ast) const noexcept {
-    auto [fromLine, fromCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().Start);
-    auto [untilLine, untilCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().End);
-
-    if (fromLine == untilLine) {
-        return llvm::formatv("<line:{0}:{1}, col:{2}>", fromLine, fromCol, untilCol);
+void AstPrinter::writeAttributes(AstAttributeList* ast) noexcept {
+    if (ast == nullptr || ast->attribs.empty()) {
+        return;
     }
-    return llvm::formatv("<line:{0}:{1}, line:{2}:{3}>", fromLine, fromCol, untilLine, untilCol);
+    m_json.attributeBegin("attrs");
+    visit(ast);
+    m_json.attributeEnd();
+}
+
+void AstPrinter::writeStmts(AstStmtList* ast) noexcept {
+    if (ast == nullptr || ast->stmts.empty()) {
+        return;
+    }
+    m_json.attributeBegin("stmts");
+    visit(ast);
+    m_json.attributeEnd();
+}
+
+void AstPrinter::writeHeader(AstRoot* ast) noexcept {
+    if (ast == nullptr) {
+        return;
+    }
+    m_json.attribute("class", ast->getClassName());
+    m_json.attributeBegin("loc");
+    writeLocation(ast);
+    m_json.attributeEnd();
+}
+
+void AstPrinter::writeExpr(AstExpr* ast) noexcept {
+    if (ast == nullptr) {
+        return;
+    }
+    m_json.attributeBegin("expr");
+    visit(ast);
+    m_json.attributeEnd();
+}
+
+void AstPrinter::writeLocation(AstRoot* ast) noexcept {
+    auto [startLine, startCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().Start);
+    auto [endLine, endCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().End);
+
+    if (startLine == endLine) {
+        m_json.value(llvm::formatv("{0}:{1} - {2}", startLine, startCol, endCol));
+    } else {
+        m_json.value(llvm::formatv("{0}:{1} - {2}:3", startLine, startCol, endLine, endCol));
+    }
+}
+
+void AstPrinter::writeIdent(AstIdentExpr* ast) noexcept {
+    if (ast == nullptr) {
+        return;
+    }
+    m_json.attributeBegin("ident");
+    visit(ast);
+    m_json.attributeEnd();
+}
+
+void AstPrinter::writeType(AstTypeExpr* ast) noexcept {
+    if (ast == nullptr) {
+        return;
+    }
+    m_json.attributeBegin("type");
+    visit(ast);
+    m_json.attributeEnd();
 }

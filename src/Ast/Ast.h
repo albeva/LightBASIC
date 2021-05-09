@@ -31,7 +31,7 @@ struct AstRoot {
 
     [[nodiscard]] constexpr AstKind kind() const noexcept { return m_kind; }
     [[nodiscard]] constexpr llvm::SMRange getRange() const noexcept { return m_range; }
-    [[nodiscard]] const llvm::StringLiteral& describe() const noexcept;
+    [[nodiscard]] const llvm::StringRef getClassName() const noexcept;
 
 private:
     const AstKind m_kind;
