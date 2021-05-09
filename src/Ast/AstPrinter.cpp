@@ -178,6 +178,7 @@ void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
 void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);
+        m_json.attribute("operation", Token::description(ast->tokenKind));
         writeExpr(ast->expr.get());
     });
 }
@@ -185,6 +186,8 @@ void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
 void AstPrinter::visit(AstCastExpr* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);
+        m_json.attribute("implicit", ast->implicit);
+        writeType(ast->typeExpr.get());
         writeExpr(ast->expr.get());
     });
 }

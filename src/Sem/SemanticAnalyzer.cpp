@@ -148,7 +148,9 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
     if (type != nullptr) {
         coerce(ast, type);
     }
-    m_constantFolder.fold(ast);
+    if (!m_context.getDumpAst()) {
+        m_constantFolder.fold(ast);
+    }
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr* ast) noexcept {
