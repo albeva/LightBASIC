@@ -97,7 +97,7 @@ void SemanticAnalyzer::visit(AstFuncStmt* ast) noexcept {
 
 void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
     const auto* retType = m_function->retTypeExpr->type;
-    auto isVoid = isa<TypeVoid>(retType);
+    auto isVoid = retType->isVoid();
     if (!ast->expr) {
         if (!isVoid) {
             fatalError("Expected expression");
@@ -148,7 +148,6 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
     if (type != nullptr) {
         coerce(ast, type);
     }
-
     m_constantFolder.fold(ast);
 }
 
@@ -227,10 +226,36 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) noexcept {
 
 void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
     expression(ast->expr);
-    if (!isa<TypeNumeric>(ast->expr->type)) {
-        fatalError("Applying unary - to non numeric type");
+    const auto* type = ast->expr->type;
+
+    switch (ast->tokenKind) {
+    case TokenKind::LogicalNot:
+        if (type->isBoolean()) {
+            ast->type = type;
+            return;
+        }
+        if (type->isNumeric()) {
+            cast(ast->expr, TypeBoolean::get());
+            m_constantFolder.fold(ast->expr);
+            ast->type = ast->expr->type;
+            return;
+        }
+        fatalError("Applying unary NOT to non-numeric pr bool type");
+    case TokenKind::Negate:
+        // can negate numeric values
+        if (type->isNumeric()) {
+            ast->type = type;
+            return;
+        }
+        fatalError("Applying unary negate to non-numeric type");
+    default:
+        llvm_unreachable("unknown unary operator");
     }
-    ast->type = ast->expr->type;
+
+    //    if (!isa<TypeNumeric>(ast->expr->type) && !isa<TypeBoolean>(ast->expr->type)) {
+    //        fatalError("Applying unary - to non numeric type");
+    //    }
+    //    ast->type = ast->expr->type;
 }
 
 void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
@@ -271,8 +296,11 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
     if (ast->type == type) {
         return;
     }
+    auto src = type;
+    auto dst = ast->type;
 
-    if (isa<TypeNumeric>(type) && isa<TypeNumeric>(ast->type)) {
+    if ((src->isNumeric() || src->isBoolean())
+        && (dst->isNumeric() || dst->isBoolean())) {
         return cast(ast, type);
     }
 

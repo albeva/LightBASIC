@@ -278,7 +278,7 @@ void CodeGen::visit(AstAttribute* /*ast*/) noexcept {
 
 void CodeGen::visit(AstIdentExpr* ast) noexcept {
     const auto* type = ast->type;
-    if (isa<TypeFunction>(type)) {
+    if (type->isFunction()) {
         ast->llvmValue = ast->symbol->getLlvmValue();
         return;
     }
@@ -393,8 +393,18 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
 
         break;
     }
+    case TokenKind::LogicalNot: {
+        auto* expr = ast->expr.get();
+        visit(expr);
+        auto t = llvm::ConstantInt::get(
+            ast->type->getLlvmType(m_context),
+            1,
+            static_cast<const TypeBoolean*>(ast->type)->isSigned());
+        ast->llvmValue = llvm::BinaryOperator::CreateXor(expr->llvmValue, t, "lnot", m_block);
+        break;
+    }
     default:
-        fatalError("Unsupported unary operator: '"_t + Token::description(ast->tokenKind) + "'");
+        llvm_unreachable("Unexpected unary operator");
     }
 }
 
@@ -405,15 +415,8 @@ void CodeGen::visit(AstBinaryExpr* ast) noexcept {
 void CodeGen::visit(AstCastExpr* ast) noexcept {
     visit(ast->expr.get());
 
-    bool srcIsSigned = false;
-    if (const auto* src = dyn_cast<TypeIntegral>(ast->expr->type)) {
-        srcIsSigned = src->isSigned();
-    }
-
-    bool dstIsSigned = false;
-    if (const auto* dst = dyn_cast<TypeIntegral>(ast->type)) {
-        dstIsSigned = dst->isSigned();
-    }
+    bool srcIsSigned = ast->expr->type->isSignedIntegral();
+    bool dstIsSigned = ast->type->isSignedIntegral();
 
     auto opcode = llvm::CastInst::getCastOpcode(
         ast->expr->llvmValue,

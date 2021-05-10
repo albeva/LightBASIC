@@ -49,20 +49,35 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
     auto replacement = AstLiteralExpr::create(ast->getRange());
     replacement->type = literal->type;
 
-    if (ast->tokenKind == TokenKind::Negate) {
+    switch (ast->tokenKind) {
+    case TokenKind::Negate: {
         constexpr auto visitor = Visitor{
-            [](uint64_t integral) -> AstLiteralExpr::Value {
-                return static_cast<uint64_t>(-static_cast<int64_t>(integral));
+            [](uint64_t value) -> AstLiteralExpr::Value {
+                return static_cast<uint64_t>(-static_cast<int64_t>(value));
             },
-            [](double fp) -> AstLiteralExpr::Value {
-                return -fp;
+            [](double value) -> AstLiteralExpr::Value {
+                return -value;
             },
             [](auto) -> AstLiteralExpr::Value {
                 llvm_unreachable("Non supported type");
             }
         };
         replacement->value = std::visit(visitor, literal->value);
-    } else {
+        break;
+    }
+    case TokenKind::LogicalNot: {
+        constexpr auto visitor = Visitor{
+            [](bool value) -> AstLiteralExpr::Value {
+                return !value;
+            },
+            [](auto) -> AstLiteralExpr::Value {
+                llvm_unreachable("Non supported type");
+            }
+        };
+        replacement->value = std::visit(visitor, literal->value);
+        break;
+    }
+    default:
         llvm_unreachable("Unsupported unary operation");
     }
 
@@ -85,7 +100,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcep
                 replacement->value = castLiteral<uint64_t, TYPE>(literal);       \
                 return replacement;                                              \
             }
-        INTEGRAL_TYPES(INTEGRAL)
+            INTEGRAL_TYPES(INTEGRAL)
         #undef INTEGRAL
     } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(ast->type)) {
         #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                 \
@@ -93,9 +108,13 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcep
                 replacement->value = castLiteral<double, TYPE>(literal); \
                 return replacement;                                      \
             }
-        FLOATINGPOINT_TYPES(FLOATINGPOINT)
+            FLOATINGPOINT_TYPES(FLOATINGPOINT)
         #undef INTEGRAL
+    } else if (ast->type->isBoolean()) {
+        replacement->value = castLiteral<bool, bool>(literal);
+        return replacement;
     }
     // clang-format on
+
     llvm_unreachable("Unsupported castLiteral");
 }
