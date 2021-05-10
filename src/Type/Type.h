@@ -52,20 +52,20 @@ public:
     [[nodiscard]] virtual string asString() const noexcept = 0;
 
     // Type queries
-    constexpr bool isVoid() const noexcept { return m_kind == TypeFamily::Void; }
-    constexpr bool isAny() const noexcept { return m_kind == TypeFamily::Any; }
-    constexpr bool isPointer() const noexcept { return m_kind == TypeFamily::Pointer; }
-    constexpr bool isBoolean() const noexcept { return m_kind == TypeFamily::Boolean; }
-    constexpr bool isNumeric() const noexcept { return isIntegral() || isFloatingPoint(); }
-    constexpr bool isIntegral() const noexcept { return m_kind == TypeFamily::Integral; }
-    constexpr bool isFloatingPoint() const noexcept { return m_kind == TypeFamily::FloatingPoint; }
-    constexpr bool isFunction() const noexcept { return m_kind == TypeFamily::Function; }
-    constexpr bool isZString() const noexcept { return m_kind == TypeFamily::ZString; }
-    bool isAnyPointer() const noexcept;
-    bool isSignedIntegral() const noexcept;
+    [[nodiscard]] constexpr bool isVoid() const noexcept { return m_kind == TypeFamily::Void; }
+    [[nodiscard]] constexpr bool isAny() const noexcept { return m_kind == TypeFamily::Any; }
+    [[nodiscard]] constexpr bool isPointer() const noexcept { return m_kind == TypeFamily::Pointer; }
+    [[nodiscard]] constexpr bool isBoolean() const noexcept { return m_kind == TypeFamily::Boolean; }
+    [[nodiscard]] constexpr bool isNumeric() const noexcept { return isIntegral() || isFloatingPoint(); }
+    [[nodiscard]] constexpr bool isIntegral() const noexcept { return m_kind == TypeFamily::Integral; }
+    [[nodiscard]] constexpr bool isFloatingPoint() const noexcept { return m_kind == TypeFamily::FloatingPoint; }
+    [[nodiscard]] constexpr bool isFunction() const noexcept { return m_kind == TypeFamily::Function; }
+    [[nodiscard]] constexpr bool isZString() const noexcept { return m_kind == TypeFamily::ZString; }
+    [[nodiscard]] bool isAnyPointer() const noexcept;
+    [[nodiscard]] bool isSignedIntegral() const noexcept;
 
     // clang-format off
-    #define CHECK_TYPE_METHOD(ID, ...) bool is##ID() const noexcept;
+    #define CHECK_TYPE_METHOD(ID, ...) [[nodiscard]] bool is##ID() const noexcept;
     INTEGRAL_TYPES(CHECK_TYPE_METHOD)
     FLOATINGPOINT_TYPES(CHECK_TYPE_METHOD)
     #undef CHECK_TYPE_METHOD
