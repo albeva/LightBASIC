@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Dump CODE" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="testing.dump.bas -v -code-dump -o testing.dump-gen.bas" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$/samples" PASS_PARENT_ENVS_2="true" PROJECT_NAME="lbc" TARGET_NAME="lbc" CONFIG_NAME="Debug-Visual Studio x64" RUN_TARGET_PROJECT_NAME="lbc" RUN_TARGET_NAME="lbc">
+    <method v="2">
+      <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+    </method>
+  </configuration>
+</component>

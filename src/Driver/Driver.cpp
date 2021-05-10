@@ -173,7 +173,7 @@ void Driver::emitExecutable() noexcept {
     if (output.empty()) {
         output = m_context.getWorkingDir() / objFiles[0]->origin.path.stem();
         if (triple.isOSWindows()) {
-            output.replace_extension(".exe");
+            output += ".exe";
         }
     } else if (output.is_relative()) {
         output = fs::absolute(m_context.getWorkingDir() / output);

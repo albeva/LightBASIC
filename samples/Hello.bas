@@ -1,4 +1,4 @@
-''[alias="printf"] _
-'declare function printf(fmt as zstring, ...) as integer
-''
-var f = a- -b
+[alias="puts"] _
+declare function print(str as zstring) as integer
+
+print "Hello World\n"
