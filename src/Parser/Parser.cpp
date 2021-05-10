@@ -412,11 +412,13 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
  */
 unique_ptr<AstExpr> Parser::expression() noexcept {
     auto expr = factor();
-    if (!m_token->isOperator()) {
-        return expr;
+
+    replace(TokenKind::Assign, TokenKind::Equal);
+    if (m_token->isOperator()) {
+        return expression(std::move(expr), 1);
     }
 
-    return expression(std::move(expr), 1);
+    return expr;
 }
 
 /**
@@ -470,6 +472,7 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         auto prec = m_token->getPrecedence();
         auto kind = move()->kind();
 
+        replace(TokenKind::Minus, TokenKind::Negate);
         auto expr = expression(factor(), prec);
 
         auto unary = AstUnaryExpr::create({ start, m_endLoc });
@@ -486,7 +489,6 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
  * https://en.wikipedia.org/wiki/Operator-precedence_parser#Precedence_climbing_method
  */
 [[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) noexcept {
-    replace(TokenKind::Assign, TokenKind::Equal);
     while (m_token->getPrecedence() >= precedence) {
         auto current = m_token->getPrecedence();
         auto kind = m_token->kind();
@@ -578,8 +580,7 @@ bool Parser::isValid() const noexcept {
 
 void Parser::replace(TokenKind what, TokenKind with) noexcept {
     if (match(what)) {
-        auto repl = Token::create(with, m_token->range());
-        m_token.reset(repl.release());
+        m_token.reset(m_token->convert(with).release());
     }
 }
 

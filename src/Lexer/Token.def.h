@@ -26,37 +26,36 @@
     _( ParenClose,      ")"   ) \
     _( BracketOpen,     "["   ) \
     _( BracketClose,    "]"   ) \
-    _( Ellipsis,        "..." )
+    _( Ellipsis,        "..." ) \
+    _( Assign,          "="   )
 
 #define TOKEN_OPERATORS(_) \
-    _( Exponent,        "^",   11, Binary, Right ) \
-                                                   \
     _( Factorial,       "!",   10, Unary,  Right ) \
                                                    \
-    _( Negate,          "-",   9,  Unary,  Left  ) \
-    _( LogicalNot,      "NOT", 9,  Unary,  Left  ) \
+    _( Exponent,        "^",   9,  Binary, Right ) \
                                                    \
-    _( Multiply,        "*",   8,  Binary, Left  ) \
-    _( Divide,          "/",   8,  Binary, Left  ) \
+    _( Negate,          "-",   8,  Unary,  Left  ) \
+    _( LogicalNot,      "NOT", 8,  Unary,  Left  ) \
                                                    \
-    _( Modulus,         "MOD", 7,  Binary, Left  ) \
+    _( Multiply,        "*",   7,  Binary, Left  ) \
+    _( Divide,          "/",   7,  Binary, Left  ) \
                                                    \
-    _( Plus,            "+",   6,  Binary, Left  ) \
-    _( Minus,           "-",   6,  Binary, Left  ) \
+    _( Modulus,         "MOD", 6,  Binary, Left  ) \
                                                    \
-    _( Equal,           "=",   5,  Binary, Left  ) \
-    _( NotEqual,        "<>",  5,  Binary, Left  ) \
+    _( Plus,            "+",   5,  Binary, Left  ) \
+    _( Minus,           "-",   5,  Binary, Left  ) \
                                                    \
-    _( LessThan,        "<",   4,  Binary, Left  ) \
-    _( LessOrEqual,     "<=",  4,  Binary, Left  ) \
-    _( GreaterThan,     ">",   4,  Binary, Left  ) \
-    _( GreaterOrEqual,  ">=",  4,  Binary, Left  ) \
+    _( Equal,           "=",   4,  Binary, Left  ) \
+    _( NotEqual,        "<>",  4,  Binary, Left  ) \
                                                    \
-    _( LogicalAnd,      "AND", 3,  Binary, Left  ) \
+    _( LessThan,        "<",   3,  Binary, Left  ) \
+    _( LessOrEqual,     "<=",  3,  Binary, Left  ) \
+    _( GreaterThan,     ">",   3,  Binary, Left  ) \
+    _( GreaterOrEqual,  ">=",  3,  Binary, Left  ) \
                                                    \
-    _( LogicalOr,       "OR",  2,  Binary, Left  ) \
+    _( LogicalAnd,      "AND", 2,  Binary, Left  ) \
                                                    \
-    _( Assign,          "OR",  1,  Binary, Left  )
+    _( LogicalOr,       "OR",  1,  Binary, Left  )
 
 #define TOKEN_KEYWORDS(_)   \
     _( Var,             "VAR"      ) \

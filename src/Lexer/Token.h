@@ -48,6 +48,12 @@ public:
 
     ~Token() = default;
 
+    // convert token kind
+
+    [[nodiscard]] unique_ptr<Token> convert(TokenKind kind) const noexcept {
+        return create(kind, m_range);
+    }
+
     // Getters
 
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
