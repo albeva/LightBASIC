@@ -13,8 +13,8 @@ static std::vector<unique_ptr<TypeFunction>> declaredFunc;
 static std::vector<unique_ptr<TypePointer>> declaredPtrs;
 
 // Commonly used types
-const TypeVoid voidTy;                // VOID
-const TypeAny anyTy;                  // Any typeExpr
+const TypeVoid voidTy{};              // VOID
+const TypeAny anyTy{};                // Any typeExpr
 const TypePointer anyPtrTy{ &anyTy }; // void*
 
 // primitives
@@ -72,27 +72,13 @@ bool TypeRoot::isSignedIntegral() const noexcept {
 }
 
 // clang-format off
-#define CHECK_TYPE_INTEGRAL(ID, STR, KIND, BITS, SIGNED, ...)       \
-    bool TypeRoot::is##ID() const noexcept {                        \
-        if (!isIntegral()) {                                        \
-            return false;                                           \
-        }                                                           \
-        const auto* iTy = static_cast<const TypeIntegral*>(this);   \
-        return BITS == iTy->getBits() && SIGNED == iTy->isSigned(); \
+#define CHECK_TYPE_IMPL(ID, ...)             \
+    bool TypeRoot::is##ID() const noexcept { \
+        return this == &ID##Ty;              \
     }
-    INTEGRAL_TYPES(CHECK_TYPE_INTEGRAL)
-#undef CHECK_TYPE_INTEGRAL
-
-#define CHECK_TYPE_FP(ID, STR, KIND, BITS, ...)                        \
-    bool TypeRoot::is##ID() const noexcept {                           \
-        if (!isFloatingPoint()) {                                      \
-            return false;                                              \
-        }                                                              \
-        const auto* fpTy = static_cast<const TypeFloatingPoint*>(this); \
-        return BITS == fpTy->getBits();                                 \
-    }
-    FLOATINGPOINT_TYPES(CHECK_TYPE_FP)
-#undef CHECK_TYPE_INTEGRAL
+    INTEGRAL_TYPES(CHECK_TYPE_IMPL)
+    FLOATINGPOINT_TYPES(CHECK_TYPE_IMPL)
+#undef CHECK_TYPE_IMPL
 // clang-format on
 
 // Void
