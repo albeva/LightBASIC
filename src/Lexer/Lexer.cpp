@@ -22,6 +22,10 @@ inline bool isLineEnd(char ch) noexcept {
 inline llvm::SMRange getRange(const char* start, const char* end) noexcept {
     return { llvm::SMLoc::getFromPointer(start), llvm::SMLoc::getFromPointer(end) };
 }
+
+inline bool isIdentifierChar(char ch) noexcept {
+    return isAlpha(ch) || isDigit(ch) || ch == '_';
+}
 } // namespace
 
 Lexer::Lexer(Context& context, unsigned fileID) noexcept
@@ -171,7 +175,7 @@ unique_ptr<Token> Lexer::ellipsis() noexcept {
 unique_ptr<Token> Lexer::identifier() noexcept {
     const auto* start = m_input;
     size_t length = 1;
-    while (move() && isAlpha(m_char)) {
+    while (move() && isIdentifierChar(m_char)) {
         length++;
     }
     const auto* end = start + length; // NOLINT
