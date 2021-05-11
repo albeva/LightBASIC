@@ -9,8 +9,8 @@ using namespace lbc;
 namespace {
 
 // Declared declaredTypes.
-static std::vector<unique_ptr<TypeFunction>> declaredFunc;
-static std::vector<unique_ptr<TypePointer>> declaredPtrs;
+static std::vector<unique_ptr<TypeFunction>> declaredFunc; // NOLINT
+static std::vector<unique_ptr<TypePointer>> declaredPtrs; // NOLINT
 
 // Commonly used types
 const TypeVoid voidTy{};              // VOID
@@ -66,9 +66,10 @@ bool TypeRoot::isAnyPointer() const noexcept {
 }
 
 bool TypeRoot::isSignedIntegral() const noexcept {
-    if (!isIntegral())
+    if (!isIntegral()) {
         return false;
-    return static_cast<const TypeIntegral*>(this)->isSigned();
+    }
+    return static_cast<const TypeIntegral*>(this)->isSigned(); // NOLINT
 }
 
 // clang-format off

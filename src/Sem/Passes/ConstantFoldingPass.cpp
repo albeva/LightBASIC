@@ -58,7 +58,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
             [](double value) -> AstLiteralExpr::Value {
                 return -value;
             },
-            [](auto) -> AstLiteralExpr::Value {
+            [](auto /*value*/) -> AstLiteralExpr::Value {
                 llvm_unreachable("Non supported type");
             }
         };
@@ -70,7 +70,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
             [](bool value) -> AstLiteralExpr::Value {
                 return !value;
             },
-            [](auto) -> AstLiteralExpr::Value {
+            [](auto /*value*/) -> AstLiteralExpr::Value {
                 llvm_unreachable("Non supported type");
             }
         };
@@ -95,16 +95,16 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcep
 
     // clang-format off
     if (const auto* integral = dyn_cast<TypeIntegral>(ast->type)) {
-        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                      \
-            if (integral->getBits() == BITS && integral->isSigned() == SIGNED) { \
-                replacement->value = castLiteral<uint64_t, TYPE>(literal);       \
-                return replacement;                                              \
+        #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                          \
+            if (integral->getBits() == (BITS) && integral->isSigned() == (SIGNED)) { \
+                replacement->value = castLiteral<uint64_t, TYPE>(literal);           \
+                return replacement;                                                  \
             }
             INTEGRAL_TYPES(INTEGRAL)
         #undef INTEGRAL
     } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(ast->type)) {
         #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                 \
-            if (fp->getBits() == BITS) {                                 \
+            if (fp->getBits() == (BITS)) {                               \
                 replacement->value = castLiteral<double, TYPE>(literal); \
                 return replacement;                                      \
             }

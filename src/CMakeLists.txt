@@ -37,7 +37,6 @@ add_executable(
     Sem/Passes/FuncDeclarerPass.h
     Sem/SemanticAnalyzer.cpp
     Sem/SemanticAnalyzer.h
-    Symbol/Symbol.cpp
     Symbol/Symbol.h
     Symbol/SymbolTable.cpp
     Symbol/SymbolTable.h

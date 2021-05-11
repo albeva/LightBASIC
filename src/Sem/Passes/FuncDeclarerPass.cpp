@@ -12,10 +12,10 @@ void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     for (const auto& stmt : ast->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
-            visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()), true);
+            visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()), true); // NOLINT
             break;
         case AstKind::FuncStmt:
-            visitFuncDecl(static_cast<AstFuncStmt*>(stmt.get())->decl.get(), false);
+            visitFuncDecl(static_cast<AstFuncStmt*>(stmt.get())->decl.get(), false); // NOLINT
             break;
         default:
             break;

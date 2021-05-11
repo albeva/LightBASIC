@@ -296,8 +296,8 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
     if (ast->type == type) {
         return;
     }
-    auto src = type;
-    auto dst = ast->type;
+    const auto *src = type;
+    const auto *dst = ast->type;
 
     if ((src->isNumeric() || src->isBoolean())
         && (dst->isNumeric() || dst->isBoolean())) {

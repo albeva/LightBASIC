@@ -5,9 +5,12 @@ Checks: '*,
         -google-*,
         -zircon-*,
         -abseil-*,
+        -altera-struct-*,
         -modernize-use-trailing-return-type,
         -llvmlibc-callee-namespace,
-        -misc-non-private-member-variables-in-classes'
+        -misc-non-private-member-variables-in-classes,
+        -readability-function-cognitive-complexity,
+        -cppcoreguidelines-macro-usage'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 FormatStyle: none

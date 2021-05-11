@@ -18,7 +18,7 @@ namespace Sem {
         explicit ConstantFoldingPass(Context& context) noexcept : m_context{ context } {}
         ~ConstantFoldingPass() = default;
 
-        void fold(unique_ptr<AstExpr>& ast) noexcept;
+        static void fold(unique_ptr<AstExpr>& ast) noexcept;
 
     private:
         static unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;

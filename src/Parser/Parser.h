@@ -86,7 +86,7 @@ private:
     unique_ptr<Lexer> m_lexer;
     unique_ptr<Token> m_token;
     unique_ptr<Token> m_next;
-    llvm::SMLoc m_endLoc;
+    llvm::SMLoc m_endLoc{};
 };
 
 } // namespace lbc

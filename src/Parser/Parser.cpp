@@ -579,7 +579,7 @@ bool Parser::isValid() const noexcept {
 
 void Parser::replace(TokenKind what, TokenKind with) noexcept {
     if (match(what)) {
-        m_token.reset(m_token->convert(with).release());
+        m_token = m_token->convert(with);
     }
 }
 

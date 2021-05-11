@@ -2,6 +2,8 @@
 // Created by Albert Varaksin on 30/04/2021.
 //
 #pragma once
+#include <utility>
+
 #include "pch.h"
 #include "Context.h"
 
@@ -13,13 +15,13 @@ namespace lbc {
 struct Source final {
     NO_COPY_AND_MOVE(Source)
 
-    Source(Context::FileType ty, const fs::path& p, bool gen, const Source* o) noexcept
-    : type{ ty }, path{ p }, isGenerated{ gen }, origin{ o == nullptr ? *this : *o } {}
+    Source(Context::FileType ty, fs::path p, bool gen, const Source* o) noexcept
+    : type{ ty }, path{ std::move(p) }, isGenerated{ gen }, origin{ o == nullptr ? *this : *o } {}
 
     ~Source() = default;
 
-    [[nodiscard]] static unique_ptr<Source> create(Context::FileType type, const fs::path& path, bool generated, const Source* origin = nullptr) noexcept {
-        return make_unique<Source>(type, path, generated, origin);
+    [[nodiscard]] static unique_ptr<Source> create(Context::FileType type, fs::path path, bool generated, const Source* origin = nullptr) noexcept {
+        return make_unique<Source>(type, std::forward<fs::path>(path), generated, origin);
     }
 
     const Context::FileType type;
@@ -30,8 +32,8 @@ struct Source final {
     /**
      * Derive new generated Source with the same origin
      */
-    [[nodiscard]] unique_ptr<Source> derive(Context::FileType ty, const fs::path& p) const noexcept {
-        return create(ty, p, true, &origin);
+    [[nodiscard]] unique_ptr<Source> derive(Context::FileType ty, fs::path p) const noexcept {
+        return create(ty, std::move(p), true, &origin);
     }
 };
 

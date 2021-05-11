@@ -156,9 +156,6 @@ public:
         return type->getKind() == TypeFamily::Boolean;
     }
 
-    [[nodiscard]] constexpr unsigned getBits() const noexcept { return 1; }
-    [[nodiscard]] constexpr bool isSigned() const noexcept { return false; }
-
     [[nodiscard]] string asString() const noexcept final;
 
 protected:

@@ -132,7 +132,12 @@ void Driver::emitObjects(bool temporary) noexcept {
 void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
     const auto& bcFiles = getSources(Context::FileType::BitCode);
     auto& dstFiles = getSources(type);
-    auto filetype = "-filetype="s + (type == Context::FileType::Object ? "obj" : "asm");
+    string filetype;
+    if (type == Context::FileType::Object) {
+        filetype = "obj";
+    } else {
+        filetype = "asm";
+    }
     dstFiles.reserve(dstFiles.size() + bcFiles.size());
 
     auto assembler = m_context.getToolchain().createTask(ToolKind::Assembler);
@@ -140,7 +145,7 @@ void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
         auto output = deriveSource(*source, type, temporary);
 
         assembler.reset();
-        assembler.addArg(filetype);
+        assembler.addArg("-filetype="s + filetype);
         assembler.addPath("-o", output->path);
         assembler.addPath(source->path);
 

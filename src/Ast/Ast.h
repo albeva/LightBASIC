@@ -31,7 +31,7 @@ struct AstRoot {
 
     [[nodiscard]] constexpr AstKind kind() const noexcept { return m_kind; }
     [[nodiscard]] constexpr llvm::SMRange getRange() const noexcept { return m_range; }
-    [[nodiscard]] const llvm::StringRef getClassName() const noexcept;
+    [[nodiscard]] llvm::StringRef getClassName() const noexcept;
 
 private:
     const AstKind m_kind;
@@ -40,7 +40,7 @@ private:
 
 template<typename This, typename Base, AstKind kind>
 struct AstNode : Base {
-    constexpr AstNode(llvm::SMRange range) noexcept : Base{ kind, range } {}
+    constexpr explicit AstNode(llvm::SMRange range) noexcept : Base{ kind, range } {}
 
     static constexpr bool classof(const AstRoot* ast) noexcept {
         return ast->kind() == kind;
