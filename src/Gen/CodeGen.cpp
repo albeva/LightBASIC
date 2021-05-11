@@ -72,8 +72,10 @@ void CodeGen::visit(AstModule* ast) noexcept {
         llvm::ReturnInst::Create(m_llvmContext, retValue, &lastBlock);
     }
 
-    if ((m_globalCtorBlock != nullptr) && (m_globalCtorBlock->getTerminator() == nullptr)) {
-        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_globalCtorBlock);
+    if (m_globalCtorBlock != nullptr) { // NOLINT
+        if (m_globalCtorBlock->getTerminator() == nullptr) {
+            llvm::ReturnInst::Create(m_llvmContext, nullptr, m_globalCtorBlock);
+        }
     }
 }
 
@@ -195,10 +197,10 @@ void CodeGen::declareFuncs() noexcept {
     for (const auto& stmt : m_astRootModule->stmtList->stmts) {
         switch (stmt->kind()) {
         case AstKind::FuncDecl:
-            declareFunc(static_cast<AstFuncDecl*>(stmt.get()));
+            declareFunc(static_cast<AstFuncDecl*>(stmt.get())); // NOLINT
             break;
         case AstKind::FuncStmt:
-            declareFunc(static_cast<AstFuncStmt*>(stmt.get())->decl.get());
+            declareFunc(static_cast<AstFuncStmt*>(stmt.get())->decl.get()); // NOLINT
             break;
         default:
             break;
@@ -315,7 +317,7 @@ void CodeGen::visit(AstCallExpr* ast) noexcept {
 void CodeGen::visit(AstLiteralExpr* ast) noexcept {
     llvm::Constant* constant = nullptr;
     auto visitor = Visitor{
-        [&](std::monostate) {
+        [&](std::monostate /*value*/) {
             constant = llvm::ConstantPointerNull::get(
                 llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         },
@@ -326,7 +328,7 @@ void CodeGen::visit(AstLiteralExpr* ast) noexcept {
             constant = llvm::ConstantInt::get(
                 ast->type->getLlvmType(m_context),
                 value,
-                static_cast<const TypeIntegral*>(ast->type)->isSigned());
+                static_cast<const TypeIntegral*>(ast->type)->isSigned()); // NOLINT
         },
         [&](double value) {
             constant = llvm::ConstantFP::get(
@@ -336,8 +338,8 @@ void CodeGen::visit(AstLiteralExpr* ast) noexcept {
         [&](bool value) {
             constant = llvm::ConstantInt::get(
                 ast->type->getLlvmType(m_context),
-                value,
-                static_cast<const TypeBoolean*>(ast->type)->isSigned());
+                value ? 1 : 0,
+                false);
         }
     };
     std::visit(visitor, ast->value);
@@ -396,10 +398,10 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
     case TokenKind::LogicalNot: {
         auto* expr = ast->expr.get();
         visit(expr);
-        auto t = llvm::ConstantInt::get(
+        auto* t = llvm::ConstantInt::get(
             ast->type->getLlvmType(m_context),
             1,
-            static_cast<const TypeBoolean*>(ast->type)->isSigned());
+            false);
         ast->llvmValue = llvm::BinaryOperator::CreateXor(expr->llvmValue, t, "lnot", m_block);
         break;
     }
