@@ -4,6 +4,7 @@
 #include "CodePrinter.h"
 #include "Ast.h"
 #include "Lexer/Token.h"
+#include "Type/Type.h"
 using namespace lbc;
 
 void CodePrinter::visit(AstModule* ast) noexcept {
@@ -177,8 +178,8 @@ void CodePrinter::visit(AstCallExpr* ast) noexcept {
 }
 
 void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
-    constexpr auto visitor = Visitor{
-        [](std::monostate) -> string {
+    const auto visitor = Visitor{
+        [](std::monostate /*value*/) -> string {
             return "NULL";
         },
         [](const StringRef& value) -> string {
@@ -197,7 +198,11 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
             }
             return '"' + s + '"';
         },
-        [](uint64_t value) -> string {
+        [&](uint64_t value) -> string {
+            if (ast->type->isSignedIntegral()) {
+                auto sval = static_cast<int64_t>(value);
+                return std::to_string(sval);
+            }
             return std::to_string(value);
         },
         [](double value) -> string {

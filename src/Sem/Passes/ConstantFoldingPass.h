@@ -15,16 +15,14 @@ namespace Sem {
     public:
         NO_COPY_AND_MOVE(ConstantFoldingPass)
 
-        explicit ConstantFoldingPass(Context& context) noexcept : m_context{ context } {}
+        ConstantFoldingPass() noexcept = default;
         ~ConstantFoldingPass() = default;
 
-        static void fold(unique_ptr<AstExpr>& ast) noexcept;
+        void fold(unique_ptr<AstExpr>& ast) noexcept;
 
     private:
         static unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;
         static unique_ptr<AstExpr> visitCastExpr(AstCastExpr* ast) noexcept;
-
-        Context& m_context;
     };
 
 } // namespace Sem

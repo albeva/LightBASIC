@@ -13,7 +13,7 @@ using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
 : m_context{ context },
-  m_constantFolder{ context } {}
+  m_constantFolder{} {}
 
 void SemanticAnalyzer::visit(AstModule* ast) noexcept {
     m_astRootModule = ast;
@@ -145,10 +145,11 @@ void SemanticAnalyzer::visit(AstTypeExpr* ast) noexcept {
 
 void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
     visit(ast.get());
+    m_constantFolder.fold(ast);
     if (type != nullptr) {
         coerce(ast, type);
+        m_constantFolder.fold(ast);
     }
-    m_constantFolder.fold(ast);
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr* ast) noexcept {
@@ -242,7 +243,6 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
         }
         fatalError("Applying unary NOT to non-numeric pr bool type");
     case TokenKind::Negate:
-        // can negate numeric values
         if (type->isNumeric()) {
             ast->type = type;
             return;
@@ -251,14 +251,9 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
     default:
         llvm_unreachable("unknown unary operator");
     }
-
-    //    if (!isa<TypeNumeric>(ast->expr->type) && !isa<TypeBoolean>(ast->expr->type)) {
-    //        fatalError("Applying unary - to non numeric type");
-    //    }
-    //    ast->type = ast->expr->type;
 }
 
-void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
+void SemanticAnalyzer::visit(AstBinaryExpr* /*ast*/) noexcept {
     // TODO
     //    expression(ast->lhs);
     //    expression(ast->rhs);

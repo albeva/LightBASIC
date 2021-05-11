@@ -272,6 +272,10 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
         fatalError("Failed to parse '"_t + path.string() + "'");
     }
 
+    // Analyze
+    SemanticAnalyzer sem{ m_context };
+    sem.visit(ast.get());
+
     if (m_context.getDumpAst() || m_context.getDumpCode()) {
         m_modules.emplace_back(std::make_unique<TranslationUnit>(
             nullptr,
@@ -279,10 +283,6 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
             std::move(ast)));
         return;
     }
-
-    // Analyze
-    SemanticAnalyzer sem{ m_context };
-    sem.visit(ast.get());
 
     // generate IR
     CodeGen gen{ m_context };

@@ -15,7 +15,8 @@ using namespace lbc;
 
 CodeGen::CodeGen(Context& context) noexcept
 : m_context{ context },
-  m_llvmContext{ context.getLlvmContext() } {
+  m_llvmContext{ context.getLlvmContext() },
+  m_builder{ m_llvmContext } {
 }
 
 bool CodeGen::validate() const noexcept {
@@ -48,18 +49,21 @@ void CodeGen::visit(AstModule* ast) noexcept {
     }
     bool generateMain = !hasMainDefined && ast->hasImplicitMain;
 
+    llvm::Function* mainFn = nullptr;
     if (generateMain) {
-        m_function = llvm::Function::Create(
+        mainFn = llvm::Function::Create(
             llvm::FunctionType::get(llvm::Type::getInt32Ty(m_llvmContext), false),
             llvm::Function::ExternalLinkage,
             "main",
             *m_module);
-        m_function->setCallingConv(llvm::CallingConv::C);
-        m_function->setDSOLocal(true);
-        m_function->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
-        m_block = llvm::BasicBlock::Create(m_llvmContext, "", m_function);
+        mainFn->setCallingConv(llvm::CallingConv::C);
+        mainFn->setDSOLocal(true);
+        mainFn->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
+        auto* block = llvm::BasicBlock::Create(m_llvmContext, "", mainFn);
+        m_builder.SetInsertPoint(block);
     } else {
-        m_block = llvm::BasicBlock::Create(m_llvmContext);
+        auto* block = llvm::BasicBlock::Create(m_llvmContext);
+        m_builder.SetInsertPoint(block);
     }
 
     // parse statements
@@ -68,11 +72,11 @@ void CodeGen::visit(AstModule* ast) noexcept {
     // close main
     if (generateMain) {
         auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_llvmContext));
-        auto& lastBlock = m_function->getBasicBlockList().back();
+        auto& lastBlock = mainFn->getBasicBlockList().back();
         llvm::ReturnInst::Create(m_llvmContext, retValue, &lastBlock);
     }
 
-    if (m_globalCtorBlock != nullptr) { // NOLINT
+    if (m_globalCtorBlock != nullptr) {
         if (m_globalCtorBlock->getTerminator() == nullptr) {
             llvm::ReturnInst::Create(m_llvmContext, nullptr, m_globalCtorBlock);
         }
@@ -106,7 +110,8 @@ void CodeGen::visit(AstStmtList* ast) noexcept {
 void CodeGen::visit(AstAssignStmt* ast) noexcept {
     auto* dstValue = getStoreValue(ast->identExpr.get());
     visit(ast->expr.get());
-    new llvm::StoreInst(ast->expr->llvmValue, dstValue, m_block);
+
+    m_builder.CreateStore(ast->expr->llvmValue, dstValue);
 }
 
 llvm::Value* CodeGen::getStoreValue(AstIdentExpr* identExpr) {
@@ -155,10 +160,11 @@ void CodeGen::declareGlobalVar(AstVarDecl* ast) noexcept {
         ast->symbol->identifier());
 
     if (generateStoreInCtror) {
-        RESTORE_ON_EXIT(m_block);
-        m_block = getGlobalCtorBlock();
+        auto* block = m_builder.GetInsertBlock();
+        m_builder.SetInsertPoint(getGlobalCtorBlock());
         visit(ast->expr.get());
-        new llvm::StoreInst(ast->expr->llvmValue, value, m_block);
+        m_builder.CreateStore(ast->expr->llvmValue, value);
+        m_builder.SetInsertPoint(block);
     }
 
     sym->setLlvmValue(value);
@@ -174,14 +180,11 @@ void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
         exprValue = ast->expr->llvmValue;
     }
 
-    auto* value = new llvm::AllocaInst(
-        exprType,
-        0,
-        ast->symbol->identifier(),
-        m_block);
+    auto* value = m_builder.CreateAlloca(exprType, nullptr, ast->symbol->identifier());
 
     if (exprValue != nullptr) {
-        new llvm::StoreInst(exprValue, value, m_block);
+        // new llvm::StoreInst(exprValue, value, m_block);
+        m_builder.CreateStore(exprValue, value);
     }
 
     ast->symbol->setLlvmValue(value);
@@ -233,40 +236,43 @@ void CodeGen::visit(AstFuncParamDecl* /*ast*/) noexcept {
 }
 
 void CodeGen::visit(AstFuncStmt* ast) noexcept {
-    RESTORE_ON_EXIT(m_function);
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
-    m_function = llvm::cast<llvm::Function>(ast->decl->symbol->getLlvmValue());
-    m_block = llvm::BasicBlock::Create(m_llvmContext, "", m_function);
+    auto* func = llvm::cast<llvm::Function>(ast->decl->symbol->getLlvmValue());
+
+    auto* current = m_builder.GetInsertBlock();
+    auto* block = llvm::BasicBlock::Create(m_llvmContext, "", func);
+    m_builder.SetInsertPoint(block);
 
     for (const auto& param : ast->decl->paramDecls) {
         auto* sym = param->symbol;
         auto* value = sym->getLlvmValue();
-        sym->setLlvmValue(new llvm::AllocaInst( // NOLINT
+        sym->setLlvmValue(m_builder.CreateAlloca(
             sym->type()->getLlvmType(m_context),
-            0,
-            sym->identifier() + ".addr",
-            m_block));
-        new llvm::StoreInst(value, sym->getLlvmValue(), m_block);
+            nullptr,
+            sym->identifier() + ".addr"));
+        m_builder.CreateStore(value, sym->getLlvmValue());
     }
 
     visit(ast->stmtList.get());
 
-    if (m_block->getTerminator() == nullptr) {
-        auto* retType = m_function->getReturnType();
+    if (block->getTerminator() == nullptr) {
+        auto* retType = func->getReturnType();
         if (!retType->isVoidTy()) {
             fatalError("No RETURN statement");
         }
-        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
+        m_builder.CreateRetVoid();
     }
+
+    m_builder.SetInsertPoint(current);
 }
 
 void CodeGen::visit(AstReturnStmt* ast) noexcept {
     if (ast->expr) {
         visit(ast->expr.get());
-        llvm::ReturnInst::Create(m_llvmContext, ast->expr->llvmValue, m_block);
+        m_builder.CreateRet(ast->expr->llvmValue);
     } else {
-        llvm::ReturnInst::Create(m_llvmContext, nullptr, m_block);
+        m_builder.CreateRetVoid();
     }
 }
 
@@ -286,11 +292,7 @@ void CodeGen::visit(AstIdentExpr* ast) noexcept {
     }
 
     auto* sym = ast->symbol;
-    ast->llvmValue = new llvm::LoadInst(
-        sym->type()->getLlvmType(m_context),
-        sym->getLlvmValue(),
-        ast->symbol->identifier(),
-        m_block);
+    ast->llvmValue = m_builder.CreateLoad(sym->getLlvmValue(), sym->identifier());
 }
 
 void CodeGen::visit(AstTypeExpr* /*ast*/) noexcept {
@@ -309,9 +311,9 @@ void CodeGen::visit(AstCallExpr* ast) noexcept {
         args.emplace_back(arg->llvmValue);
     }
 
-    auto* inst = llvm::CallInst::Create(llvm::FunctionCallee(fn), args, "", m_block);
-    inst->setTailCall(false);
-    ast->llvmValue = inst;
+    auto* call = m_builder.CreateCall(llvm::FunctionCallee(fn), args, "");
+    call->setTailCall(false);
+    ast->llvmValue = call;
 }
 
 void CodeGen::visit(AstLiteralExpr* ast) noexcept {
@@ -388,9 +390,9 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
         visit(expr);
 
         if (expr->llvmValue->getType()->isIntegerTy()) {
-            ast->llvmValue = llvm::BinaryOperator::CreateNeg(expr->llvmValue, "", m_block);
+            ast->llvmValue = m_builder.CreateNeg(expr->llvmValue);
         } else if (expr->llvmValue->getType()->isFloatingPointTy()) {
-            ast->llvmValue = llvm::UnaryOperator::CreateFNeg(expr->llvmValue, "", m_block);
+            ast->llvmValue = m_builder.CreateFNeg(expr->llvmValue);
         }
 
         break;
@@ -398,11 +400,7 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
     case TokenKind::LogicalNot: {
         auto* expr = ast->expr.get();
         visit(expr);
-        auto* t = llvm::ConstantInt::get(
-            ast->type->getLlvmType(m_context),
-            1,
-            false);
-        ast->llvmValue = llvm::BinaryOperator::CreateXor(expr->llvmValue, t, "lnot", m_block);
+        ast->llvmValue = m_builder.CreateNot(expr->llvmValue, "lnot");
         break;
     }
     default:
@@ -425,15 +423,7 @@ void CodeGen::visit(AstCastExpr* ast) noexcept {
         srcIsSigned,
         ast->type->getLlvmType(m_context),
         dstIsSigned);
-
-    auto* value = llvm::CastInst::Create(
-        opcode,
-        ast->expr->llvmValue,
-        ast->type->getLlvmType(m_context),
-        "",
-        m_block);
-
-    ast->llvmValue = value;
+    ast->llvmValue = m_builder.CreateCast(opcode, ast->expr->llvmValue, ast->type->getLlvmType(m_context));
 }
 
 unique_ptr<llvm::Module> CodeGen::getModule() noexcept {

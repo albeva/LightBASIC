@@ -5,6 +5,7 @@
 #include "Ast.h"
 #include "Driver/Context.h"
 #include "Lexer/Token.h"
+#include "Type/Type.h"
 using namespace lbc;
 
 AstPrinter::AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
@@ -149,14 +150,18 @@ void AstPrinter::visit(AstCallExpr* ast) noexcept {
 
 void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
     using Ret = std::pair<TokenKind, string>;
-    constexpr auto visitor = Visitor{
-        [](std::monostate) -> Ret {
+    const auto visitor = Visitor{
+        [](std::monostate /*value*/) -> Ret {
             return { TokenKind::NullLiteral, "null" };
         },
         [](const StringRef& value) -> Ret {
             return { TokenKind::StringLiteral, value.str() };
         },
-        [](uint64_t value) -> Ret {
+        [&](uint64_t value) -> Ret {
+            if (ast->type->isSignedIntegral()) {
+                auto sval = static_cast<int64_t>(value);
+                return { TokenKind::IntegerLiteral, std::to_string(sval) };
+            }
             return { TokenKind::IntegerLiteral, std::to_string(value) };
         },
         [](double value) -> Ret {

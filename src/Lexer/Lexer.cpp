@@ -30,7 +30,6 @@ inline bool isIdentifierChar(char ch) noexcept {
 
 Lexer::Lexer(Context& context, unsigned fileID) noexcept
 : m_context{ context },
-  m_fileID{ fileID },
   m_buffer{ m_context.getSourceMrg().getMemoryBuffer(fileID) },
   m_input{ m_buffer->getBufferStart() },
   m_char{ *m_input },

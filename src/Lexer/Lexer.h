@@ -37,7 +37,6 @@ private:
     void handleLineEnd() noexcept;
 
     Context& m_context;
-    unsigned m_fileID;
     const llvm::MemoryBuffer* m_buffer;
     const char* m_input;
     char m_char;

@@ -51,10 +51,8 @@ private:
     unsigned int m_fileId = ~0U;
     Scope m_scope = Scope::Root;
     unique_ptr<llvm::Module> m_module;
-    llvm::Value* m_value = nullptr;
-    llvm::Function* m_function = nullptr;
-    llvm::BasicBlock* m_block = nullptr;
     llvm::BasicBlock* m_globalCtorBlock = nullptr;
+    llvm::IRBuilder<> m_builder;
     llvm::StringMap<llvm::Constant*> m_stringLiterals;
 };
 
