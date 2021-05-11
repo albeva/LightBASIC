@@ -455,9 +455,8 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
     if (match(TokenKind::Identifier)) {
         if (m_next && *m_next == TokenKind::ParenOpen) {
             return callExpr();
-        } else {
-            return identifier();
         }
+        return identifier();
     }
 
     if (accept(TokenKind::ParenOpen)) {
@@ -472,7 +471,7 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         auto prec = m_token->getPrecedence();
         auto kind = move()->kind();
 
-        replace(TokenKind::Minus, TokenKind::Negate);
+        replace(TokenKind::Assign, TokenKind::Equal);
         auto expr = expression(factor(), prec);
 
         auto unary = AstUnaryExpr::create({ start, m_endLoc });
