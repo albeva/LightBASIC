@@ -201,10 +201,10 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) noexcept {
 
 void SemanticAnalyzer::visit(AstLiteralExpr* ast) noexcept {
     constexpr auto visitor = Visitor{
-        [](const std::monostate&) {
+        [](const std::monostate& /*value*/) {
             return TokenKind::Null;
         },
-        [](const StringRef&) {
+        [](const StringRef& /*value*/) {
             return TokenKind::ZString;
         },
         [](uint64_t value) {
@@ -213,10 +213,10 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) noexcept {
             }
             return TokenKind::Integer;
         },
-        [](double) {
+        [](double /*value*/) {
             return TokenKind::Double;
         },
-        [](bool) {
+        [](bool /*value*/) {
             return TokenKind::Bool;
         }
     };
