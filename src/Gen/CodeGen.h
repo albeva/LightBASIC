@@ -23,11 +23,6 @@ public:
      */
     [[nodiscard]] bool validate() const noexcept;
 
-    /**
-     * Print module
-     */
-    void print() const noexcept;
-
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
 private:

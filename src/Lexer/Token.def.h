@@ -30,32 +30,33 @@
     _( Assign,          "="   )
 
 #define TOKEN_OPERATORS(_) \
-    _( Factorial,       "!",   10, Unary,  Right ) \
-                                                   \
-    _( Exponent,        "^",   9,  Binary, Right ) \
-                                                   \
-    _( Negate,          "-",   8,  Unary,  Left  ) \
-    _( LogicalNot,      "NOT", 8,  Unary,  Left  ) \
-                                                   \
-    _( Multiply,        "*",   7,  Binary, Left  ) \
-    _( Divide,          "/",   7,  Binary, Left  ) \
-                                                   \
-    _( Modulus,         "MOD", 6,  Binary, Left  ) \
-                                                   \
-    _( Plus,            "+",   5,  Binary, Left  ) \
-    _( Minus,           "-",   5,  Binary, Left  ) \
-                                                   \
-    _( Equal,           "=",   4,  Binary, Left  ) \
-    _( NotEqual,        "<>",  4,  Binary, Left  ) \
-                                                   \
-    _( LessThan,        "<",   3,  Binary, Left  ) \
-    _( LessOrEqual,     "<=",  3,  Binary, Left  ) \
-    _( GreaterThan,     ">",   3,  Binary, Left  ) \
-    _( GreaterOrEqual,  ">=",  3,  Binary, Left  ) \
-                                                   \
-    _( LogicalAnd,      "AND", 2,  Binary, Left  ) \
-                                                   \
-    _( LogicalOr,       "OR",  1,  Binary, Left  )
+    /* ID               Ch      Prec    Type    Assoc   Kind       */ \
+    _( Factorial,       "!",    10,     Unary,  Right,  Arithmetic  ) \
+                                                                      \
+    _( Exponent,        "^",    9,      Binary, Right,  Arithmetic  ) \
+                                                                      \
+    _( Negate,          "-",    8,      Unary,  Left,   Arithmetic  ) \
+    _( LogicalNot,      "NOT",  8,      Unary,  Left,   Logical     ) \
+                                                                      \
+    _( Multiply,        "*",    7,      Binary, Left,   Arithmetic  ) \
+    _( Divide,          "/",    7,      Binary, Left,   Arithmetic  ) \
+                                                                      \
+    _( Modulus,         "MOD",  6,      Binary, Left,   Arithmetic  ) \
+                                                                      \
+    _( Plus,            "+",    5,      Binary, Left,   Arithmetic  ) \
+    _( Minus,           "-",    5,      Binary, Left,   Arithmetic  ) \
+                                                                      \
+    _( Equal,           "=",    4,      Binary, Left,   Comparison  ) \
+    _( NotEqual,        "<>",   4,      Binary, Left,   Comparison  ) \
+                                                                      \
+    _( LessThan,        "<",    3,      Binary, Left,   Comparison  ) \
+    _( LessOrEqual,     "<=",   3,      Binary, Left,   Comparison  ) \
+    _( GreaterThan,     ">",    3,      Binary, Left,   Comparison  ) \
+    _( GreaterOrEqual,  ">=",   3,      Binary, Left,   Comparison  ) \
+                                                                      \
+    _( LogicalAnd,      "AND",  2,      Binary, Left,   Logical     ) \
+                                                                      \
+    _( LogicalOr,       "OR",   1,      Binary, Left,   Logical     )
 
 #define TOKEN_KEYWORDS(_)   \
     _( Var,             "VAR"      ) \

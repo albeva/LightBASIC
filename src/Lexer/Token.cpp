@@ -159,8 +159,20 @@ bool Token::isRightToLeft() const noexcept {
         return dir;
     switch (m_kind) {
         TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
-    default:
-        return false;
+        default:
+            return false;
+    }
+#undef CASE_OPERATOR
+}
+
+OperatorType Token::getOperatorType(TokenKind kind) noexcept {
+#define CASE_OPERATOR(ID, CH, PREC, BINARY, DIR, KIND, ...) \
+    case TokenKind::ID:                                     \
+        return OperatorType::KIND;
+    switch (kind) {
+        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+        default:
+            llvm_unreachable("Unknown operator type");
     }
 #undef CASE_OPERATOR
 }

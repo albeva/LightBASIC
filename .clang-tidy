@@ -10,7 +10,9 @@ Checks: '*,
         -llvmlibc-callee-namespace,
         -misc-non-private-member-variables-in-classes,
         -readability-function-cognitive-complexity,
-        -cppcoreguidelines-macro-usage'
+        -cppcoreguidelines-macro-usage,
+        -readability-convert-member-functions-to-static,
+        -bugprone-branch-clone'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 FormatStyle: none

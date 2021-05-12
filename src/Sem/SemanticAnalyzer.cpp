@@ -9,6 +9,7 @@
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
 #include <charconv>
+
 using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
@@ -253,14 +254,31 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
     }
 }
 
-void SemanticAnalyzer::visit(AstBinaryExpr* /*ast*/) noexcept {
-    // TODO
-    //    expression(ast->lhs);
-    //    expression(ast->rhs);
-    //    if (isa<TypeNumeric>(ast->lhs->type) && isa<TypeNumeric>(ast->rhs->type)) {
-    //        ast->type = ast->expr->type;
-    //    }
-    //    fatalError("Applying unary - to non numeric type");
+void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
+    expression(ast->lhs);
+    expression(ast->rhs);
+
+    const auto* lt = ast->lhs->type;
+    const auto* rt = ast->rhs->type;
+
+    switch (Token::getOperatorType(ast->tokenKind)) {
+    case OperatorType::Arithmetic:
+        // int(a) OP int(b) -> int, size=max(size(a), size(b)) unsigned=unsigned(a) or unsigned(b)
+        // int OP fp -> fp
+        // fp OP int -> fp
+        // fp(a) OP fp(b) -> fp, size=max(size(a), size(b))
+        if (!lt->isNumeric() || !rt->isNumeric()) {
+            fatalError("Non numeric type in arithmetic operation");
+        }
+        break;
+    case OperatorType::Comparison:
+        // numeric OP numeric -> bool
+        // bool OP bool -> bool
+        break;
+    case OperatorType::Logical:
+        // bool OP bool -> bool
+        break;
+    }
 }
 
 void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {
@@ -291,8 +309,8 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
     if (ast->type == type) {
         return;
     }
-    const auto *src = type;
-    const auto *dst = ast->type;
+    const auto* src = type;
+    const auto* dst = ast->type;
 
     if ((src->isNumeric() || src->isBoolean())
         && (dst->isNumeric() || dst->isBoolean())) {

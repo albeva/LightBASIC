@@ -13,6 +13,12 @@ enum class TokenKind {
 #undef IMPL_TOKENS
 };
 
+enum class OperatorType {
+    Arithmetic,
+    Logical,
+    Comparison
+};
+
 class Token final {
 public:
     NO_COPY_AND_MOVE(Token)
@@ -83,6 +89,8 @@ public:
     [[nodiscard]] bool isUnary() const noexcept;
     [[nodiscard]] bool isLeftToRight() const noexcept;
     [[nodiscard]] bool isRightToLeft() const noexcept;
+
+    static OperatorType getOperatorType(TokenKind kind) noexcept;
 
     // comparisons
 

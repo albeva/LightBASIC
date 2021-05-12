@@ -2,15 +2,11 @@
 // Created by Albert Varaksin on 05/07/2020.
 //
 #include "CodeGen.h"
-#include "Ast/Ast.h"
 #include "Driver/Context.h"
-#include "Lexer/Token.h"
-#include "Symbol/Symbol.h"
-#include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
-#include <charconv>
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
+
 using namespace lbc;
 
 CodeGen::CodeGen(Context& context) noexcept
@@ -22,12 +18,6 @@ CodeGen::CodeGen(Context& context) noexcept
 bool CodeGen::validate() const noexcept {
     assert(m_module != nullptr); // NOLINT
     return !llvm::verifyModule(*m_module, &llvm::outs());
-}
-
-void CodeGen::print() const noexcept {
-    assert(m_module != nullptr); // NOLINT
-    auto* printer = llvm::createPrintModulePass(llvm::outs());
-    printer->runOnModule(*m_module);
 }
 
 void CodeGen::visit(AstModule* ast) noexcept {
@@ -70,7 +60,7 @@ void CodeGen::visit(AstModule* ast) noexcept {
     visit(ast->stmtList.get());
 
     // close main
-    if (generateMain) {
+    if (mainFn != nullptr) {
         auto* retValue = llvm::Constant::getNullValue(llvm::IntegerType::getInt32Ty(m_llvmContext));
         auto& lastBlock = mainFn->getBasicBlockList().back();
         llvm::ReturnInst::Create(m_llvmContext, retValue, &lastBlock);
@@ -408,7 +398,7 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
     }
 }
 
-void CodeGen::visit(AstBinaryExpr* ast) noexcept {
+void CodeGen::visit(AstBinaryExpr* /*ast*/) noexcept {
     // TODO
 }
 
