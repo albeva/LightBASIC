@@ -10,7 +10,7 @@ namespace {
 
 // Declared declaredTypes.
 static std::vector<unique_ptr<TypeFunction>> declaredFunc; // NOLINT
-static std::vector<unique_ptr<TypePointer>> declaredPtrs; // NOLINT
+static std::vector<unique_ptr<TypePointer>> declaredPtrs;  // NOLINT
 
 // Commonly used types
 const TypeVoid voidTy{};              // VOID

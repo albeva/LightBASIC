@@ -65,10 +65,12 @@ public:
     [[nodiscard]] bool isSignedIntegral() const noexcept;
 
     // clang-format off
+
     #define CHECK_TYPE_METHOD(ID, ...) [[nodiscard]] bool is##ID() const noexcept;
     INTEGRAL_TYPES(CHECK_TYPE_METHOD)
     FLOATINGPOINT_TYPES(CHECK_TYPE_METHOD)
     #undef CHECK_TYPE_METHOD
+
     // clang-format on
 
 protected:
