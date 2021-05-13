@@ -258,25 +258,114 @@ void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
     expression(ast->lhs);
     expression(ast->rhs);
 
-    const auto* lt = ast->lhs->type;
-    const auto* rt = ast->rhs->type;
-
     switch (Token::getOperatorType(ast->tokenKind)) {
-    case OperatorType::Arithmetic:
-        // int(a) OP int(b) -> int, size=max(size(a), size(b)) unsigned=unsigned(a) or unsigned(b)
-        // int OP fp -> fp
-        // fp OP int -> fp
-        // fp(a) OP fp(b) -> fp, size=max(size(a), size(b))
-        if (!lt->isNumeric() || !rt->isNumeric()) {
-            fatalError("Non numeric type in arithmetic operation");
+    case OperatorType::Arithmetic: {
+//        auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) {
+//            cast(expr, ty);
+//            m_constantFolder.fold(expr);
+//            ast->type = ty;
+//        };
+//
+//        const auto* lt = dyn_cast<TypeNumeric>(ast->lhs->type);
+//        const auto* rt = dyn_cast<TypeNumeric>(ast->rhs->type);
+//        if (lt == nullptr || rt == nullptr) {
+//            fatalError("Applying binary operation to non numeric type");
+//        }
+//
+//        if (lt == rt) {
+//            ast->type = lt;
+//            return;
+//        }
+//
+//        if (const auto* li = dyn_cast<TypeIntegral>(lt)) {
+//            if (const auto* ri = dyn_cast<TypeIntegral>(rt)) {
+//                if (li->getBits() > ri->getBits()) {
+//                    return convert(ast->rhs, li);
+//                }
+//                if (li->getBits() < ri->getBits()) {
+//                    return convert(ast->lhs, ri);
+//                }
+//                if (li->isSigned()) {
+//                    return convert(ast->rhs, li);
+//                }
+//                if (ri->isSigned()) {
+//                    return convert(ast->lhs, ri);
+//                }
+//            } else if (const auto* rfp = dyn_cast<TypeFloatingPoint>(rt)) {
+//                return convert(ast->lhs, rfp);
+//            }
+//        } else if (const auto& lfp = dyn_cast<TypeFloatingPoint>(lt)) {
+//            if (const auto* ri = dyn_cast<TypeIntegral>(rt)) {
+//                return convert(ast->rhs, lfp);
+//            }
+//            if (const auto* rfp = dyn_cast<TypeFloatingPoint>(rt)) {
+//                if (lfp->getBits() > rfp->getBits()) {
+//                    return convert(ast->rhs, lfp);
+//                }
+//                return convert(ast->lhs, rfp);
+//            }
+//        }
+        llvm_unreachable("Unknown difference between types");
+    }
+    case OperatorType::Comparison: {
+        if (ast->lhs->type->isBoolean() && ast->rhs->type->isBoolean()) {
+            if (ast->tokenKind == TokenKind::Equal || ast->tokenKind == TokenKind::NotEqual) {
+                ast->type = ast->lhs->type;
+                return;
+            }
+            fatalError("Applying unsupported operation to boolean type");
         }
-        break;
-    case OperatorType::Comparison:
-        // numeric OP numeric -> bool
-        // bool OP bool -> bool
-        break;
+
+        const auto* lt = dyn_cast<TypeNumeric>(ast->lhs->type);
+        const auto* rt = dyn_cast<TypeNumeric>(ast->rhs->type);
+        if (lt == nullptr || rt == nullptr) {
+            fatalError("Applying binary operation to non numeric type");
+        }
+
+        if (lt == rt) {
+            ast->type = TypeBoolean::get();
+            return;
+        }
+
+        auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) {
+            cast(expr, ty);
+            m_constantFolder.fold(expr);
+            ast->type = TypeBoolean::get();
+        };
+
+        if (const auto* li = dyn_cast<TypeIntegral>(lt)) {
+            if (const auto* ri = dyn_cast<TypeIntegral>(rt)) {
+                if (li->getBits() > ri->getBits()) {
+                    return convert(ast->rhs, li);
+                }
+                if (li->getBits() < ri->getBits()) {
+                    return convert(ast->lhs, ri);
+                }
+                if (li->isSigned()) {
+                    return convert(ast->rhs, li);
+                }
+                if (ri->isSigned()) {
+                    return convert(ast->lhs, ri);
+                }
+            } else if (const auto* rfp = dyn_cast<TypeFloatingPoint>(rt)) {
+                return convert(ast->lhs, rfp);
+            }
+        } else if (const auto& lfp = dyn_cast<TypeFloatingPoint>(lt)) {
+            if (const auto* ri = dyn_cast<TypeIntegral>(rt)) {
+                return convert(ast->rhs, lfp);
+            }
+            if (const auto* rfp = dyn_cast<TypeFloatingPoint>(rt)) {
+                if (lfp->getBits() > rfp->getBits()) {
+                    return convert(ast->rhs, lfp);
+                }
+                return convert(ast->lhs, rfp);
+            }
+        }
+        llvm_unreachable("Unknown difference between types");
+    }
     case OperatorType::Logical:
         // bool OP bool -> bool
+        llvm_unreachable("Logical operators not implemented yet");
         break;
     }
 }

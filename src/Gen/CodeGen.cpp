@@ -398,8 +398,80 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
     }
 }
 
-void CodeGen::visit(AstBinaryExpr* /*ast*/) noexcept {
-    // TODO
+void CodeGen::visit(AstBinaryExpr* ast) noexcept {
+    visit(ast->lhs.get());
+    visit(ast->rhs.get());
+    const auto* ty = ast->lhs->type;
+
+    if (Token::getOperatorType(ast->tokenKind) == OperatorType::Comparison) {
+        comparison(ast, ty);
+    } else {
+        llvm_unreachable("Unsupported");
+    }
+}
+
+void CodeGen::comparison(AstBinaryExpr* ast, const TypeRoot* ty) noexcept {
+    llvm::CmpInst::Predicate pred{};
+    if (ty->isIntegral()) {
+        auto sign = ty->isSignedIntegral();
+        switch (ast->tokenKind) {
+        case TokenKind::Equal:
+            pred = llvm::CmpInst::Predicate::ICMP_EQ;
+            break;
+        case TokenKind::NotEqual:
+            pred = llvm::CmpInst::Predicate::ICMP_NE;
+            break;
+        case TokenKind::LessThan:
+            pred = sign ? llvm::CmpInst::Predicate::ICMP_SLT : llvm::CmpInst::Predicate::ICMP_ULT;
+            break;
+        case TokenKind::LessOrEqual:
+            pred = sign ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
+            break;
+        case TokenKind::GreaterOrEqual:
+            pred = sign ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
+            break;
+        case TokenKind::GreaterThan:
+            pred = sign ? llvm::CmpInst::Predicate::ICMP_SGT : llvm::CmpInst::Predicate::ICMP_UGT;
+            break;
+        default:
+            llvm_unreachable("Unkown comparison op");
+        }
+    } else if (ty->isFloatingPoint()) {
+        switch (ast->tokenKind) {
+        case TokenKind::Equal:
+            pred = llvm::CmpInst::Predicate::FCMP_OEQ;
+            break;
+        case TokenKind::NotEqual:
+            pred = llvm::CmpInst::Predicate::FCMP_UNE;
+            break;
+        case TokenKind::LessThan:
+            pred = llvm::CmpInst::Predicate::FCMP_OLT;
+            break;
+        case TokenKind::LessOrEqual:
+            pred = llvm::CmpInst::Predicate::FCMP_OLE;
+            break;
+        case TokenKind::GreaterOrEqual:
+            pred = llvm::CmpInst::Predicate::FCMP_OGE;
+            break;
+        case TokenKind::GreaterThan:
+            pred = llvm::CmpInst::Predicate::FCMP_OGT;
+            break;
+        default:
+            llvm_unreachable("Unkown comparison op");
+        }
+    } else if (ty->isBoolean()) {
+        switch (ast->tokenKind) {
+        case TokenKind::Equal:
+            pred = llvm::CmpInst::Predicate::ICMP_EQ;
+            break;
+        case TokenKind::NotEqual:
+            pred = llvm::CmpInst::Predicate::ICMP_NE;
+            break;
+        default:
+            llvm_unreachable("Unkown comparison op");
+        }
+    }
+    ast->llvmValue = this->m_builder.CreateICmp(pred, ast->lhs->llvmValue, ast->rhs->llvmValue);
 }
 
 void CodeGen::visit(AstCastExpr* ast) noexcept {

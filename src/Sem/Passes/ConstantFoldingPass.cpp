@@ -28,6 +28,9 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     case AstKind::UnaryExpr:
         replace = visitUnaryExpr(static_cast<AstUnaryExpr*>(ast.get())); // NOLINT
         break;
+    case AstKind::BinaryExpr:
+        replace = visitBinaryExpr(static_cast<AstBinaryExpr*>(ast.get())); // NOLINT
+        break;
     case AstKind::CastExpr:
         replace = visitCastExpr(static_cast<AstCastExpr*>(ast.get())); // NOLINT
         break;
@@ -82,6 +85,11 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
     }
 
     return replacement;
+}
+
+unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr* /*ast*/) noexcept {
+    // TODO
+    return nullptr;
 }
 
 unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcept {

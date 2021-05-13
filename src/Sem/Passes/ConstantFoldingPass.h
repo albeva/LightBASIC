@@ -22,6 +22,7 @@ namespace Sem {
 
     private:
         static unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;
+        static unique_ptr<AstExpr> visitBinaryExpr(AstBinaryExpr* ast) noexcept;
         static unique_ptr<AstExpr> visitCastExpr(AstCastExpr* ast) noexcept;
     };
 
