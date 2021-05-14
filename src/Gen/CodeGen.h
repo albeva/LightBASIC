@@ -53,8 +53,8 @@ private:
     llvm::IRBuilder<> m_builder;
     llvm::StringMap<llvm::Constant*> m_stringLiterals;
 
-    llvm::ConstantInt * m_constantFalse = nullptr;
-    llvm::ConstantInt * m_constantTrue = nullptr;
+    llvm::ConstantInt* m_constantFalse = nullptr;
+    llvm::ConstantInt* m_constantTrue = nullptr;
 };
 
 } // namespace lbc
