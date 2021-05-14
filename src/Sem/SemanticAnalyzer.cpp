@@ -236,13 +236,7 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
             ast->type = type;
             return;
         }
-        if (type->isNumeric()) {
-            cast(ast->expr, TypeBoolean::get());
-            m_constantFolder.fold(ast->expr);
-            ast->type = ast->expr->type;
-            return;
-        }
-        fatalError("Applying unary NOT to non-numeric pr bool type");
+        fatalError("Applying unary NOT to non bool type");
     case TokenKind::Negate:
         if (type->isNumeric()) {
             ast->type = type;
@@ -262,52 +256,27 @@ void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
 
     switch (Token::getOperatorType(ast->tokenKind)) {
     case OperatorType::Arithmetic: {
-//        auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) {
-//            cast(expr, ty);
-//            m_constantFolder.fold(expr);
-//            ast->type = ty;
-//        };
-//
-//        const auto* lt = dyn_cast<TypeNumeric>(ast->lhs->type);
-//        const auto* rt = dyn_cast<TypeNumeric>(ast->rhs->type);
-//        if (lt == nullptr || rt == nullptr) {
-//            fatalError("Applying binary operation to non numeric type");
-//        }
-//
-//        if (lt == rt) {
-//            ast->type = lt;
-//            return;
-//        }
-//
-//        if (const auto* li = dyn_cast<TypeIntegral>(lt)) {
-//            if (const auto* ri = dyn_cast<TypeIntegral>(rt)) {
-//                if (li->getBits() > ri->getBits()) {
-//                    return convert(ast->rhs, li);
-//                }
-//                if (li->getBits() < ri->getBits()) {
-//                    return convert(ast->lhs, ri);
-//                }
-//                if (li->isSigned()) {
-//                    return convert(ast->rhs, li);
-//                }
-//                if (ri->isSigned()) {
-//                    return convert(ast->lhs, ri);
-//                }
-//            } else if (const auto* rfp = dyn_cast<TypeFloatingPoint>(rt)) {
-//                return convert(ast->lhs, rfp);
-//            }
-//        } else if (const auto& lfp = dyn_cast<TypeFloatingPoint>(lt)) {
-//            if (const auto* ri = dyn_cast<TypeIntegral>(rt)) {
-//                return convert(ast->rhs, lfp);
-//            }
-//            if (const auto* rfp = dyn_cast<TypeFloatingPoint>(rt)) {
-//                if (lfp->getBits() > rfp->getBits()) {
-//                    return convert(ast->rhs, lfp);
-//                }
-//                return convert(ast->lhs, rfp);
-//            }
-//        }
-        llvm_unreachable("Unknown difference between types");
+        if (!left->isNumeric() || !right->isNumeric()) {
+            fatalError("Applying artithmetic operation to non numeric type");
+        }
+
+        const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
+            cast(expr, ty);
+            m_constantFolder.fold(expr);
+            ast->type = ty;
+        };
+
+        switch (left->compare(right)) {
+        case TypeComparison::Incompatible:
+            fatalError("Operator on incompatible types");
+        case TypeComparison::Downcast:
+            return convert(ast->rhs, left);
+        case TypeComparison::Equal:
+            ast->type = TypeBoolean::get();
+            return;
+        case TypeComparison::Upcast:
+            return convert(ast->lhs, right);
+        }
     }
     case OperatorType::Comparison: {
         if (left->isBoolean() && right->isBoolean()) {
@@ -319,7 +288,7 @@ void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
         }
 
         if (!left->isNumeric() || !right->isNumeric()) {
-            fatalError("Applying binary operation to non numeric type");
+            fatalError("Applying comparison operation to non numeric type");
         }
 
         const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
@@ -341,9 +310,11 @@ void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
         }
     }
     case OperatorType::Logical:
-        // bool OP bool -> bool
-        llvm_unreachable("Logical operators not implemented yet");
-        break;
+        if (!left->isBoolean() || !right->isBoolean()) {
+            fatalError("Applying logical operator to non boolean type");
+        }
+        ast->type = left;
+        return;
     }
 }
 
