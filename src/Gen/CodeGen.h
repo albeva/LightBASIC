@@ -39,7 +39,8 @@ private:
     void declareLocalVar(AstVarDecl* ast) noexcept;
     static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
     llvm::Constant* getStringConstant(const StringRef& str) noexcept;
-    void comparison(AstBinaryExpr* ast, const TypeRoot* ty) noexcept;
+    void comparison(AstBinaryExpr* ast) noexcept;
+    void arithmetic(AstBinaryExpr* ast) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

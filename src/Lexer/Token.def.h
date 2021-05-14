@@ -31,10 +31,6 @@
 
 #define TOKEN_OPERATORS(_) \
     /* ID               Ch      Prec    Type    Assoc   Kind       */ \
-    _( Factorial,       "!",    10,     Unary,  Right,  Arithmetic  ) \
-                                                                      \
-    _( Exponent,        "^",    9,      Binary, Right,  Arithmetic  ) \
-                                                                      \
     _( Negate,          "-",    8,      Unary,  Left,   Arithmetic  ) \
     _( LogicalNot,      "NOT",  8,      Unary,  Left,   Logical     ) \
                                                                       \

@@ -401,16 +401,19 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
 void CodeGen::visit(AstBinaryExpr* ast) noexcept {
     visit(ast->lhs.get());
     visit(ast->rhs.get());
-    const auto* ty = ast->lhs->type;
 
-    if (Token::getOperatorType(ast->tokenKind) == OperatorType::Comparison) {
-        comparison(ast, ty);
-    } else {
-        llvm_unreachable("Unsupported");
+    switch(Token::getOperatorType(ast->tokenKind)) {
+    case OperatorType::Arithmetic:
+        return arithmetic(ast);
+    case OperatorType::Logical:
+        break;
+    case OperatorType::Comparison:
+        return comparison(ast);
     }
 }
 
-void CodeGen::comparison(AstBinaryExpr* ast, const TypeRoot* ty) noexcept {
+void CodeGen::comparison(AstBinaryExpr* ast) noexcept {
+    const auto* ty = ast->lhs->type;
     llvm::CmpInst::Predicate pred{};
     if (ty->isIntegral()) {
         auto sign = ty->isSignedIntegral();
@@ -470,8 +473,61 @@ void CodeGen::comparison(AstBinaryExpr* ast, const TypeRoot* ty) noexcept {
         default:
             llvm_unreachable("Unkown comparison op");
         }
+    } else {
+        llvm_unreachable("Unkown comparison type");
     }
     ast->llvmValue = this->m_builder.CreateICmp(pred, ast->lhs->llvmValue, ast->rhs->llvmValue);
+}
+
+void CodeGen::arithmetic(AstBinaryExpr* ast) noexcept {
+    const auto* ty = ast->lhs->type;
+    llvm::Instruction::BinaryOps op{};
+
+    if (ty->isIntegral()) {
+        auto sign = ty->isSignedIntegral();
+        switch (ast->tokenKind) {
+        case TokenKind::Multiply:
+            op = llvm::Instruction::Mul;
+            break;
+        case TokenKind::Divide:
+            op = sign ? llvm::Instruction::SDiv : llvm::Instruction::UDiv;
+            break;
+        case TokenKind::Modulus:
+            op = sign ? llvm::Instruction::SRem : llvm::Instruction::URem;
+            break;;
+        case TokenKind::Plus:
+            op = llvm::Instruction::Add;
+            break;
+        case TokenKind::Minus:
+            op = llvm::Instruction::Sub;
+            break;
+        default:
+            llvm_unreachable("Unknown binary op");
+        }
+    } else if (ty->isFloatingPoint()) {
+        switch (ast->tokenKind) {
+        case TokenKind::Multiply:
+            op = llvm::Instruction::FMul;
+            break;
+        case TokenKind::Divide:
+            op = llvm::Instruction::FDiv;
+            break;
+        case TokenKind::Modulus:
+            op = llvm::Instruction::FRem;
+            break;;
+        case TokenKind::Plus:
+            op = llvm::Instruction::FAdd;
+            break;
+        case TokenKind::Minus:
+            op = llvm::Instruction::FSub;
+            break;
+        default:
+            llvm_unreachable("Unknown binary op");
+        }
+    } else {
+        llvm_unreachable("Unsupported binary op type");
+    }
+    ast->llvmValue = m_builder.CreateBinOp(op, ast->lhs->llvmValue, ast->rhs->llvmValue);
 }
 
 void CodeGen::visit(AstCastExpr* ast) noexcept {

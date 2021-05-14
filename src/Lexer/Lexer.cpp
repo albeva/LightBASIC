@@ -113,10 +113,6 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
             return op(TokenKind::Multiply);
         case '/':
             return op(TokenKind::Divide);
-        case '^':
-            return op(TokenKind::Exponent);
-        case '!':
-            return op(TokenKind::Factorial);
         case '<': {
             auto la = peek(1);
             if (la == '>') {

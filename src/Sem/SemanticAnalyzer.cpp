@@ -226,6 +226,10 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) noexcept {
     ast->type = TypeRoot::fromTokenKind(typeKind);
 }
 
+//------------------------------------------------------------------
+// Unary Expressions
+//------------------------------------------------------------------
+
 void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
     expression(ast->expr);
     const auto* type = ast->expr->type;
@@ -248,84 +252,31 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
     }
 }
 
+//------------------------------------------------------------------
+// Binary Expressions
+//------------------------------------------------------------------
+
 void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
     expression(ast->lhs);
     expression(ast->rhs);
+
+    switch (Token::getOperatorType(ast->tokenKind)) {
+    case OperatorType::Arithmetic:
+        return arithmetic(ast);
+    case OperatorType::Comparison:
+        return comparison(ast);
+    case OperatorType::Logical:
+        return logical(ast);
+    }
+}
+
+void SemanticAnalyzer::arithmetic(AstBinaryExpr* ast) noexcept {
     const auto* left = ast->lhs->type;
     const auto* right = ast->rhs->type;
 
-    switch (Token::getOperatorType(ast->tokenKind)) {
-    case OperatorType::Arithmetic: {
-        if (!left->isNumeric() || !right->isNumeric()) {
-            fatalError("Applying artithmetic operation to non numeric type");
-        }
-
-        const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
-            cast(expr, ty);
-            m_constantFolder.fold(expr);
-            ast->type = ty;
-        };
-
-        switch (left->compare(right)) {
-        case TypeComparison::Incompatible:
-            fatalError("Operator on incompatible types");
-        case TypeComparison::Downcast:
-            return convert(ast->rhs, left);
-        case TypeComparison::Equal:
-            ast->type = TypeBoolean::get();
-            return;
-        case TypeComparison::Upcast:
-            return convert(ast->lhs, right);
-        }
+    if (!left->isNumeric() || !right->isNumeric()) {
+        fatalError("Applying artithmetic operation to non numeric type");
     }
-    case OperatorType::Comparison: {
-        if (left->isBoolean() && right->isBoolean()) {
-            if (ast->tokenKind == TokenKind::Equal || ast->tokenKind == TokenKind::NotEqual) {
-                ast->type = left;
-                return;
-            }
-            fatalError("Applying unsupported operation to boolean type");
-        }
-
-        if (!left->isNumeric() || !right->isNumeric()) {
-            fatalError("Applying comparison operation to non numeric type");
-        }
-
-        const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
-            cast(expr, ty);
-            m_constantFolder.fold(expr);
-            ast->type = TypeBoolean::get();
-        };
-
-        switch (left->compare(right)) {
-        case TypeComparison::Incompatible:
-            fatalError("Operator on incompatible types");
-        case TypeComparison::Downcast:
-            return convert(ast->rhs, left);
-        case TypeComparison::Equal:
-            ast->type = TypeBoolean::get();
-            return;
-        case TypeComparison::Upcast:
-            return convert(ast->lhs, right);
-        }
-    }
-    case OperatorType::Logical:
-        if (!left->isBoolean() || !right->isBoolean()) {
-            fatalError("Applying logical operator to non boolean type");
-        }
-        ast->type = left;
-        return;
-    }
-}
-
-void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {
-    fatalError("CAST not implemented");
-}
-
-void SemanticAnalyzer::visit(AstIfExpr* ast) noexcept {
-    expression(ast->expr, TypeBoolean::get());
-    expression(ast->trueExpr);
-    expression(ast->falseExpr);
 
     const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
         cast(expr, ty);
@@ -333,39 +284,70 @@ void SemanticAnalyzer::visit(AstIfExpr* ast) noexcept {
         ast->type = ty;
     };
 
-    const auto* left = ast->trueExpr->type;
-    const auto* right = ast->falseExpr->type;
-    switch(left->compare(right)) {
+    switch (left->compare(right)) {
     case TypeComparison::Incompatible:
-        fatalError("Incompatible types");
+        fatalError("Operator on incompatible types");
     case TypeComparison::Downcast:
-        return convert(ast->falseExpr, left);
+        return convert(ast->rhs, left);
     case TypeComparison::Equal:
         ast->type = left;
         return;
     case TypeComparison::Upcast:
-        return convert(ast->trueExpr, right);
+        return convert(ast->lhs, right);
     }
 }
 
-//----------------------------------------
-// Utils
-//----------------------------------------
+void SemanticAnalyzer::logical(AstBinaryExpr* ast) noexcept {
+    const auto* left = ast->lhs->type;
+    const auto* right = ast->rhs->type;
 
-Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, const StringRef& id) noexcept {
-    if (m_table->find(id, false) != nullptr) {
-        fatalError("Redefinition of "_t + id);
+    if (!left->isBoolean() || !right->isBoolean()) {
+        fatalError("Applying logical operator to non boolean type");
     }
-    auto* symbol = m_table->insert(id);
+    ast->type = left;
+}
 
-    // alias?
-    if (ast->attributes) {
-        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
-            symbol->setAlias(*alias);
+void SemanticAnalyzer::comparison(AstBinaryExpr* ast) noexcept {
+    const auto* left = ast->lhs->type;
+    const auto* right = ast->rhs->type;
+
+    if (left->isBoolean() && right->isBoolean()) {
+        if (ast->tokenKind == TokenKind::Equal || ast->tokenKind == TokenKind::NotEqual) {
+            ast->type = left;
+            return;
         }
+        fatalError("Applying unsupported operation to boolean type");
     }
 
-    return symbol;
+    if (!left->isNumeric() || !right->isNumeric()) {
+        fatalError("Applying comparison operation to non numeric type");
+    }
+
+    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
+        cast(expr, ty);
+        m_constantFolder.fold(expr);
+        ast->type = TypeBoolean::get();
+    };
+
+    switch (left->compare(right)) {
+    case TypeComparison::Incompatible:
+        fatalError("Operator on incompatible types");
+    case TypeComparison::Downcast:
+        return convert(ast->rhs, left);
+    case TypeComparison::Equal:
+        ast->type = TypeBoolean::get();
+        return;
+    case TypeComparison::Upcast:
+        return convert(ast->lhs, right);
+    }
+}
+
+//------------------------------------------------------------------
+// Casting
+//------------------------------------------------------------------
+
+void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {
+    fatalError("CAST not implemented");
 }
 
 void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
@@ -396,4 +378,54 @@ void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noex
     cast->type = type;
     cast->implicit = true;
     ast.reset(cast.release()); // NOLINT
+}
+
+//------------------------------------------------------------------
+// IfExpr
+//------------------------------------------------------------------
+
+void SemanticAnalyzer::visit(AstIfExpr* ast) noexcept {
+    expression(ast->expr, TypeBoolean::get());
+    expression(ast->trueExpr);
+    expression(ast->falseExpr);
+
+    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
+        cast(expr, ty);
+        m_constantFolder.fold(expr);
+        ast->type = ty;
+    };
+
+    const auto* left = ast->trueExpr->type;
+    const auto* right = ast->falseExpr->type;
+    switch(left->compare(right)) {
+    case TypeComparison::Incompatible:
+        fatalError("Incompatible types");
+    case TypeComparison::Downcast:
+        return convert(ast->falseExpr, left);
+    case TypeComparison::Equal:
+        ast->type = left;
+        return;
+    case TypeComparison::Upcast:
+        return convert(ast->trueExpr, right);
+    }
+}
+
+//------------------------------------------------------------------
+// Utils
+//------------------------------------------------------------------
+
+Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, const StringRef& id) noexcept {
+    if (m_table->find(id, false) != nullptr) {
+        fatalError("Redefinition of "_t + id);
+    }
+    auto* symbol = m_table->insert(id);
+
+    // alias?
+    if (ast->attributes) {
+        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+            symbol->setAlias(*alias);
+        }
+    }
+
+    return symbol;
 }
