@@ -41,6 +41,7 @@ private:
     llvm::Constant* getStringConstant(const StringRef& str) noexcept;
     void comparison(AstBinaryExpr* ast) noexcept;
     void arithmetic(AstBinaryExpr* ast) noexcept;
+    void logical(AstBinaryExpr* ast) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;
@@ -48,9 +49,12 @@ private:
     unsigned int m_fileId = ~0U;
     Scope m_scope = Scope::Root;
     unique_ptr<llvm::Module> m_module;
-    llvm::BasicBlock* m_globalCtorBlock = nullptr;
+    llvm::Function* m_globalCtorFunc = nullptr;
     llvm::IRBuilder<> m_builder;
     llvm::StringMap<llvm::Constant*> m_stringLiterals;
+
+    llvm::ConstantInt * m_constantFalse = nullptr;
+    llvm::ConstantInt * m_constantTrue = nullptr;
 };
 
 } // namespace lbc
