@@ -82,6 +82,46 @@ bool TypeRoot::isSignedIntegral() const noexcept {
 #undef CHECK_TYPE_IMPL
 // clang-format on
 
+TypeComparison TypeRoot::compare(const TypeRoot *other) const noexcept {
+    if (this == other) {
+        return TypeComparison::Equal;
+    }
+
+    if (const auto* left = dyn_cast<TypeIntegral>(this)) {
+        if (const auto* right = dyn_cast<TypeIntegral>(other)) {
+            if (left->getBits() > right->getBits()) {
+                return TypeComparison::Downcast;
+            }
+            if (left->getBits() < right->getBits()) {
+                return TypeComparison::Upcast;
+            }
+            if (left->isSigned()) {
+                return TypeComparison::Downcast;
+            }
+            if (right->isSigned()) {
+                return TypeComparison::Upcast;
+            }
+        } else if (other->isFloatingPoint()) {
+            return TypeComparison::Upcast;
+        }
+        return TypeComparison::Incompatible;
+    }
+
+    if (const auto& left = dyn_cast<TypeFloatingPoint>(this)) {
+        if (other->isIntegral()) {
+            return TypeComparison::Downcast;
+        }
+        if (const auto* right = dyn_cast<TypeFloatingPoint>(other)) {
+            if (left->getBits() > right->getBits()) {
+                return TypeComparison::Downcast;
+            }
+            return TypeComparison::Upcast;
+        }
+    }
+
+    return TypeComparison::Incompatible;
+}
+
 // Void
 
 const TypeVoid* TypeVoid::get() noexcept {

@@ -30,6 +30,13 @@ class TypeZString;
 class Context;
 enum class TokenKind;
 
+enum class TypeComparison {
+    Incompatible,
+    Downcast,
+    Equal,
+    Upcast
+};
+
 /**
  * Base typeExpr is root for all lb types
  *
@@ -63,6 +70,8 @@ public:
     [[nodiscard]] constexpr bool isZString() const noexcept { return m_kind == TypeFamily::ZString; }
     [[nodiscard]] bool isAnyPointer() const noexcept;
     [[nodiscard]] bool isSignedIntegral() const noexcept;
+
+    [[nodiscard]] TypeComparison compare(const TypeRoot* other) const noexcept;
 
     // clang-format off
 
