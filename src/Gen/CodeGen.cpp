@@ -402,7 +402,7 @@ void CodeGen::visit(AstBinaryExpr* ast) noexcept {
     visit(ast->lhs.get());
     visit(ast->rhs.get());
 
-    switch(Token::getOperatorType(ast->tokenKind)) {
+    switch (Token::getOperatorType(ast->tokenKind)) {
     case OperatorType::Arithmetic:
         return arithmetic(ast);
     case OperatorType::Logical:
@@ -494,7 +494,8 @@ void CodeGen::arithmetic(AstBinaryExpr* ast) noexcept {
             break;
         case TokenKind::Modulus:
             op = sign ? llvm::Instruction::SRem : llvm::Instruction::URem;
-            break;;
+            break;
+            ;
         case TokenKind::Plus:
             op = llvm::Instruction::Add;
             break;
@@ -514,7 +515,8 @@ void CodeGen::arithmetic(AstBinaryExpr* ast) noexcept {
             break;
         case TokenKind::Modulus:
             op = llvm::Instruction::FRem;
-            break;;
+            break;
+            ;
         case TokenKind::Plus:
             op = llvm::Instruction::FAdd;
             break;

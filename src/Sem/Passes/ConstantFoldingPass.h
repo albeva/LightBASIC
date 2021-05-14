@@ -15,7 +15,7 @@ namespace Sem {
     public:
         NO_COPY_AND_MOVE(ConstantFoldingPass)
 
-        explicit ConstantFoldingPass(Context& context) noexcept: m_context{ context } {}
+        explicit ConstantFoldingPass(Context& context) noexcept : m_context{ context } {}
         ~ConstantFoldingPass() = default;
 
         void fold(unique_ptr<AstExpr>& ast) noexcept;

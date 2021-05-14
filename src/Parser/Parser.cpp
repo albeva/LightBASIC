@@ -556,7 +556,7 @@ unique_ptr<AstIfExpr> Parser::ifExpr() noexcept {
     expect(TokenKind::Else);
     auto falseExpr = expression();
 
-    auto ast = AstIfExpr::create({start, m_endLoc});
+    auto ast = AstIfExpr::create({ start, m_endLoc });
     ast->expr = std::move(expr);
     ast->trueExpr = std::move(trueExpr);
     ast->falseExpr = std::move(falseExpr);

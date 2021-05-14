@@ -397,7 +397,7 @@ void SemanticAnalyzer::visit(AstIfExpr* ast) noexcept {
 
     const auto* left = ast->trueExpr->type;
     const auto* right = ast->falseExpr->type;
-    switch(left->compare(right)) {
+    switch (left->compare(right)) {
     case TypeComparison::Incompatible:
         fatalError("Incompatible types");
     case TypeComparison::Downcast:

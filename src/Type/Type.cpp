@@ -82,7 +82,7 @@ bool TypeRoot::isSignedIntegral() const noexcept {
 #undef CHECK_TYPE_IMPL
 // clang-format on
 
-TypeComparison TypeRoot::compare(const TypeRoot *other) const noexcept {
+TypeComparison TypeRoot::compare(const TypeRoot* other) const noexcept {
     if (this == other) {
         return TypeComparison::Equal;
     }

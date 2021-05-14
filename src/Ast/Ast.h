@@ -235,7 +235,7 @@ struct AstCastExpr final : AstNode<AstCastExpr, AstExpr, AstKind::CastExpr> {
     bool implicit = false;
 };
 
-struct AstIfExpr final: AstNode<AstIfExpr, AstExpr, AstKind::IfExpr> {
+struct AstIfExpr final : AstNode<AstIfExpr, AstExpr, AstKind::IfExpr> {
     using AstNode::AstNode;
     unique_ptr<AstExpr> expr;
     unique_ptr<AstExpr> trueExpr;
