@@ -30,7 +30,7 @@ private:
     void logical(AstBinaryExpr* ast) noexcept;
     void comparison(AstBinaryExpr* ast) noexcept;
 
-    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, const StringRef& id) noexcept;
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, StringRef id) noexcept;
     static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
     static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
 

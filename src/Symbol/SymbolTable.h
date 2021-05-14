@@ -22,10 +22,10 @@ public:
 
     [[nodiscard]] SymbolTable* parent() const { return m_parent; }
 
-    Symbol* insert(const StringRef& name);
+    Symbol* insert(StringRef name);
 
-    [[nodiscard]] bool exists(const StringRef& name, bool recursive = false) const;
-    [[nodiscard]] Symbol* find(const StringRef& id, bool recursive = true) const;
+    [[nodiscard]] bool exists(StringRef name, bool recursive = false) const;
+    [[nodiscard]] Symbol* find(StringRef id, bool recursive = true) const;
 
 private:
     SymbolTable* m_parent;

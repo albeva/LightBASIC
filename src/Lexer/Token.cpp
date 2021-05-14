@@ -29,7 +29,7 @@ constexpr std::array kindToDescription {
 
 } // namespace
 
-const StringRef& Token::description(TokenKind kind) noexcept {
+StringRef Token::description(TokenKind kind) noexcept {
     auto index = static_cast<size_t>(kind);
     return kindToDescription.at(index);
 }

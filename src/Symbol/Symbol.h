@@ -12,7 +12,7 @@ class Symbol final {
 public:
     NO_COPY_AND_MOVE(Symbol)
 
-    explicit Symbol(const StringRef& name, const TypeRoot* type = nullptr)
+    explicit Symbol(StringRef name, const TypeRoot* type = nullptr)
     : m_name{ name }, m_type{ type }, m_alias{ "" } {}
 
     ~Symbol() = default;
@@ -23,15 +23,15 @@ public:
     [[nodiscard]] bool isExternal() const { return m_external; }
     void setExternal(bool external) { m_external = external; }
 
-    [[nodiscard]] const StringRef& name() const { return m_name; }
+    [[nodiscard]] StringRef name() const { return m_name; }
 
     [[nodiscard]] llvm::Value* getLlvmValue() const { return m_llvmValue; }
     void setLlvmValue(llvm::Value* value) { m_llvmValue = value; }
 
-    [[nodiscard]] const StringRef& alias() const { return m_alias; }
-    void setAlias(const StringRef& alias) { m_alias = alias; }
+    [[nodiscard]] StringRef alias() const { return m_alias; }
+    void setAlias(StringRef alias) { m_alias = alias; }
 
-    [[nodiscard]] const StringRef& identifier() const {
+    [[nodiscard]] StringRef identifier() const {
         if (m_alias.empty()) {
             return m_name;
         }

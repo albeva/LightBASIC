@@ -117,7 +117,7 @@ struct AstAttr : AstRoot {
 
 struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::AttributeList> {
     using AstNode::AstNode;
-    [[nodiscard]] std::optional<StringRef> getStringLiteral(const StringRef& key) const;
+    [[nodiscard]] std::optional<StringRef> getStringLiteral(StringRef key) const;
     std::vector<unique_ptr<AstAttribute>> attribs;
 };
 

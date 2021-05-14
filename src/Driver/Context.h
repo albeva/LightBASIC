@@ -145,7 +145,7 @@ public:
     [[nodiscard]] fs::path resolveFilePath(const fs::path& path) const;
 
     /**
-     * Retain a copy of the string in the context and return a const StringRef& that
+     * Retain a copy of the string in the context and return a StringRef that
      * we can pass around safely without worry of it expiring (as long as context lives)
      * @param str string to retain
      */

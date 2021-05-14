@@ -182,7 +182,7 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
         [](std::monostate /*value*/) -> string {
             return "NULL";
         },
-        [](const StringRef& value) -> string {
+        [](StringRef value) -> string {
             constexpr std::array chars{
                 std::make_pair('\"', "\\\""),
                 std::make_pair('\n', "\\n"),

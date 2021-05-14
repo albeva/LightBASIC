@@ -25,7 +25,7 @@ public:
     using Value = std::variant<std::monostate, StringRef, uint64_t, double, bool>;
 
     // Describe given token kind
-    static const StringRef& description(TokenKind kind) noexcept;
+    static StringRef description(TokenKind kind) noexcept;
 
     // find matching token for string or return TokenKind::Identifier
     static TokenKind findKind(StringRef str) noexcept;
@@ -40,7 +40,7 @@ public:
     Token(TokenKind kind, const llvm::SMRange& range) noexcept
     : m_kind{ kind }, m_value{ std::monostate{} }, m_range{ range } {}
 
-    Token(TokenKind kind, const StringRef& value, const llvm::SMRange& range) noexcept
+    Token(TokenKind kind, StringRef value, const llvm::SMRange& range) noexcept
     : m_kind{ kind }, m_value{ value }, m_range{ range } {}
 
     Token(uint64_t value, const llvm::SMRange& range) noexcept
@@ -72,7 +72,7 @@ public:
         return m_range;
     };
 
-    [[nodiscard]] const StringRef& description() const noexcept {
+    [[nodiscard]] StringRef description() const noexcept {
         return description(m_kind);
     }
 

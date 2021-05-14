@@ -20,7 +20,7 @@ llvm::StringRef AstRoot::getClassName() const noexcept {
     return literals::nodes.at(index);
 }
 
-std::optional<StringRef> AstAttributeList::getStringLiteral(const StringRef& key) const {
+std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const {
     for (const auto& attr : attribs) {
         if (attr->identExpr->id == key) {
             if (attr->argExprs.size() != 1) {

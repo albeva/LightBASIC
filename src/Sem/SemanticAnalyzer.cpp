@@ -206,7 +206,7 @@ void SemanticAnalyzer::visit(AstLiteralExpr* ast) noexcept {
         [](const std::monostate& /*value*/) {
             return TokenKind::Null;
         },
-        [](const StringRef& /*value*/) {
+        [](StringRef /*value*/) {
             return TokenKind::ZString;
         },
         [](uint64_t value) {
@@ -414,7 +414,7 @@ void SemanticAnalyzer::visit(AstIfExpr* ast) noexcept {
 // Utils
 //------------------------------------------------------------------
 
-Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, const StringRef& id) noexcept {
+Symbol* SemanticAnalyzer::createNewSymbol(AstDecl* ast, StringRef id) noexcept {
     if (m_table->find(id, false) != nullptr) {
         fatalError("Redefinition of "_t + id);
     }

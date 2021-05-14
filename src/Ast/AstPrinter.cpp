@@ -154,7 +154,7 @@ void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
         [](std::monostate /*value*/) -> Ret {
             return { TokenKind::NullLiteral, "null" };
         },
-        [](const StringRef& value) -> Ret {
+        [](StringRef value) -> Ret {
             return { TokenKind::StringLiteral, value.str() };
         },
         [&](uint64_t value) -> Ret {

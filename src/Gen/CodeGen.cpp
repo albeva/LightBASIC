@@ -321,7 +321,7 @@ void CodeGen::visit(AstLiteralExpr* ast) noexcept {
             constant = llvm::ConstantPointerNull::get(
                 llvm::cast<llvm::PointerType>(ast->type->getLlvmType(m_context)));
         },
-        [&](const StringRef& str) {
+        [&](StringRef str) {
             constant = getStringConstant(str);
         },
         [&](uint64_t value) {
@@ -343,7 +343,7 @@ void CodeGen::visit(AstLiteralExpr* ast) noexcept {
     ast->llvmValue = constant;
 }
 
-llvm::Constant* CodeGen::getStringConstant(const StringRef& str) noexcept {
+llvm::Constant* CodeGen::getStringConstant(StringRef str) noexcept {
     auto iter = m_stringLiterals.find(str);
     if (iter != m_stringLiterals.end()) {
         return iter->second;

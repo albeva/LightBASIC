@@ -8,7 +8,7 @@
 #include "pch.h"
 
 namespace lbc::TempFileCache {
-[[nodiscard]] fs::path createUniquePath(const StringRef& suffix);
-[[nodiscard]] fs::path createUniquePath(const fs::path& file, const StringRef& suffix);
+[[nodiscard]] fs::path createUniquePath(StringRef suffix);
+[[nodiscard]] fs::path createUniquePath(const fs::path& file, StringRef suffix);
 void removeTemporaryFiles();
 } // namespace lbc::TempFileCache
