@@ -1,8 +1,10 @@
+''------------------------------------------------------------------------------
 '' test-008-logical-not.bas
 '' - unary NOT to bool literal
 '' - unary NOT to bool variable
 ''
 '' CHECK: 0, 1, 0, 1
+''------------------------------------------------------------------------------
 [alias="printf"] _
 declare function printf(str as zstring, ...) as integer
 
