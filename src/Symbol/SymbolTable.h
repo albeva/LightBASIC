@@ -15,7 +15,7 @@ public:
     using iterator = Storage::iterator;
 
     explicit SymbolTable(SymbolTable* parent = nullptr) : m_parent{ parent } {}
-    ~SymbolTable() = default;
+    ~SymbolTable() noexcept = default;
 
     iterator begin() { return m_symbols.begin(); }
     iterator end() { return m_symbols.end(); }

@@ -18,7 +18,7 @@ struct Source final {
     Source(Context::FileType ty, fs::path p, bool gen, const Source* o) noexcept
     : type{ ty }, path{ std::move(p) }, isGenerated{ gen }, origin{ o == nullptr ? *this : *o } {}
 
-    ~Source() = default;
+    ~Source() noexcept = default;
 
     [[nodiscard]] static unique_ptr<Source> create(Context::FileType type, fs::path path, bool generated, const Source* origin = nullptr) noexcept {
         return make_unique<Source>(type, std::forward<fs::path>(path), generated, origin);

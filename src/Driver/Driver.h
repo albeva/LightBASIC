@@ -18,7 +18,7 @@ public:
     NO_COPY_AND_MOVE(Driver)
 
     explicit Driver(Context& context) noexcept : m_context{ context } {}
-    ~Driver() = default;
+    ~Driver() noexcept = default;
 
     void drive() noexcept;
 

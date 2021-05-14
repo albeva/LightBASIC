@@ -23,7 +23,7 @@ namespace Sem {
         NO_COPY_AND_MOVE(FuncDeclarerPass)
 
         explicit FuncDeclarerPass(Context& context) noexcept : m_context{ context } {}
-        ~FuncDeclarerPass() = default;
+        ~FuncDeclarerPass() noexcept = default;
 
         void visit(AstModule* ast) noexcept;
 

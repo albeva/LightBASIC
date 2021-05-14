@@ -15,7 +15,7 @@ public:
     explicit Symbol(StringRef name, const TypeRoot* type = nullptr)
     : m_name{ name }, m_type{ type }, m_alias{ "" } {}
 
-    ~Symbol() = default;
+    ~Symbol() noexcept = default;
 
     [[nodiscard]] const TypeRoot* type() const { return m_type; }
     void setType(const TypeRoot* type) { m_type = type; }

@@ -54,7 +54,7 @@ public:
         }
         return m_llvmType;
     }
-    virtual ~TypeRoot() = default;
+    virtual ~TypeRoot() noexcept = default;
     [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind) noexcept;
     [[nodiscard]] virtual string asString() const noexcept = 0;
 

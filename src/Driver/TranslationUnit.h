@@ -14,7 +14,7 @@ struct TranslationUnit final {
     TranslationUnit(unique_ptr<llvm::Module>&& m, const Source* src, unique_ptr<AstModule> tree) noexcept
     : llvmModule{ std::move(m) }, source{ src }, ast{ std::move(tree) } {}
 
-    ~TranslationUnit() = default;
+    ~TranslationUnit() noexcept = default;
 
     unique_ptr<llvm::Module> llvmModule;
     const Source* source;

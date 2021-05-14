@@ -17,7 +17,7 @@ public:
     NO_COPY_AND_MOVE(Parser)
 
     Parser(Context& context, unsigned int fileId, bool isMain) noexcept;
-    ~Parser() = default;
+    ~Parser() noexcept = default;
 
     [[nodiscard]] unique_ptr<AstModule> parse() noexcept;
 

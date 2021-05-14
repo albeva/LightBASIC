@@ -46,7 +46,7 @@ public:
     [[nodiscard]] static string getFileExt(FileType type);
 
     Context();
-    ~Context() = default;
+    ~Context() noexcept = default;
 
     void validate() const noexcept;
 

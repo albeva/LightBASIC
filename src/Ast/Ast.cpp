@@ -14,7 +14,7 @@ constexpr std::array nodes {
 };
 } // namespace literals
 
-llvm::StringRef AstRoot::getClassName() const noexcept {
+StringRef AstRoot::getClassName() const noexcept {
     auto index = static_cast<size_t>(kind());
     assert(index < literals::nodes.size()); // NOLINT
     return literals::nodes.at(index);

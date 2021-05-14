@@ -19,7 +19,7 @@ public:
     ToolTask(Context& context, fs::path path) noexcept
     : m_context{ context }, m_path{ std::move(path) } {}
 
-    ~ToolTask() = default;
+    ~ToolTask() noexcept = default;
 
     ToolTask& reset() noexcept;
 

@@ -15,7 +15,7 @@ public:
     NO_COPY_AND_MOVE(Lexer)
 
     Lexer(Context& context, unsigned fileID) noexcept;
-    ~Lexer() = default;
+    ~Lexer() noexcept = default;
 
     [[nodiscard]] unique_ptr<Token> next() noexcept;
 

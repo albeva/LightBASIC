@@ -19,7 +19,7 @@ public:
     using Args = llvm::ArrayRef<const char*>;
 
     explicit CmdLineParser(Context& context) noexcept : m_context{ context } {}
-    ~CmdLineParser() = default;
+    ~CmdLineParser() noexcept = default;
 
     void parse(const Args& args) noexcept;
 

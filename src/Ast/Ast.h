@@ -27,11 +27,11 @@ struct AstRoot {
 
     constexpr explicit AstRoot(AstKind kind, llvm::SMRange range) noexcept
     : m_kind{ kind }, m_range{ range } {}
-    virtual ~AstRoot() = default;
+    virtual ~AstRoot() noexcept = default;
 
     [[nodiscard]] constexpr AstKind kind() const noexcept { return m_kind; }
     [[nodiscard]] constexpr llvm::SMRange getRange() const noexcept { return m_range; }
-    [[nodiscard]] llvm::StringRef getClassName() const noexcept;
+    [[nodiscard]] StringRef getClassName() const noexcept;
 
 private:
     const AstKind m_kind;

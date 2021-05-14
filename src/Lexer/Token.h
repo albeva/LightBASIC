@@ -52,7 +52,7 @@ public:
     Token(bool value, const llvm::SMRange& range) noexcept
     : m_kind{ TokenKind::BooleanLiteral }, m_value{ value }, m_range{ range } {}
 
-    ~Token() = default;
+    ~Token() noexcept = default;
 
     // convert token kind
 
