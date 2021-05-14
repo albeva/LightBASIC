@@ -182,7 +182,6 @@ void CodeGen::declareLocalVar(AstVarDecl* ast) noexcept {
     auto* value = m_builder.CreateAlloca(exprType, nullptr, ast->symbol->identifier());
 
     if (exprValue != nullptr) {
-        // new llvm::StoreInst(exprValue, value, m_block);
         m_builder.CreateStore(exprValue, value);
     }
 
@@ -426,9 +425,9 @@ void CodeGen::logical(AstBinaryExpr* ast) noexcept {
 
     auto* func = lhsBlock->getParent();
     const auto isAnd = ast->tokenKind == TokenKind::LogicalAnd;
-    const auto* prefix = isAnd ? "and" : "or";
+    auto prefix = isAnd ? "and"s : "or"s;
     auto* elseBlock = llvm::BasicBlock::Create(m_llvmContext, prefix, func);
-    auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, prefix + ".end"_t);
+    auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, prefix + ".end");
 
     if (isAnd) {
         m_builder.CreateCondBr(ast->lhs->llvmValue, elseBlock, endBlock);
