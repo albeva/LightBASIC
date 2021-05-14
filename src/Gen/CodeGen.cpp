@@ -488,6 +488,16 @@ void CodeGen::visit(AstCastExpr* ast) noexcept {
     ast->llvmValue = m_builder.CreateCast(opcode, ast->expr->llvmValue, ast->type->getLlvmType(m_context));
 }
 
+void CodeGen::visit(AstIfExpr* ast) noexcept {
+    visit(ast->expr.get());
+    visit(ast->trueExpr.get());
+    visit(ast->falseExpr.get());
+    ast->llvmValue = m_builder.CreateSelect(
+        ast->expr->llvmValue,
+        ast->trueExpr->llvmValue,
+        ast->falseExpr->llvmValue);
+}
+
 unique_ptr<llvm::Module> CodeGen::getModule() noexcept {
     return std::move(m_module);
 }

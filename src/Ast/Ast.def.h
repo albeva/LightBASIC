@@ -60,9 +60,10 @@
     _( LiteralExpr ) \
     _( UnaryExpr   ) \
     _( BinaryExpr  ) \
-    _( CastExpr    )
+    _( CastExpr    ) \
+    _( IfExpr      )
 
-#define AST_EXPR_RANGE(_) _(IdentExpr, CastExpr)
+#define AST_EXPR_RANGE(_) _(IdentExpr, IfExpr)
 
 /**
  * Combined

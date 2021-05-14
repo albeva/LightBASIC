@@ -206,6 +206,15 @@ void AstPrinter::visit(AstCastExpr* ast) noexcept {
     });
 }
 
+void AstPrinter::visit(AstIfExpr* ast) noexcept {
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast->expr.get(), "expr");
+        writeExpr(ast->trueExpr.get(), "true");
+        writeExpr(ast->falseExpr.get(), "false");
+    });
+}
+
 void AstPrinter::writeAttributes(AstAttributeList* ast) noexcept {
     if (ast == nullptr || ast->attribs.empty()) {
         return;

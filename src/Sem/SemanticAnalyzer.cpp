@@ -14,7 +14,7 @@ using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
 : m_context{ context },
-  m_constantFolder{} {}
+  m_constantFolder{ context } {}
 
 void SemanticAnalyzer::visit(AstModule* ast) noexcept {
     m_astRootModule = ast;
@@ -322,6 +322,32 @@ void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {
     fatalError("CAST not implemented");
 }
 
+void SemanticAnalyzer::visit(AstIfExpr* ast) noexcept {
+    expression(ast->expr, TypeBoolean::get());
+    expression(ast->trueExpr);
+    expression(ast->falseExpr);
+
+    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
+        cast(expr, ty);
+        m_constantFolder.fold(expr);
+        ast->type = ty;
+    };
+
+    const auto* left = ast->trueExpr->type;
+    const auto* right = ast->falseExpr->type;
+    switch(left->compare(right)) {
+    case TypeComparison::Incompatible:
+        fatalError("Incompatible types");
+    case TypeComparison::Downcast:
+        return convert(ast->falseExpr, left);
+    case TypeComparison::Equal:
+        ast->type = left;
+        return;
+    case TypeComparison::Upcast:
+        return convert(ast->trueExpr, right);
+    }
+}
+
 //----------------------------------------
 // Utils
 //----------------------------------------
@@ -349,15 +375,19 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
     const auto* src = type;
     const auto* dst = ast->type;
 
-    if ((src->isNumeric() || src->isBoolean())
-        && (dst->isNumeric() || dst->isBoolean())) {
+    switch (src->compare(dst)) {
+    case TypeComparison::Incompatible:
+        fatalError(
+            "Type mismatch."_t
+            + " Expected '" + type->asString() + "'"
+            + " got '" + ast->type->asString() + "'");
+    case TypeComparison::Downcast:
+    case TypeComparison::Upcast:
         return cast(ast, type);
+        break;
+    case TypeComparison::Equal:
+        return;
     }
-
-    fatalError(
-        "Type mismatch."_t
-        + " Expected '" + type->asString() + "'"
-        + " got '" + ast->type->asString() + "'");
 }
 
 void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {

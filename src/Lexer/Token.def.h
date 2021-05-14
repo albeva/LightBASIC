@@ -68,7 +68,10 @@
     _( Return,          "RETURN"   ) \
     _( True,            "TRUE"     ) \
     _( False,           "FALSE"    ) \
-    _( Null,            "NULL"     )
+    _( Null,            "NULL"     ) \
+    _( If,              "IF"       ) \
+    _( Then,            "THEN"     ) \
+    _( Else,            "ELSE"     )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \

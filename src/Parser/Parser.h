@@ -41,6 +41,7 @@ private:
 
     [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
     [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;
+    [[nodiscard]] unique_ptr<AstIfExpr> ifExpr() noexcept;
     [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList() noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;

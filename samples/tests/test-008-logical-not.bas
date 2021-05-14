@@ -11,8 +11,8 @@ var t = not f
 var ff = not not false
 var tt = not not t
 
-var int_f as integer = f
-var int_t as integer = t
-var int_ff as integer = ff
-var int_tt as integer = tt
+var int_f = if f then 1 else 0
+var int_t = if t then 1 else 0
+var int_ff = if ff then 1 else 0
+var int_tt = if tt then 1 else 0
 printf "%d, %d, %d, %d", int_f, int_t, int_ff, int_tt

@@ -252,6 +252,16 @@ void CodePrinter::visit(AstCastExpr* ast) noexcept {
     m_os << ")";
 }
 
+void CodePrinter::visit(AstIfExpr* ast) noexcept {
+    m_os << "(IF ";
+    visit(ast->expr.get());
+    m_os << " THEN ";
+    visit(ast->trueExpr.get());
+    m_os << " ELSE ";
+    visit(ast->falseExpr.get());
+    m_os << ")";
+}
+
 string CodePrinter::indent() const noexcept {
     return string(m_indent * SPACES, ' ');
 }

@@ -3,6 +3,7 @@
 //
 #include "ConstantFoldingPass.h"
 #include "Type/Type.h"
+#include "Driver/Context.h"
 using namespace lbc;
 using namespace Sem;
 
@@ -22,8 +23,11 @@ inline BASE castLiteral(AstLiteralExpr* ast) noexcept {
 } // namespace
 
 void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
-    unique_ptr<AstExpr> replace;
+    if (m_context.getOptimizationLevel() == Context::OptimizationLevel::O0) {
+        return;
+    }
 
+    unique_ptr<AstExpr> replace;
     switch (ast->kind()) {
     case AstKind::UnaryExpr:
         replace = visitUnaryExpr(static_cast<AstUnaryExpr*>(ast.get())); // NOLINT
@@ -34,10 +38,12 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     case AstKind::CastExpr:
         replace = visitCastExpr(static_cast<AstCastExpr*>(ast.get())); // NOLINT
         break;
+    case AstKind::IfExpr:
+        replace = visitIfExpr(static_cast<AstIfExpr*>(ast.get())); // NOLINT
+        break;
     default:
         return;
     }
-
     if (replace != nullptr) {
         ast.swap(replace);
     }
@@ -85,6 +91,63 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
     }
 
     return replacement;
+}
+
+unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr* ast) noexcept {
+    if (auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+        if (std::get<bool>(expr->value)) {
+            return std::move(ast->trueExpr);
+        }
+        return std::move(ast->falseExpr);
+    }
+
+    if (auto repl = optimizeIifToCast(ast)) {
+        return repl;
+    }
+
+    return nullptr;
+}
+
+unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr* ast) noexcept {
+    auto* lhs = dyn_cast<AstLiteralExpr>(ast->trueExpr.get());
+    if (lhs == nullptr) {
+        return nullptr;
+    }
+    auto* lval = std::get_if<uint64_t>(&lhs->value);
+    if (lval == nullptr) {
+        return nullptr;
+    }
+
+    auto* rhs = dyn_cast<AstLiteralExpr>(ast->falseExpr.get());
+    if (rhs == nullptr) {
+        return nullptr;
+    }
+    auto* rval = std::get_if<uint64_t>(&rhs->value);
+    if (rval == nullptr) {
+        return nullptr;
+    }
+
+    if (*lval == 1 && *rval == 0) {
+        auto cast = AstCastExpr::create(ast->getRange());
+        cast->expr = std::move(ast->expr);
+        cast->type = lhs->type;
+        cast->implicit = true;
+        return cast;
+    }
+
+    if (*lval == 0 && *rval == 1) {
+        auto unary = AstUnaryExpr::create(ast->getRange());
+        unary->tokenKind = TokenKind::LogicalNot;
+        unary->expr = std::move(ast->expr);
+
+        auto cast = AstCastExpr::create(ast->getRange());
+        cast->expr = std::move(unary);
+        cast->type = lhs->type;
+        cast->implicit = true;
+        return cast;
+    }
+
+    return nullptr;
 }
 
 unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr* /*ast*/) noexcept {

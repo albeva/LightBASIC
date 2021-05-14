@@ -441,10 +441,11 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
 
 /**
  * primary = literal
- *         | callExpr
+ *         | CallExpr
  *         | identifier
  *         | "(" expression ")"
  *         | <Left Unary Op> [ factor { <Binary Op> expression } ]
+ *         | IfExpr
   *        .
  */
 unique_ptr<AstExpr> Parser::primary() noexcept {
@@ -463,6 +464,10 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         auto expr = expression();
         expect(TokenKind::ParenClose);
         return expr;
+    }
+
+    if (match(TokenKind::If)) {
+        return ifExpr();
     }
 
     replace(TokenKind::Minus, TokenKind::Negate);
@@ -536,6 +541,26 @@ unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
     call->identExpr = std::move(id);
     call->argExprs = std::move(args);
     return call;
+}
+
+/**
+ * IfExpr = "IF" expr "THEN" expr "ELSE" expr .
+ */
+unique_ptr<AstIfExpr> Parser::ifExpr() noexcept {
+    auto start = m_token->range().Start;
+
+    expect(TokenKind::If);
+    auto expr = expression();
+    expect(TokenKind::Then);
+    auto trueExpr = expression();
+    expect(TokenKind::Else);
+    auto falseExpr = expression();
+
+    auto ast = AstIfExpr::create({start, m_endLoc});
+    ast->expr = std::move(expr);
+    ast->trueExpr = std::move(trueExpr);
+    ast->falseExpr = std::move(falseExpr);
+    return ast;
 }
 
 /**
