@@ -120,6 +120,10 @@ void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
     }
 }
 
+void SemanticAnalyzer::visit(AstIfStmt* /*ast*/) noexcept {
+    // llvm_unreachable("AstIfStmt not implemented");
+}
+
 //----------------------------------------
 // Attributes
 //----------------------------------------

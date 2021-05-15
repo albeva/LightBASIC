@@ -98,6 +98,26 @@ void AstPrinter::visit(AstReturnStmt* ast) noexcept {
     });
 }
 
+void AstPrinter::visit(AstIfStmt* ast) noexcept {
+    m_json.object([&]{
+        writeHeader(ast);
+        m_json.attributeArray("blocks", [&]{
+            for (const auto& block: ast->blocks) {
+                m_json.object([&]{
+                    writeExpr(block.expr.get());
+                    if (auto* list = dyn_cast<AstStmtList>(block.stmt.get())) {
+                        writeStmts(list);
+                    } else {
+                        m_json.attributeBegin("stmt");
+                        visit(block.stmt.get());
+                        m_json.attributeEnd();
+                    }
+                });
+            }
+        });
+    });
+}
+
 void AstPrinter::visit(AstAttributeList* ast) noexcept {
     m_json.array([&] {
         for (const auto& attr : ast->attribs) {

@@ -103,6 +103,11 @@ void CodePrinter::visit(AstFuncDecl* ast) noexcept {
     }
 
     m_os << indent();
+
+    if (!ast->hasImpl) {
+        m_os << "DECLARE ";
+    }
+
     if (ast->retTypeExpr) {
         m_os << "FUNCTION ";
     } else {
@@ -153,6 +158,31 @@ void CodePrinter::visit(AstReturnStmt* ast) noexcept {
         m_os << " ";
         visit(ast->expr.get());
     }
+}
+
+void CodePrinter::visit(AstIfStmt* ast) noexcept {
+    bool isFirst = true;
+    for (const auto& block: ast->blocks) {
+        m_os << indent();
+        if (!isFirst) {
+            m_os << "ELSE";
+        }
+        if (block.expr) {
+            if (!isFirst) {
+                m_os << " ";
+            }
+            m_os << "IF ";
+            visit(block.expr.get());
+            m_os << " THEN\n";
+        } else {
+            m_os << "\n";
+        }
+        m_indent++;
+        visit(block.stmt.get());
+        m_indent--;
+        isFirst = false;
+    }
+    m_os << indent() << "END IF";
 }
 
 // Expressions

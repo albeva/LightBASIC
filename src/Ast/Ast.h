@@ -104,6 +104,18 @@ struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt
     unique_ptr<AstExpr> expr;
 };
 
+struct AstIfStmt final: AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
+    using AstNode::AstNode;
+    struct Block final {
+        std::vector<unique_ptr<AstVarDecl>> decls;
+        unique_ptr<SymbolTable> symbolTable;
+        unique_ptr<AstExpr> expr;
+        unique_ptr<AstStmt> stmt;
+    };
+    bool isSingleLine = false;
+    std::vector<Block> blocks;
+};
+
 //----------------------------------------
 // Attributes
 //----------------------------------------
@@ -154,6 +166,8 @@ struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
     std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
     // is function variadic?
     bool variadic = false;
+    // has implementation
+    bool hasImpl = false;
     // declared typeExpr
     unique_ptr<AstTypeExpr> retTypeExpr;
     // scope symbol table for parameters

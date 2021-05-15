@@ -274,6 +274,10 @@ void CodeGen::visit(AstReturnStmt* ast) noexcept {
     }
 }
 
+void CodeGen::visit(AstIfStmt* /*ast*/) noexcept {
+    llvm_unreachable("AstIfStmt not implemented");
+}
+
 void CodeGen::visit(AstAttributeList* /*ast*/) noexcept {
     llvm_unreachable("visitAttributeList");
 }

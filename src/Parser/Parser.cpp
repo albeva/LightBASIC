@@ -49,7 +49,7 @@ unique_ptr<AstModule> Parser::parse() noexcept {
 unique_ptr<AstStmtList> Parser::stmtList() noexcept {
     auto start = m_token->range().Start;
     std::vector<unique_ptr<AstStmt>> stms;
-    while (isValid() && !match(TokenKind::End)) {
+    while (isValid() && !match(TokenKind::End) && !match(TokenKind::Else)) {
         stms.emplace_back(statement());
         expect(TokenKind::EndOfStmt);
     }
@@ -63,6 +63,7 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
  *   = Declaration
  *   | Assignment
  *   | CallStmt
+ *   | IfStmt
  *   | RETURN
  *   .
  */
@@ -83,6 +84,8 @@ unique_ptr<AstStmt> Parser::statement() noexcept {
         return callStmt();
     case TokenKind::Return:
         return kwReturn();
+    case TokenKind::If:
+        return kwIf();
     default:
         error("Expected statement");
     }
@@ -384,6 +387,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
 
     auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
     auto decl = funcSignature(start, std::move(attribs));
+    decl->hasImpl = true;
     expect(TokenKind::EndOfStmt);
 
     RESTORE_ON_EXIT(m_scope);
@@ -422,6 +426,80 @@ unique_ptr<AstStmt> Parser::kwReturn() noexcept {
     auto ret = AstReturnStmt::create({ start, m_endLoc });
     ret->expr = std::move(expr);
     return ret;
+}
+
+//----------------------------------------
+// If statement
+//----------------------------------------
+
+/**
+ * IF
+ *   = IfBlock
+ *   { ELSE IfBlock }
+ *   [ ElseBlock ]
+ *   "END" "IF"
+ *   .
+ */
+unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
+    auto start = m_token->range().Start;
+    std::vector<AstIfStmt::Block> m_blocks;
+
+    bool isSingleLine = false;
+    while (true) {
+        m_blocks.emplace_back(ifBlock(isSingleLine));
+        if (accept(TokenKind::Else)) {
+            if (match(TokenKind::If)) {
+                continue;
+            }
+            m_blocks.emplace_back(elseBlock(isSingleLine));
+        }
+        break;
+    }
+
+    if (m_blocks.empty()) {
+        fatalError("expected IF statement");
+    }
+
+    expect(TokenKind::End);
+    expect(TokenKind::If);
+
+    auto ast = AstIfStmt::create({start, m_endLoc});
+    ast->blocks = std::move(m_blocks);
+    ast->isSingleLine = isSingleLine;
+    return ast;
+}
+
+/**
+ * IfBlock
+ *   = "IF" Expression "THEN"
+ *   ( EoS StmtList
+ *   | Statement
+ *   )
+ *   .
+ */
+AstIfStmt::Block Parser::ifBlock(bool& isSingleLine) noexcept {
+    expect(TokenKind::If);
+    auto expr = expression();
+    expect(TokenKind::Then);
+    expect(TokenKind::EndOfStmt);
+    auto stmt = stmtList();
+
+    isSingleLine = false;
+    return AstIfStmt::Block{{}, nullptr, std::move(expr), std::move(stmt)};
+}
+
+/**
+ * ElseBlock
+ *   =
+ *   ( EoS StmtList
+ *   | Statement
+ *   )
+ *   .
+ */
+[[nodiscard]] AstIfStmt::Block Parser::elseBlock(bool /*isSingleLine*/) noexcept {
+    expect(TokenKind::EndOfStmt);
+    auto stmt = stmtList();
+    return AstIfStmt::Block{{}, nullptr, nullptr, std::move(stmt)};
 }
 
 //----------------------------------------

@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "pch.h"
-#include "Ast/Ast.def.h"
+#include "Ast/Ast.h"
 #include "Lexer/Lexer.h"
 
 namespace lbc {
@@ -35,29 +35,29 @@ private:
     [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
     [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
     [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
-
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
     [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
     [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;
     [[nodiscard]] unique_ptr<AstIfExpr> ifExpr() noexcept;
-
     [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList() noexcept;
 
     [[nodiscard]] unique_ptr<AstAssignStmt> assignment() noexcept;
     [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] unique_ptr<AstIfStmt> kwIf() noexcept;
+    [[nodiscard]] AstIfStmt::Block ifBlock(bool& isSingleLine) noexcept;
+    [[nodiscard]] AstIfStmt::Block elseBlock(bool isSingleLine) noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;
     [[nodiscard]] std::vector<unique_ptr<AstLiteralExpr>> attributeArgList() noexcept;
 
     [[nodiscard]] unique_ptr<AstTypeExpr> typeExpr() noexcept;
-    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
 
+    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParamList(bool& isVariadic) noexcept;
     [[nodiscard]] unique_ptr<AstFuncParamDecl> funcParam() noexcept;
-
     [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstStmt> kwReturn() noexcept;
 
