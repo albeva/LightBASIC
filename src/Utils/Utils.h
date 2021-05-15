@@ -62,9 +62,9 @@ void warning(const Twine& message, bool prefix = true) noexcept;
  */
 template<typename T, std::enable_if_t<std::is_trivially_copyable_v<T> && std::is_trivially_assignable_v<T&, T>, int> = 0>
 struct ValueRestorer final {
-    explicit ValueRestorer(T& value) : m_target{ value }, m_value{ value } {}
+    constexpr explicit ValueRestorer(T& value) noexcept : m_target{ value }, m_value{ value } {}
 
-    ~ValueRestorer() {
+    ~ValueRestorer() noexcept {
         m_target = m_value;
     }
 
