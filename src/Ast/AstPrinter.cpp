@@ -243,7 +243,7 @@ void AstPrinter::writeHeader(AstRoot* ast) noexcept {
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeExpr(AstExpr* ast, const string& name) noexcept {
+void AstPrinter::writeExpr(AstExpr* ast, StringRef name) noexcept {
     if (ast == nullptr) {
         return;
     }

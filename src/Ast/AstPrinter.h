@@ -20,7 +20,7 @@ private:
     void writeLocation(AstRoot* ast) noexcept;
     void writeAttributes(AstAttributeList* ast) noexcept;
     void writeStmts(AstStmtList* ast) noexcept;
-    void writeExpr(AstExpr* ast, const string& name = "expr") noexcept;
+    void writeExpr(AstExpr* ast, StringRef name = "expr") noexcept;
     void writeIdent(AstIdentExpr* ast) noexcept;
     void writeType(AstTypeExpr* ast) noexcept;
 
