@@ -29,6 +29,7 @@ private:
 
     [[nodiscard]] unique_ptr<AstStmtList> stmtList() noexcept;
     [[nodiscard]] unique_ptr<AstStmt> statement() noexcept;
+    [[nodiscard]] unique_ptr<AstStmt> declaration() noexcept;
 
     [[nodiscard]] unique_ptr<AstExpr> expression() noexcept;
     [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
@@ -36,26 +37,29 @@ private:
     [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
 
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
-    [[nodiscard]] unique_ptr<AstAssignStmt> assignStmt() noexcept;
-    [[nodiscard]] unique_ptr<AstStmt> kwReturn() noexcept;
-
-    [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
+    [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
     [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;
     [[nodiscard]] unique_ptr<AstIfExpr> ifExpr() noexcept;
+
     [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList() noexcept;
+
+    [[nodiscard]] unique_ptr<AstAssignStmt> assignment() noexcept;
+    [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
+    [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;
-    [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
-    [[nodiscard]] std::vector<unique_ptr<AstLiteralExpr>> attributeArgumentList() noexcept;
-
-    [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParams(bool& isVariadic) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] std::vector<unique_ptr<AstLiteralExpr>> attributeArgList() noexcept;
 
     [[nodiscard]] unique_ptr<AstTypeExpr> typeExpr() noexcept;
+    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
+
+    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParamList(bool& isVariadic) noexcept;
+    [[nodiscard]] unique_ptr<AstFuncParamDecl> funcParam() noexcept;
+
+    [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] unique_ptr<AstStmt> kwReturn() noexcept;
 
     // return true if has more content to parse
     [[nodiscard]] bool isValid() const noexcept;

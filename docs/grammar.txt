@@ -1,99 +1,67 @@
 EBNF
 ----
-Program         = { VarDecl }
-                .
-VarDecl     = [ AttributeList ]
-                ( VAR
-                | DECLARE
-                | FunctionImpl
-                | SubImpl
-                )
-                .
-AttributeList   = "[" Attribute { ","  Attribute } "]"
-                .
-Attribute       = identExpr [ AttribParamList ]
-                .
-AttribParamList = "=" AttribParam
-                | "(" [ AttribParam { "," AttribParam } ] ")"
-                .
-AttribParam     = IntegerLiteral
-                | StringLiteral
-                | TRUE | FALSE
-                | NULL
-                .
-VAR             = "VAR" identExpr [ "AS" TypeExpr ] "=" Expression
-                .
-FunctionDecl    = "DECLARE" ( FunctionSignature | SubSignature )
-                .
-FuncSignature   = "FUNCTION" identExpr [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
-                .
-SubSignature    = "SUB" identExpr [ "(" FuncParamList ")" ]
-                .
-FuncParamList   = FuncParam { "," FuncParam }
-                .
-FuncParam       = identExpr "AS" TypeExpr
-                .
-TypeExpr        = ("INTEGER" | "ZSTRING")
-                .
-FunctionImpl    = FuncSignature
-                  StatementList
-                  "END" "FUNCTION"
-                .
-SubImpl         = SubSignature
-                  StatementList
-                  "END" "SUB"
-                .
-StatementList   = { Statement }
-                .
-Statement       = DIM
-                | VAR
-                | AssignStmt
-                | CallStmt
-                | ReturnStmt
-                | IfStmt
-                | ForStmt
-                .
-AssignStmt      = Expression "=" Expression
-                .
-CallStmt        = identExpr
-                ( "(" [ funcArgList ] ")"
-                | [ funcArgList ] )
-                .
-ReturnStmt      = "RETURN" [ Expression ]
-                .
-IfStmt          = "IF" Expression "THEN"
-                  StatementList
-                  { "ELSE" "IF" Expression "THEN"
-                    StatementList
-                  }
-                  [ "ELSE"
-                    StatementList
-                  ]
-                  "END" "IF"
-                .
-ForStmt         = "FOR" ( identifier [ "AS" TypeExpr] | "VAR" identExpr | Expression )
-                  "=" Expression "TO" Expression [ "STEP" Expression ]
-                  StatementList
-                  "NEXT"
-                .
-Expression      = IntegerLiteral
-                | FloatingPointLiteral
-                | StringLiteral
-                | CallExpr
-                | identExpr
-                | AddressOf
-                | Dereference
-                | BinaryExpression      (. this is broken. will use a expression parser anyway. so ebnf won't work .)
-                .
-BinaryExpression= Expression Op Expression
-                .
-CallExpr        = identExpr "(" [ funcArgList ] ")"
-                .
-funcArgList     = Expression { "," Expression }
-                .
-ReturnStmt      = "RETURN" Expression
-                .
-AddressOf       = "&" identExpr
-                .
-Dereference     = "*" Expression
-                .
+Module
+    = StmtList
+    .
+
+StmtList
+    = { Statement }
+    .
+
+Statement
+    = Declaration
+    | Assignment
+    | CallStmt
+    | RETURN
+    .
+
+Declaration
+    = [ AttributeList ]
+    ( VAR
+    | DECLARE
+    | FUNCTION
+    | SUB
+    )
+    .
+
+AttributeList
+    = "[" Attribute { ","  Attribute } "]"
+    .
+
+Attribute
+    = IdentExpr [ AttributeArgList ]
+    .
+
+AttributeArgList
+    = "=" Literal
+    | "(" [ Literal { "," Literal } ] ")"
+    .
+
+VAR
+    = "VAR" identifier
+    ( "=" Expression
+    | "AS" TypeExpr [ "=" Expression ]
+    )
+    .
+
+DECLARE
+    = "DECLARE" FuncSignature
+    .
+
+FuncSignature
+    = "FUNCTION" id [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
+    | "SUB" id [ "(" FuncParamList ")" ]
+    .
+
+FuncParamList
+    = FuncParam { "," FuncParam } [ "," "..." ]
+    | "..."
+    .
+
+FuncParam
+    = id "AS" TypeExpr
+    .
+
+TypeExpr
+    = id
+    .

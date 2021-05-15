@@ -18,11 +18,13 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
     m_lexer = make_unique<Lexer>(m_context, fileId);
     m_token = m_lexer->next();
     m_next = m_lexer->next();
-    m_endLoc = m_token->range().End;
+    m_endLoc = m_token->range().End; // NOLINT
 }
 
 /**
- * Program = stmtList .
+ * Module
+ *   = StmtList
+ *   .
  */
 unique_ptr<AstModule> Parser::parse() noexcept {
     auto stmts = stmtList();
@@ -40,7 +42,9 @@ unique_ptr<AstModule> Parser::parse() noexcept {
 //----------------------------------------
 
 /**
- * stmtList = { statement } .
+ * StmtList
+ *   = { Statement }
+ *   .
  */
 unique_ptr<AstStmtList> Parser::stmtList() noexcept {
     auto start = m_token->range().Start;
@@ -55,20 +59,46 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
 }
 
 /**
- * statement =
- *           ( [ attributeList ]
- *             ( VAR
- *             | DECLARE
- *             | FUNCTION
- *             | SUB
- *             )
- *           )
- *           | assignStmt
- *           | callStmt
- *           | RETURN
- *           .
+ * Statement
+ *   = Declaration
+ *   | Assignment
+ *   | CallStmt
+ *   | RETURN
+ *   .
  */
 unique_ptr<AstStmt> Parser::statement() noexcept {
+    if (auto decl = declaration()) {
+        return decl;
+    }
+
+    if (!m_isMain && m_scope == Scope::Root) {
+        error("expressions are not allowed at the top level");
+    }
+
+    switch (m_token->kind()) {
+    case TokenKind::Identifier:
+        if (m_next && m_next->kind() == TokenKind::Assign) {
+            return assignment();
+        }
+        return callStmt();
+    case TokenKind::Return:
+        return kwReturn();
+    default:
+        error("Expected statement");
+    }
+}
+
+/**
+ * Declaration
+ *   = [ AttributeList ]
+ *   ( VAR
+ *   | DECLARE
+ *   | FUNCTION
+ *   | SUB
+ *   )
+ *   .
+ */
+unique_ptr<AstStmt> Parser::declaration() noexcept {
     unique_ptr<AstAttributeList> attribs;
     if (m_token->kind() == TokenKind::BracketOpen) {
         attribs = attributeList();
@@ -88,31 +118,220 @@ unique_ptr<AstStmt> Parser::statement() noexcept {
 
     if (attribs) {
         error("Expected SUB, FUNCTION, DECLARE or VAR got '"_t
-            + m_token->description()
-            + "'");
+              + m_token->description()
+              + "'");
     }
+    return nullptr;
+}
 
-    if (!m_isMain && m_scope == Scope::Root) {
-        error("expressions are not allowed at the top level");
-    }
+//----------------------------------------
+// Attributes
+//----------------------------------------
 
-    switch (m_token->kind()) {
-    case TokenKind::Identifier:
-        if (m_next && m_next->kind() == TokenKind::Assign) {
-            return assignStmt();
-        }
-        return callStmt();
-    case TokenKind::Return:
-        return kwReturn();
-    default:
-        error("Expected statement");
-    }
+/**
+ *  AttributeList = '[' Attribute { ','  Attribute } ']' .
+ */
+unique_ptr<AstAttributeList> Parser::attributeList() noexcept {
+    auto start = m_token->range().Start;
+
+    std::vector<unique_ptr<AstAttribute>> attribs;
+    expect(TokenKind::BracketOpen);
+    do {
+        attribs.emplace_back(attribute());
+    } while (accept(TokenKind::Comma));
+    expect(TokenKind::BracketClose);
+
+    auto list = AstAttributeList::create({ start, m_endLoc });
+    list->attribs = std::move(attribs);
+    return list;
 }
 
 /**
- * assignStmt = identExpr '=' expression .
+ * Attribute
+ *   = IdentExpr [ AttributeArgList ]
+ *   .
  */
-unique_ptr<AstAssignStmt> Parser::assignStmt() noexcept {
+unique_ptr<AstAttribute> Parser::attribute() noexcept {
+    auto start = m_token->range().Start;
+
+    auto id = identifier();
+    std::vector<unique_ptr<AstLiteralExpr>> args;
+    if (*m_token == TokenKind::Assign || *m_token == TokenKind::ParenOpen) {
+        args = attributeArgList();
+    }
+
+    auto attrib = AstAttribute::create({ start, m_endLoc });
+    attrib->identExpr = std::move(id);
+    attrib->argExprs = std::move(args);
+    return attrib;
+}
+
+/**
+ * AttributeArgList
+ *   = "=" Literal
+ *   | "(" [ Literal { "," Literal } ] ")"
+ *   .
+ */
+std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgList() noexcept {
+    std::vector<unique_ptr<AstLiteralExpr>> args;
+    if (accept(TokenKind::Assign)) {
+        args.emplace_back(literal());
+    } else if (accept(TokenKind::ParenOpen)) {
+        while (isValid() && *m_token != TokenKind::ParenClose) {
+            args.emplace_back(literal());
+            if (!accept(TokenKind::Comma)) {
+                break;
+            }
+        }
+        expect(TokenKind::ParenClose);
+    }
+    return args;
+}
+
+//----------------------------------------
+// VAR
+//----------------------------------------
+
+/**
+ * VAR
+ *   = "VAR" identifier
+ *   ( "=" Expression
+ *   | "AS" TypeExpr [ "=" Expression ]
+ *   )
+ *   .
+ */
+unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexcept {
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
+
+    expect(TokenKind::Var);
+    auto id = expect(TokenKind::Identifier);
+
+    unique_ptr<AstTypeExpr> type;
+    unique_ptr<AstExpr> expr;
+
+    if (accept(TokenKind::As)) {
+        type = typeExpr();
+        if (accept(TokenKind::Assign)) {
+            expr = expression();
+        }
+    } else {
+        expect(TokenKind::Assign);
+        expr = expression();
+    }
+
+    auto var = AstVarDecl::create({ start, m_endLoc });
+    var->attributes = std::move(attribs);
+    var->id = std::get<StringRef>(id->getValue());
+    var->typeExpr = std::move(type);
+    var->expr = std::move(expr);
+    return var;
+}
+
+//----------------------------------------
+// DECLARE
+//----------------------------------------
+
+/**
+ * DECLARE
+ *   = "DECLARE" FuncSignature
+ *   .
+ */
+unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept {
+    if (m_scope != Scope::Root) {
+        error("Nested declarations not allowed");
+    }
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
+    expect(TokenKind::Declare);
+    return funcSignature(start, std::move(attribs));
+}
+
+/**
+ * FuncSignature
+ *     = "FUNCTION" id [ "(" [ FuncParamList ] ")" ] "AS" TypeExpr
+ *     | "SUB" id [ "(" FuncParamList ")" ]
+ *     .
+ */
+unique_ptr<AstFuncDecl> Parser::funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept {
+    bool isFunc = accept(TokenKind::Function) != nullptr;
+    if (!isFunc) {
+        expect(TokenKind::Sub);
+    }
+
+    auto id = expect(TokenKind::Identifier);
+
+    bool isVariadic = false;
+    std::vector<unique_ptr<AstFuncParamDecl>> params;
+    if (accept(TokenKind::ParenOpen)) {
+        params = funcParamList(isVariadic);
+        expect(TokenKind::ParenClose);
+    }
+
+    unique_ptr<AstTypeExpr> ret;
+    if (isFunc) {
+        expect(TokenKind::As);
+        ret = typeExpr();
+    }
+
+    auto func = AstFuncDecl::create({ start, m_endLoc });
+    func->id = std::get<StringRef>(id->getValue());
+    func->attributes = std::move(attribs);
+    func->variadic = isVariadic;
+    func->paramDecls = std::move(params);
+    func->retTypeExpr = std::move(ret);
+    return func;
+}
+
+/**
+ * FuncParamList
+ *   = FuncParam { "," FuncParam } [ "," "..." ]
+ *   | "..."
+ *   .
+ */
+std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParamList(bool& isVariadic) noexcept {
+    std::vector<unique_ptr<AstFuncParamDecl>> params;
+    while (isValid() && *m_token != TokenKind::ParenClose) {
+        if (accept(TokenKind::Ellipsis)) {
+            isVariadic = true;
+            if (match(TokenKind::Comma)) {
+                error("Variadic parameter must be last in function declaration");
+            }
+            break;
+        }
+        params.push_back(funcParam());
+        if (!accept(TokenKind::Comma)) {
+            break;
+        }
+    }
+    return params;
+}
+
+/**
+ * FuncParam
+ *  = id "AS" TypeExpr
+ *  .
+ */
+unique_ptr<AstFuncParamDecl> Parser::funcParam() noexcept {
+    auto start = m_token->range().Start;
+
+    auto id = expect(TokenKind::Identifier);
+    expect(TokenKind::As);
+    auto type = typeExpr();
+
+    auto param = AstFuncParamDecl::create({ start, m_endLoc });
+    param->id = std::get<StringRef>(id->getValue());
+    param->typeExpr = std::move(type);
+    return param;
+}
+
+//----------------------------------------
+// Assignment
+//----------------------------------------
+
+/**
+ * Assignment
+ *   = identExpr '=' expression .
+ */
+unique_ptr<AstAssignStmt> Parser::assignment() noexcept {
     auto start = m_token->range().Start;
     auto ident = identifier();
     expect(TokenKind::Assign);
@@ -123,6 +342,10 @@ unique_ptr<AstAssignStmt> Parser::assignStmt() noexcept {
     assign->expr = std::move(expr);
     return assign;
 }
+
+//----------------------------------------
+// Call
+//----------------------------------------
 
 /**
  * CallStmt = id
@@ -199,187 +422,6 @@ unique_ptr<AstStmt> Parser::kwReturn() noexcept {
     auto ret = AstReturnStmt::create({ start, m_endLoc });
     ret->expr = std::move(expr);
     return ret;
-}
-
-//----------------------------------------
-// Attributes
-//----------------------------------------
-
-/**
- *  attributeList = '[' Attribute { ','  Attribute } ']' .
- */
-unique_ptr<AstAttributeList> Parser::attributeList() noexcept {
-    auto start = m_token->range().Start;
-
-    std::vector<unique_ptr<AstAttribute>> attribs;
-    expect(TokenKind::BracketOpen);
-    do {
-        attribs.emplace_back(attribute());
-    } while (accept(TokenKind::Comma));
-    expect(TokenKind::BracketClose);
-
-    auto list = AstAttributeList::create({ start, m_endLoc });
-    list->attribs = std::move(attribs);
-    return list;
-}
-
-/**
- * attribute = "id" [AttributeArgList] .
- */
-unique_ptr<AstAttribute> Parser::attribute() noexcept {
-    auto start = m_token->range().Start;
-
-    auto id = identifier();
-    std::vector<unique_ptr<AstLiteralExpr>> args;
-    if (*m_token == TokenKind::Assign || *m_token == TokenKind::ParenOpen) {
-        args = attributeArgumentList();
-    }
-
-    auto attrib = AstAttribute::create({ start, m_endLoc });
-    attrib->identExpr = std::move(id);
-    attrib->argExprs = std::move(args);
-    return attrib;
-}
-
-/**
- * AttributeArgList = '=' literal
- *                  | '(' [ literalExpr { ',' literal } ] ')'
- *                  .
- */
-std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgumentList() noexcept {
-    std::vector<unique_ptr<AstLiteralExpr>> args;
-    if (accept(TokenKind::Assign)) {
-        args.emplace_back(literal());
-    } else if (accept(TokenKind::ParenOpen)) {
-        while (isValid() && *m_token != TokenKind::ParenClose) {
-            args.emplace_back(literal());
-            if (!accept(TokenKind::Comma)) {
-                break;
-            }
-        }
-        expect(TokenKind::ParenClose);
-    }
-    return args;
-}
-
-//----------------------------------------
-// Declarations
-//----------------------------------------
-
-/**
- * VAR = identifier
- *     ( "=" expression
- *     | "AS" TypeExpr [ "=" expression ]
- *     ) .
- */
-unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexcept {
-    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
-
-    expect(TokenKind::Var);
-    auto id = expect(TokenKind::Identifier);
-
-    unique_ptr<AstTypeExpr> type;
-    unique_ptr<AstExpr> expr;
-
-    if (accept(TokenKind::As)) {
-        type = typeExpr();
-        if (accept(TokenKind::Assign)) {
-            expr = expression();
-        }
-    } else {
-        expect(TokenKind::Assign);
-        expr = expression();
-    }
-
-    auto var = AstVarDecl::create({ start, m_endLoc });
-    var->attributes = std::move(attribs);
-    var->id = std::get<StringRef>(id->getValue());
-    var->typeExpr = std::move(type);
-    var->expr = std::move(expr);
-    return var;
-}
-
-/**
- * DECLARE = "DECLARE" funcSignature .
- */
-unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept {
-    if (m_scope != Scope::Root) {
-        error("Nested declarations not allowed");
-    }
-    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
-    expect(TokenKind::Declare);
-    return funcSignature(start, std::move(attribs));
-}
-
-/**
- * funcSignature = ( "FUNCTION" id [ "(" funcParams ")" ] "AS" TypeExpr
- *                 | "SUB" id [ "(" funcParams ")" ]
- *                 ) .
- */
-unique_ptr<AstFuncDecl> Parser::funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept {
-    bool isFunc = accept(TokenKind::Function) != nullptr;
-    if (!isFunc) {
-        expect(TokenKind::Sub);
-    }
-
-    auto id = expect(TokenKind::Identifier);
-
-    bool isVariadic = false;
-    std::vector<unique_ptr<AstFuncParamDecl>> params;
-    if (accept(TokenKind::ParenOpen)) {
-        params = funcParams(isVariadic);
-        expect(TokenKind::ParenClose);
-    }
-
-    unique_ptr<AstTypeExpr> ret;
-    if (isFunc) {
-        expect(TokenKind::As);
-        ret = typeExpr();
-    }
-
-    auto func = AstFuncDecl::create({ start, m_endLoc });
-    func->id = std::get<StringRef>(id->getValue());
-    func->attributes = std::move(attribs);
-    func->variadic = isVariadic;
-    func->paramDecls = std::move(params);
-    func->retTypeExpr = std::move(ret);
-    return func;
-}
-
-/**
- *  funcParams = <empty>
- *             | Param { "," Param } [ "," "..." ]
- *             | "..."
- *             .
- *  Param = id "AS" TypeExpr .
- */
-std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParams(bool& isVariadic) noexcept {
-    std::vector<unique_ptr<AstFuncParamDecl>> params;
-    while (isValid() && *m_token != TokenKind::ParenClose) {
-        auto start = m_token->range().Start;
-
-        if (accept(TokenKind::Ellipsis)) {
-            isVariadic = true;
-            if (match(TokenKind::Comma)) {
-                error("Variadic parameter must be last in function declaration");
-            }
-            break;
-        }
-
-        auto id = expect(TokenKind::Identifier);
-        expect(TokenKind::As);
-        auto type = typeExpr();
-
-        auto param = AstFuncParamDecl::create({ start, m_endLoc });
-        param->id = std::get<StringRef>(id->getValue());
-        param->typeExpr = std::move(type);
-        params.push_back(std::move(param));
-
-        if (!accept(TokenKind::Comma)) {
-            break;
-        }
-    }
-    return params;
 }
 
 //----------------------------------------
