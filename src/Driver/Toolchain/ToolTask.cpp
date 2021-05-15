@@ -13,12 +13,12 @@ ToolTask& ToolTask::reset() noexcept {
     return *this;
 }
 
-ToolTask& ToolTask::addArg(string arg) noexcept {
-    m_args.push_back(std::move(arg));
+ToolTask& ToolTask::addArg(const string& arg) noexcept {
+    m_args.push_back(arg);
     return *this;
 }
 
-ToolTask& ToolTask::addArg(string name, string value) noexcept {
+ToolTask& ToolTask::addArg(const string& name, const string& value) noexcept {
     m_args.push_back(name);
     m_args.push_back(value);
     return *this;
@@ -29,7 +29,7 @@ ToolTask& ToolTask::addPath(const fs::path& path) noexcept {
     return *this;
 }
 
-ToolTask& ToolTask::addPath(string name, const fs::path& value) noexcept {
+ToolTask& ToolTask::addPath(const string& name, const fs::path& value) noexcept {
     m_args.push_back(name);
     addPath(value);
     return *this;
@@ -55,11 +55,22 @@ int ToolTask::execute() const noexcept {
     }
 
     if (m_context.isVerbose()) {
+        switch (m_kind) {
+        case ToolKind::Optimizer:
+            std::cout << "Optimize:\n";
+            break;
+        case ToolKind::Assembler:
+            std::cout << "Assemble:\n";
+            break;
+        case ToolKind::Linker:
+            std::cout << "Link:\n";
+            break;
+        }
         std::cout << program;
         for (const auto& arg : m_args) {
             std::cout << " " << arg;
         }
-        std::cout << std::endl;
+        std::cout << '\n' << '\n';
     }
 
     return llvm::sys::ExecuteAndWait(program, args);

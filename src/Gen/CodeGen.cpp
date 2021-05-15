@@ -522,7 +522,7 @@ void CodeGen::comparison(AstBinaryExpr* ast) noexcept {
     } else {
         llvm_unreachable("Unkown comparison type");
     }
-    ast->llvmValue = this->m_builder.CreateCmp(pred, ast->lhs->llvmValue, ast->rhs->llvmValue);
+    ast->llvmValue = m_builder.CreateCmp(pred, ast->lhs->llvmValue, ast->rhs->llvmValue);
 }
 
 void CodeGen::arithmetic(AstBinaryExpr* ast) noexcept {

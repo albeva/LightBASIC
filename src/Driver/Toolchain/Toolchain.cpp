@@ -7,7 +7,7 @@
 using namespace lbc;
 
 ToolTask Toolchain::createTask(ToolKind kind) const noexcept {
-    return ToolTask(m_context, getPath(kind));
+    return ToolTask{m_context, getPath(kind), kind};
 }
 
 #if __APPLE__ || __linux__ || __unix__

@@ -32,6 +32,7 @@ void Driver::drive() noexcept {
     switch (m_context.getCompilationTarget()) {
     case Context::CompilationTarget::Executable:
         emitBitCode(true);
+        optimize();
         emitObjects(true);
         emitExecutable();
         break;
@@ -39,10 +40,12 @@ void Driver::drive() noexcept {
         switch (m_context.getOutputType()) {
         case Context::OutputType::Native:
             emitBitCode(true);
+            optimize();
             emitObjects(false);
             break;
         case Context::OutputType::LLVM:
             emitBitCode(false);
+            optimize();
             break;
         }
         break;
@@ -50,10 +53,12 @@ void Driver::drive() noexcept {
         switch (m_context.getOutputType()) {
         case Context::OutputType::Native:
             emitBitCode(true);
+            optimize();
             emitAssembly(false);
             break;
         case Context::OutputType::LLVM:
             emitLLVMIr(false);
+            optimize();
             break;
         }
     }
@@ -157,6 +162,47 @@ void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
     }
 }
 
+void Driver::optimize() noexcept {
+    auto level = m_context.getOptimizationLevel();
+    if (level == Context::OptimizationLevel::O0) {
+        return;
+    }
+    bool llvmIr = m_context.isOutputLLVMIr();
+    const auto& files = getSources(llvmIr ? Context::FileType::LLVMIr : Context::FileType::BitCode);
+
+    auto optimizer = m_context.getToolchain().createTask(ToolKind::Optimizer);
+    for (const auto& file: files) {
+        optimizer.reset();
+        if (llvmIr) {
+            optimizer.addArg("-S");
+        }
+
+        switch (level) {
+        case Context::OptimizationLevel::OS:
+            optimizer.addArg("-OS");
+            break;
+        case Context::OptimizationLevel::O1:
+            optimizer.addArg("-O1");
+            break;
+        case Context::OptimizationLevel::O2:
+            optimizer.addArg("-O2");
+            break;
+        case Context::OptimizationLevel::O3:
+            optimizer.addArg("-O3");
+            break;
+        default:
+            llvm_unreachable("Unexpected optimization level");
+        }
+        optimizer.addPath("-o", file->path);
+
+        optimizer.addPath(file->path);
+
+        if (optimizer.execute() != EXIT_SUCCESS) {
+            fatalError("Failed to optimize "_t + file->path.string());
+        }
+    }
+}
+
 void Driver::emitExecutable() noexcept {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
     const auto& objFiles = getSources(Context::FileType::Object);
@@ -184,13 +230,18 @@ void Driver::emitExecutable() noexcept {
         output = fs::absolute(m_context.getWorkingDir() / output);
     }
 
+    if (m_context.getOptimizationLevel() != Context::OptimizationLevel::O0) {
+        linker
+            .addArg("-O")
+            .addArg("-s");
+    }
+
     if (triple.isOSWindows()) {
         auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
         linker
             .addArg("-m", "i386pep")
             .addPath("-o", output)
             .addArg("-subsystem", "console")
-            .addArg("-s")
             .addPath("-L", sysLibPath)
             .addPath(sysLibPath / "crt2.o")
             .addPath(sysLibPath / "crtbegin.o");
@@ -247,6 +298,10 @@ void Driver::emitExecutable() noexcept {
 // Compile
 
 void Driver::compileSources() noexcept {
+    if (m_context.isVerbose()) {
+        std::cout << "Compile:\n";
+    }
+
     const auto& sources = getSources(Context::FileType::Source);
     m_modules.reserve(m_modules.size() + sources.size());
     for (const auto& source : sources) {
@@ -257,12 +312,16 @@ void Driver::compileSources() noexcept {
         }
         compileSource(source.get(), ID);
     }
+
+    if (m_context.isVerbose()) {
+        std::cout << '\n';
+    }
 }
 
 void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
     const auto& path = source->path;
     if (m_context.isVerbose()) {
-        std::cout << "Compile: " << path << '\n';
+        std::cout << path.string() << '\n';
     }
 
     bool isMain = m_context.isMainFile(path);

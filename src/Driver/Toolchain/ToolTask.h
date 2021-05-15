@@ -16,17 +16,17 @@ class ToolTask final {
 public:
     NO_COPY_AND_MOVE(ToolTask)
 
-    ToolTask(Context& context, fs::path path) noexcept
-    : m_context{ context }, m_path{ std::move(path) } {}
+    ToolTask(Context& context, fs::path path, ToolKind kind) noexcept
+    : m_context{ context }, m_path{ std::move(path) }, m_kind{ kind } {}
 
     ~ToolTask() noexcept = default;
 
     ToolTask& reset() noexcept;
 
-    ToolTask& addArg(string arg) noexcept;
-    ToolTask& addArg(string name, string value) noexcept;
+    ToolTask& addArg(const string& arg) noexcept;
+    ToolTask& addArg(const string& name, const string& value) noexcept;
     ToolTask& addPath(const fs::path& path) noexcept;
-    ToolTask& addPath(string name, const fs::path& value) noexcept;
+    ToolTask& addPath(const string& name, const fs::path& value) noexcept;
     ToolTask& addArgs(std::initializer_list<string> arghs) noexcept;
 
     [[nodiscard]] int execute() const noexcept;
@@ -35,6 +35,7 @@ private:
     std::vector<string> m_args;
     Context& m_context;
     const fs::path m_path;
+    const ToolKind m_kind;
 };
 
 } // namespace lbc

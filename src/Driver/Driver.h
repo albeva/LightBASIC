@@ -39,6 +39,8 @@ private:
     void emitNative(Context::FileType type, bool temporary) noexcept;
     void emitExecutable() noexcept;
 
+    void optimize() noexcept;
+
     void compileSources() noexcept;
     void compileSource(const Source* source, unsigned ID) noexcept;
     void dumpAst() noexcept;
