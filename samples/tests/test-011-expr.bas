@@ -1,8 +1,8 @@
 ''------------------------------------------------------------------------------
 '' test-011-expr.bas
-'' - logical expressions
 '' - arithmetic expressions
 '' - comparison expressions
+'' - implicit conversions
 ''
 '' CHECK: 7, 4, 1
 '' CHECK: 7.000000, 4.000000, 1.000000
@@ -23,13 +23,13 @@ var dfour = dseven - 6 / 2
 var done = d10 mod c3
 printf "%lf, %lf, %lf\n", dseven, dfour, done
 
-out iseven > ifour, false
-out ifour >= ione, true
-out ione < ifour, true
-out c3 > dfour, true
-out iseven = dseven, true
+out "",   iseven > ifour
+out ", ", ifour >= ione
+out ", ", ione < ifour
+out ", ", c3 > dfour
+out ", ", iseven = dseven
+printf "\n"
 
-sub out(b as bool, first as bool)
-    if first then printf ", "
-    printf "%s", if b then "true" else "false"
+sub out(sep as zstring, b as bool)
+    printf "%s%s", sep, if b then "true" else "false"
 end sub
