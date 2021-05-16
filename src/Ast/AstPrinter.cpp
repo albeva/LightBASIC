@@ -105,6 +105,13 @@ void AstPrinter::visit(AstIfStmt* ast) noexcept {
             for (const auto& block: ast->blocks) {
                 m_json.object([&]{
                     writeExpr(block.expr.get());
+                    if (!block.decls.empty()) {
+                        m_json.attributeArray("decls", [&]{
+                            for (const auto& decl: block.decls) {
+                                visit(decl.get());
+                            }
+                        });
+                    }
                     if (auto* list = dyn_cast<AstStmtList>(block.stmt.get())) {
                         writeStmts(list);
                     } else {

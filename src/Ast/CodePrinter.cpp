@@ -168,6 +168,8 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
             m_os << "ELSE";
         }
         if (block.expr) {
+            RESTORE_ON_EXIT(m_indent);
+            m_indent = 0;
             if (!isFirst) {
                 m_os << " ";
             }
