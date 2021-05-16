@@ -112,7 +112,6 @@ struct AstIfStmt final: AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
         unique_ptr<AstExpr> expr;
         unique_ptr<AstStmt> stmt;
     };
-    bool isSingleLine = false;
     std::vector<Block> blocks;
 };
 

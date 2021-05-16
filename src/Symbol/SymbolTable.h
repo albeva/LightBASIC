@@ -11,25 +11,22 @@ class SymbolTable final {
 public:
     NO_COPY_AND_MOVE(SymbolTable)
 
-    using Storage = llvm::StringMap<unique_ptr<Symbol>>;
-    using iterator = Storage::iterator;
-
-    explicit SymbolTable(SymbolTable* parent = nullptr) : m_parent{ parent } {}
+    explicit SymbolTable(SymbolTable* parent = nullptr) noexcept : m_parent{ parent } {}
     ~SymbolTable() noexcept = default;
 
-    iterator begin() { return m_symbols.begin(); }
-    iterator end() { return m_symbols.end(); }
+    [[nodiscard]] SymbolTable* parent() const noexcept { return m_parent; }
 
-    [[nodiscard]] SymbolTable* parent() const { return m_parent; }
+    Symbol* insert(StringRef name) noexcept;
+    void addReference(Symbol*) noexcept;
 
-    Symbol* insert(StringRef name);
-
-    [[nodiscard]] bool exists(StringRef name, bool recursive = false) const;
-    [[nodiscard]] Symbol* find(StringRef id, bool recursive = true) const;
+    [[nodiscard]] bool exists(StringRef name, bool recursive = false) const noexcept;
+    [[nodiscard]] Symbol* find(StringRef id, bool recursive = true) const noexcept;
 
 private:
+
     SymbolTable* m_parent;
-    Storage m_symbols;
+    llvm::StringMap<unique_ptr<Symbol>> m_symbols;
+    llvm::StringMap<Symbol*> m_references;
 };
 
 } // namespace lbc

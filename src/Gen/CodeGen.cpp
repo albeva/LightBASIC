@@ -288,6 +288,10 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         const auto& block = ast->blocks[idx];
         llvm::BasicBlock* elseBlock = nullptr;
 
+        for (auto& decl: block.decls) {
+            visit(decl.get());
+        }
+
         if (block.expr) {
             visit(block.expr.get());
 

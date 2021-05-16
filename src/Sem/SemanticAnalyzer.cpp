@@ -121,8 +121,21 @@ void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
+    RESTORE_ON_EXIT(m_table);
     for (auto& block: ast->blocks) {
         block.symbolTable = make_unique<SymbolTable>(m_table);
+    }
+
+    for (size_t idx = 0; idx < ast->blocks.size(); idx++) {
+        auto& block = ast->blocks[idx];
+
+        m_table = block.symbolTable.get();
+        for (auto& var: block.decls) {
+            visit(var.get());
+            for (size_t next = idx + 1; next < ast->blocks.size(); next++) {
+                ast->blocks[next].symbolTable->addReference(var->symbol);
+            }
+        }
         if (block.expr) {
             expression(block.expr);
             if (!block.expr->type->isBoolean()) {
@@ -131,8 +144,6 @@ void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
                     + "' cannot be used as boolean");
             }
         }
-        RESTORE_ON_EXIT(m_table);
-        m_table = block.symbolTable.get();
         visit(block.stmt.get());
     }
 }
@@ -179,7 +190,7 @@ void SemanticAnalyzer::visit(AstIdentExpr* ast) noexcept {
     }
 
     if (symbol->type() == nullptr) {
-        fatalError("Identifier "_t + name + " has unresolved m_type");
+        fatalError("Identifier "_t + name + " has unresolved type");
     }
 
     ast->symbol = symbol;

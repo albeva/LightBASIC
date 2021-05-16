@@ -447,11 +447,19 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
     expect(TokenKind::If);
     m_blocks.emplace_back(ifBlock());
 
+    if (match(TokenKind::EndOfStmt) && m_next->kind() == TokenKind::Else) {
+        move();
+    }
+
     while (accept(TokenKind::Else)) {
         if (accept(TokenKind::If)) {
             m_blocks.emplace_back(ifBlock());
         } else {
-            m_blocks.emplace_back(thenBlock(nullptr));
+            m_blocks.emplace_back(thenBlock({}, nullptr));
+        }
+
+        if (match(TokenKind::EndOfStmt) && m_next->kind() == TokenKind::Else) {
+            move();
         }
     }
 
@@ -467,13 +475,19 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
 
 /**
  * IfBlock
- *   = Expression "THEN" ThenBlock
+ *   = [ VAR ] Expression "THEN" ThenBlock
  *   .
  */
 AstIfStmt::Block Parser::ifBlock() noexcept {
-    auto expr = expression();
+    std::vector<unique_ptr<AstVarDecl>> decls;
+    while (match(TokenKind::Var)) {
+        decls.emplace_back(kwVar(nullptr));
+        expect(TokenKind::Comma);
+    }
+
+    auto expr = expression(true);
     expect(TokenKind::Then);
-    return thenBlock(std::move(expr));
+    return thenBlock(std::move(decls), std::move(expr));
 }
 
 /**
@@ -484,14 +498,14 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
  *   )
  *   .
  */
-[[nodiscard]] AstIfStmt::Block Parser::thenBlock(unique_ptr<AstExpr> expr) noexcept {
+[[nodiscard]] AstIfStmt::Block Parser::thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept {
     unique_ptr<AstStmt> stmt;
     if (accept(TokenKind::EndOfStmt)) {
         stmt = stmtList();
     } else {
         stmt = statement();
     }
-    return AstIfStmt::Block{{}, nullptr, std::move(expr), std::move(stmt)};
+    return AstIfStmt::Block{std::move(decls), nullptr, std::move(expr), std::move(stmt)};
 }
 
 //----------------------------------------
@@ -522,12 +536,15 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
 /**
  * expression = factor { <Binary Op> expression } .
  */
-unique_ptr<AstExpr> Parser::expression() noexcept {
+unique_ptr<AstExpr> Parser::expression(bool commaAsAnd) noexcept {
     auto expr = factor();
 
     replace(TokenKind::Assign, TokenKind::Equal);
+    if (commaAsAnd) {
+        replace(TokenKind::Comma, TokenKind::CommaAnd);
+    }
     if (m_token->isOperator()) {
-        return expression(std::move(expr), 1);
+        return expression(std::move(expr), 1, commaAsAnd);
     }
 
     return expr;
@@ -604,7 +621,7 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
  * Recursievly climb operator precedence
  * https://en.wikipedia.org/wiki/Operator-precedence_parser#Precedence_climbing_method
  */
-[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) noexcept {
+[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence, bool commaAsAnd) noexcept {
     while (m_token->getPrecedence() >= precedence) {
         auto current = m_token->getPrecedence();
         auto kind = m_token->kind();
@@ -612,13 +629,16 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
 
         auto rhs = factor();
         replace(TokenKind::Assign, TokenKind::Equal);
+        if (commaAsAnd) {
+            replace(TokenKind::Comma, TokenKind::CommaAnd);
+        }
 
         while (m_token->getPrecedence() > current || (m_token->isRightToLeft() && m_token->getPrecedence() == current)) {
-            rhs = expression(std::move(rhs), m_token->getPrecedence());
+            rhs = expression(std::move(rhs), m_token->getPrecedence(), commaAsAnd);
         }
 
         auto left = AstBinaryExpr::create({ lhs->getRange().Start, m_endLoc });
-        left->tokenKind = kind;
+        left->tokenKind = kind == TokenKind::CommaAnd ? TokenKind::LogicalAnd : kind;
         left->lhs = std::move(lhs);
         left->rhs = std::move(rhs);
         lhs = std::move(left);
@@ -662,7 +682,7 @@ unique_ptr<AstIfExpr> Parser::ifExpr() noexcept {
     auto start = m_token->range().Start;
 
     expect(TokenKind::If);
-    auto expr = expression();
+    auto expr = expression(true);
     expect(TokenKind::Then);
     auto trueExpr = expression();
     expect(TokenKind::Else);

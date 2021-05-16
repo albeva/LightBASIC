@@ -31,10 +31,10 @@ private:
     [[nodiscard]] unique_ptr<AstStmt> statement() noexcept;
     [[nodiscard]] unique_ptr<AstStmt> declaration() noexcept;
 
-    [[nodiscard]] unique_ptr<AstExpr> expression() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(bool commaAsAnd = false) noexcept;
     [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
     [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence, bool commaAsAnd = false) noexcept;
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
     [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
     [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;
@@ -46,7 +46,7 @@ private:
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstIfStmt> kwIf() noexcept;
     [[nodiscard]] AstIfStmt::Block ifBlock() noexcept;
-    [[nodiscard]] AstIfStmt::Block thenBlock(unique_ptr<AstExpr> expr) noexcept;
+    [[nodiscard]] AstIfStmt::Block thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;

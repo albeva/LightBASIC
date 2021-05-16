@@ -31,28 +31,29 @@
 
 #define TOKEN_OPERATORS(_) \
     /* ID               Ch      Prec    Type    Assoc   Kind       */ \
-    _( Negate,          "-",    8,      Unary,  Left,   Arithmetic  ) \
-    _( LogicalNot,      "NOT",  8,      Unary,  Left,   Logical     ) \
+    _( Negate,          "-",    9,      Unary,  Left,   Arithmetic  ) \
+    _( LogicalNot,      "NOT",  9,      Unary,  Left,   Logical     ) \
                                                                       \
-    _( Multiply,        "*",    7,      Binary, Left,   Arithmetic  ) \
-    _( Divide,          "/",    7,      Binary, Left,   Arithmetic  ) \
+    _( Multiply,        "*",    8,      Binary, Left,   Arithmetic  ) \
+    _( Divide,          "/",    8,      Binary, Left,   Arithmetic  ) \
                                                                       \
-    _( Modulus,         "MOD",  6,      Binary, Left,   Arithmetic  ) \
+    _( Modulus,         "MOD",  7,      Binary, Left,   Arithmetic  ) \
                                                                       \
-    _( Plus,            "+",    5,      Binary, Left,   Arithmetic  ) \
-    _( Minus,           "-",    5,      Binary, Left,   Arithmetic  ) \
+    _( Plus,            "+",    6,      Binary, Left,   Arithmetic  ) \
+    _( Minus,           "-",    6,      Binary, Left,   Arithmetic  ) \
                                                                       \
-    _( Equal,           "=",    4,      Binary, Left,   Comparison  ) \
-    _( NotEqual,        "<>",   4,      Binary, Left,   Comparison  ) \
+    _( Equal,           "=",    5,      Binary, Left,   Comparison  ) \
+    _( NotEqual,        "<>",   5,      Binary, Left,   Comparison  ) \
                                                                       \
-    _( LessThan,        "<",    3,      Binary, Left,   Comparison  ) \
-    _( LessOrEqual,     "<=",   3,      Binary, Left,   Comparison  ) \
-    _( GreaterThan,     ">",    3,      Binary, Left,   Comparison  ) \
-    _( GreaterOrEqual,  ">=",   3,      Binary, Left,   Comparison  ) \
+    _( LessThan,        "<",    4,      Binary, Left,   Comparison  ) \
+    _( LessOrEqual,     "<=",   4,      Binary, Left,   Comparison  ) \
+    _( GreaterThan,     ">",    4,      Binary, Left,   Comparison  ) \
+    _( GreaterOrEqual,  ">=",   4,      Binary, Left,   Comparison  ) \
                                                                       \
-    _( LogicalAnd,      "AND",  2,      Binary, Left,   Logical     ) \
+    _( LogicalAnd,      "AND",  3,      Binary, Left,   Logical     ) \
                                                                       \
-    _( LogicalOr,       "OR",   1,      Binary, Left,   Logical     )
+    _( LogicalOr,       "OR",   2,      Binary, Left,   Logical     ) \
+    _( CommaAnd,        ",",    1,      Binary, Left,   Logical     )
 
 #define TOKEN_KEYWORDS(_)   \
     _( Var,             "VAR"      ) \

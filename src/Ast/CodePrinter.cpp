@@ -172,6 +172,10 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
                 m_os << " ";
             }
             m_os << "IF ";
+            for (const auto& var: block.decls) {
+                visit(var.get());
+                m_os << ", ";
+            }
             visit(block.expr.get());
             m_os << " THEN\n";
         } else {
@@ -179,6 +183,9 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
         }
         m_indent++;
         visit(block.stmt.get());
+        if (block.stmt->kind() != AstKind::StmtList) {
+            m_os << '\n';
+        }
         m_indent--;
         isFirst = false;
     }
