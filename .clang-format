@@ -53,10 +53,6 @@ DerivePointerAlignment: false
 DisableFormat: false
 ExperimentalAutoDetectBinPacking: true
 FixNamespaceComments: true
-ForEachMacros:
-- foreach
-- Q_FOREACH
-- BOOST_FOREACH
 IncludeCategories:
 - Priority: 1
   Regex: ^"pch\.h"
