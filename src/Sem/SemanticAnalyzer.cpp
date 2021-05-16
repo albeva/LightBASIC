@@ -120,8 +120,21 @@ void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
     }
 }
 
-void SemanticAnalyzer::visit(AstIfStmt* /*ast*/) noexcept {
-    // llvm_unreachable("AstIfStmt not implemented");
+void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
+    for (auto& block: ast->blocks) {
+        block.symbolTable = make_unique<SymbolTable>(m_table);
+        if (block.expr) {
+            expression(block.expr);
+            if (!block.expr->type->isBoolean()) {
+                fatalError("type '"_t
+                    + block.expr->type->asString()
+                    + "' cannot be used as boolean");
+            }
+        }
+        RESTORE_ON_EXIT(m_table);
+        m_table = block.symbolTable.get();
+        visit(block.stmt.get());
+    }
 }
 
 //----------------------------------------
