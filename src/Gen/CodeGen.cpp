@@ -254,6 +254,7 @@ void CodeGen::visit(AstFuncStmt* ast) noexcept {
 
     visit(ast->stmtList.get());
 
+    block = m_builder.GetInsertBlock();
     if (block->getTerminator() == nullptr) {
         auto* retType = func->getReturnType();
         if (!retType->isVoidTy()) {
@@ -288,14 +289,14 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         llvm::BasicBlock* elseBlock = nullptr;
 
         if (block.expr) {
+            visit(block.expr.get());
+
+            auto* thenBlock = llvm::BasicBlock::Create(m_llvmContext, "if.then", func);
             if (idx == count - 1) {
                 elseBlock = endBlock;
             } else {
                 elseBlock = llvm::BasicBlock::Create(m_llvmContext, "if.else", func);
             }
-            visit(block.expr.get());
-
-            auto* thenBlock = llvm::BasicBlock::Create(m_llvmContext, "if.then", func);
             m_builder.CreateCondBr(block.expr->llvmValue, thenBlock, elseBlock);
 
             thenBlock->moveAfter(m_builder.GetInsertBlock());
@@ -469,7 +470,7 @@ void CodeGen::logical(AstBinaryExpr* ast) noexcept {
     const auto isAnd = ast->tokenKind == TokenKind::LogicalAnd;
     auto prefix = isAnd ? "and"s : "or"s;
     auto* elseBlock = llvm::BasicBlock::Create(m_llvmContext, prefix, func);
-    auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, prefix + ".end");
+    auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, prefix + ".end", func);
 
     if (isAnd) {
         m_builder.CreateCondBr(ast->lhs->llvmValue, elseBlock, endBlock);
@@ -484,7 +485,7 @@ void CodeGen::logical(AstBinaryExpr* ast) noexcept {
     m_builder.CreateBr(endBlock);
 
     // phi
-    endBlock->insertInto(func);
+    endBlock->moveAfter(rhsBlock);
     m_builder.SetInsertPoint(endBlock);
     auto* phi = m_builder.CreatePHI(ast->type->getLlvmType(m_context), 2);
 

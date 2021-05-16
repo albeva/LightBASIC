@@ -45,8 +45,8 @@ private:
     [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstIfStmt> kwIf() noexcept;
-    [[nodiscard]] AstIfStmt::Block ifBlock(bool& isSingleLine) noexcept;
-    [[nodiscard]] AstIfStmt::Block elseBlock(bool isSingleLine) noexcept;
+    [[nodiscard]] AstIfStmt::Block ifBlock() noexcept;
+    [[nodiscard]] AstIfStmt::Block thenBlock(unique_ptr<AstExpr> expr) noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;

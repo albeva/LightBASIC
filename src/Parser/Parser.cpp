@@ -435,8 +435,8 @@ unique_ptr<AstStmt> Parser::kwReturn() noexcept {
 /**
  * IF
  *   = IfBlock
- *   { ELSE IfBlock }
- *   [ ElseBlock ]
+ *   { ELSE IF IfBlock }
+ *   [ ELSE ThenBlock ]
  *   "END" "IF"
  *   .
  */
@@ -444,62 +444,54 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
     auto start = m_token->range().Start;
     std::vector<AstIfStmt::Block> m_blocks;
 
-    bool isSingleLine = false;
-    while (true) {
-        m_blocks.emplace_back(ifBlock(isSingleLine));
-        if (accept(TokenKind::Else)) {
-            if (match(TokenKind::If)) {
-                continue;
-            }
-            m_blocks.emplace_back(elseBlock(isSingleLine));
-        }
-        break;
-    }
-
-    if (m_blocks.empty()) {
-        fatalError("expected IF statement");
-    }
-
-    expect(TokenKind::End);
     expect(TokenKind::If);
+    m_blocks.emplace_back(ifBlock());
+
+    while (accept(TokenKind::Else)) {
+        if (accept(TokenKind::If)) {
+            m_blocks.emplace_back(ifBlock());
+        } else {
+            m_blocks.emplace_back(thenBlock(nullptr));
+        }
+    }
+
+    if (m_blocks.back().stmt->kind() == AstKind::StmtList) {
+        expect(TokenKind::End);
+        expect(TokenKind::If);
+    }
 
     auto ast = AstIfStmt::create({start, m_endLoc});
     ast->blocks = std::move(m_blocks);
-    ast->isSingleLine = isSingleLine;
     return ast;
 }
 
 /**
  * IfBlock
- *   = "IF" Expression "THEN"
- *   ( EoS StmtList
- *   | Statement
- *   )
+ *   = Expression "THEN" ThenBlock
  *   .
  */
-AstIfStmt::Block Parser::ifBlock(bool& isSingleLine) noexcept {
-    expect(TokenKind::If);
+AstIfStmt::Block Parser::ifBlock() noexcept {
     auto expr = expression();
     expect(TokenKind::Then);
-    expect(TokenKind::EndOfStmt);
-    auto stmt = stmtList();
-
-    isSingleLine = false;
-    return AstIfStmt::Block{{}, nullptr, std::move(expr), std::move(stmt)};
+    return thenBlock(std::move(expr));
 }
 
 /**
- * ElseBlock
+ * ThenBlock
  *   =
  *   ( EoS StmtList
  *   | Statement
  *   )
  *   .
  */
-[[nodiscard]] AstIfStmt::Block Parser::elseBlock(bool /*isSingleLine*/) noexcept {
-    expect(TokenKind::EndOfStmt);
-    auto stmt = stmtList();
-    return AstIfStmt::Block{{}, nullptr, nullptr, std::move(stmt)};
+[[nodiscard]] AstIfStmt::Block Parser::thenBlock(unique_ptr<AstExpr> expr) noexcept {
+    unique_ptr<AstStmt> stmt;
+    if (accept(TokenKind::EndOfStmt)) {
+        stmt = stmtList();
+    } else {
+        stmt = statement();
+    }
+    return AstIfStmt::Block{{}, nullptr, std::move(expr), std::move(stmt)};
 }
 
 //----------------------------------------
