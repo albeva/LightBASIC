@@ -26,5 +26,5 @@ else if b then printf ", true"
 if b and b then
     printf ", true"
 else if b or b then
-    printf ", unreachable"
+    printf "unreachable"
 end if
