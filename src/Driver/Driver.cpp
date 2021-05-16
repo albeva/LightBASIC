@@ -151,6 +151,9 @@ void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
 
         assembler.reset();
         assembler.addArg("-filetype="s + filetype);
+        if (type == Context::FileType::Assembly) {
+            assembler.addArg("--x86-asm-syntax=intel");
+        }
         assembler.addPath("-o", output->path);
         assembler.addPath(source->path);
 
