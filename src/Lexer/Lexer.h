@@ -30,6 +30,7 @@ private:
     [[nodiscard]] static unique_ptr<Token> invalid(const char* loc) noexcept;
 
     void skipUntilLineEnd() noexcept;
+    void multilineComment() noexcept;
     bool move() noexcept;
     bool move(int steps) noexcept;
     [[nodiscard]] bool isValid() const noexcept;

@@ -47,6 +47,7 @@ private:
     [[nodiscard]] unique_ptr<AstIfStmt> kwIf() noexcept;
     [[nodiscard]] AstIfStmt::Block ifBlock() noexcept;
     [[nodiscard]] AstIfStmt::Block thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
+    [[nodiscard]] unique_ptr<AstForStmt> kwFor() noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;

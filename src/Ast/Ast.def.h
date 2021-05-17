@@ -20,10 +20,11 @@
     _( ExprStmt   ) \
     _( FuncStmt   ) \
     _( ReturnStmt ) \
-    _( IfStmt     )
+    _( IfStmt     ) \
+    _( ForStmt    )
 
 // include declarations
-#define AST_STMT_RANGE(_) _(StmtList, IfStmt)
+#define AST_STMT_RANGE(_) _(StmtList, ForStmt)
 
 /**
  * Declarations

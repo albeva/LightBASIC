@@ -115,6 +115,17 @@ struct AstIfStmt final: AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
     std::vector<Block> blocks;
 };
 
+struct AstForStmt final: AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
+    using AstNode::AstNode;
+    std::vector<unique_ptr<AstVarDecl>> decls;
+    unique_ptr<AstVarDecl> iterator;
+    unique_ptr<AstExpr> limit;
+    unique_ptr<AstExpr> step;
+    unique_ptr<AstStmt> stmt;
+    StringRef next;
+    unique_ptr<SymbolTable> symbolTable;
+};
+
 //----------------------------------------
 // Attributes
 //----------------------------------------

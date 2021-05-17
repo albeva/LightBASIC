@@ -55,6 +55,8 @@ private:
 
     llvm::ConstantInt* m_constantFalse = nullptr;
     llvm::ConstantInt* m_constantTrue = nullptr;
+
+    bool m_declareAsGlobals = true;
 };
 
 } // namespace lbc

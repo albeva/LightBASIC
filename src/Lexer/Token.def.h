@@ -68,7 +68,12 @@
     _( Null,            "NULL"     ) \
     _( If,              "IF"       ) \
     _( Then,            "THEN"     ) \
-    _( Else,            "ELSE"     )
+    _( Else,            "ELSE"     ) \
+    _( For,             "FOR"      ) \
+    _( Next,            "NEXT"     ) \
+    _( Step,            "STEP"     ) \
+    _( To,              "TO"       ) \
+    _( Do,              "DO"       )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \

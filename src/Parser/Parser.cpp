@@ -47,9 +47,20 @@ unique_ptr<AstModule> Parser::parse() noexcept {
  *   .
  */
 unique_ptr<AstStmtList> Parser::stmtList() noexcept {
+    constexpr auto isTerminator = [](const unique_ptr<Token>& token) noexcept {
+        switch (token->kind()) {
+        case TokenKind::End:
+        case TokenKind::Else:
+        case TokenKind::Next:
+            return true;
+        default:
+            return false;
+        }
+    };
+
     auto start = m_token->range().Start;
     std::vector<unique_ptr<AstStmt>> stms;
-    while (isValid() && !match(TokenKind::End) && !match(TokenKind::Else)) {
+    while (isValid() && !isTerminator(m_token)) {
         stms.emplace_back(statement());
         expect(TokenKind::EndOfStmt);
     }
@@ -64,6 +75,7 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
  *   | Assignment
  *   | CallStmt
  *   | IfStmt
+ *   | ForStmt
  *   | RETURN
  *   .
  */
@@ -86,6 +98,8 @@ unique_ptr<AstStmt> Parser::statement() noexcept {
         return kwReturn();
     case TokenKind::If:
         return kwIf();
+    case TokenKind::For:
+        return kwFor();
     default:
         error("Expected statement");
     }
@@ -475,7 +489,7 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
 
 /**
  * IfBlock
- *   = [ VAR ] Expression "THEN" ThenBlock
+ *   = [ VAR { "," VAR } "," ] Expression "THEN" ThenBlock
  *   .
  */
 AstIfStmt::Block Parser::ifBlock() noexcept {
@@ -506,6 +520,79 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
         stmt = statement();
     }
     return AstIfStmt::Block{std::move(decls), nullptr, std::move(expr), std::move(stmt)};
+}
+
+//----------------------------------------
+// FOR statement
+//----------------------------------------
+
+/**
+ * FOR
+ *   = "FOR" [ VAR { "," VAR } "," ]
+ *     id [ "AS" TypeExpr ] "=" Expression "TO" Expression [ "STEP" expression ]
+ *   ( "DO" Statement
+ *   | <EoS> StatementList
+ *     "NEXT" [ id ]
+ *   )
+ *   .
+ */
+[[nodiscard]] unique_ptr<AstForStmt> Parser::kwFor() noexcept {
+    auto start = m_token->range().Start;
+    expect(TokenKind::For);
+
+    std::vector<unique_ptr<AstVarDecl>> decls;
+
+    // [ VAR { "," VAR } "," ]
+    while (match(TokenKind::Var)) {
+        decls.emplace_back(kwVar(nullptr));
+        expect(TokenKind::Comma);
+    }
+
+    // id [ "AS" TypeExpr ] "=" Expression
+    auto idStart = m_token->range().Start;
+    auto id = expect(TokenKind::Identifier);
+    unique_ptr<AstTypeExpr> type;
+    if (accept(TokenKind::As)) {
+        type = typeExpr();
+    }
+    expect(TokenKind::Assign);
+    auto expr = expression();
+    auto iterator = AstVarDecl::create({idStart, m_endLoc});
+    iterator->expr = std::move(expr);
+    iterator->typeExpr = std::move(type);
+    iterator->id = std::get<StringRef>(id->getValue());
+
+    // "TO" Expression [ "STEP" expression ]
+    expect(TokenKind::To);
+    auto limit = expression();
+    unique_ptr<AstExpr> step;
+    if (accept(TokenKind::Step)) {
+        step = expression();
+    }
+
+    // "DO" statement ?
+    unique_ptr<AstStmt> stmt;
+    StringRef next;
+    if (accept(TokenKind::Do)) {
+        stmt = statement();
+    } else {
+        expect(TokenKind::EndOfStmt);
+        stmt = stmtList();
+        expect(TokenKind::Next);
+        if (auto nextId = accept(TokenKind::Identifier)) {
+            next = std::get<StringRef>(nextId->getValue());
+        }
+    }
+
+    auto ast = AstForStmt::create({start, m_endLoc});
+    ast->decls = std::move(decls);
+    ast->iterator = std::move(iterator);
+    ast->limit = std::move(limit);
+    ast->step = std::move(step);
+    ast->stmt = std::move(stmt);
+    ast->next = next;
+
+    return ast;
 }
 
 //----------------------------------------

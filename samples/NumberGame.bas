@@ -25,14 +25,14 @@ Var answer = 0
 printf "Guess a number between 1 and 100. 0 to exit. You have 25 tries\n"
 
 '' Try for 25 times
-For Var i = 1 To 25
+For i = 1 To 25
     printf "Attempt %d: ", i
     scanf "%d", &answer
     If answer = 0 Then
-        Return
+        Return 0
     Else If answer = secret Then
         printf "Correct\n"
-        Return
+        Return 0
     Else If answer > secret Then
         printf "Nope. Too big!\n"
     Else

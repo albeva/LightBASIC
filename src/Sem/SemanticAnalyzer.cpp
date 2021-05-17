@@ -148,6 +148,66 @@ void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
     }
 }
 
+void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
+    RESTORE_ON_EXIT(m_table);
+    ast->symbolTable = make_unique<SymbolTable>(m_table);
+    m_table = ast->symbolTable.get();
+
+    for (auto& var: ast->decls) {
+        visit(var.get());
+    }
+    visit(ast->iterator.get());
+    visit(ast->limit.get());
+    if (ast->step) {
+        visit(ast->step.get());
+    }
+
+    const auto* type = ast->iterator->symbol->type();
+    if (!type->isNumeric()) {
+        fatalError("NEXT iterator must be of numeric type");
+    }
+
+    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
+        cast(expr, ty);
+        m_constantFolder.fold(expr);
+    };
+
+    // type TO type check
+    switch (type->compare(ast->limit->type)) {
+    case TypeComparison::Incompatible:
+        fatalError("Incompatible types in FOR");
+    case TypeComparison::Downcast:
+        convert(ast->limit, type);
+        break;
+    case TypeComparison::Equal:
+        break;
+    case TypeComparison::Upcast:
+        if (ast->iterator->typeExpr) {
+            convert(ast->limit, type);
+        } else {
+            convert(ast->iterator->expr, ast->limit->type);
+            ast->iterator->symbol->setType(ast->limit->type);
+        }
+        break;
+    }
+
+    // type STEP type check
+    if (ast->step) {
+        switch (type->compare(ast->step->type)) {
+        case TypeComparison::Incompatible:
+            fatalError("Incompatible types in STEP");
+        case TypeComparison::Downcast:
+        case TypeComparison::Upcast:
+            convert(ast->step, type);
+            break;
+        case TypeComparison::Equal:
+            break;
+        }
+    }
+
+    visit(ast->stmt.get());
+}
+
 //----------------------------------------
 // Attributes
 //----------------------------------------

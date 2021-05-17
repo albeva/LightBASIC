@@ -124,7 +124,7 @@ void CodeGen::visit(AstExprStmt* ast) noexcept {
 // Variables
 
 void CodeGen::visit(AstVarDecl* ast) noexcept {
-    if (m_scope == Scope::Root) {
+    if (m_declareAsGlobals) {
         declareGlobalVar(ast);
     } else {
         declareLocalVar(ast);
@@ -236,6 +236,10 @@ void CodeGen::visit(AstFuncParamDecl* /*ast*/) noexcept {
 void CodeGen::visit(AstFuncStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
+
+    RESTORE_ON_EXIT(m_declareAsGlobals);
+    m_declareAsGlobals = false;
+
     auto* func = llvm::cast<llvm::Function>(ast->decl->symbol->getLlvmValue());
 
     auto* current = m_builder.GetInsertBlock();
@@ -280,6 +284,9 @@ void CodeGen::visit(AstReturnStmt* ast) noexcept {
 //------------------------------------------------------------------
 
 void CodeGen::visit(AstIfStmt* ast) noexcept {
+    RESTORE_ON_EXIT(m_declareAsGlobals);
+    m_declareAsGlobals = false;
+
     auto* func = m_builder.GetInsertBlock()->getParent();
     auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, "if.end", func);
 
@@ -288,7 +295,7 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         const auto& block = ast->blocks[idx];
         llvm::BasicBlock* elseBlock = nullptr;
 
-        for (auto& decl: block.decls) {
+        for (const auto& decl: block.decls) {
             visit(decl.get());
         }
 
@@ -315,6 +322,137 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         elseBlock->moveAfter(m_builder.GetInsertBlock());
         m_builder.SetInsertPoint(elseBlock);
     }
+}
+
+void CodeGen::visit(AstForStmt* ast) noexcept {
+    RESTORE_ON_EXIT(m_declareAsGlobals);
+    m_declareAsGlobals = false;
+
+    // blocks
+    auto* func = m_builder.GetInsertBlock()->getParent();
+    auto* exitBlock = llvm::BasicBlock::Create(m_llvmContext, "for.end");
+    auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "for.body");
+    auto* condBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond");
+
+    for (const auto& decl: ast->decls) {
+        visit(decl.get());
+    }
+    visit(ast->iterator.get());
+    auto* iterator = ast->iterator->symbol->getLlvmValue();
+    const auto* type = ast->iterator->symbol->type();
+    auto* llvmType = type->getLlvmType(m_context);
+
+    bool isIntegral = type->isIntegral();
+    auto isSigned = type->isSignedIntegral();
+    llvm::CmpInst::Predicate lessThanPred{};
+    llvm::CmpInst::Predicate lessOrEqualPred{};
+    if (isIntegral) {
+        if (isSigned) {
+            lessThanPred = llvm::CmpInst::ICMP_SLT;
+            lessOrEqualPred = llvm::CmpInst::ICMP_SLE;
+        } else {
+            lessThanPred = llvm::CmpInst::ICMP_ULT;
+            lessOrEqualPred = llvm::CmpInst::ICMP_ULE;
+        }
+    } else {
+        lessThanPred = llvm::CmpInst::FCMP_OLT;
+        lessOrEqualPred = llvm::CmpInst::FCMP_OLE;
+    }
+
+    visit(ast->limit.get());
+    auto* limit = m_builder.CreateAlloca(llvmType, nullptr, "__for.limit");
+    m_builder.CreateStore(ast->limit->llvmValue, limit);
+
+    auto* limitValue = m_builder.CreateLoad(limit);
+    auto* iterValue = m_builder.CreateLoad(iterator);
+    auto* isDecr = m_builder.CreateCmp(
+        lessThanPred,
+        limitValue,
+        iterValue);
+
+    auto * step = m_builder.CreateAlloca(llvmType, nullptr, "__for.step");
+    if (ast->step) {
+        visit(ast->step.get());
+        m_builder.CreateStore(ast->step->llvmValue, step);
+
+        llvm::Value* stepValue = m_builder.CreateLoad(step);
+        auto* isStepNeg = m_builder.CreateCmp(
+            lessThanPred,
+            stepValue,
+            llvm::Constant::getNullValue(llvmType));
+
+        auto* negateBlock = llvm::BasicBlock::Create(m_llvmContext, "for.negate");
+        auto* negateEndBlock = llvm::BasicBlock::Create(m_llvmContext, "for.negate.end");
+        m_builder.CreateCondBr(isStepNeg, negateBlock, negateEndBlock);
+
+        negateBlock->insertInto(func);
+        m_builder.SetInsertPoint(negateBlock);
+        stepValue = m_builder.CreateNeg(stepValue);
+        m_builder.CreateStore(stepValue, step);
+        m_builder.CreateBr(negateEndBlock);
+
+        negateEndBlock->insertInto(func);
+        m_builder.SetInsertPoint(negateEndBlock);
+
+        auto* isDecrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.isdecr");
+        auto* isIncrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.isincr");
+        m_builder.CreateCondBr(isDecr, isDecrBlock, isIncrBlock);
+
+        isDecrBlock->insertInto(func);
+        m_builder.SetInsertPoint(isDecrBlock);
+        m_builder.CreateCondBr(isStepNeg, bodyBlock, exitBlock);
+
+        isIncrBlock->insertInto(func);
+        m_builder.SetInsertPoint(isIncrBlock);
+        m_builder.CreateCondBr(isStepNeg, exitBlock, bodyBlock);
+    } else {
+        llvm::Value* stepVal = nullptr;
+        if (isIntegral) {
+            stepVal = llvm::ConstantInt::get(llvmType, 1, isSigned);
+        } else {
+            stepVal = llvm::ConstantFP::get(llvmType, 1);
+        }
+        m_builder.CreateStore(stepVal, step);
+    }
+
+    if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
+        m_builder.CreateBr(bodyBlock);
+    }
+
+    bodyBlock->insertInto(func);
+    m_builder.SetInsertPoint(bodyBlock);
+    visit(ast->stmt.get());
+    m_builder.CreateBr(condBlock);
+
+    condBlock->insertInto(func);
+    m_builder.SetInsertPoint(condBlock);
+    auto* incrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond.incr");
+    auto* decrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond.decr");
+    m_builder.CreateCondBr(isDecr, decrBlock, incrBlock);
+
+    const auto conditional = [&](llvm::BasicBlock* block, bool incr) {
+        block->insertInto(func);
+        m_builder.SetInsertPoint(block);
+
+        llvm::Value* iterValue = m_builder.CreateLoad(iterator);
+        llvm::Value* stepValue = m_builder.CreateLoad(step);
+        auto* result = incr
+            ? m_builder.CreateAdd(iterValue, stepValue)
+            : m_builder.CreateSub(iterValue, stepValue);
+        m_builder.CreateStore(result, iterator);
+
+        auto* limitValue = m_builder.CreateLoad(limit);
+        auto* cmp = incr
+            ? m_builder.CreateCmp(lessOrEqualPred, result, limitValue)
+            : m_builder.CreateCmp(lessOrEqualPred, limitValue, result);
+        m_builder.CreateCondBr(cmp, bodyBlock, exitBlock);
+    };
+
+    conditional(incrBlock, true);
+    conditional(decrBlock, false);
+
+    exitBlock->insertInto(func);
+    m_builder.SetInsertPoint(exitBlock);
 }
 
 //------------------------------------------------------------------

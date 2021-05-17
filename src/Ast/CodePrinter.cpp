@@ -194,6 +194,44 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
     m_os << indent() << "END IF";
 }
 
+void CodePrinter::visit(AstForStmt* ast) noexcept {
+    m_os << indent() << "FOR ";
+
+    for (const auto& decl: ast->decls) {
+        visit(decl.get());
+        m_os << ", ";
+    }
+
+    m_os << ast->iterator->id;
+    if (ast->iterator->typeExpr) {
+        m_os << " AS ";
+        visit(ast->iterator->typeExpr.get());
+    }
+
+    m_os << " = ";
+    visit(ast->iterator->expr.get());
+    m_os << " TO ";
+    visit(ast->limit.get());
+    if (ast->step) {
+        m_os << " STEP ";
+        visit(ast->step.get());
+    }
+
+    if (ast->stmt->kind() == AstKind::StmtList) {
+        m_os << '\n';
+        m_indent++;
+        visit(ast->stmt.get());
+        m_indent--;
+        m_os << "NEXT";
+        if (!ast->next.empty()) {
+            m_os << " " << ast->next;
+        }
+    } else {
+        m_os << " DO ";
+        visit(ast->stmt.get());
+    }
+}
+
 // Expressions
 
 void CodePrinter::visit(AstIdentExpr* ast) noexcept {

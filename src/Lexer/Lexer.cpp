@@ -61,6 +61,12 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
             continue;
         }
 
+        // multi line comments
+        if (m_char == '/' && peek(1) == '\'') {
+            multilineComment();
+            continue;
+        }
+
         // there is some parsable content. so set stmt to true
         m_hasStmt = true;
 
@@ -283,6 +289,24 @@ unique_ptr<Token> Lexer::invalid(const char* loc) noexcept {
 
 void Lexer::skipUntilLineEnd() noexcept {
     while (move() && m_char != '\n') {}
+}
+
+void Lexer::multilineComment() noexcept {
+    move();
+    int level = 1;
+    while (move()) {
+        if (m_char == '\'' && peek() == '/') {
+            move(2);
+            level--;
+            if (level == 0) {
+                return;
+            }
+        }
+        else if (m_char == '/' && peek() == '\'') {
+            move();
+            level++;
+        }
+    }
 }
 
 bool Lexer::move() noexcept {
