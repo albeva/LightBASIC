@@ -25,7 +25,7 @@ CodeGen::CodeGen(Context& context) noexcept
 
 bool CodeGen::validate() const noexcept {
     assert(m_module != nullptr); // NOLINT
-    return true; // !llvm::verifyModule(*m_module, &llvm::outs());
+    return true;                 // !llvm::verifyModule(*m_module, &llvm::outs());
 }
 
 void CodeGen::visit(AstModule* ast) noexcept {
@@ -295,7 +295,7 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         const auto& block = ast->blocks[idx];
         llvm::BasicBlock* elseBlock = nullptr;
 
-        for (const auto& decl: block.decls) {
+        for (const auto& decl : block.decls) {
             visit(decl.get());
         }
 
@@ -334,7 +334,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "for.body");
     auto* condBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond");
 
-    for (const auto& decl: ast->decls) {
+    for (const auto& decl : ast->decls) {
         visit(decl.get());
     }
     visit(ast->iterator.get());
@@ -370,7 +370,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
         limitValue,
         iterValue);
 
-    auto * step = m_builder.CreateAlloca(llvmType, nullptr, "__for.step");
+    auto* step = m_builder.CreateAlloca(llvmType, nullptr, "__for.step");
     if (ast->step) {
         visit(ast->step.get());
         m_builder.CreateStore(ast->step->llvmValue, step);

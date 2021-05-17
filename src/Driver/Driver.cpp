@@ -174,7 +174,7 @@ void Driver::optimize() noexcept {
     const auto& files = getSources(llvmIr ? Context::FileType::LLVMIr : Context::FileType::BitCode);
 
     auto optimizer = m_context.getToolchain().createTask(ToolKind::Optimizer);
-    for (const auto& file: files) {
+    for (const auto& file : files) {
         optimizer.reset();
         if (llvmIr) {
             optimizer.addArg("-S");

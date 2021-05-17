@@ -301,8 +301,7 @@ void Lexer::multilineComment() noexcept {
             if (level == 0) {
                 return;
             }
-        }
-        else if (m_char == '/' && peek() == '\'') {
+        } else if (m_char == '/' && peek() == '\'') {
             move();
             level++;
         }

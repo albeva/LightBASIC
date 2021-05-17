@@ -99,14 +99,14 @@ void AstPrinter::visit(AstReturnStmt* ast) noexcept {
 }
 
 void AstPrinter::visit(AstIfStmt* ast) noexcept {
-    m_json.object([&]{
+    m_json.object([&] {
         writeHeader(ast);
-        m_json.attributeArray("blocks", [&]{
-            for (const auto& block: ast->blocks) {
-                m_json.object([&]{
+        m_json.attributeArray("blocks", [&] {
+            for (const auto& block : ast->blocks) {
+                m_json.object([&] {
                     if (!block.decls.empty()) {
-                        m_json.attributeArray("decls", [&]{
-                            for (const auto& decl: block.decls) {
+                        m_json.attributeArray("decls", [&] {
+                            for (const auto& decl : block.decls) {
                                 visit(decl.get());
                             }
                         });
@@ -128,7 +128,7 @@ void AstPrinter::visit(AstIfStmt* ast) noexcept {
 }
 
 void AstPrinter::visit(AstForStmt* ast) noexcept {
-    m_json.object([&]{
+    m_json.object([&] {
         writeHeader(ast);
         if (!ast->decls.empty()) {
             m_json.attributeArray("decls", [&] {

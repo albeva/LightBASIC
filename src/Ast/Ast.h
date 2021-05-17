@@ -104,7 +104,7 @@ struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt
     unique_ptr<AstExpr> expr;
 };
 
-struct AstIfStmt final: AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
+struct AstIfStmt final : AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
     using AstNode::AstNode;
     struct Block final {
         std::vector<unique_ptr<AstVarDecl>> decls;
@@ -115,7 +115,7 @@ struct AstIfStmt final: AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
     std::vector<Block> blocks;
 };
 
-struct AstForStmt final: AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
+struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     using AstNode::AstNode;
     std::vector<unique_ptr<AstVarDecl>> decls;
     unique_ptr<AstVarDecl> iterator;

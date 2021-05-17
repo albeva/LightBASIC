@@ -70,7 +70,8 @@ int ToolTask::execute() const noexcept {
         for (const auto& arg : m_args) {
             std::cout << " " << arg;
         }
-        std::cout << '\n' << '\n';
+        std::cout << '\n'
+                  << '\n';
     }
 
     return llvm::sys::ExecuteAndWait(program, args);

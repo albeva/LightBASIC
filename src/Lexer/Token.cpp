@@ -138,7 +138,7 @@ bool Token::isUnary() const noexcept {
 }
 
 bool Token::isLeftToRight() const noexcept {
-    constexpr bool Left = true;  // NOLINT
+    constexpr bool Left = true; // NOLINT
     // constexpr bool Right = true; // NOLINT
 #define CASE_OPERATOR(id, ch, prec, binary, dir, ...) \
     case TokenKind::id:                               \

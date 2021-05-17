@@ -162,7 +162,7 @@ void CodePrinter::visit(AstReturnStmt* ast) noexcept {
 
 void CodePrinter::visit(AstIfStmt* ast) noexcept {
     bool isFirst = true;
-    for (const auto& block: ast->blocks) {
+    for (const auto& block : ast->blocks) {
         m_os << indent();
         if (!isFirst) {
             m_os << "ELSE";
@@ -174,7 +174,7 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
                 m_os << " ";
             }
             m_os << "IF ";
-            for (const auto& var: block.decls) {
+            for (const auto& var : block.decls) {
                 visit(var.get());
                 m_os << ", ";
             }
@@ -197,7 +197,7 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
 void CodePrinter::visit(AstForStmt* ast) noexcept {
     m_os << indent() << "FOR ";
 
-    for (const auto& decl: ast->decls) {
+    for (const auto& decl : ast->decls) {
         visit(decl.get());
         m_os << ", ";
     }

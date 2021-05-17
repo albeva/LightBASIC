@@ -23,7 +23,6 @@ public:
     [[nodiscard]] Symbol* find(StringRef id, bool recursive = true) const noexcept;
 
 private:
-
     SymbolTable* m_parent;
     llvm::StringMap<unique_ptr<Symbol>> m_symbols;
     llvm::StringMap<Symbol*> m_references;

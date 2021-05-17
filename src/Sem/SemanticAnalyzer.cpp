@@ -122,7 +122,7 @@ void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
 
 void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_table);
-    for (auto& block: ast->blocks) {
+    for (auto& block : ast->blocks) {
         block.symbolTable = make_unique<SymbolTable>(m_table);
     }
 
@@ -130,7 +130,7 @@ void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
         auto& block = ast->blocks[idx];
 
         m_table = block.symbolTable.get();
-        for (auto& var: block.decls) {
+        for (auto& var : block.decls) {
             visit(var.get());
             for (size_t next = idx + 1; next < ast->blocks.size(); next++) {
                 ast->blocks[next].symbolTable->addReference(var->symbol);
@@ -153,7 +153,7 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
     ast->symbolTable = make_unique<SymbolTable>(m_table);
     m_table = ast->symbolTable.get();
 
-    for (auto& var: ast->decls) {
+    for (auto& var : ast->decls) {
         visit(var.get());
     }
     visit(ast->iterator.get());

@@ -135,8 +135,8 @@ unique_ptr<AstStmt> Parser::declaration() noexcept {
 
     if (attribs) {
         error("Expected SUB, FUNCTION, DECLARE or VAR got '"_t
-              + m_token->description()
-              + "'");
+            + m_token->description()
+            + "'");
     }
     return nullptr;
 }
@@ -482,7 +482,7 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
         expect(TokenKind::If);
     }
 
-    auto ast = AstIfStmt::create({start, m_endLoc});
+    auto ast = AstIfStmt::create({ start, m_endLoc });
     ast->blocks = std::move(m_blocks);
     return ast;
 }
@@ -519,7 +519,7 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
     } else {
         stmt = statement();
     }
-    return AstIfStmt::Block{std::move(decls), nullptr, std::move(expr), std::move(stmt)};
+    return AstIfStmt::Block{ std::move(decls), nullptr, std::move(expr), std::move(stmt) };
 }
 
 //----------------------------------------
@@ -557,7 +557,7 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
     }
     expect(TokenKind::Assign);
     auto expr = expression();
-    auto iterator = AstVarDecl::create({idStart, m_endLoc});
+    auto iterator = AstVarDecl::create({ idStart, m_endLoc });
     iterator->expr = std::move(expr);
     iterator->typeExpr = std::move(type);
     iterator->id = std::get<StringRef>(id->getValue());
@@ -584,7 +584,7 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
         }
     }
 
-    auto ast = AstForStmt::create({start, m_endLoc});
+    auto ast = AstForStmt::create({ start, m_endLoc });
     ast->decls = std::move(decls);
     ast->iterator = std::move(iterator);
     ast->limit = std::move(limit);
