@@ -9,6 +9,62 @@
 
 using namespace lbc;
 
+namespace {
+[[nodiscard]] llvm::CmpInst::Predicate getCmpPred(const TypeRoot* type, TokenKind op) noexcept {
+    if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
+        bool isSigned = integral->isSigned();
+        switch (op) {
+        case TokenKind::Equal:
+            return llvm::CmpInst::Predicate::ICMP_EQ;
+        case TokenKind::NotEqual:
+            return llvm::CmpInst::Predicate::ICMP_NE;
+        case TokenKind::LessThan:
+            return isSigned ? llvm::CmpInst::Predicate::ICMP_SLT : llvm::CmpInst::Predicate::ICMP_ULT;
+        case TokenKind::LessOrEqual:
+            return isSigned ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
+        case TokenKind::GreaterOrEqual:
+            return isSigned ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
+        case TokenKind::GreaterThan:
+            return isSigned ? llvm::CmpInst::Predicate::ICMP_SGT : llvm::CmpInst::Predicate::ICMP_UGT;
+        default:
+            llvm_unreachable("Unkown comparison op");
+        }
+    }
+
+    if (type->isFloatingPoint()) {
+        switch (op) {
+        case TokenKind::Equal:
+            return llvm::CmpInst::Predicate::FCMP_OEQ;
+        case TokenKind::NotEqual:
+            return llvm::CmpInst::Predicate::FCMP_UNE;
+        case TokenKind::LessThan:
+            return llvm::CmpInst::Predicate::FCMP_OLT;
+        case TokenKind::LessOrEqual:
+            return llvm::CmpInst::Predicate::FCMP_OLE;
+        case TokenKind::GreaterOrEqual:
+            return llvm::CmpInst::Predicate::FCMP_OGE;
+        case TokenKind::GreaterThan:
+            return llvm::CmpInst::Predicate::FCMP_OGT;
+        default:
+            llvm_unreachable("Unkown comparison op");
+        }
+    }
+
+    if (type->isBoolean()) {
+        switch (op) {
+        case TokenKind::Equal:
+            return llvm::CmpInst::Predicate::ICMP_EQ;
+        case TokenKind::NotEqual:
+            return llvm::CmpInst::Predicate::ICMP_NE;
+        default:
+            llvm_unreachable("Unkown comparison op");
+        }
+    }
+
+    llvm_unreachable("Unsupported type");
+}
+} // namespace
+
 CodeGen::CodeGen(Context& context) noexcept
 : m_context{ context },
   m_llvmContext{ context.getLlvmContext() },
@@ -344,20 +400,8 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
 
     bool isIntegral = type->isIntegral();
     auto isSigned = type->isSignedIntegral();
-    llvm::CmpInst::Predicate lessThanPred{};
-    llvm::CmpInst::Predicate lessOrEqualPred{};
-    if (isIntegral) {
-        if (isSigned) {
-            lessThanPred = llvm::CmpInst::ICMP_SLT;
-            lessOrEqualPred = llvm::CmpInst::ICMP_SLE;
-        } else {
-            lessThanPred = llvm::CmpInst::ICMP_ULT;
-            lessOrEqualPred = llvm::CmpInst::ICMP_ULE;
-        }
-    } else {
-        lessThanPred = llvm::CmpInst::FCMP_OLT;
-        lessOrEqualPred = llvm::CmpInst::FCMP_OLE;
-    }
+    auto lessThanPred = getCmpPred(type, TokenKind::LessThan);
+    auto lessOrEqualPred = getCmpPred(type, TokenKind::LessOrEqual);
 
     visit(ast->limit.get());
     auto* limit = m_builder.CreateAlloca(llvmType, nullptr, "__for.limit");
@@ -645,68 +689,7 @@ void CodeGen::comparison(AstBinaryExpr* ast) noexcept {
     visit(ast->rhs.get());
 
     const auto* ty = ast->lhs->type;
-    llvm::CmpInst::Predicate pred{};
-    if (ty->isIntegral()) {
-        auto sign = ty->isSignedIntegral();
-        switch (ast->tokenKind) {
-        case TokenKind::Equal:
-            pred = llvm::CmpInst::Predicate::ICMP_EQ;
-            break;
-        case TokenKind::NotEqual:
-            pred = llvm::CmpInst::Predicate::ICMP_NE;
-            break;
-        case TokenKind::LessThan:
-            pred = sign ? llvm::CmpInst::Predicate::ICMP_SLT : llvm::CmpInst::Predicate::ICMP_ULT;
-            break;
-        case TokenKind::LessOrEqual:
-            pred = sign ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
-            break;
-        case TokenKind::GreaterOrEqual:
-            pred = sign ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
-            break;
-        case TokenKind::GreaterThan:
-            pred = sign ? llvm::CmpInst::Predicate::ICMP_SGT : llvm::CmpInst::Predicate::ICMP_UGT;
-            break;
-        default:
-            llvm_unreachable("Unkown comparison op");
-        }
-    } else if (ty->isFloatingPoint()) {
-        switch (ast->tokenKind) {
-        case TokenKind::Equal:
-            pred = llvm::CmpInst::Predicate::FCMP_OEQ;
-            break;
-        case TokenKind::NotEqual:
-            pred = llvm::CmpInst::Predicate::FCMP_UNE;
-            break;
-        case TokenKind::LessThan:
-            pred = llvm::CmpInst::Predicate::FCMP_OLT;
-            break;
-        case TokenKind::LessOrEqual:
-            pred = llvm::CmpInst::Predicate::FCMP_OLE;
-            break;
-        case TokenKind::GreaterOrEqual:
-            pred = llvm::CmpInst::Predicate::FCMP_OGE;
-            break;
-        case TokenKind::GreaterThan:
-            pred = llvm::CmpInst::Predicate::FCMP_OGT;
-            break;
-        default:
-            llvm_unreachable("Unkown comparison op");
-        }
-    } else if (ty->isBoolean()) {
-        switch (ast->tokenKind) {
-        case TokenKind::Equal:
-            pred = llvm::CmpInst::Predicate::ICMP_EQ;
-            break;
-        case TokenKind::NotEqual:
-            pred = llvm::CmpInst::Predicate::ICMP_NE;
-            break;
-        default:
-            llvm_unreachable("Unkown comparison op");
-        }
-    } else {
-        llvm_unreachable("Unkown comparison type");
-    }
+    auto pred = getCmpPred(ty, ast->tokenKind);
     ast->llvmValue = m_builder.CreateCmp(pred, ast->lhs->llvmValue, ast->rhs->llvmValue);
 }
 
