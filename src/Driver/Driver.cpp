@@ -234,9 +234,10 @@ void Driver::emitExecutable() noexcept {
     }
 
     if (m_context.getOptimizationLevel() != Context::OptimizationLevel::O0) {
-        linker
-            .addArg("-O")
-            .addArg("-s");
+        if (!triple.isMacOSX()) {
+            linker.addArg("-O");
+            linker.addArg("-s");
+        }
     }
 
     if (triple.isOSWindows()) {
