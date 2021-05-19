@@ -438,7 +438,7 @@ void SemanticAnalyzer::visit(AstCastExpr* ast) noexcept {
     visit(ast->typeExpr.get());
     ast->type = ast->typeExpr->type;
     expression(ast->expr);
-    
+
     if (ast->expr->type->compare(ast->type) == TypeComparison::Incompatible) {
         fatalError("Incompatible cast");
     }

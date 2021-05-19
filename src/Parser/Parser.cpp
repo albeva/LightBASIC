@@ -654,11 +654,11 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
             expr = std::move(unary);
             continue;
         }
-        
+
         // "AS" TypeExpr
         if (accept(TokenKind::As)) {
             auto type = typeExpr();
-            auto cast = AstCastExpr::create({start, m_endLoc});
+            auto cast = AstCastExpr::create({ start, m_endLoc });
             cast->expr = std::move(expr);
             cast->typeExpr = std::move(type);
             cast->implicit = false;
