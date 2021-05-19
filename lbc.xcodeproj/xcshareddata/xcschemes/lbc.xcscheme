@@ -53,7 +53,15 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "hello.bas"
+            argument = "testing.dump.bas"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-code-dump"
+            isEnabled = "YES">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-o testing.dump-gen.bas"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument

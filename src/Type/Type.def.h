@@ -30,5 +30,5 @@
 
 #define ALL_TYPES(_)   \
     PRIMITIVE_TYPES(_) \
-    INTEGRAL_TYPES(_)   \
+    INTEGRAL_TYPES(_)  \
     FLOATINGPOINT_TYPES(_)

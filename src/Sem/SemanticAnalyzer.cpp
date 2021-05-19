@@ -434,8 +434,14 @@ void SemanticAnalyzer::comparison(AstBinaryExpr* ast) noexcept {
 // Casting
 //------------------------------------------------------------------
 
-void SemanticAnalyzer::visit(AstCastExpr* /*ast*/) noexcept {
-    fatalError("CAST not implemented");
+void SemanticAnalyzer::visit(AstCastExpr* ast) noexcept {
+    visit(ast->typeExpr.get());
+    ast->type = ast->typeExpr->type;
+    expression(ast->expr);
+    
+    if (ast->expr->type->compare(ast->type) == TypeComparison::Incompatible) {
+        fatalError("Incompatible cast");
+    }
 }
 
 void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {

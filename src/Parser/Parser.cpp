@@ -638,18 +638,34 @@ unique_ptr<AstExpr> Parser::expression(bool commaAsAnd) noexcept {
 }
 
 /**
- * factor = primary { <Right Unary Op> } .
+ * factor = primary { <Right Unary Op> | "AS" TypeExpr } .
  */
 unique_ptr<AstExpr> Parser::factor() noexcept {
     auto start = m_token->range().Start;
     auto expr = primary();
 
-    while (m_token->isUnary() && m_token->isRightToLeft()) {
-        auto kind = move()->kind();
-        auto unary = AstUnaryExpr::create({ start, m_endLoc });
-        unary->expr = std::move(expr);
-        unary->tokenKind = kind;
-        expr = std::move(unary);
+    while (true) {
+        // <Right Unary Op>
+        if (m_token->isUnary() && m_token->isRightToLeft()) {
+            auto kind = move()->kind();
+            auto unary = AstUnaryExpr::create({ start, m_endLoc });
+            unary->expr = std::move(expr);
+            unary->tokenKind = kind;
+            expr = std::move(unary);
+            continue;
+        }
+        
+        // "AS" TypeExpr
+        if (accept(TokenKind::As)) {
+            auto type = typeExpr();
+            auto cast = AstCastExpr::create({start, m_endLoc});
+            cast->expr = std::move(expr);
+            cast->typeExpr = std::move(type);
+            cast->implicit = false;
+            expr = std::move(cast);
+            continue;
+        }
+        break;
     }
 
     return expr;

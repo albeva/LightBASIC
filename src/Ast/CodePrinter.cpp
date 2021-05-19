@@ -318,14 +318,19 @@ void CodePrinter::visit(AstBinaryExpr* ast) noexcept {
 }
 
 void CodePrinter::visit(AstCastExpr* ast) noexcept {
-    m_os << "CAST(";
+    m_os << "(";
+    visit(ast->expr.get());
+    m_os << " AS ";
     if (ast->implicit) {
-        m_os << "ANY /' implicit '/";
+        if (ast->type) {
+            m_os << ast->type->asString();
+        } else {
+            m_os << "ANY";
+        }
+        m_os << " /' implicit '/";
     } else {
         visit(ast->typeExpr.get());
     }
-    m_os << ", ";
-    visit(ast->expr.get());
     m_os << ")";
 }
 

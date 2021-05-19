@@ -17,7 +17,6 @@
 		506FBF442638E1C300063AC6 /* Toolchain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF192638E1C300063AC6 /* Toolchain.cpp */; };
 		506FBF452638E1C300063AC6 /* SemanticAnalyzer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF1C2638E1C300063AC6 /* SemanticAnalyzer.cpp */; };
 		506FBF462638E1C300063AC6 /* Utils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF1F2638E1C300063AC6 /* Utils.cpp */; };
-		506FBF472638E1C300063AC6 /* Symbol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF222638E1C300063AC6 /* Symbol.cpp */; };
 		506FBF482638E1C300063AC6 /* SymbolTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF252638E1C300063AC6 /* SymbolTable.cpp */; };
 		506FBF492638E1C300063AC6 /* CodeGen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF282638E1C300063AC6 /* CodeGen.cpp */; };
 		506FBF4A2638E1C300063AC6 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF2B2638E1C300063AC6 /* Parser.cpp */; };
@@ -27,6 +26,7 @@
 		506FBF502638E1C300063AC6 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 506FBF3A2638E1C300063AC6 /* main.cpp */; };
 		50E7A1E22647633900D796BB /* ConstantFoldingPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50E7A1E02647633900D796BB /* ConstantFoldingPass.cpp */; };
 		50F2ACDD264002D0009ABAE3 /* FuncDeclarerPass.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */; };
+		BF1DF1CC26556DF400225598 /* CodePrinter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BF1DF1CB26556D8100225598 /* CodePrinter.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -68,7 +68,6 @@
 		506FBF1E2638E1C300063AC6 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utils.h; sourceTree = "<group>"; };
 		506FBF1F2638E1C300063AC6 /* Utils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Utils.cpp; sourceTree = "<group>"; };
 		506FBF202638E1C300063AC6 /* Version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Version.h; sourceTree = "<group>"; };
-		506FBF222638E1C300063AC6 /* Symbol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Symbol.cpp; sourceTree = "<group>"; };
 		506FBF232638E1C300063AC6 /* Symbol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Symbol.h; sourceTree = "<group>"; };
 		506FBF242638E1C300063AC6 /* SymbolTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SymbolTable.h; sourceTree = "<group>"; };
 		506FBF252638E1C300063AC6 /* SymbolTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SymbolTable.cpp; sourceTree = "<group>"; };
@@ -95,6 +94,8 @@
 		50F2ACD2263CFF9F009ABAE3 /* Source.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Source.h; sourceTree = "<group>"; };
 		50F2ACDB264002D0009ABAE3 /* FuncDeclarerPass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FuncDeclarerPass.h; sourceTree = "<group>"; };
 		50F2ACDC264002D0009ABAE3 /* FuncDeclarerPass.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FuncDeclarerPass.cpp; sourceTree = "<group>"; };
+		BF1DF1CA26556D8100225598 /* CodePrinter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CodePrinter.h; sourceTree = "<group>"; };
+		BF1DF1CB26556D8100225598 /* CodePrinter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = CodePrinter.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -193,7 +194,6 @@
 		506FBF212638E1C300063AC6 /* Symbol */ = {
 			isa = PBXGroup;
 			children = (
-				506FBF222638E1C300063AC6 /* Symbol.cpp */,
 				506FBF232638E1C300063AC6 /* Symbol.h */,
 				506FBF252638E1C300063AC6 /* SymbolTable.cpp */,
 				506FBF242638E1C300063AC6 /* SymbolTable.h */,
@@ -238,6 +238,8 @@
 				506FBF392638E1C300063AC6 /* AstPrinter.cpp */,
 				506FBF372638E1C300063AC6 /* AstPrinter.h */,
 				506FBF312638E1C300063AC6 /* AstVisitor.h */,
+				BF1DF1CB26556D8100225598 /* CodePrinter.cpp */,
+				BF1DF1CA26556D8100225598 /* CodePrinter.h */,
 			);
 			path = Ast;
 			sourceTree = "<group>";
@@ -379,9 +381,9 @@
 				506FBF4C2638E1C300063AC6 /* Ast.cpp in Sources */,
 				506FBF452638E1C300063AC6 /* SemanticAnalyzer.cpp in Sources */,
 				506FBF412638E1C300063AC6 /* ToolTask.cpp in Sources */,
+				BF1DF1CC26556DF400225598 /* CodePrinter.cpp in Sources */,
 				506FBF4A2638E1C300063AC6 /* Parser.cpp in Sources */,
 				506FBF462638E1C300063AC6 /* Utils.cpp in Sources */,
-				506FBF472638E1C300063AC6 /* Symbol.cpp in Sources */,
 				506FBF4B2638E1C300063AC6 /* Type.cpp in Sources */,
 				506FBF402638E1C300063AC6 /* Driver.cpp in Sources */,
 				506FBF3B2638E1C300063AC6 /* Lexer.cpp in Sources */,
