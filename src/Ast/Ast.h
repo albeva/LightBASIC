@@ -25,26 +25,24 @@ enum class AstKind {
 struct AstRoot {
     NO_COPY_AND_MOVE(AstRoot)
 
-    constexpr explicit AstRoot(AstKind kind, llvm::SMRange range) noexcept
-    : m_kind{ kind }, m_range{ range } {}
+    constexpr explicit AstRoot(AstKind kind_, llvm::SMRange range_) noexcept
+    : kind{ kind_ }, range{ range_ } {}
+
     virtual ~AstRoot() noexcept = default;
 
-    [[nodiscard]] constexpr AstKind kind() const noexcept { return m_kind; }
-    [[nodiscard]] constexpr llvm::SMRange getRange() const noexcept { return m_range; }
     [[nodiscard]] StringRef getClassName() const noexcept;
 
-private:
-    const AstKind m_kind;
-    const llvm::SMRange m_range;
+    const AstKind kind;
+    const llvm::SMRange range;
 };
 
 template<typename This, typename Base, AstKind kind>
 struct AstNode : Base {
     using Base::Base;
-    constexpr static AstKind ID = kind;
+    constexpr static AstKind KIND = kind;
 
     constexpr static bool classof(const AstRoot* ast) noexcept {
-        return ast->kind() == kind;
+        return ast->kind == kind;
     }
 
     template<typename... Args>
@@ -53,7 +51,7 @@ struct AstNode : Base {
     }
 };
 
-#define IS_AST_CLASSOF(FIRST, LAST) ast->kind() >= AstKind::FIRST && ast->kind() <= AstKind::LAST;
+#define IS_AST_CLASSOF(FIRST, LAST) ast->kind >= AstKind::FIRST && ast->kind <= AstKind::LAST;
 
 //----------------------------------------
 // Module
@@ -65,13 +63,13 @@ struct AstModule final : AstNode<AstModule, AstRoot, AstKind::Module> {
         llvm::SMRange range,
         bool implicitMain,
         unique_ptr<AstStmtList> stms) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       fileId{ file },
       hasImplicitMain{ implicitMain },
       stmtList{ std::move(stms) } {};
 
-    unsigned int fileId;
-    bool hasImplicitMain;
+    const unsigned int fileId;
+    const bool hasImplicitMain;
     unique_ptr<AstStmtList> stmtList;
     unique_ptr<SymbolTable> symbolTable;
 };
@@ -92,7 +90,7 @@ struct AstStmtList final : AstNode<AstStmtList, AstStmt, AstKind::StmtList> {
     explicit AstStmtList(
         llvm::SMRange range,
         std::vector<unique_ptr<AstStmt>> list) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       stmts{ std::move(list) } {};
 
     std::vector<unique_ptr<AstStmt>> stmts;
@@ -102,7 +100,7 @@ struct AstExprStmt final : AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
     explicit AstExprStmt(
         llvm::SMRange range,
         unique_ptr<AstExpr> e) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       expr{ std::move(e) } {};
 
     unique_ptr<AstExpr> expr;
@@ -113,7 +111,7 @@ struct AstAssignStmt final : AstNode<AstAssignStmt, AstStmt, AstKind::AssignStmt
         llvm::SMRange range,
         unique_ptr<AstIdentExpr> ident,
         unique_ptr<AstExpr> e) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       identExpr{ std::move(ident) },
       expr{ std::move(e) } {};
 
@@ -126,7 +124,7 @@ struct AstFuncStmt final : AstNode<AstFuncStmt, AstStmt, AstKind::FuncStmt> {
         llvm::SMRange range,
         unique_ptr<AstFuncDecl> d,
         unique_ptr<AstStmtList> list) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       decl{ std::move(d) },
       stmtList{ std::move(list) } {};
 
@@ -138,7 +136,7 @@ struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt
     explicit AstReturnStmt(
         llvm::SMRange range,
         unique_ptr<AstExpr> e) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       expr{ std::move(e) } {};
 
     unique_ptr<AstExpr> expr;
@@ -155,7 +153,7 @@ struct AstIfStmt final : AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
     explicit AstIfStmt(
         llvm::SMRange range,
         std::vector<Block> list) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       blocks{ std::move(list) } {};
 
     std::vector<Block> blocks;
@@ -170,7 +168,7 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
         unique_ptr<AstExpr> step_,
         unique_ptr<AstStmt> stmt_,
         StringRef next_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       decls{ std::move(decls_) },
       iterator{ std::move(iter) },
       limit{ std::move(limit_) },
@@ -183,7 +181,7 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     unique_ptr<AstExpr> limit;
     unique_ptr<AstExpr> step;
     unique_ptr<AstStmt> stmt;
-    StringRef next;
+    const StringRef next;
     unique_ptr<SymbolTable> symbolTable;
 };
 
@@ -202,10 +200,11 @@ struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::Attr
     explicit AstAttributeList(
         llvm::SMRange range,
         std::vector<unique_ptr<AstAttribute>> attribs_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       attribs{ std::move(attribs_) } {};
 
     [[nodiscard]] std::optional<StringRef> getStringLiteral(StringRef key) const;
+
     std::vector<unique_ptr<AstAttribute>> attribs;
 };
 
@@ -214,7 +213,7 @@ struct AstAttribute final : AstNode<AstAttribute, AstAttr, AstKind::Attribute> {
         llvm::SMRange range,
         unique_ptr<AstIdentExpr> ident,
         std::vector<unique_ptr<AstLiteralExpr>> args) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       identExpr{ std::move(ident) },
       argExprs{ std::move(args) } {};
 
@@ -231,15 +230,15 @@ struct AstDecl : AstStmt {
         llvm::SMRange range,
         StringRef id_,
         unique_ptr<AstAttributeList> attribs) noexcept
-    : AstStmt{kind, range},
-      id{id_},
-      attributes{std::move(attribs) } {}
+    : AstStmt{ kind, range },
+      id{ id_ },
+      attributes{ std::move(attribs) } {}
 
     static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_DECL_RANGE(IS_AST_CLASSOF)
     }
 
-    StringRef id;
+    const StringRef id;
     unique_ptr<AstAttributeList> attributes;
     Symbol* symbol = nullptr;
 };
@@ -251,7 +250,7 @@ struct AstVarDecl final : AstNode<AstVarDecl, AstDecl, AstKind::VarDecl> {
         unique_ptr<AstAttributeList> attrs,
         unique_ptr<AstTypeExpr> type,
         unique_ptr<AstExpr> expr_) noexcept
-    : AstNode{ ID, range, id, std::move(attrs) },
+    : AstNode{ KIND, range, id, std::move(attrs) },
       typeExpr{ std::move(type) },
       expr{ std::move(expr_) } {};
 
@@ -268,21 +267,16 @@ struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
         bool variadic_,
         unique_ptr<AstTypeExpr> retType_,
         bool hasImpl_) noexcept
-    :  AstNode{ ID, range, id, std::move(attrs) },
+    : AstNode{ KIND, range, id, std::move(attrs) },
       paramDecls{ std::move(params) },
       variadic{ variadic_ },
       retTypeExpr{ std::move(retType_) },
       hasImpl{ hasImpl_ } {};
 
-    // declared parameters
     std::vector<unique_ptr<AstFuncParamDecl>> paramDecls;
-    // is function variadic?
-    bool variadic = false;
-    // declared typeExpr
+    const bool variadic;
     unique_ptr<AstTypeExpr> retTypeExpr;
-    // has implementation
-    bool hasImpl = false;
-    // scope symbol table for parameters
+    const bool hasImpl;
     unique_ptr<SymbolTable> symbolTable;
 };
 
@@ -292,7 +286,7 @@ struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::Func
         StringRef id,
         unique_ptr<AstAttributeList> attrs,
         unique_ptr<AstTypeExpr> type) noexcept
-    : AstNode{ ID, range, id, std::move(attrs) },
+    : AstNode{ KIND, range, id, std::move(attrs) },
       typeExpr{ std::move(type) } {};
 
     unique_ptr<AstTypeExpr> typeExpr;
@@ -315,10 +309,10 @@ struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
     explicit AstTypeExpr(
         llvm::SMRange range,
         TokenKind tokenKind_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       tokenKind{ tokenKind_ } {};
 
-    TokenKind tokenKind{};
+    const TokenKind tokenKind;
 };
 
 //----------------------------------------
@@ -339,10 +333,10 @@ struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
     explicit AstIdentExpr(
         llvm::SMRange range,
         StringRef id_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       id{ id_ } {};
 
-    StringRef id;
+    const StringRef id;
     Symbol* symbol = nullptr;
 };
 
@@ -351,7 +345,7 @@ struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {
         llvm::SMRange range,
         unique_ptr<AstIdentExpr> ident,
         std::vector<unique_ptr<AstExpr>> args) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       identExpr{ std::move(ident) },
       argExprs{ std::move(args) } {};
 
@@ -365,10 +359,10 @@ struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralE
     explicit AstLiteralExpr(
         llvm::SMRange range,
         Value value_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       value{ value_ } {};
 
-    Value value{};
+    const Value value;
 };
 
 struct AstUnaryExpr final : AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
@@ -376,11 +370,11 @@ struct AstUnaryExpr final : AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
         llvm::SMRange range,
         TokenKind tokenKind_,
         unique_ptr<AstExpr> expr_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       tokenKind{ tokenKind_ },
       expr{ std::move(expr_) } {};
 
-    TokenKind tokenKind;
+    const TokenKind tokenKind;
     unique_ptr<AstExpr> expr;
 };
 
@@ -390,12 +384,12 @@ struct AstBinaryExpr final : AstNode<AstBinaryExpr, AstExpr, AstKind::BinaryExpr
         TokenKind tokenKind_,
         unique_ptr<AstExpr> lhs_,
         unique_ptr<AstExpr> rhs_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       tokenKind{ tokenKind_ },
       lhs{ std::move(lhs_) },
       rhs{ std::move(rhs_) } {};
 
-    TokenKind tokenKind;
+    const TokenKind tokenKind;
     unique_ptr<AstExpr> lhs;
     unique_ptr<AstExpr> rhs;
 };
@@ -406,14 +400,14 @@ struct AstCastExpr final : AstNode<AstCastExpr, AstExpr, AstKind::CastExpr> {
         unique_ptr<AstExpr> expr_,
         unique_ptr<AstTypeExpr> typeExpr_,
         bool implicit_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       expr{ std::move(expr_) },
       typeExpr{ std::move(typeExpr_) },
       implicit{ implicit_ } {};
 
     unique_ptr<AstExpr> expr;
     unique_ptr<AstTypeExpr> typeExpr;
-    bool implicit;
+    const bool implicit;
 };
 
 struct AstIfExpr final : AstNode<AstIfExpr, AstExpr, AstKind::IfExpr> {
@@ -422,7 +416,7 @@ struct AstIfExpr final : AstNode<AstIfExpr, AstExpr, AstKind::IfExpr> {
         unique_ptr<AstExpr> expr_,
         unique_ptr<AstExpr> trueExpr_,
         unique_ptr<AstExpr> falseExpr_) noexcept
-    : AstNode{ ID, range },
+    : AstNode{ KIND, range },
       expr{ std::move(expr_) },
       trueExpr{ std::move(trueExpr_) },
       falseExpr{ std::move(falseExpr_) } {};

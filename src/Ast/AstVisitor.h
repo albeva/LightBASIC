@@ -15,7 +15,7 @@ public:
         return static_cast<This*>(this)->visit(static_cast<Ast##KIND*>(ast));
 
     void visit(AstStmt* ast) noexcept {
-        switch (ast->kind()) {
+        switch (ast->kind) {
             AST_STMT_NODES(VISIT_CASE)
             AST_DECL_NODES(VISIT_CASE)
         default:
@@ -24,7 +24,7 @@ public:
     }
 
     void visit(AstDecl* ast) noexcept {
-        switch (ast->kind()) {
+        switch (ast->kind) {
             AST_DECL_NODES(VISIT_CASE)
         default:
             llvm_unreachable(("visit: Unmatched Decl: "_t + ast->getClassName()).str().c_str());
@@ -32,7 +32,7 @@ public:
     }
 
     void visit(AstAttr* ast) noexcept {
-        switch (ast->kind()) {
+        switch (ast->kind) {
             AST_ATTRIB_NODES(VISIT_CASE)
         default:
             llvm_unreachable(("visit: Unmatched Attr: "_t + ast->getClassName()).str().c_str());
@@ -40,7 +40,7 @@ public:
     }
 
     void visit(AstType* ast) noexcept {
-        switch (ast->kind()) {
+        switch (ast->kind) {
             AST_TYPE_NODES(VISIT_CASE)
         default:
             llvm_unreachable(("visit: Unmatched Attr: "_t + ast->getClassName()).str().c_str());
@@ -48,7 +48,7 @@ public:
     }
 
     void visit(AstExpr* ast) noexcept {
-        switch (ast->kind()) {
+        switch (ast->kind) {
             AST_EXPR_NODES(VISIT_CASE)
         default:
             llvm_unreachable(("visit: Unmatched Expr: "_t + ast->getClassName()).str().c_str());

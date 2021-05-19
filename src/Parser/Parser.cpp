@@ -31,7 +31,7 @@ unique_ptr<AstModule> Parser::parse() noexcept {
 
     return AstModule::create(
         m_fileId,
-        stmts->getRange(),
+        stmts->range,
         m_isMain,
         std::move(stmts));
 }
@@ -218,7 +218,7 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgList() noexcept {
  *   .
  */
 unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexcept {
-    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->range.Start;
 
     expect(TokenKind::Var);
     auto id = expect(TokenKind::Identifier);
@@ -257,7 +257,7 @@ unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) 
     if (m_scope != Scope::Root) {
         error("Nested declarations not allowed");
     }
-    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->range.Start;
     expect(TokenKind::Declare);
     return funcSignature(start, std::move(attribs), false);
 }
@@ -387,7 +387,7 @@ unique_ptr<AstExprStmt> Parser::callStmt() noexcept {
         std::move(id),
         std::move(args));
 
-    return AstExprStmt::create(call->getRange(), std::move(call));
+    return AstExprStmt::create(call->range, std::move(call));
 }
 
 /**
@@ -400,7 +400,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
         error("Nested SUBs/FUNCTIONs not allowed");
     }
 
-    auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
+    auto start = attribs == nullptr ? m_token->range().Start : attribs->range.Start;
     auto decl = funcSignature(start, std::move(attribs), true);
     expect(TokenKind::EndOfStmt);
 
@@ -477,7 +477,7 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
         }
     }
 
-    if (m_blocks.back().stmt->kind() == AstKind::StmtList) {
+    if (m_blocks.back().stmt->kind == AstKind::StmtList) {
         expect(TokenKind::End);
         expect(TokenKind::If);
     }
@@ -746,7 +746,7 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         }
 
         auto left = AstBinaryExpr::create(
-            llvm::SMRange{ lhs->getRange().Start, m_endLoc },
+            llvm::SMRange{ lhs->range.Start, m_endLoc },
             kind == TokenKind::CommaAnd ? TokenKind::LogicalAnd : kind,
             std::move(lhs),
             std::move(rhs));

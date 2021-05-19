@@ -313,8 +313,8 @@ void AstPrinter::writeExpr(AstExpr* ast, StringRef name) noexcept {
 }
 
 void AstPrinter::writeLocation(AstRoot* ast) noexcept {
-    auto [startLine, startCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().Start);
-    auto [endLine, endCol] = m_context.getSourceMrg().getLineAndColumn(ast->getRange().End);
+    auto [startLine, startCol] = m_context.getSourceMrg().getLineAndColumn(ast->range.Start);
+    auto [endLine, endCol] = m_context.getSourceMrg().getLineAndColumn(ast->range.End);
 
     if (startLine == endLine) {
         m_json.value(llvm::formatv("{0}:{1} - {2}", startLine, startCol, endCol));

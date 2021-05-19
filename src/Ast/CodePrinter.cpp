@@ -185,7 +185,7 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
         }
         m_indent++;
         visit(block.stmt.get());
-        if (block.stmt->kind() != AstKind::StmtList) {
+        if (block.stmt->kind != AstKind::StmtList) {
             m_os << '\n';
         }
         m_indent--;
@@ -217,7 +217,7 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
         visit(ast->step.get());
     }
 
-    if (ast->stmt->kind() == AstKind::StmtList) {
+    if (ast->stmt->kind == AstKind::StmtList) {
         m_os << '\n';
         m_indent++;
         visit(ast->stmt.get());
@@ -295,7 +295,7 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
 
 void CodePrinter::visit(AstUnaryExpr* ast) noexcept {
     m_os << "(";
-    auto tkn = Token::create(ast->tokenKind, ast->getRange());
+    auto tkn = Token::create(ast->tokenKind, ast->range);
     if (tkn->isRightToLeft()) {
         visit(ast->expr.get());
         m_os << " " << tkn->description();
@@ -310,7 +310,7 @@ void CodePrinter::visit(AstBinaryExpr* ast) noexcept {
     m_os << "(";
     visit(ast->lhs.get());
 
-    auto tkn = Token::create(ast->tokenKind, ast->getRange());
+    auto tkn = Token::create(ast->tokenKind, ast->range);
     m_os << " " << tkn->description() << " ";
 
     visit(ast->rhs.get());

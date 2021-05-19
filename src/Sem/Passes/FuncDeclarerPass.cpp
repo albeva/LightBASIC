@@ -10,7 +10,7 @@ using namespace Sem;
 void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     m_table = ast->symbolTable.get();
     for (const auto& stmt : ast->stmtList->stmts) {
-        switch (stmt->kind()) {
+        switch (stmt->kind) {
         case AstKind::FuncDecl:
             visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()), true); // NOLINT
             break;

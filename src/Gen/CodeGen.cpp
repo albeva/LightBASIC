@@ -252,7 +252,7 @@ void CodeGen::visit(AstFuncDecl* /*ast*/) noexcept {
 
 void CodeGen::declareFuncs() noexcept {
     for (const auto& stmt : m_astRootModule->stmtList->stmts) {
-        switch (stmt->kind()) {
+        switch (stmt->kind) {
         case AstKind::FuncDecl:
             declareFunc(static_cast<AstFuncDecl*>(stmt.get())); // NOLINT
             break;

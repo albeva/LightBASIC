@@ -28,7 +28,7 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     }
 
     unique_ptr<AstExpr> replace;
-    switch (ast->kind()) {
+    switch (ast->kind) {
     case AstKind::UnaryExpr:
         replace = visitUnaryExpr(static_cast<AstUnaryExpr*>(ast.get())); // NOLINT
         break;
@@ -56,7 +56,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr* ast)
     }
 
     auto value = unary(ast->tokenKind, literal);
-    auto repl = AstLiteralExpr::create(ast->getRange(), value);
+    auto repl = AstLiteralExpr::create(ast->range, value);
     repl->type = ast->type;
     return repl;
 }
@@ -130,7 +130,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr* ast) noexc
 
     if (*lval == 1 && *rval == 0) {
         auto cast = AstCastExpr::create(
-            ast->getRange(),
+            ast->range,
             std::move(ast->expr),
             nullptr,
             true);
@@ -140,12 +140,12 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr* ast) noexc
 
     if (*lval == 0 && *rval == 1) {
         auto unary = AstUnaryExpr::create(
-            ast->getRange(),
+            ast->range,
             TokenKind::LogicalNot,
             std::move(ast->expr));
 
         auto cast = AstCastExpr::create(
-            ast->getRange(),
+            ast->range,
             std::move(unary),
             nullptr,
             true);
@@ -168,7 +168,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr* ast) n
     }
 
     auto value = cast(ast->type, literal);
-    auto repl = AstLiteralExpr::create(ast->getRange(), value);
+    auto repl = AstLiteralExpr::create(ast->range, value);
     repl->type = ast->type;
     return repl;
 }
