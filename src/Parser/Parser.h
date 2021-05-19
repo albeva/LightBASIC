@@ -56,7 +56,7 @@ private:
     [[nodiscard]] unique_ptr<AstTypeExpr> typeExpr() noexcept;
 
     [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs, bool hasImpl) noexcept;
     [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParamList(bool& isVariadic) noexcept;
     [[nodiscard]] unique_ptr<AstFuncParamDecl> funcParam() noexcept;
     [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;

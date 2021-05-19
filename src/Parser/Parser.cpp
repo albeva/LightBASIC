@@ -29,12 +29,11 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
 unique_ptr<AstModule> Parser::parse() noexcept {
     auto stmts = stmtList();
 
-    auto module = AstModule::create(stmts->getRange());
-    module->fileId = m_fileId;
-    module->hasImplicitMain = m_isMain;
-    module->stmtList = std::move(stmts);
-    expect(TokenKind::EndOfFile);
-    return module;
+    return AstModule::create(
+        m_fileId,
+        stmts->getRange(),
+        m_isMain,
+        std::move(stmts));
 }
 
 //----------------------------------------
@@ -64,9 +63,10 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
         stms.emplace_back(statement());
         expect(TokenKind::EndOfStmt);
     }
-    auto list = AstStmtList::create({ start, m_endLoc });
-    list->stmts = std::move(stms);
-    return list;
+
+    return AstStmtList::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(stms));
 }
 
 /**
@@ -158,9 +158,9 @@ unique_ptr<AstAttributeList> Parser::attributeList() noexcept {
     } while (accept(TokenKind::Comma));
     expect(TokenKind::BracketClose);
 
-    auto list = AstAttributeList::create({ start, m_endLoc });
-    list->attribs = std::move(attribs);
-    return list;
+    return AstAttributeList::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(attribs));
 }
 
 /**
@@ -177,10 +177,10 @@ unique_ptr<AstAttribute> Parser::attribute() noexcept {
         args = attributeArgList();
     }
 
-    auto attrib = AstAttribute::create({ start, m_endLoc });
-    attrib->identExpr = std::move(id);
-    attrib->argExprs = std::move(args);
-    return attrib;
+    return AstAttribute::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(id),
+        std::move(args));
 }
 
 /**
@@ -236,12 +236,12 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) noexc
         expr = expression();
     }
 
-    auto var = AstVarDecl::create({ start, m_endLoc });
-    var->attributes = std::move(attribs);
-    var->id = std::get<StringRef>(id->getValue());
-    var->typeExpr = std::move(type);
-    var->expr = std::move(expr);
-    return var;
+    return AstVarDecl::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::get<StringRef>(id->getValue()),
+        std::move(attribs),
+        std::move(type),
+        std::move(expr));
 }
 
 //----------------------------------------
@@ -259,7 +259,7 @@ unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) 
     }
     auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
     expect(TokenKind::Declare);
-    return funcSignature(start, std::move(attribs));
+    return funcSignature(start, std::move(attribs), false);
 }
 
 /**
@@ -268,7 +268,7 @@ unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) 
  *     | "SUB" id [ "(" FuncParamList ")" ]
  *     .
  */
-unique_ptr<AstFuncDecl> Parser::funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs) noexcept {
+unique_ptr<AstFuncDecl> Parser::funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs, bool hasImpl) noexcept {
     bool isFunc = accept(TokenKind::Function) != nullptr;
     if (!isFunc) {
         expect(TokenKind::Sub);
@@ -289,13 +289,14 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(llvm::SMLoc start, unique_ptr<AstA
         ret = typeExpr();
     }
 
-    auto func = AstFuncDecl::create({ start, m_endLoc });
-    func->id = std::get<StringRef>(id->getValue());
-    func->attributes = std::move(attribs);
-    func->variadic = isVariadic;
-    func->paramDecls = std::move(params);
-    func->retTypeExpr = std::move(ret);
-    return func;
+    return AstFuncDecl::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::get<StringRef>(id->getValue()),
+        std::move(attribs),
+        std::move(params),
+        isVariadic,
+        std::move(ret),
+        hasImpl);
 }
 
 /**
@@ -334,10 +335,11 @@ unique_ptr<AstFuncParamDecl> Parser::funcParam() noexcept {
     expect(TokenKind::As);
     auto type = typeExpr();
 
-    auto param = AstFuncParamDecl::create({ start, m_endLoc });
-    param->id = std::get<StringRef>(id->getValue());
-    param->typeExpr = std::move(type);
-    return param;
+    return AstFuncParamDecl::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::get<StringRef>(id->getValue()),
+        nullptr,
+        std::move(type));
 }
 
 //----------------------------------------
@@ -354,10 +356,10 @@ unique_ptr<AstAssignStmt> Parser::assignment() noexcept {
     expect(TokenKind::Assign);
     auto expr = expression();
 
-    auto assign = AstAssignStmt::create({ start, m_endLoc });
-    assign->identExpr = std::move(ident);
-    assign->expr = std::move(expr);
-    return assign;
+    return AstAssignStmt::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(ident),
+        std::move(expr));
 }
 
 //----------------------------------------
@@ -380,13 +382,12 @@ unique_ptr<AstExprStmt> Parser::callStmt() noexcept {
         expect(TokenKind::ParenClose);
     }
 
-    auto call = AstCallExpr::create({ start, m_endLoc });
-    call->identExpr = std::move(id);
-    call->argExprs = std::move(args);
+    auto call = AstCallExpr::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(id),
+        std::move(args));
 
-    auto stmt = AstExprStmt::create(call->getRange());
-    stmt->expr = std::move(call);
-    return stmt;
+    return AstExprStmt::create(call->getRange(), std::move(call));
 }
 
 /**
@@ -400,8 +401,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
     }
 
     auto start = attribs == nullptr ? m_token->range().Start : attribs->getRange().Start;
-    auto decl = funcSignature(start, std::move(attribs));
-    decl->hasImpl = true;
+    auto decl = funcSignature(start, std::move(attribs), true);
     expect(TokenKind::EndOfStmt);
 
     RESTORE_ON_EXIT(m_scope);
@@ -416,10 +416,10 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
         expect(TokenKind::Sub);
     }
 
-    auto func = AstFuncStmt::create({ start, m_endLoc });
-    func->decl = std::move(decl);
-    func->stmtList = std::move(stmts);
-    return func;
+    return AstFuncStmt::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(decl),
+        std::move(stmts));
 }
 
 /**
@@ -437,9 +437,9 @@ unique_ptr<AstStmt> Parser::kwReturn() noexcept {
         expr = expression();
     }
 
-    auto ret = AstReturnStmt::create({ start, m_endLoc });
-    ret->expr = std::move(expr);
-    return ret;
+    return AstReturnStmt::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(expr));
 }
 
 //----------------------------------------
@@ -482,9 +482,9 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
         expect(TokenKind::If);
     }
 
-    auto ast = AstIfStmt::create({ start, m_endLoc });
-    ast->blocks = std::move(m_blocks);
-    return ast;
+    return AstIfStmt::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(m_blocks));
 }
 
 /**
@@ -557,10 +557,12 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
     }
     expect(TokenKind::Assign);
     auto expr = expression();
-    auto iterator = AstVarDecl::create({ idStart, m_endLoc });
-    iterator->expr = std::move(expr);
-    iterator->typeExpr = std::move(type);
-    iterator->id = std::get<StringRef>(id->getValue());
+    auto iterator = AstVarDecl::create(
+        llvm::SMRange{ idStart, m_endLoc },
+        std::get<StringRef>(id->getValue()),
+        nullptr,
+        std::move(type),
+        std::move(expr));
 
     // "TO" Expression [ "STEP" expression ]
     expect(TokenKind::To);
@@ -584,15 +586,14 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
         }
     }
 
-    auto ast = AstForStmt::create({ start, m_endLoc });
-    ast->decls = std::move(decls);
-    ast->iterator = std::move(iterator);
-    ast->limit = std::move(limit);
-    ast->step = std::move(step);
-    ast->stmt = std::move(stmt);
-    ast->next = next;
-
-    return ast;
+    return AstForStmt::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(decls),
+        std::move(iterator),
+        std::move(limit),
+        std::move(step),
+        std::move(stmt),
+        next);
 }
 
 //----------------------------------------
@@ -606,9 +607,9 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
         ALL_TYPES(TYPE_KEYWORD)
         {
             auto kind = move()->kind();
-            auto type = AstTypeExpr::create({ start, m_endLoc });
-            type->tokenKind = kind;
-            return type;
+            return AstTypeExpr::create(
+                llvm::SMRange{ start, m_endLoc },
+                kind);
         }
     default:
         error("Expected type got "_t + m_token->description());
@@ -648,9 +649,11 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
         // <Right Unary Op>
         if (m_token->isUnary() && m_token->isRightToLeft()) {
             auto kind = move()->kind();
-            auto unary = AstUnaryExpr::create({ start, m_endLoc });
-            unary->expr = std::move(expr);
-            unary->tokenKind = kind;
+            auto unary = AstUnaryExpr::create(
+                llvm::SMRange{ start, m_endLoc },
+                kind,
+                std::move(expr)
+            );
             expr = std::move(unary);
             continue;
         }
@@ -658,13 +661,15 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
         // "AS" TypeExpr
         if (accept(TokenKind::As)) {
             auto type = typeExpr();
-            auto cast = AstCastExpr::create({ start, m_endLoc });
-            cast->expr = std::move(expr);
-            cast->typeExpr = std::move(type);
-            cast->implicit = false;
+            auto cast = AstCastExpr::create(
+                llvm::SMRange{ start, m_endLoc },
+                std::move(expr),
+                std::move(type),
+                false);
             expr = std::move(cast);
             continue;
         }
+
         break;
     }
 
@@ -711,10 +716,10 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         replace(TokenKind::Assign, TokenKind::Equal);
         auto expr = expression(factor(), prec);
 
-        auto unary = AstUnaryExpr::create({ start, m_endLoc });
-        unary->expr = std::move(expr);
-        unary->tokenKind = kind;
-        return unary;
+        return AstUnaryExpr::create(
+            llvm::SMRange{ start, m_endLoc },
+            kind,
+            std::move(expr));
     }
 
     error("expected primary");
@@ -740,10 +745,11 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
             rhs = expression(std::move(rhs), m_token->getPrecedence(), commaAsAnd);
         }
 
-        auto left = AstBinaryExpr::create({ lhs->getRange().Start, m_endLoc });
-        left->tokenKind = kind == TokenKind::CommaAnd ? TokenKind::LogicalAnd : kind;
-        left->lhs = std::move(lhs);
-        left->rhs = std::move(rhs);
+        auto left = AstBinaryExpr::create(
+            llvm::SMRange{ lhs->getRange().Start, m_endLoc },
+            kind == TokenKind::CommaAnd ? TokenKind::LogicalAnd : kind,
+            std::move(lhs),
+            std::move(rhs));
         lhs = std::move(left);
     }
     return lhs;
@@ -756,9 +762,9 @@ unique_ptr<AstIdentExpr> Parser::identifier() noexcept {
     auto start = m_token->range().Start;
     auto id = expect(TokenKind::Identifier);
 
-    auto ident = AstIdentExpr::create({ start, m_endLoc });
-    ident->id = std::get<StringRef>(id->getValue());
-    return ident;
+    return AstIdentExpr::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::get<StringRef>(id->getValue()));
 }
 
 /**
@@ -772,10 +778,10 @@ unique_ptr<AstCallExpr> Parser::callExpr() noexcept {
     auto args = expressionList();
     expect(TokenKind::ParenClose);
 
-    auto call = AstCallExpr::create({ start, m_endLoc });
-    call->identExpr = std::move(id);
-    call->argExprs = std::move(args);
-    return call;
+    return AstCallExpr::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(id),
+        std::move(args));
 }
 
 /**
@@ -791,11 +797,11 @@ unique_ptr<AstIfExpr> Parser::ifExpr() noexcept {
     expect(TokenKind::Else);
     auto falseExpr = expression();
 
-    auto ast = AstIfExpr::create({ start, m_endLoc });
-    ast->expr = std::move(expr);
-    ast->trueExpr = std::move(trueExpr);
-    ast->falseExpr = std::move(falseExpr);
-    return ast;
+    return AstIfExpr::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(expr),
+        std::move(trueExpr),
+        std::move(falseExpr));
 }
 
 /**
@@ -808,9 +814,9 @@ unique_ptr<AstIfExpr> Parser::ifExpr() noexcept {
  *         .
  */
 unique_ptr<AstLiteralExpr> Parser::literal() noexcept {
-    auto lit = AstLiteralExpr::create(m_token->range());
-    lit->value = move()->getValue();
-    return lit;
+    return AstLiteralExpr::create(
+        m_token->range(),
+        move()->getValue());
 }
 
 /**

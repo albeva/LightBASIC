@@ -9,7 +9,7 @@ using namespace Sem;
 
 namespace {
 template<typename BASE, typename T>
-inline BASE castLiteral(AstLiteralExpr* ast) noexcept {
+constexpr inline BASE castLiteral(const AstLiteralExpr* ast) noexcept {
     constexpr auto visitor = [](const auto& val) -> T {
         using R = std::decay_t<decltype(val)>;
         if constexpr (std::is_convertible_v<R, T>) {
@@ -49,16 +49,20 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     }
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr* ast) noexcept {
     auto* literal = dyn_cast<AstLiteralExpr>(ast->expr.get());
     if (literal == nullptr) {
         return nullptr;
     }
 
-    auto replacement = AstLiteralExpr::create(ast->getRange());
-    replacement->type = literal->type;
+    auto value = unary(ast->tokenKind, literal);
+    auto repl = AstLiteralExpr::create(ast->getRange(), value);
+    repl->type = ast->type;
+    return repl;
+}
 
-    switch (ast->tokenKind) {
+AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralExpr* ast) noexcept {
+    switch (op) {
     case TokenKind::Negate: {
         constexpr auto visitor = Visitor{
             [](uint64_t value) -> AstLiteralExpr::Value {
@@ -71,8 +75,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
                 llvm_unreachable("Non supported type");
             }
         };
-        replacement->value = std::visit(visitor, literal->value);
-        break;
+        return std::visit(visitor, ast->value);
     }
     case TokenKind::LogicalNot: {
         constexpr auto visitor = Visitor{
@@ -83,15 +86,13 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(AstUnaryExpr* ast) noexc
                 llvm_unreachable("Non supported type");
             }
         };
-        replacement->value = std::visit(visitor, literal->value);
-        break;
+        return std::visit(visitor, ast->value);
     }
     default:
         llvm_unreachable("Unsupported unary operation");
     }
-
-    return replacement;
 }
+
 
 unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr* ast) noexcept {
     if (auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
@@ -128,22 +129,27 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr* ast) noexc
     }
 
     if (*lval == 1 && *rval == 0) {
-        auto cast = AstCastExpr::create(ast->getRange());
-        cast->expr = std::move(ast->expr);
-        cast->type = lhs->type;
-        cast->implicit = true;
+        auto cast = AstCastExpr::create(
+            ast->getRange(),
+            std::move(ast->expr),
+            nullptr,
+            true);
+        cast->type = ast->type;
         return cast;
     }
 
     if (*lval == 0 && *rval == 1) {
-        auto unary = AstUnaryExpr::create(ast->getRange());
-        unary->tokenKind = TokenKind::LogicalNot;
-        unary->expr = std::move(ast->expr);
+        auto unary = AstUnaryExpr::create(
+            ast->getRange(),
+            TokenKind::LogicalNot,
+            std::move(ast->expr));
 
-        auto cast = AstCastExpr::create(ast->getRange());
-        cast->expr = std::move(unary);
-        cast->type = lhs->type;
-        cast->implicit = true;
+        auto cast = AstCastExpr::create(
+            ast->getRange(),
+            std::move(unary),
+            nullptr,
+            true);
+        cast->type = ast->type;
         return cast;
     }
 
@@ -155,37 +161,37 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr* /*ast*/)
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(AstCastExpr* ast) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr* ast) noexcept {
     auto* literal = dyn_cast<AstLiteralExpr>(ast->expr.get());
     if (literal == nullptr) {
         return nullptr;
     }
 
-    auto replacement = AstLiteralExpr::create(ast->getRange());
-    replacement->type = ast->type;
+    auto value = cast(ast->type, literal);
+    auto repl = AstLiteralExpr::create(ast->getRange(), value);
+    repl->type = ast->type;
+    return repl;
+}
 
+AstLiteralExpr::Value ConstantFoldingPass::cast(const TypeRoot* type, const AstLiteralExpr* literal) noexcept {
     // clang-format off
-    if (const auto* integral = dyn_cast<TypeIntegral>(ast->type)) {
+    if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
         #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                          \
             if (integral->getBits() == (BITS) && integral->isSigned() == (SIGNED)) { \
-                replacement->value = castLiteral<uint64_t, TYPE>(literal);           \
-                return replacement;                                                  \
+                return castLiteral<uint64_t, TYPE>(literal);                         \
             }
-            INTEGRAL_TYPES(INTEGRAL)
+        INTEGRAL_TYPES(INTEGRAL)
         #undef INTEGRAL
-    } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(ast->type)) {
-        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)                 \
-            if (fp->getBits() == (BITS)) {                               \
-                replacement->value = castLiteral<double, TYPE>(literal); \
-                return replacement;                                      \
+    } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(type)) {
+        #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)   \
+            if (fp->getBits() == (BITS)) {                 \
+                return castLiteral<double, TYPE>(literal); \
             }
-            FLOATINGPOINT_TYPES(FLOATINGPOINT)
+        FLOATINGPOINT_TYPES(FLOATINGPOINT)
         #undef INTEGRAL
-    } else if (ast->type->isBoolean()) {
-        replacement->value = castLiteral<bool, bool>(literal);
-        return replacement;
+    } else if (type->isBoolean()) {
+        return castLiteral<bool, bool>(literal);
     }
     // clang-format on
-
     llvm_unreachable("Unsupported castLiteral");
 }

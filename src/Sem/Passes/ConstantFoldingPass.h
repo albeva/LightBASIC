@@ -8,6 +8,7 @@
 
 namespace lbc {
 class Context;
+class TypeRoot;
 
 namespace Sem {
 
@@ -21,11 +22,13 @@ namespace Sem {
         void fold(unique_ptr<AstExpr>& ast) noexcept;
 
     private:
-        static unique_ptr<AstExpr> visitUnaryExpr(AstUnaryExpr* ast) noexcept;
+        static unique_ptr<AstExpr> visitUnaryExpr(const AstUnaryExpr* ast) noexcept;
+        static AstLiteralExpr::Value unary(TokenKind op, const AstLiteralExpr* ast) noexcept;
         static unique_ptr<AstExpr> visitIfExpr(AstIfExpr* ast) noexcept;
         static unique_ptr<AstExpr> optimizeIifToCast(AstIfExpr* ast) noexcept;
         static unique_ptr<AstExpr> visitBinaryExpr(AstBinaryExpr* ast) noexcept;
-        static unique_ptr<AstExpr> visitCastExpr(AstCastExpr* ast) noexcept;
+        static unique_ptr<AstExpr> visitCastExpr(const AstCastExpr* ast) noexcept;
+        static AstLiteralExpr::Value cast(const TypeRoot* type, const AstLiteralExpr* literal) noexcept;
 
         Context& m_context;
     };

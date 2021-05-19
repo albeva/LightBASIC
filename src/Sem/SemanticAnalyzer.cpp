@@ -467,11 +467,13 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
 }
 
 void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
-    auto cast = AstCastExpr::create(ast->getRange());
-    cast->expr.swap(ast);
+    auto cast = AstCastExpr::create(
+        ast->getRange(),
+        std::move(ast),
+        nullptr,
+        true);
     cast->type = type;
-    cast->implicit = true;
-    ast.reset(cast.release()); // NOLINT
+    ast = std::move(cast); // NOLINT
 }
 
 //------------------------------------------------------------------
