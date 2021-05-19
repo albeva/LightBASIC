@@ -478,14 +478,14 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
         block->insertInto(func);
         m_builder.SetInsertPoint(block);
 
-        llvm::Value* iterValue = m_builder.CreateLoad(iterator);
-        llvm::Value* stepValue = m_builder.CreateLoad(step);
+        iterValue = m_builder.CreateLoad(iterator);
+        auto* stepValue = m_builder.CreateLoad(step);
         auto* result = incr
             ? m_builder.CreateAdd(iterValue, stepValue)
             : m_builder.CreateSub(iterValue, stepValue);
         m_builder.CreateStore(result, iterator);
 
-        auto* limitValue = m_builder.CreateLoad(limit);
+        limitValue = m_builder.CreateLoad(limit);
         auto* cmp = incr
             ? m_builder.CreateCmp(lessOrEqualPred, result, limitValue)
             : m_builder.CreateCmp(lessOrEqualPred, limitValue, result);
