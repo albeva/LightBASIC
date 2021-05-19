@@ -652,8 +652,7 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
             auto unary = AstUnaryExpr::create(
                 llvm::SMRange{ start, m_endLoc },
                 kind,
-                std::move(expr)
-            );
+                std::move(expr));
             expr = std::move(unary);
             continue;
         }
