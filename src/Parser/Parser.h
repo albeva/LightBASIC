@@ -39,9 +39,9 @@ private:
     [[nodiscard]] unique_ptr<AstStmt> declaration() noexcept;
 
     [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::Default) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> factor(ExprFlags flags) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> primary(ExprFlags flags) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence, ExprFlags flags) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
     [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
     [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;
@@ -100,6 +100,7 @@ private:
     unique_ptr<Token> m_token;
     unique_ptr<Token> m_next;
     llvm::SMLoc m_endLoc{};
+    ExprFlags m_exprFlags{};
 };
 
 } // namespace lbc

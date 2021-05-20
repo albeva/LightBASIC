@@ -625,7 +625,10 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
  * expression = factor { <Binary Op> expression } .
  */
 unique_ptr<AstExpr> Parser::expression(ExprFlags flags) noexcept {
-    auto expr = factor(flags);
+    RESTORE_ON_EXIT(m_exprFlags);
+    m_exprFlags = flags;
+
+    auto expr = factor();
 
     if ((flags & ExprFlags::AssignAsEqual) != 0) {
         replace(TokenKind::Assign, TokenKind::Equal);
@@ -634,7 +637,7 @@ unique_ptr<AstExpr> Parser::expression(ExprFlags flags) noexcept {
         replace(TokenKind::Comma, TokenKind::CommaAnd);
     }
     if (m_token->isOperator()) {
-        return expression(std::move(expr), 1, flags);
+        return expression(std::move(expr), 1);
     }
 
     return expr;
@@ -643,9 +646,9 @@ unique_ptr<AstExpr> Parser::expression(ExprFlags flags) noexcept {
 /**
  * factor = primary { <Right Unary Op> | "AS" TypeExpr } .
  */
-unique_ptr<AstExpr> Parser::factor(ExprFlags flags) noexcept {
+unique_ptr<AstExpr> Parser::factor() noexcept {
     auto start = m_token->range().Start;
-    auto expr = primary(flags);
+    auto expr = primary();
 
     while (true) {
         // <Right Unary Op>
@@ -684,7 +687,7 @@ unique_ptr<AstExpr> Parser::factor(ExprFlags flags) noexcept {
  *         | IfExpr
   *        .
  */
-unique_ptr<AstExpr> Parser::primary(ExprFlags flags) noexcept {
+unique_ptr<AstExpr> Parser::primary() noexcept {
     if (m_token->isLiteral()) {
         return literal();
     }
@@ -712,10 +715,10 @@ unique_ptr<AstExpr> Parser::primary(ExprFlags flags) noexcept {
         auto prec = m_token->getPrecedence();
         auto kind = move()->kind();
 
-        if ((flags & ExprFlags::AssignAsEqual) != 0) {
+        if ((m_exprFlags & ExprFlags::AssignAsEqual) != 0) {
             replace(TokenKind::Assign, TokenKind::Equal);
         }
-        auto expr = expression(factor(flags), prec, flags);
+        auto expr = expression(factor(), prec);
 
         return AstUnaryExpr::create(
             llvm::SMRange{ start, m_endLoc },
@@ -730,22 +733,22 @@ unique_ptr<AstExpr> Parser::primary(ExprFlags flags) noexcept {
  * Recursievly climb operator precedence
  * https://en.wikipedia.org/wiki/Operator-precedence_parser#Precedence_climbing_method
  */
-[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence, ExprFlags flags) noexcept {
+[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) noexcept {
     while (m_token->getPrecedence() >= precedence) {
         auto current = m_token->getPrecedence();
         auto kind = m_token->kind();
         move();
 
-        auto rhs = factor(flags);
-        if ((flags & ExprFlags::AssignAsEqual) != 0) {
+        auto rhs = factor();
+        if ((m_exprFlags & ExprFlags::AssignAsEqual) != 0) {
             replace(TokenKind::Assign, TokenKind::Equal);
         }
-        if ((flags & ExprFlags::CommaAsAnd) != 0) {
+        if ((m_exprFlags & ExprFlags::CommaAsAnd) != 0) {
             replace(TokenKind::Comma, TokenKind::CommaAnd);
         }
 
         while (m_token->getPrecedence() > current || (m_token->isRightToLeft() && m_token->getPrecedence() == current)) {
-            rhs = expression(std::move(rhs), m_token->getPrecedence(), flags);
+            rhs = expression(std::move(rhs), m_token->getPrecedence());
         }
 
         auto left = AstBinaryExpr::create(
