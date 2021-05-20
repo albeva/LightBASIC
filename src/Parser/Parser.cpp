@@ -352,14 +352,14 @@ unique_ptr<AstFuncParamDecl> Parser::funcParam() noexcept {
  */
 unique_ptr<AstAssignStmt> Parser::assignment() noexcept {
     auto start = m_token->range().Start;
-    auto ident = identifier();
+    auto lhs = expression({});
     expect(TokenKind::Assign);
-    auto expr = expression();
+    auto rhs = expression();
 
     return AstAssignStmt::create(
         llvm::SMRange{ start, m_endLoc },
-        std::move(ident),
-        std::move(expr));
+        std::move(lhs),
+        std::move(rhs));
 }
 
 //----------------------------------------
@@ -499,7 +499,7 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
         expect(TokenKind::Comma);
     }
 
-    auto expr = expression(true);
+    auto expr = expression(ExprFlags::Default | ExprFlags::CommaAsAnd);
     expect(TokenKind::Then);
     return thenBlock(std::move(decls), std::move(expr));
 }
@@ -624,15 +624,17 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
 /**
  * expression = factor { <Binary Op> expression } .
  */
-unique_ptr<AstExpr> Parser::expression(bool commaAsAnd) noexcept {
-    auto expr = factor();
+unique_ptr<AstExpr> Parser::expression(ExprFlags flags) noexcept {
+    auto expr = factor(flags);
 
-    replace(TokenKind::Assign, TokenKind::Equal);
-    if (commaAsAnd) {
+    if ((flags & ExprFlags::AssignAsEqual) != 0) {
+        replace(TokenKind::Assign, TokenKind::Equal);
+    }
+    if ((flags & ExprFlags::CommaAsAnd) != 0) {
         replace(TokenKind::Comma, TokenKind::CommaAnd);
     }
     if (m_token->isOperator()) {
-        return expression(std::move(expr), 1, commaAsAnd);
+        return expression(std::move(expr), 1, flags);
     }
 
     return expr;
@@ -641,9 +643,9 @@ unique_ptr<AstExpr> Parser::expression(bool commaAsAnd) noexcept {
 /**
  * factor = primary { <Right Unary Op> | "AS" TypeExpr } .
  */
-unique_ptr<AstExpr> Parser::factor() noexcept {
+unique_ptr<AstExpr> Parser::factor(ExprFlags flags) noexcept {
     auto start = m_token->range().Start;
-    auto expr = primary();
+    auto expr = primary(flags);
 
     while (true) {
         // <Right Unary Op>
@@ -668,10 +670,8 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
             expr = std::move(cast);
             continue;
         }
-
         break;
     }
-
     return expr;
 }
 
@@ -684,7 +684,7 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
  *         | IfExpr
   *        .
  */
-unique_ptr<AstExpr> Parser::primary() noexcept {
+unique_ptr<AstExpr> Parser::primary(ExprFlags flags) noexcept {
     if (m_token->isLiteral()) {
         return literal();
     }
@@ -712,8 +712,10 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         auto prec = m_token->getPrecedence();
         auto kind = move()->kind();
 
-        replace(TokenKind::Assign, TokenKind::Equal);
-        auto expr = expression(factor(), prec);
+        if ((flags & ExprFlags::AssignAsEqual) != 0) {
+            replace(TokenKind::Assign, TokenKind::Equal);
+        }
+        auto expr = expression(factor(flags), prec, flags);
 
         return AstUnaryExpr::create(
             llvm::SMRange{ start, m_endLoc },
@@ -728,20 +730,22 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
  * Recursievly climb operator precedence
  * https://en.wikipedia.org/wiki/Operator-precedence_parser#Precedence_climbing_method
  */
-[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence, bool commaAsAnd) noexcept {
+[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence, ExprFlags flags) noexcept {
     while (m_token->getPrecedence() >= precedence) {
         auto current = m_token->getPrecedence();
         auto kind = m_token->kind();
         move();
 
-        auto rhs = factor();
-        replace(TokenKind::Assign, TokenKind::Equal);
-        if (commaAsAnd) {
+        auto rhs = factor(flags);
+        if ((flags & ExprFlags::AssignAsEqual) != 0) {
+            replace(TokenKind::Assign, TokenKind::Equal);
+        }
+        if ((flags & ExprFlags::CommaAsAnd) != 0) {
             replace(TokenKind::Comma, TokenKind::CommaAnd);
         }
 
         while (m_token->getPrecedence() > current || (m_token->isRightToLeft() && m_token->getPrecedence() == current)) {
-            rhs = expression(std::move(rhs), m_token->getPrecedence(), commaAsAnd);
+            rhs = expression(std::move(rhs), m_token->getPrecedence(), flags);
         }
 
         auto left = AstBinaryExpr::create(
@@ -790,7 +794,7 @@ unique_ptr<AstIfExpr> Parser::ifExpr() noexcept {
     auto start = m_token->range().Start;
 
     expect(TokenKind::If);
-    auto expr = expression(true);
+    auto expr = expression(ExprFlags::Default | ExprFlags::CommaAsAnd);
     expect(TokenKind::Then);
     auto trueExpr = expression();
     expect(TokenKind::Else);

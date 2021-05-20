@@ -109,14 +109,13 @@ struct AstExprStmt final : AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
 struct AstAssignStmt final : AstNode<AstAssignStmt, AstStmt, AstKind::AssignStmt> {
     AstAssignStmt(
         llvm::SMRange range_,
-        unique_ptr<AstIdentExpr> ident,
-        unique_ptr<AstExpr> e) noexcept
+        unique_ptr<AstExpr> lhs_,
+        unique_ptr<AstExpr> rhs_) noexcept
     : AstNode{ KIND, range_ },
-      identExpr{ std::move(ident) },
-      expr{ std::move(e) } {};
+      lhs{ std::move(lhs_) },
+      rhs{ std::move(rhs_) } {};
 
-    unique_ptr<AstIdentExpr> identExpr;
-    unique_ptr<AstExpr> expr;
+    unique_ptr<AstExpr> lhs, rhs;
 };
 
 struct AstFuncStmt final : AstNode<AstFuncStmt, AstStmt, AstKind::FuncStmt> {
@@ -228,17 +227,17 @@ struct AstDecl : AstStmt {
     AstDecl(
         AstKind kind_,
         llvm::SMRange range_,
-        StringRef id_,
+        StringRef name_,
         unique_ptr<AstAttributeList> attribs) noexcept
     : AstStmt{ kind_, range_ },
-      id{ id_ },
+      name{ name_ },
       attributes{ std::move(attribs) } {}
 
     static constexpr bool classof(const AstRoot* ast) noexcept {
         return AST_DECL_RANGE(IS_AST_CLASSOF)
     }
 
-    const StringRef id;
+    const StringRef name;
     unique_ptr<AstAttributeList> attributes;
     Symbol* symbol = nullptr;
 };
@@ -246,11 +245,11 @@ struct AstDecl : AstStmt {
 struct AstVarDecl final : AstNode<AstVarDecl, AstDecl, AstKind::VarDecl> {
     AstVarDecl(
         llvm::SMRange range_,
-        StringRef id_,
+        StringRef name_,
         unique_ptr<AstAttributeList> attrs,
         unique_ptr<AstTypeExpr> type,
         unique_ptr<AstExpr> expr_) noexcept
-    : AstNode{ KIND, range_, id_, std::move(attrs) },
+    : AstNode{ KIND, range_, name_, std::move(attrs) },
       typeExpr{ std::move(type) },
       expr{ std::move(expr_) } {};
 
@@ -261,13 +260,13 @@ struct AstVarDecl final : AstNode<AstVarDecl, AstDecl, AstKind::VarDecl> {
 struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
     AstFuncDecl(
         llvm::SMRange range_,
-        StringRef id_,
+        StringRef name_,
         unique_ptr<AstAttributeList> attrs,
         std::vector<unique_ptr<AstFuncParamDecl>> params,
         bool variadic_,
         unique_ptr<AstTypeExpr> retType_,
         bool hasImpl_) noexcept
-    : AstNode{ KIND, range_, id_, std::move(attrs) },
+    : AstNode{ KIND, range_, name_, std::move(attrs) },
       paramDecls{ std::move(params) },
       variadic{ variadic_ },
       retTypeExpr{ std::move(retType_) },
@@ -283,10 +282,10 @@ struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
 struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::FuncParamDecl> {
     AstFuncParamDecl(
         llvm::SMRange range_,
-        StringRef id_,
+        StringRef name_,
         unique_ptr<AstAttributeList> attrs,
         unique_ptr<AstTypeExpr> type) noexcept
-    : AstNode{ KIND, range_, id_, std::move(attrs) },
+    : AstNode{ KIND, range_, name_, std::move(attrs) },
       typeExpr{ std::move(type) } {};
 
     unique_ptr<AstTypeExpr> typeExpr;
@@ -332,11 +331,11 @@ struct AstExpr : AstRoot {
 struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
     AstIdentExpr(
         llvm::SMRange range_,
-        StringRef id_) noexcept
+        StringRef name_) noexcept
     : AstNode{ KIND, range_ },
-      id{ id_ } {};
+      name{ name_ } {};
 
-    const StringRef id;
+    const StringRef name;
     Symbol* symbol = nullptr;
 };
 

@@ -37,7 +37,7 @@ private:
     void declareFunc(AstFuncDecl* ast) noexcept;
     void declareGlobalVar(AstVarDecl* ast) noexcept;
     void declareLocalVar(AstVarDecl* ast) noexcept;
-    static llvm::Value* getStoreValue(AstIdentExpr* identExpr);
+    static llvm::Value* getStoreValue(AstExpr* identExpr);
     llvm::Constant* getStringConstant(StringRef str) noexcept;
     void comparison(AstBinaryExpr* ast) noexcept;
     void arithmetic(AstBinaryExpr* ast) noexcept;

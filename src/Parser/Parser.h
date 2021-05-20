@@ -12,6 +12,13 @@ class Context;
 enum class TokenKind;
 AST_FORWARD_DECLARE()
 
+enum class ExprFlags : unsigned {
+    CommaAsAnd = 1,
+    AssignAsEqual = 2,
+    Default = AssignAsEqual
+};
+ENABLE_BITMASK_OPERATORS(ExprFlags);
+
 class Parser final {
 public:
     NO_COPY_AND_MOVE(Parser)
@@ -31,10 +38,10 @@ private:
     [[nodiscard]] unique_ptr<AstStmt> statement() noexcept;
     [[nodiscard]] unique_ptr<AstStmt> declaration() noexcept;
 
-    [[nodiscard]] unique_ptr<AstExpr> expression(bool commaAsAnd = false) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence, bool commaAsAnd = false) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::Default) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> factor(ExprFlags flags) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> primary(ExprFlags flags) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence, ExprFlags flags) noexcept;
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
     [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
     [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;

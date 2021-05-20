@@ -22,9 +22,9 @@ void CodePrinter::visit(AstStmtList* ast) noexcept {
 
 void CodePrinter::visit(AstAssignStmt* ast) noexcept {
     m_os << indent();
-    visit(ast->identExpr.get());
+    visit(ast->lhs.get());
     m_os << " = ";
-    visit(ast->expr.get());
+    visit(ast->rhs.get());
 }
 
 void CodePrinter::visit(AstExprStmt* ast) noexcept {
@@ -83,7 +83,7 @@ void CodePrinter::visit(AstVarDecl* ast) noexcept {
 
     m_os << indent();
     m_os << "VAR ";
-    m_os << ast->id;
+    m_os << ast->name;
 
     if (ast->typeExpr) {
         m_os << " AS ";
@@ -113,7 +113,7 @@ void CodePrinter::visit(AstFuncDecl* ast) noexcept {
     } else {
         m_os << "SUB ";
     }
-    m_os << ast->id;
+    m_os << ast->name;
 
     if (!ast->paramDecls.empty()) {
         m_os << "(";
@@ -136,7 +136,7 @@ void CodePrinter::visit(AstFuncDecl* ast) noexcept {
 }
 
 void CodePrinter::visit(AstFuncParamDecl* ast) noexcept {
-    m_os << ast->id;
+    m_os << ast->name;
     m_os << " AS ";
     visit(ast->typeExpr.get());
 }
@@ -202,7 +202,7 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
         m_os << ", ";
     }
 
-    m_os << ast->iterator->id;
+    m_os << ast->iterator->name;
     if (ast->iterator->typeExpr) {
         m_os << " AS ";
         visit(ast->iterator->typeExpr.get());
@@ -235,7 +235,7 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
 // Expressions
 
 void CodePrinter::visit(AstIdentExpr* ast) noexcept {
-    m_os << ast->id;
+    m_os << ast->name;
 }
 
 void CodePrinter::visit(AstCallExpr* ast) noexcept {

@@ -34,8 +34,11 @@ void SemanticAnalyzer::visit(AstStmtList* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstAssignStmt* ast) noexcept {
-    visit(ast->identExpr.get());
-    expression(ast->expr, ast->identExpr->type);
+    visit(ast->lhs.get());
+    if (ast->lhs->kind != AstKind::IdentExpr) {
+        fatalError("Unsupported assignment target");
+    }
+    expression(ast->rhs, ast->lhs->type);
 }
 
 void SemanticAnalyzer::visit(AstExprStmt* ast) noexcept {
@@ -43,7 +46,7 @@ void SemanticAnalyzer::visit(AstExprStmt* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstVarDecl* ast) noexcept {
-    auto* symbol = createNewSymbol(ast, ast->id);
+    auto* symbol = createNewSymbol(ast, ast->name);
     symbol->setExternal(false);
 
     // m_type expr?
@@ -242,7 +245,7 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr* ast) noexcept {
-    const auto& name = ast->id;
+    const auto& name = ast->name;
     auto* symbol = m_table->find(name, true);
 
     if (symbol == nullptr) {

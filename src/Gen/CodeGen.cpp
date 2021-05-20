@@ -163,14 +163,16 @@ void CodeGen::visit(AstStmtList* ast) noexcept {
 }
 
 void CodeGen::visit(AstAssignStmt* ast) noexcept {
-    auto* dstValue = getStoreValue(ast->identExpr.get());
-    visit(ast->expr.get());
-
-    m_builder.CreateStore(ast->expr->llvmValue, dstValue);
+    auto* dstValue = getStoreValue(ast->lhs.get());
+    visit(ast->rhs.get());
+    m_builder.CreateStore(ast->rhs->llvmValue, dstValue);
 }
 
-llvm::Value* CodeGen::getStoreValue(AstIdentExpr* identExpr) {
-    return identExpr->symbol->getLlvmValue();
+llvm::Value* CodeGen::getStoreValue(AstExpr* ast) {
+    if (auto* id = dyn_cast<AstIdentExpr>(ast)) {
+        return id->symbol->getLlvmValue();
+    }
+    fatalError("Unsupported assign target");
 }
 
 void CodeGen::visit(AstExprStmt* ast) noexcept {

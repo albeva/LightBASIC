@@ -24,7 +24,7 @@ void FuncDeclarerPass::visit(AstModule* ast) noexcept {
 }
 
 void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
-    const auto& name = ast->id;
+    const auto& name = ast->name;
     if (m_table->exists(name)) {
         fatalError("Redefinition of "_t + name);
     }
@@ -86,7 +86,7 @@ void FuncDeclarerPass::visitTypeExpr(AstTypeExpr* ast) noexcept {
 }
 
 Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl* ast) noexcept {
-    const auto& name = ast->id;
+    const auto& name = ast->name;
     if (m_table->find(name, false) != nullptr) {
         fatalError("Redefinition of "_t + name);
     }
