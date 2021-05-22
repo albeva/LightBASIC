@@ -4,6 +4,9 @@
 #include "FuncDeclarerPass.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
+#include "Ast/Ast.h"
+#include "TypePass.h"
+
 using namespace lbc;
 using namespace Sem;
 
@@ -60,7 +63,7 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
     // return typeExpr. subs don't have one so default to Void
     const TypeRoot* retType = nullptr;
     if (ast->retTypeExpr) {
-        visitTypeExpr(ast->retTypeExpr.get());
+        m_typePass.visit(ast->retTypeExpr.get());
         retType = ast->retTypeExpr->type;
     } else {
         retType = TypeVoid::get();
@@ -75,14 +78,10 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
 void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl* ast) noexcept {
     auto* symbol = createParamSymbol(ast);
 
-    visitTypeExpr(ast->typeExpr.get());
+    m_typePass.visit(ast->typeExpr.get());
     symbol->setType(ast->typeExpr->type);
 
     ast->symbol = symbol;
-}
-
-void FuncDeclarerPass::visitTypeExpr(AstTypeExpr* ast) noexcept {
-    ast->type = TypeRoot::fromTokenKind(ast->tokenKind);
 }
 
 Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl* ast) noexcept {

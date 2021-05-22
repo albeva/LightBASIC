@@ -12,14 +12,13 @@ Declare Sub srand(seed As UInteger)
 Declare Function rand As Integer
 '' time
 [Alias = "time"] _
-Declare Function time(timer As uinteger) As UInteger
+Declare Function time(time_t As Any Ptr) As ULong
 
 '' initialize a random seed
-srand time(0)
+srand time(null)
 
 '' the secret number
 Var secret = rand() Mod 100
-printf "secret = %d\n",  secret
 Var answer = 0
 
 '' show help

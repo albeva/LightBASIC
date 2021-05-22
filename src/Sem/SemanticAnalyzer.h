@@ -5,6 +5,7 @@
 #include "pch.h"
 #include "Ast/AstVisitor.h"
 #include "Passes/ConstantFoldingPass.h"
+#include "Passes/TypePass.h"
 
 namespace lbc {
 
@@ -42,6 +43,7 @@ private:
     SymbolTable* m_table = nullptr;
     SymbolTable* m_rootTable = nullptr;
     Sem::ConstantFoldingPass m_constantFolder;
+    Sem::TypePass m_typePass;
 };
 
 } // namespace lbc

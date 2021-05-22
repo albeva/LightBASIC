@@ -4,7 +4,6 @@
 #pragma once
 #include "pch.h"
 #include "Ast/Ast.h"
-#include "Ast/AstVisitor.h"
 
 namespace lbc {
 class Context;

@@ -3,26 +3,34 @@
 //
 #pragma once
 #include "pch.h"
-#include "Ast/AstVisitor.h"
-#include "Driver/Context.h"
 
 namespace lbc {
 
 class SymbolTable;
 class Symbol;
-class Token;
+class Context;
+struct AstModule;
+struct AstFuncDecl;
+struct AstFuncParamDecl;
+struct AstTypeExpr;
 
 namespace Sem {
+    class TypePass;
 
     /**
      * Semantic pass that declares all the functions
      * and declarations in the ast
      */
-    class FuncDeclarerPass {
+    class FuncDeclarerPass final {
     public:
         NO_COPY_AND_MOVE(FuncDeclarerPass)
 
-        explicit FuncDeclarerPass(Context& context) noexcept : m_context{ context } {}
+        explicit FuncDeclarerPass(
+            Context& context,
+            TypePass& typePass) noexcept
+        : m_context{ context },
+          m_typePass{ typePass } {}
+
         ~FuncDeclarerPass() noexcept = default;
 
         void visit(AstModule* ast) noexcept;
@@ -30,11 +38,11 @@ namespace Sem {
     private:
         void visitFuncDecl(AstFuncDecl* ast, bool external) noexcept;
         void visitFuncParamDecl(AstFuncParamDecl* ast) noexcept;
-        static void visitTypeExpr(AstTypeExpr* ast) noexcept;
         [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl* ast) noexcept;
 
         SymbolTable* m_table{};
         Context& m_context;
+        TypePass& m_typePass;
     };
 
 } // namespace Sem

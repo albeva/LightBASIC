@@ -9,6 +9,8 @@ add_executable(
     Ast/AstPrinter.cpp
     Ast/AstPrinter.h
     Ast/AstVisitor.h
+    Ast/CodePrinter.cpp
+    Ast/CodePrinter.h
     Driver/CmdLineParser.cpp
     Driver/CmdLineParser.h
     Driver/Context.cpp
@@ -22,6 +24,7 @@ add_executable(
     Driver/Toolchain/ToolTask.h
     Driver/Toolchain/Toolchain.cpp
     Driver/Toolchain/Toolchain.h
+    Driver/TranslationUnit.h
     Gen/CodeGen.cpp
     Gen/CodeGen.h
     Lexer/Lexer.cpp
@@ -35,6 +38,8 @@ add_executable(
     Sem/Passes/ConstantFoldingPass.h
     Sem/Passes/FuncDeclarerPass.cpp
     Sem/Passes/FuncDeclarerPass.h
+    Sem/Passes/TypePass.cpp
+    Sem/Passes/TypePass.h
     Sem/SemanticAnalyzer.cpp
     Sem/SemanticAnalyzer.h
     Symbol/Symbol.h
@@ -43,10 +48,11 @@ add_executable(
     Type/Type.cpp
     Type/Type.def.h
     Type/Type.h
+    Utils/EnumFlags.h
     Utils/Utils.cpp
     Utils/Utils.h
     Utils/Version.h
-    Driver/TranslationUnit.h Ast/CodePrinter.cpp Ast/CodePrinter.h Utils/EnumFlags.h)
+)
 
 # LLVM
 find_package(LLVM REQUIRED CONFIG)

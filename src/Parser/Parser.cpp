@@ -601,14 +601,15 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
 //----------------------------------------
 
 /**
- * TypeExpr = identExpr { "PTR" } .
+ * TypeExpr = ( identExpr | Any ) { "PTR" } .
  */
 unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
     auto start = m_token->range().Start;
 
-    if (!m_token->isTypeKeyword()) {
+    if (!match(TokenKind::Any) && !m_token->isTypeKeyword()) {
         error("Expected type, got "_t + m_token->description());
     }
+
     auto token = move();
 
     auto deref = 0;

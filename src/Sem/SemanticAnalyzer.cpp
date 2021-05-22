@@ -14,14 +14,15 @@ using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
 : m_context{ context },
-  m_constantFolder{ context } {}
+  m_constantFolder{ context },
+  m_typePass{ context } {}
 
 void SemanticAnalyzer::visit(AstModule* ast) noexcept {
     m_astRootModule = ast;
     m_fileId = ast->fileId;
     ast->symbolTable = make_unique<SymbolTable>(nullptr);
 
-    Sem::FuncDeclarerPass(m_context).visit(ast);
+    Sem::FuncDeclarerPass(m_context, m_typePass).visit(ast);
 
     m_rootTable = m_table = ast->symbolTable.get();
     visit(ast->stmtList.get());
@@ -238,11 +239,7 @@ void SemanticAnalyzer::visit(AstAttribute* /*ast*/) noexcept {
 //----------------------------------------
 
 void SemanticAnalyzer::visit(AstTypeExpr* ast) noexcept {
-    const auto* type = TypeRoot::fromTokenKind(ast->tokenKind);
-    for (auto deref = 0; deref < ast->dereference; deref++) {
-        type = TypePointer::get(type);
-    }
-    ast->type = type;
+    m_typePass.visit(ast);
 }
 
 //----------------------------------------
@@ -297,7 +294,7 @@ void SemanticAnalyzer::visit(AstCallExpr* ast) noexcept {
 
     for (size_t index = 0; index < args.size(); index++) {
         if (index < paramTypes.size()) {
-            expression(args[index], args[index]->type);
+            expression(args[index], paramTypes[index]);
         } else {
             expression(args[index]);
         }

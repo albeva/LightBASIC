@@ -47,6 +47,8 @@ const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) noexcept {
     FLOATINGPOINT_TYPES(CASE_TYPE)
     case TokenKind::Null:
         return &anyPtrTy;
+    case TokenKind::Any:
+        return &anyTy;
     default:
         fatalError("Unknown typeExpr "_t + Token::description(kind), false);
     }

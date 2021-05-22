@@ -77,7 +77,8 @@
     _( Step,            "STEP"     ) \
     _( To,              "TO"       ) \
     _( Do,              "DO"       ) \
-    _( Ptr,             "PTR"      )
+    _( Ptr,             "PTR"      ) \
+    _( Any,             "ANY"      )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \
