@@ -19,6 +19,7 @@ srand time(0)
 
 '' the secret number
 Var secret = rand() Mod 100
+printf "secret = %d\n",  secret
 Var answer = 0
 
 '' show help
@@ -27,12 +28,12 @@ printf "Guess a number between 1 and 100. 0 to exit. You have 25 tries\n"
 '' Try for 25 times
 For i = 1 To 25
     printf "Attempt %d: ", i
-    scanf "%d", &answer
+    scanf "%d", @answer
     If answer = 0 Then
-        Return 0
+        Return
     Else If answer = secret Then
         printf "Correct\n"
-        Return 0
+        Return
     Else If answer > secret Then
         printf "Nope. Too big!\n"
     Else
