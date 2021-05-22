@@ -17,49 +17,46 @@ const TypeVoid voidTy{};              // VOID
 const TypeAny anyTy{};                // Any typeExpr
 const TypePointer anyPtrTy{ &anyTy }; // void*
 
+// clang-format off
+
 // primitives
-#define DEFINE_TYPE(id, str, kind) \
-    const Type##kind id##Ty;
-PRIMITIVE_TYPES(DEFINE_TYPE)
+#define DEFINE_TYPE(ID, STR, KIND) \
+    const Type##KIND ID##Ty;
+    PRIMITIVE_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 // integers
-#define DEFINE_TYPE(id, str, kind, bits, isSigned, ...) \
-    const Type##kind id##Ty{ bits, isSigned };
-INTEGRAL_TYPES(DEFINE_TYPE)
+#define DEFINE_TYPE(ID, STR, KIND, BITS, ISSIGNED, ...) \
+    const Type##KIND ID##Ty{ BITS, ISSIGNED };
+    INTEGRAL_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 // Floating Points
-#define DEFINE_TYPE(id, str, kind, bits, ...) \
-    const Type##kind id##Ty{ bits };
-FLOATINGPOINT_TYPES(DEFINE_TYPE)
+#define DEFINE_TYPE(ID, STR, KIND, BITS, ...) \
+    const Type##KIND ID##Ty{ BITS };
+    FLOATINGPOINT_TYPES(DEFINE_TYPE)
 #undef DEFINE_TYPE
 
 } // namespace
 
 const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) noexcept {
-#define CASE_PRIMITIVE(id, str, KIND, ...) \
-    case TokenKind::id:                    \
-        return Type##KIND::get();
-#define CASE_INTEGER(id, str, KIND, bits, isSigned, ...) \
-    case TokenKind::id:                                  \
-        return Type##KIND::get(bits, isSigned);
-#define CASE_FLOATINGPOINT(id, str, KIND, bits, ...) \
-    case TokenKind::id:                              \
-        return Type##KIND::get(bits);
-
+    #define CASE_TYPE(ID, ...) case TokenKind::ID: return &ID##Ty;
     switch (kind) {
-        PRIMITIVE_TYPES(CASE_PRIMITIVE)
-        INTEGRAL_TYPES(CASE_INTEGER)
-        FLOATINGPOINT_TYPES(CASE_FLOATINGPOINT)
+    PRIMITIVE_TYPES(CASE_TYPE)
+    INTEGRAL_TYPES(CASE_TYPE)
+    FLOATINGPOINT_TYPES(CASE_TYPE)
+    case TokenKind::Null:
+        return &anyPtrTy;
     default:
         fatalError("Unknown typeExpr "_t + Token::description(kind), false);
     }
 
-#undef TO_PRIMITIVE_TYPE
-#undef CASE_INTEGER
-#undef CASE_INTEGER
+    #undef TO_PRIMITIVE_TYPE
+    #undef CASE_INTEGER
+    #undef CASE_INTEGER
 }
+
+// clang-format on
 
 bool TypeRoot::isAnyPointer() const noexcept {
     return this == &anyPtrTy;
@@ -85,6 +82,18 @@ bool TypeRoot::isSignedIntegral() const noexcept {
 TypeComparison TypeRoot::compare(const TypeRoot* other) const noexcept {
     if (this == other) {
         return TypeComparison::Equal;
+    }
+
+    if (const auto* left = dyn_cast<TypePointer>(this)) {
+        if (const auto* right = dyn_cast<TypePointer>(other)) {
+            if (left->getBase()->isAny()) {
+                return TypeComparison::Upcast;
+            }
+            if (right->getBase()->isAny()) {
+                return TypeComparison::Downcast;
+            }
+        }
+        return TypeComparison::Incompatible;
     }
 
     if (const auto* left = dyn_cast<TypeIntegral>(this)) {
@@ -190,9 +199,9 @@ string TypeBoolean::asString() const noexcept {
 // Integer
 
 const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) noexcept {
-#define USE_TYPE(id, str, kind, BITS, IS_SIGNED, ...) \
+#define USE_TYPE(ID, STR, KIND, BITS, IS_SIGNED, ...) \
     if (bits == BITS && isSigned == IS_SIGNED)        \
-        return &id##Ty;
+        return &ID##Ty;
     INTEGRAL_TYPES(USE_TYPE)
 #undef USE_TYPE
 
@@ -204,9 +213,9 @@ llvm::Type* TypeIntegral::genLlvmType(Context& context) const noexcept {
 }
 
 string TypeIntegral::asString() const noexcept {
-#define GET_TYPE(id, str, kind, BITS, SIGNED, ...) \
+#define GET_TYPE(ID, STR, KIND, BITS, SIGNED, ...) \
     if (getBits() == BITS && isSigned() == SIGNED) \
-        return str;
+        return STR;
     INTEGRAL_TYPES(GET_TYPE)
 #undef GET_TYPE
 
@@ -217,9 +226,9 @@ string TypeIntegral::asString() const noexcept {
 
 const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) noexcept {
     switch (bits) {
-#define USE_TYPE(id, str, kind, BITS, ...) \
+#define USE_TYPE(ID, STR, KIND, BITS, ...) \
     case BITS:                             \
-        return &id##Ty;
+        return &ID##Ty;
         FLOATINGPOINT_TYPES(USE_TYPE)
 #undef USE_TYPE
     default:
@@ -239,9 +248,9 @@ llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const noexcept {
 }
 
 string TypeFloatingPoint::asString() const noexcept {
-#define GET_TYPE(id, str, kind, BITS, ...) \
+#define GET_TYPE(ID, STR, kind, BITS, ...) \
     if (getBits() == BITS)                 \
-        return str;
+        return STR;
     FLOATINGPOINT_TYPES(GET_TYPE)
 #undef GET_TYPE
 

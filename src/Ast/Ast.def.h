@@ -63,9 +63,11 @@
     _( UnaryExpr   ) \
     _( BinaryExpr  ) \
     _( CastExpr    ) \
-    _( IfExpr      )
+    _( IfExpr      ) \
+    _( Dereference ) \
+    _( AddressOf   )
 
-#define AST_EXPR_RANGE(_) _(IdentExpr, IfExpr)
+#define AST_EXPR_RANGE(_) _(IdentExpr, AddressOf)
 
 /**
  * Combined

@@ -306,6 +306,18 @@ void CodePrinter::visit(AstUnaryExpr* ast) noexcept {
     m_os << ")";
 }
 
+void CodePrinter::visit(AstDereference* ast) noexcept {
+    m_os << "*(";
+    visit(ast->expr.get());
+    m_os << ")";
+}
+
+void CodePrinter::visit(AstAddressOf* ast) noexcept {
+    m_os << "@(";
+    visit(ast->expr.get());
+    m_os << ")";
+}
+
 void CodePrinter::visit(AstBinaryExpr* ast) noexcept {
     m_os << "(";
     visit(ast->lhs.get());

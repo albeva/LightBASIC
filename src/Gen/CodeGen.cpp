@@ -50,7 +50,7 @@ namespace {
         }
     }
 
-    if (type->isBoolean()) {
+    if (type->isBoolean() || type->isPointer()) {
         switch (op) {
         case TokenKind::Equal:
             return llvm::CmpInst::Predicate::ICMP_EQ;
@@ -333,7 +333,15 @@ void CodeGen::visit(AstReturnStmt* ast) noexcept {
         visit(ast->expr.get());
         m_builder.CreateRet(ast->expr->llvmValue);
     } else {
-        m_builder.CreateRetVoid();
+        auto* func = m_builder.GetInsertBlock()->getParent();
+        auto* retTy = func->getReturnType();
+
+        if (retTy->isVoidTy()) {
+            m_builder.CreateRetVoid();
+        } else {
+            auto* constant = llvm::Constant::getNullValue(retTy);
+            m_builder.CreateRet(constant);
+        }
     }
 }
 
@@ -375,7 +383,9 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         }
 
         visit(block.stmt.get());
-        m_builder.CreateBr(endBlock);
+        if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
+            m_builder.CreateBr(endBlock);
+        }
 
         elseBlock->moveAfter(m_builder.GetInsertBlock());
         m_builder.SetInsertPoint(elseBlock);
@@ -468,7 +478,10 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     bodyBlock->insertInto(func);
     m_builder.SetInsertPoint(bodyBlock);
     visit(ast->stmt.get());
-    m_builder.CreateBr(condBlock);
+
+    if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
+        m_builder.CreateBr(condBlock);
+    }
 
     condBlock->insertInto(func);
     m_builder.SetInsertPoint(condBlock);
@@ -634,6 +647,22 @@ void CodeGen::visit(AstUnaryExpr* ast) noexcept {
     }
 }
 
+void CodeGen::visit(AstDereference* ast) noexcept {
+    visit(ast->expr.get());
+    ast->llvmValue = m_builder.CreateLoad(ast->expr->llvmValue);
+}
+
+void CodeGen::visit(AstAddressOf* ast) noexcept {
+    llvm::Value* addr = nullptr;
+    if (auto* ident = dyn_cast<AstIdentExpr>(ast->expr.get())) {
+        addr = ident->symbol->getLlvmValue();
+    } else {
+        fatalError("Taking address of non id expression");
+    }
+
+    ast->llvmValue = addr;
+}
+
 //------------------------------------------------------------------
 // Binary Operation
 //------------------------------------------------------------------
@@ -646,6 +675,8 @@ void CodeGen::visit(AstBinaryExpr* ast) noexcept {
         return logical(ast);
     case OperatorType::Comparison:
         return comparison(ast);
+    default:
+        llvm_unreachable("invalid operator type");
     }
 }
 

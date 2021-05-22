@@ -307,11 +307,14 @@ struct AstType : AstRoot {
 struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
     AstTypeExpr(
         llvm::SMRange range_,
-        TokenKind tokenKind_) noexcept
+        TokenKind tokenKind_,
+        int deref) noexcept
     : AstNode{ KIND, range_ },
-      tokenKind{ tokenKind_ } {};
+      tokenKind{ tokenKind_ },
+      dereference{ deref } {};
 
     const TokenKind tokenKind;
+    const int dereference;
 };
 
 //----------------------------------------
@@ -374,6 +377,26 @@ struct AstUnaryExpr final : AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
       expr{ std::move(expr_) } {};
 
     const TokenKind tokenKind;
+    unique_ptr<AstExpr> expr;
+};
+
+struct AstDereference final : AstNode<AstDereference, AstExpr, AstKind::Dereference> {
+    AstDereference(
+        llvm::SMRange range_,
+        unique_ptr<AstExpr> expr_) noexcept
+        : AstNode{ KIND, range_ },
+          expr{ std::move(expr_) } {};
+
+    unique_ptr<AstExpr> expr;
+};
+
+struct AstAddressOf final : AstNode<AstAddressOf, AstExpr, AstKind::AddressOf> {
+    AstAddressOf(
+        llvm::SMRange range_,
+        unique_ptr<AstExpr> expr_) noexcept
+        : AstNode{ KIND, range_ },
+          expr{ std::move(expr_) } {};
+
     unique_ptr<AstExpr> expr;
 };
 

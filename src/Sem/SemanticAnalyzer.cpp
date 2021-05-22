@@ -100,10 +100,20 @@ void SemanticAnalyzer::visit(AstFuncStmt* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstReturnStmt* ast) noexcept {
-    const auto* retType = m_function->retTypeExpr->type;
+    const TypeRoot* retType = nullptr;
+    bool canOmitExpression = false;
+    if (m_function == nullptr) {
+        if (!m_astRootModule->hasImplicitMain) {
+            fatalError("Return statement outside SUB / FUNCTION or a main module");
+        }
+        retType = TypeIntegral::fromTokenKind(TokenKind::Integer);
+        canOmitExpression = true;
+    } else {
+        retType = llvm::cast<TypeFunction>(m_function->symbol->type())->getReturn();
+    }
     auto isVoid = retType->isVoid();
     if (!ast->expr) {
-        if (!isVoid) {
+        if (!isVoid && !canOmitExpression) {
             fatalError("Expected expression");
         }
         return;
@@ -228,7 +238,11 @@ void SemanticAnalyzer::visit(AstAttribute* /*ast*/) noexcept {
 //----------------------------------------
 
 void SemanticAnalyzer::visit(AstTypeExpr* ast) noexcept {
-    ast->type = TypeRoot::fromTokenKind(ast->tokenKind);
+    const auto* type = TypeRoot::fromTokenKind(ast->tokenKind);
+    for (auto deref = 0; deref < ast->dereference; deref++) {
+        type = TypePointer::get(type);
+    }
+    ast->type = type;
 }
 
 //----------------------------------------
@@ -344,6 +358,31 @@ void SemanticAnalyzer::visit(AstUnaryExpr* ast) noexcept {
 }
 
 //------------------------------------------------------------------
+// Dereference
+//------------------------------------------------------------------
+
+void SemanticAnalyzer::visit(AstDereference* ast) noexcept {
+    visit(ast->expr.get());
+    if (const auto* type = dyn_cast<TypePointer>(ast->expr->type)) {
+        ast->type = type->getBase();
+    } else {
+        fatalError("dereferencing a non pointer");
+    }
+}
+
+//------------------------------------------------------------------
+// AddressOf
+//------------------------------------------------------------------
+
+void SemanticAnalyzer::visit(AstAddressOf* ast) noexcept {
+    visit(ast->expr.get());
+    if (ast->expr->kind != AstKind::IdentExpr) {
+        fatalError("Taking address of non identifier");
+    }
+    ast->type = TypePointer::get(ast->expr->type);
+}
+
+//------------------------------------------------------------------
 // Binary Expressions
 //------------------------------------------------------------------
 
@@ -358,6 +397,8 @@ void SemanticAnalyzer::visit(AstBinaryExpr* ast) noexcept {
         return comparison(ast);
     case OperatorType::Logical:
         return logical(ast);
+    default:
+        llvm_unreachable("invalid operator");
     }
 }
 
@@ -402,16 +443,8 @@ void SemanticAnalyzer::comparison(AstBinaryExpr* ast) noexcept {
     const auto* left = ast->lhs->type;
     const auto* right = ast->rhs->type;
 
-    if (left->isBoolean() && right->isBoolean()) {
-        if (ast->tokenKind == TokenKind::Equal || ast->tokenKind == TokenKind::NotEqual) {
-            ast->type = left;
-            return;
-        }
-        fatalError("Applying unsupported operation to boolean type");
-    }
-
-    if (!left->isNumeric() || !right->isNumeric()) {
-        fatalError("Applying comparison operation to non numeric type");
+    if (!canPerformBinary(ast->tokenKind, left, right)) {
+        fatalError("Cannot apply operationg to types");
     }
 
     const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
@@ -431,6 +464,18 @@ void SemanticAnalyzer::comparison(AstBinaryExpr* ast) noexcept {
     case TypeComparison::Upcast:
         return convert(ast->lhs, right);
     }
+}
+
+bool SemanticAnalyzer::canPerformBinary(TokenKind op, const TypeRoot* left, const TypeRoot* right) const noexcept {
+    if (left->isBoolean() && right->isBoolean()) {
+        return op == TokenKind::Equal || op == TokenKind::NotEqual;
+    }
+
+    if (left->isPointer() && right->isPointer()) {
+        return op == TokenKind::Equal || op == TokenKind::NotEqual;
+    }
+
+    return left->isNumeric() &&  right->isNumeric();
 }
 
 //------------------------------------------------------------------

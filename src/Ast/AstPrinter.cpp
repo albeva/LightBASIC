@@ -248,6 +248,20 @@ void AstPrinter::visit(AstUnaryExpr* ast) noexcept {
     });
 }
 
+void AstPrinter::visit(AstDereference* ast) noexcept {
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast);
+    });
+}
+
+void AstPrinter::visit(AstAddressOf* ast) noexcept {
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast->expr.get());
+    });
+}
+
 void AstPrinter::visit(AstBinaryExpr* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);

@@ -41,6 +41,8 @@ private:
     [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::Default) noexcept;
     [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
     [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> unary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> expr) noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> binary(llvm::SMRange range,TokenKind op, unique_ptr<AstExpr> lhs, unique_ptr<AstExpr> rhs) noexcept;
     [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
     [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
     [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;

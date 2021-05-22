@@ -137,9 +137,11 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
                 return op(TokenKind::GreaterOrEqual);
             }
             return op(TokenKind::GreaterThan);
+        case '@':
+            return op(TokenKind::AddressOf);
+        default:
+            return invalid(m_input);
         }
-
-        return invalid(m_input);
     }
 
     return endOfFile(); // NOLINT

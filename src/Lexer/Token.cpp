@@ -42,137 +42,152 @@ TokenKind Token::findKind(StringRef str) noexcept {
     return TokenKind::Identifier;
 }
 
+// Generated from .def tables
+
+// clang-format off
+
 bool Token::isGeneral() const noexcept {
-#define CASE_GENERAL(id, ...) case TokenKind::id:
+    #define CASE_GENERAL(id, ...) case TokenKind::id:
     switch (m_kind) {
-        TOKEN_GENERAL(CASE_GENERAL)
+    TOKEN_GENERAL(CASE_GENERAL)
         return true;
     default:
         return false;
     }
-#undef CASE_LITERAL
+    #undef CASE_LITERAL
 }
 
 bool Token::isLiteral() const noexcept {
-#define CASE_LITERAL(id, ...) case TokenKind::id:
+    #define CASE_LITERAL(id, ...) case TokenKind::id:
     switch (m_kind) {
-        TOKEN_LITERALS(CASE_LITERAL)
+    TOKEN_LITERALS(CASE_LITERAL)
         return true;
     default:
         return false;
     }
-#undef CASE_LITERAL
+    #undef CASE_LITERAL
 }
 
 bool Token::isSymbol() const noexcept {
-#define CASE_SYMBOL(id, ...) case TokenKind::id:
+    #define CASE_SYMBOL(id, ...) case TokenKind::id:
     switch (m_kind) {
-        TOKEN_SYMBOLS(CASE_SYMBOL)
+    TOKEN_SYMBOLS(CASE_SYMBOL)
         return true;
     default:
         return false;
     }
-#undef CASE_SYMBOL
+    #undef CASE_SYMBOL
 }
 
 bool Token::isOperator() const noexcept {
-#define CASE_OPERATOR(id, ...) case TokenKind::id:
+    #define CASE_OPERATOR(id, ...) case TokenKind::id:
     switch (m_kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR)
+    TOKEN_OPERATORS(CASE_OPERATOR)
         return true;
     default:
         return false;
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
 }
 
 bool Token::isKeyword() const noexcept {
-#define CASE_KEYWORD(id, ...) case TokenKind::id:
+    #define CASE_KEYWORD(id, ...) case TokenKind::id:
     switch (m_kind) {
-        TOKEN_KEYWORDS(CASE_KEYWORD)
+    TOKEN_KEYWORDS(CASE_KEYWORD)
         return true;
     default:
         return false;
     }
-#undef CASE_KEYWORD
+    #undef CASE_KEYWORD
 }
 
 int Token::getPrecedence() const noexcept {
-#define CASE_OPERATOR(id, ch, prec, ...) \
-    case TokenKind::id:                  \
-        return prec;
+    #define CASE_OPERATOR(id, ch, prec, ...) \
+        case TokenKind::id:                  \
+            return prec;
     switch (m_kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+    TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
     default:
         return 0;
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
 }
 
 bool Token::isBinary() const noexcept {
     constexpr bool Binary = true; // NOLINT
     constexpr bool Unary = false; // NOLINT
-#define CASE_OPERATOR(id, ch, prec, binary, ...) \
-    case TokenKind::id:                          \
-        return binary;
+    #define CASE_OPERATOR(id, ch, prec, binary, ...) \
+        case TokenKind::id:                          \
+            return binary;
     switch (m_kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+    TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
     default:
         return false;
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
 }
 
 bool Token::isUnary() const noexcept {
     constexpr bool Binary = false; // NOLINT
     constexpr bool Unary = true;   // NOLINT
-#define CASE_OPERATOR(id, ch, prec, binary, ...) \
-    case TokenKind::id:                          \
-        return binary;
+    #define CASE_OPERATOR(id, ch, prec, binary, ...) \
+        case TokenKind::id:                          \
+            return binary;
     switch (m_kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+    TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
     default:
         return false;
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
 }
 
 bool Token::isLeftToRight() const noexcept {
     constexpr bool Left = true; // NOLINT
     // constexpr bool Right = true; // NOLINT
-#define CASE_OPERATOR(id, ch, prec, binary, dir, ...) \
-    case TokenKind::id:                               \
-        return dir;
+    #define CASE_OPERATOR(id, ch, prec, binary, dir, ...) \
+        case TokenKind::id:                               \
+            return dir;
     switch (m_kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+    TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
     default:
         return false;
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
 }
 
 bool Token::isRightToLeft() const noexcept {
     constexpr bool Left = false; // NOLINT
     // constexpr bool Right = true; // NOLINT
-#define CASE_OPERATOR(id, ch, prec, binary, dir, ...) \
-    case TokenKind::id:                               \
-        return dir;
+    #define CASE_OPERATOR(id, ch, prec, binary, dir, ...) \
+        case TokenKind::id:                               \
+            return dir;
     switch (m_kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+    TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
     default:
         return false;
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
 }
 
 OperatorType Token::getOperatorType(TokenKind kind) noexcept {
-#define CASE_OPERATOR(ID, CH, PREC, BINARY, DIR, KIND, ...) \
-    case TokenKind::ID:                                     \
-        return OperatorType::KIND;
+    #define CASE_OPERATOR(ID, CH, PREC, BINARY, DIR, KIND, ...) \
+        case TokenKind::ID:                                     \
+            return OperatorType::KIND;
     switch (kind) {
-        TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
+    TOKEN_OPERATORS(CASE_OPERATOR) // NOLINT
     default:
         llvm_unreachable("Unknown operator type");
     }
-#undef CASE_OPERATOR
+    #undef CASE_OPERATOR
+}
+
+bool Token::isTypeKeyword() const noexcept {
+    #define TYPE_KEYWORD(id, ...) case TokenKind::id:
+    switch (m_kind) {
+    ALL_TYPES(TYPE_KEYWORD)
+        return true;
+    default:
+        return false;
+    }
+    #undef TYPE_KEYWORD
 }

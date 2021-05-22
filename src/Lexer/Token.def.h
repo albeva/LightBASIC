@@ -31,6 +31,9 @@
 
 #define TOKEN_OPERATORS(_) \
     /* ID               Ch      Prec    Type    Assoc   Kind       */ \
+    _( AddressOf,       "@",    10,     Unary,  Left,   Memory      ) \
+    _( Dereference,     "*",    10,     Unary,  Left,   Memory      ) \
+                                                                      \
     _( Negate,          "-",    9,      Unary,  Left,   Arithmetic  ) \
     _( LogicalNot,      "NOT",  9,      Unary,  Left,   Logical     ) \
                                                                       \
@@ -73,7 +76,8 @@
     _( Next,            "NEXT"     ) \
     _( Step,            "STEP"     ) \
     _( To,              "TO"       ) \
-    _( Do,              "DO"       )
+    _( Do,              "DO"       ) \
+    _( Ptr,             "PTR"      )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \

@@ -16,7 +16,8 @@ enum class TokenKind {
 enum class OperatorType {
     Arithmetic,
     Logical,
-    Comparison
+    Comparison,
+    Memory
 };
 
 class Token final {
@@ -91,6 +92,10 @@ public:
     [[nodiscard]] bool isRightToLeft() const noexcept;
 
     static OperatorType getOperatorType(TokenKind kind) noexcept;
+
+    // Query keyword types
+
+    [[nodiscard]] bool isTypeKeyword() const noexcept;
 
     // comparisons
 

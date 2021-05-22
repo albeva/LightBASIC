@@ -426,7 +426,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
  * RETURN = "RETURN" [ expression ] .
  */
 unique_ptr<AstStmt> Parser::kwReturn() noexcept {
-    if (m_scope == Scope::Root) {
+    if (m_scope == Scope::Root && !m_isMain) {
         error("Unexpected RETURN outside SUB / FUNCTION body");
     }
     auto start = m_token->range().Start;
@@ -600,21 +600,23 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
 // Types
 //----------------------------------------
 
+/**
+ * TypeExpr = identExpr { "PTR" } .
+ */
 unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
     auto start = m_token->range().Start;
-#define TYPE_KEYWORD(id, ...) case TokenKind::id:
-    switch (m_token->kind()) {
-        ALL_TYPES(TYPE_KEYWORD)
-        {
-            auto kind = move()->kind();
-            return AstTypeExpr::create(
-                llvm::SMRange{ start, m_endLoc },
-                kind);
-        }
-    default:
-        error("Expected type got "_t + m_token->description());
+
+    if (!m_token->isTypeKeyword()) {
+        error("Expected type, got "_t + m_token->description());
     }
-#undef TYPE_KEYWORD
+    auto token = move();
+
+    auto deref = 0;
+    while (accept(TokenKind::Ptr)) {
+        deref++;
+    }
+
+    return AstTypeExpr::create(llvm::SMRange{start, m_endLoc}, token->kind(), deref);
 }
 
 //----------------------------------------
@@ -654,11 +656,7 @@ unique_ptr<AstExpr> Parser::factor() noexcept {
         // <Right Unary Op>
         if (m_token->isUnary() && m_token->isRightToLeft()) {
             auto kind = move()->kind();
-            auto unary = AstUnaryExpr::create(
-                llvm::SMRange{ start, m_endLoc },
-                kind,
-                std::move(expr));
-            expr = std::move(unary);
+            expr = unary({ start, m_endLoc }, kind, std::move(expr));
             continue;
         }
 
@@ -710,6 +708,7 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
     }
 
     replace(TokenKind::Minus, TokenKind::Negate);
+    replace(TokenKind::Multiply, TokenKind::Dereference);
     if (m_token->isUnary() && m_token->isLeftToRight()) {
         auto start = m_token->range().Start;
         auto prec = m_token->getPrecedence();
@@ -720,20 +719,33 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
         }
         auto expr = expression(factor(), prec);
 
-        return AstUnaryExpr::create(
-            llvm::SMRange{ start, m_endLoc },
-            kind,
-            std::move(expr));
+        return unary({ start, m_endLoc }, kind, std::move(expr));
     }
 
     error("expected primary");
+}
+
+unique_ptr<AstExpr> Parser::unary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> expr) noexcept {
+    switch (op) {
+    case TokenKind::Dereference:
+        return AstDereference::create(range, std::move(expr));
+    case TokenKind::AddressOf:
+        return AstAddressOf::create(range, std::move(expr));
+    default:
+        return AstUnaryExpr::create(range, op, std::move(expr));
+    }
+}
+
+unique_ptr<AstExpr> Parser::binary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> lhs, unique_ptr<AstExpr> rhs) noexcept {
+    auto kind = op == TokenKind::CommaAnd ? TokenKind::LogicalAnd : op;
+    return AstBinaryExpr::create(range, kind, std::move(lhs), std::move(rhs));
 }
 
 /**
  * Recursievly climb operator precedence
  * https://en.wikipedia.org/wiki/Operator-precedence_parser#Precedence_climbing_method
  */
-[[nodiscard]] unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) noexcept {
+unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) noexcept {
     while (m_token->getPrecedence() >= precedence) {
         auto current = m_token->getPrecedence();
         auto kind = m_token->kind();
@@ -751,12 +763,8 @@ unique_ptr<AstExpr> Parser::primary() noexcept {
             rhs = expression(std::move(rhs), m_token->getPrecedence());
         }
 
-        auto left = AstBinaryExpr::create(
-            llvm::SMRange{ lhs->range.Start, m_endLoc },
-            kind == TokenKind::CommaAnd ? TokenKind::LogicalAnd : kind,
-            std::move(lhs),
-            std::move(rhs));
-        lhs = std::move(left);
+        auto start = lhs->range.Start;
+        lhs = binary({ start, m_endLoc }, kind, std::move(lhs), std::move(rhs));
     }
     return lhs;
 }

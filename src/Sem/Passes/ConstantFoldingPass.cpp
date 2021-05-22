@@ -191,6 +191,8 @@ AstLiteralExpr::Value ConstantFoldingPass::cast(const TypeRoot* type, const AstL
         #undef INTEGRAL
     } else if (type->isBoolean()) {
         return castLiteral<bool, bool>(literal);
+    } else if (literal->type->isAnyPointer()) {
+        return literal->value;
     }
     // clang-format on
     llvm_unreachable("Unsupported castLiteral");
