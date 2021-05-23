@@ -1,15 +1,14 @@
 //
 // Created by Albert Varaksin on 23/05/2021.
 //
-#if defined(_MSC_VER)
-#    pragma warning(disable : 4068)
-#endif
+#if defined(__CLION_IDE__)
 #pragma ide diagnostic ignored "cppcoreguidelines-avoid-non-const-global-variables"
 #pragma ide diagnostic ignored "cppcoreguidelines-owning-memory"
 #pragma ide diagnostic ignored "cppcoreguidelines-non-private-member-variables-in-classes"
 #pragma ide diagnostic ignored "cert-err58-cpp"
 #pragma ide diagnostic ignored "cppcoreguidelines-special-member-functions"
 #pragma ide diagnostic ignored "cppcoreguidelines-avoid-magic-numbers"
+#endif
 
 #include "Driver/Context.h"
 #include "Lexer/Lexer.h"
@@ -105,7 +104,7 @@ TEST_F(LexerTests, EmptyInputs) {
     };
     for (const auto* input : inputs) {
         load(input);
-        EXPECT_TOKEN(lbc::TokenKind::EndOfFile);
+        EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
     }
 }
 
@@ -125,10 +124,10 @@ TEST_F(LexerTests, MultiLineComments) {
     };
     for (const auto* input : inputs) {
         load(input);
-        EXPECT_TOKEN(lbc::TokenKind::Identifier, "A");
-        EXPECT_TOKEN(lbc::TokenKind::Identifier, "B");
-        EXPECT_TOKEN(lbc::TokenKind::EndOfStmt);
-        EXPECT_TOKEN(lbc::TokenKind::EndOfFile);
+        EXPECT_TOKEN(lbc::TokenKind::Identifier, "A")
+        EXPECT_TOKEN(lbc::TokenKind::Identifier, "B")
+        EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+        EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
     }
 }
 
@@ -143,36 +142,36 @@ TEST_F(LexerTests, TokenLocation) {
     // clang-format off
 
     // line 1
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "ONE",   1, 1,  3);
-    EXPECT_TOKEN(lbc::TokenKind::StringLiteral,  "two",   1, 5,  5);
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "THREE", 1, 11, 5);
-    EXPECT_TOKEN(lbc::TokenKind::IntegerLiteral, "42",    1, 17, 2);
-    EXPECT_TOKEN(lbc::TokenKind::Assign,         "=",     1, 20, 1);
-    EXPECT_TOKEN(lbc::TokenKind::LessOrEqual,    "<=",    1, 22, 2);
-    EXPECT_TOKEN(lbc::TokenKind::Ellipsis,       "...",   1, 25, 3);
-    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      1, 28, 0);
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "ONE",   1, 1,  3)
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral,  "two",   1, 5,  5)
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "THREE", 1, 11, 5)
+    EXPECT_TOKEN(lbc::TokenKind::IntegerLiteral, "42",    1, 17, 2)
+    EXPECT_TOKEN(lbc::TokenKind::Assign,         "=",     1, 20, 1)
+    EXPECT_TOKEN(lbc::TokenKind::LessOrEqual,    "<=",    1, 22, 2)
+    EXPECT_TOKEN(lbc::TokenKind::Ellipsis,       "...",   1, 25, 3)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      1, 28, 0)
 
     // line 2
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "FOUR",  2, 1,  4);
-    EXPECT_TOKEN(lbc::TokenKind::If,             "IF",    2, 8,  2);
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "A",     2, 11, 1);
-    EXPECT_TOKEN(lbc::TokenKind::Assign,         "=",     2, 13, 1);
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "B",     2, 15, 1);
-    EXPECT_TOKEN(lbc::TokenKind::Then,           "THEN",  2, 17, 4);
-    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      2, 22, 0);
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "FOUR",  2, 1,  4)
+    EXPECT_TOKEN(lbc::TokenKind::If,             "IF",    2, 8,  2)
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "A",     2, 11, 1)
+    EXPECT_TOKEN(lbc::TokenKind::Assign,         "=",     2, 13, 1)
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "B",     2, 15, 1)
+    EXPECT_TOKEN(lbc::TokenKind::Then,           "THEN",  2, 17, 4)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      2, 22, 0)
 
     // line 3
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "FIVE",  3, 1,  4);
-    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "SIX",   3, 23, 3);
-    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      3, 26, 0);
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "FIVE",  3, 1,  4)
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "SIX",   3, 23, 3)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      3, 26, 0)
 
     // line 4
     EXPECT_TOKEN(lbc::TokenKind::Identifier,     "SEVEN", 4, 1,  5)
 
     // line 7
-    EXPECT_TOKEN(lbc::TokenKind::Identifier, "EIGHT", 7, 7, 5);
-    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt, "", 7, 12, 0);
-    EXPECT_TOKEN(lbc::TokenKind::EndOfFile, "", 7, 12, 0);
+    EXPECT_TOKEN(lbc::TokenKind::Identifier,     "EIGHT", 7, 7,  5)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      7, 12, 0)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfFile,      "",      7, 12, 0)
 
     // clang-format on
 }
