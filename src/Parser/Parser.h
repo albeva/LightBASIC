@@ -17,7 +17,7 @@ enum class ExprFlags : unsigned {
     AssignAsEqual = 2,
     Default = AssignAsEqual
 };
-ENABLE_BITMASK_OPERATORS(ExprFlags);
+ENABLE_BITMASK_OPERATORS(ExprFlags)
 
 class Parser final {
 public:

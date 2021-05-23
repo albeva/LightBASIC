@@ -270,8 +270,8 @@ protected:
 
 private:
     const TypeRoot* m_retType;
-    const bool m_variadic;
     const std::vector<const TypeRoot*> m_paramTypes;
+    const bool m_variadic;
 };
 
 /**
