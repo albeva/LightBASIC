@@ -112,7 +112,10 @@ TEST_F(LexerTests, TokenLocation) {
         "one \"two\" three 42 = <= ...\n"
         "four \t IF a = b THEN \r\n"
         "five /'/' nested '/'/ six\n"
-        "seven/' trash\n trash /' nested\n'/\nend?'/eight";
+        "seven/' trash\n"
+        "trash /' nested\n"
+        "'/\n"
+        "end?'/eight";
     load(source);
 
     // clang-format off

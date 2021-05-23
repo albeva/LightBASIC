@@ -15,16 +15,12 @@ inline bool isWhiteSpace(char ch) noexcept {
     return ch == ' ' || ch == '\t' || ch == '\f' || ch == '\v';
 }
 
-inline bool isLineEnd(char ch) noexcept {
-    return ch == '\n';
+inline bool isIdentifierChar(char ch) noexcept {
+    return isAlpha(ch) || isDigit(ch) || ch == '_';
 }
 
 inline llvm::SMRange getRange(const char* start, const char* end) noexcept {
     return { llvm::SMLoc::getFromPointer(start), llvm::SMLoc::getFromPointer(end) };
-}
-
-inline bool isIdentifierChar(char ch) noexcept {
-    return isAlpha(ch) || isDigit(ch) || ch == '_';
 }
 } // namespace
 
@@ -48,7 +44,7 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
         }
 
         // new line, emit statement if there is one
-        if (isLineEnd(m_char)) {
+        if (m_char == '\n') {
             if (m_hasStmt) {
                 m_hasStmt = false;
                 return endOfStatement();
