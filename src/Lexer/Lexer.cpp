@@ -32,6 +32,8 @@ Lexer::Lexer(Context& context, unsigned fileID) noexcept
 : m_context{ context },
   m_buffer{ m_context.getSourceMrg().getMemoryBuffer(fileID) },
   m_input{ m_buffer->getBufferStart() },
+  m_tokenStart{ m_input },
+  m_eolPos{ m_input },
   m_char{ *m_input },
   m_hasStmt{ false } {
     handleLineEnd();
@@ -71,6 +73,7 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
         if (m_char == '_') {
             if (isIdentifierChar(peek())) {
                 m_hasStmt = true;
+                m_tokenStart = m_input;
                 return identifier();
             }
             skipUntilLineEnd();
@@ -82,6 +85,7 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
 
         // there is some parsable content. so set stmt to true
         m_hasStmt = true;
+        m_tokenStart = m_input;
 
         // identifier
         if (isAlpha(m_char)) {
@@ -166,29 +170,26 @@ unique_ptr<Token> Lexer::endOfFile() noexcept {
 }
 
 unique_ptr<Token> Lexer::endOfStatement() noexcept {
-    const auto* start = m_input;
     move();
-    return Token::create(TokenKind::EndOfStmt, getRange(start, m_input));
+    return Token::create(TokenKind::EndOfStmt, getRange(m_eolPos, m_input));
 }
 
 unique_ptr<Token> Lexer::ellipsis() noexcept {
-    const auto* start = m_input;
     move(3);
-    return Token::create(TokenKind::Ellipsis, getRange(start, m_input));
+    return Token::create(TokenKind::Ellipsis, getRange(m_tokenStart, m_input));
 }
 
 unique_ptr<Token> Lexer::identifier() noexcept {
-    const auto* start = m_input;
     size_t length = 1;
     while (move() && isIdentifierChar(m_char)) {
         length++;
     }
-    const auto* end = start + length; // NOLINT
-    auto range = getRange(start, m_input);
+    const auto* end = m_tokenStart + length; // NOLINT
+    auto range = getRange(m_tokenStart, m_input);
 
     std::string uppercased;
     uppercased.reserve(length);
-    std::transform(start, end, std::back_inserter(uppercased), llvm::toUpper);
+    std::transform(m_tokenStart, end, std::back_inserter(uppercased), llvm::toUpper);
 
     auto kind = Token::findKind(uppercased);
     switch (kind) {
@@ -208,7 +209,6 @@ unique_ptr<Token> Lexer::identifier() noexcept {
 unique_ptr<Token> Lexer::number() noexcept {
     bool isFloatingPoint = m_char == '.';
 
-    const auto* start = m_input;
     size_t len = 1;
     while (move()) {
         if (m_char == '.') {
@@ -221,30 +221,29 @@ unique_ptr<Token> Lexer::number() noexcept {
         }
         len++;
     }
-    const char* end = start + len; // NOLINT
-    auto range = getRange(start, end);
+    const char* end = m_tokenStart + len; // NOLINT
+    auto range = getRange(m_tokenStart, end);
 
     if (isFloatingPoint) {
-        std::string number{ start, end };
+        std::string number{ m_tokenStart, end };
         std::size_t size{};
         double value = std::stod(number, &size);
         if (size == 0) {
-            return invalid(start);
+            return invalid(m_tokenStart);
         }
         return Token::create(value, range);
     }
 
     uint64_t value{};
     const int base10 = 10;
-    if (std::from_chars(start, end, value, base10).ec != std::errc()) {
-        return invalid(start);
+    if (std::from_chars(m_tokenStart, end, value, base10).ec != std::errc()) {
+        return invalid(m_tokenStart);
     }
     return Token::create(value, range);
 }
 
 unique_ptr<Token> Lexer::string() noexcept {
     constexpr char visibleFrom = 32;
-    const auto* start = m_input;
     std::string literal{};
 
     while (move() && m_char >= visibleFrom && m_char != '"') {
@@ -271,20 +270,19 @@ unique_ptr<Token> Lexer::string() noexcept {
     }
 
     if (m_char != '"') {
-        return invalid(start);
+        return invalid(m_tokenStart);
     }
     move();
 
     return Token::create(
         TokenKind::StringLiteral,
         m_context.retainCopy(literal),
-        getRange(start, m_input));
+        getRange(m_tokenStart, m_input));
 }
 
 unique_ptr<Token> Lexer::op(TokenKind kind) noexcept {
-    const auto* start = m_input;
     move();
-    return Token::create(kind, getRange(start, m_input));
+    return Token::create(kind, getRange(m_tokenStart, m_input));
 }
 
 unique_ptr<Token> Lexer::invalid(const char* loc) noexcept {
@@ -300,9 +298,10 @@ void Lexer::multilineComment() noexcept {
     int level = 1;
     while (move()) {
         if (m_char == '\'' && peek() == '/') {
-            move(2);
+            move();
             level--;
             if (level == 0) {
+                move();
                 return;
             }
         } else if (m_char == '/' && peek() == '\'') {
@@ -326,9 +325,12 @@ bool Lexer::move(int steps) noexcept {
 void Lexer::handleLineEnd() noexcept {
     if (m_char == '\r') {
         if (peek() == '\n') {
+            m_eolPos = m_input;
             m_input++; // NOLINT
         }
         m_char = '\n';
+    } else if (m_char == '\n') {
+        m_eolPos = m_input;
     }
 }
 

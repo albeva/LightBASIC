@@ -40,6 +40,8 @@ private:
     Context& m_context;
     const llvm::MemoryBuffer* m_buffer;
     const char* m_input;
+    const char * m_tokenStart;
+    const char * m_eolPos;
     char m_char;
     bool m_hasStmt;
 };
