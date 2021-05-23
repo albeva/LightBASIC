@@ -2,12 +2,12 @@
 // Created by Albert Varaksin on 23/05/2021.
 //
 #if defined(__CLION_IDE__)
-#pragma ide diagnostic ignored "cppcoreguidelines-avoid-non-const-global-variables"
-#pragma ide diagnostic ignored "cppcoreguidelines-owning-memory"
-#pragma ide diagnostic ignored "cppcoreguidelines-non-private-member-variables-in-classes"
-#pragma ide diagnostic ignored "cert-err58-cpp"
-#pragma ide diagnostic ignored "cppcoreguidelines-special-member-functions"
-#pragma ide diagnostic ignored "cppcoreguidelines-avoid-magic-numbers"
+#    pragma ide diagnostic ignored "cppcoreguidelines-avoid-non-const-global-variables"
+#    pragma ide diagnostic ignored "cppcoreguidelines-owning-memory"
+#    pragma ide diagnostic ignored "cppcoreguidelines-non-private-member-variables-in-classes"
+#    pragma ide diagnostic ignored "cert-err58-cpp"
+#    pragma ide diagnostic ignored "cppcoreguidelines-special-member-functions"
+#    pragma ide diagnostic ignored "cppcoreguidelines-avoid-magic-numbers"
 #endif
 
 #include "Driver/Context.h"
@@ -77,10 +77,10 @@ private:
     lbc::Context m_context{};
 };
 
-#define EXPECT_TOKEN(KIND, ...)    \
-    {                              \
-        SCOPED_TRACE(#KIND);       \
-        expect(KIND, __VA_ARGS__); \
+#define EXPECT_TOKEN(KIND, ...)      \
+    {                                \
+        SCOPED_TRACE(#KIND);         \
+        expect(KIND, ##__VA_ARGS__); \
     }
 
 TEST_F(LexerTests, NoInput) {
