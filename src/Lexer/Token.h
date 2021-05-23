@@ -65,6 +65,8 @@ public:
 
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
 
+    [[nodiscard]] string lexeme() const noexcept;
+
     [[nodiscard]] const Value& getValue() const noexcept {
         return m_value;
     }

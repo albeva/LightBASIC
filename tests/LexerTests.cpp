@@ -28,33 +28,9 @@ protected:
     void expect(lbc::TokenKind kind, const string& lexeme = "", unsigned line = 0, unsigned col = 0, unsigned len = 0) {
         auto token = m_lexer->next();
         EXPECT_EQ(token->kind(), kind);
+        
         if (!lexeme.empty()) {
-            switch (token->kind()) {
-            case lbc::TokenKind::StringLiteral:
-            case lbc::TokenKind::Identifier:
-                EXPECT_EQ(std::get<StringRef>(token->getValue()).str(), lexeme);
-                break;
-            case lbc::TokenKind::IntegerLiteral: {
-                auto intValue = std::to_string(std::get<uint64_t>(token->getValue()));
-                EXPECT_EQ(intValue, lexeme);
-                break;
-            }
-            case lbc::TokenKind::FloatingPointLiteral: {
-                auto dblValue = std::to_string(std::get<double>(token->getValue()));
-                EXPECT_EQ(dblValue, lexeme);
-                break;
-            }
-            case lbc::TokenKind::BooleanLiteral: {
-                auto boolStr = std::get<bool>(token->getValue()) ? "TRUE"s : "FALSE"s;
-                EXPECT_EQ(boolStr, lexeme);
-                break;
-            }
-            case lbc::TokenKind::NullLiteral:
-                EXPECT_EQ("NULL", lexeme);
-                break;
-            default:
-                EXPECT_EQ(token->description().str(), lexeme);
-            }
+            EXPECT_EQ(token->lexeme(), lexeme);
         }
 
         auto start = m_context.getSourceMrg().getLineAndColumn(token->range().Start);

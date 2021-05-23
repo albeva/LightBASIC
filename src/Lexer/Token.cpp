@@ -42,6 +42,31 @@ TokenKind Token::findKind(StringRef str) noexcept {
     return TokenKind::Identifier;
 }
 
+string Token::lexeme() const noexcept{
+    constexpr auto visitor = lbc::Visitor{
+        [](std::monostate /*value*/) {
+            return "NULL"s;
+        },
+        [](StringRef value) {
+            return value.str();
+        },
+        [](uint64_t value) {
+            return std::to_string(value);
+        },
+        [](double value) {
+            return std::to_string(value);
+        },
+        [](bool value) {
+            return value ? "TRUE"s : "FALSE"s;
+        }
+    };
+
+    if (isLiteral() || m_kind == TokenKind::Identifier) {
+        return std::visit(visitor, m_value);
+    }
+    return description().str();
+}
+
 // Generated from .def tables
 
 // clang-format off
@@ -191,3 +216,4 @@ bool Token::isTypeKeyword() const noexcept {
     }
     #undef TYPE_KEYWORD
 }
+
