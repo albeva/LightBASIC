@@ -62,8 +62,21 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
         }
 
         // multi line comments
-        if (m_char == '/' && peek(1) == '\'') {
+        if (m_char == '/' && peek() == '\'') {
             multilineComment();
+            continue;
+        }
+
+        // line continuation
+        if (m_char == '_') {
+            if (isIdentifierChar(peek())) {
+                m_hasStmt = true;
+                return identifier();
+            }
+            skipUntilLineEnd();
+            if (m_char == '\n') {
+                move();
+            }
             continue;
         }
 
@@ -81,17 +94,6 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
         }
 
         switch (m_char) {
-        case '_':
-            // part of identifier
-            if (isAlpha(peek())) {
-                return identifier();
-            }
-            // part of line continuation
-            skipUntilLineEnd();
-            if (m_char == '\n') {
-                move();
-            }
-            continue;
         case '"':
             return string();
         case '=':
