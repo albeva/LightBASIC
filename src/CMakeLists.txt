@@ -1,4 +1,4 @@
-# Sources
+# lbc library
 add_library(
     lbc_lib
     pch.h
@@ -58,6 +58,7 @@ target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)
 configure_llvm(lbc_lib)
 target_link_libraries(lbc_lib PUBLIC project_options project_warnings)
 
-# App executable
+# lbc executable
 add_executable(lbc main.cpp)
 target_link_libraries(lbc PRIVATE lbc_lib)
+set_target_properties(lbc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin)

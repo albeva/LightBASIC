@@ -15,7 +15,7 @@
 #include <gtest/gtest.h>
 namespace {
 
-class LexerTests: public testing::Test {
+class LexerTests : public testing::Test {
 protected:
     unsigned load(StringRef source) {
         auto& srcMgr = context.getSourceMrg();
@@ -23,8 +23,8 @@ protected:
         return srcMgr.AddNewSourceBuffer(std::move(buffer), {});
     }
 
-    unique_ptr<lbc::Lexer> getLexer(unsigned fileId) {
-        return make_unique<lbc::Lexer>(context, fileId);
+    lbc::Lexer getLexer(unsigned fileId) {
+        return lbc::Lexer{ context, fileId };
     }
 
     lbc::Context context{};
@@ -32,12 +32,12 @@ protected:
 
 TEST_F(LexerTests, NoInput) {
     auto lexer = getLexer(load(""));
-    EXPECT_TRUE(lexer->next()->kind() == lbc::TokenKind::EndOfFile);
-    EXPECT_TRUE(lexer->next()->kind() == lbc::TokenKind::EndOfFile);
+    EXPECT_TRUE(lexer.next()->kind() == lbc::TokenKind::EndOfFile);
+    EXPECT_TRUE(lexer.next()->kind() == lbc::TokenKind::EndOfFile);
 }
 
 TEST_F(LexerTests, EmptyInputs) {
-    constexpr std::array inputs {
+    constexpr std::array inputs{
         "   ",
         "\t\t",
         "\n   \n   ",
@@ -49,9 +49,9 @@ TEST_F(LexerTests, EmptyInputs) {
         "/'/' doubly nested '/'/",
         " \t _ this should be ignored \n_ ignored again"
     };
-    for (const auto* input: inputs) {
+    for (const auto* input : inputs) {
         auto lexer = getLexer(load(input));
-        auto token = lexer->next();
+        auto token = lexer.next();
         EXPECT_TRUE(token->kind() == lbc::TokenKind::EndOfFile);
     }
 }
