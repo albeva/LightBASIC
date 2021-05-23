@@ -617,7 +617,7 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
         deref++;
     }
 
-    return AstTypeExpr::create(llvm::SMRange{start, m_endLoc}, token->kind(), deref);
+    return AstTypeExpr::create(llvm::SMRange{ start, m_endLoc }, token->kind(), deref);
 }
 
 //----------------------------------------

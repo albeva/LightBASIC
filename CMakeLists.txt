@@ -5,6 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 project(lbc CXX)
 include(cmake/StandardProjectSettings.cmake)
 include(cmake/PreventInSourceBuilds.cmake)
+include(cmake/llvm.cmake)
 
 # Link this 'library' to set the c++ standard / compileSource-time options requested
 add_library(project_options INTERFACE)
@@ -52,3 +53,9 @@ add_subdirectory(src)
 
 # Copy compiled binary
 set_target_properties(lbc PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/bin)
+
+# Testing
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    enable_testing()
+    add_subdirectory(tests)
+endif()

@@ -1,7 +1,6 @@
 # Sources
-add_executable(
-    lbc
-    main.cpp
+add_library(
+    lbc_lib
     pch.h
     Ast/Ast.cpp
     Ast/Ast.def.h
@@ -54,24 +53,11 @@ add_executable(
     Utils/Version.h
 )
 
-# LLVM
-find_package(LLVM REQUIRED CONFIG)
-llvm_map_components_to_libnames(
-    llvm_libs
-    core
-    support
-    bitwriter
-    transformUtils
-)
-
-target_include_directories(lbc SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
-add_definitions(${LLVM_DEFINITIONS})
-
-# PCH header
 target_precompile_headers(project_options INTERFACE pch.h)
+target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)
+configure_llvm(lbc_lib)
+target_link_libraries(lbc_lib PUBLIC project_options project_warnings)
 
-# Source includes
-target_include_directories(lbc PRIVATE ${lbc_SOURCE_DIR}/src)
-
-# build lbc
-target_link_libraries(lbc PRIVATE ${llvm_libs} project_options project_warnings)
+# App executable
+add_executable(lbc main.cpp)
+target_link_libraries(lbc PRIVATE lbc_lib)

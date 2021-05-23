@@ -2,9 +2,9 @@
 // Created by Albert Varaksin on 01/05/2021.
 //
 #include "FuncDeclarerPass.h"
+#include "Ast/Ast.h"
 #include "Symbol/SymbolTable.h"
 #include "Type/Type.h"
-#include "Ast/Ast.h"
 #include "TypePass.h"
 
 using namespace lbc;

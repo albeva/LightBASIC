@@ -472,7 +472,7 @@ bool SemanticAnalyzer::canPerformBinary(TokenKind op, const TypeRoot* left, cons
         return op == TokenKind::Equal || op == TokenKind::NotEqual;
     }
 
-    return left->isNumeric() &&  right->isNumeric();
+    return left->isNumeric() && right->isNumeric();
 }
 
 //------------------------------------------------------------------

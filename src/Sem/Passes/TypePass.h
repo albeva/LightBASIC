@@ -19,6 +19,7 @@ namespace Sem {
         ~TypePass() noexcept = default;
 
         void visit(AstTypeExpr* ast) noexcept;
+
     private:
         Context& m_context;
     };

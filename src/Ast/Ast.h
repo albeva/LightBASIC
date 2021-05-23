@@ -384,8 +384,8 @@ struct AstDereference final : AstNode<AstDereference, AstExpr, AstKind::Derefere
     AstDereference(
         llvm::SMRange range_,
         unique_ptr<AstExpr> expr_) noexcept
-        : AstNode{ KIND, range_ },
-          expr{ std::move(expr_) } {};
+    : AstNode{ KIND, range_ },
+      expr{ std::move(expr_) } {};
 
     unique_ptr<AstExpr> expr;
 };
@@ -394,8 +394,8 @@ struct AstAddressOf final : AstNode<AstAddressOf, AstExpr, AstKind::AddressOf> {
     AstAddressOf(
         llvm::SMRange range_,
         unique_ptr<AstExpr> expr_) noexcept
-        : AstNode{ KIND, range_ },
-          expr{ std::move(expr_) } {};
+    : AstNode{ KIND, range_ },
+      expr{ std::move(expr_) } {};
 
     unique_ptr<AstExpr> expr;
 };
