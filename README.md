@@ -8,4 +8,4 @@ declare function print(str as zstring) as integer
 print "Hello World\n"
 ```
 
-Supported by JetBrains who provide a licence to their dvelopment tools for this project. https://jb.gg/OpenSource
+Supported by JetBrains who provide a licence to their development tools for this project. https://jb.gg/OpenSource
