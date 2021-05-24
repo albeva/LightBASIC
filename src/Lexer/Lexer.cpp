@@ -65,7 +65,7 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
                 multilineComment();
                 continue;
             }
-            return op(TokenKind::Divide);
+            return token(TokenKind::Divide);
         case '_':
             if (isIdentifierChar(m_input[1])) {
                 return identifier();
@@ -75,50 +75,50 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
         case '"':
             return stringLiteral();
         case '=':
-            return op(TokenKind::Assign);
+            return token(TokenKind::Assign);
         case ',':
-            return op(TokenKind::Comma);
+            return token(TokenKind::Comma);
         case '.': {
             auto next = m_input[1];
             if (next == '.' && m_input[2] == '.') {
-                return op(TokenKind::Ellipsis, 3);
+                return token(TokenKind::Ellipsis, 3);
             }
             if (isDigit(next)) {
                 return numberLiteral();
             }
-            return op(TokenKind::Period);
+            return token(TokenKind::Period);
         }
         case '(':
-            return op(TokenKind::ParenOpen);
+            return token(TokenKind::ParenOpen);
         case ')':
-            return op(TokenKind::ParenClose);
+            return token(TokenKind::ParenClose);
         case '[':
-            return op(TokenKind::BracketOpen);
+            return token(TokenKind::BracketOpen);
         case ']':
-            return op(TokenKind::BracketClose);
+            return token(TokenKind::BracketClose);
         case '+':
-            return op(TokenKind::Plus);
+            return token(TokenKind::Plus);
         case '-':
-            return op(TokenKind::Minus);
+            return token(TokenKind::Minus);
         case '*':
-            return op(TokenKind::Multiply);
+            return token(TokenKind::Multiply);
         case '<': {
             auto la = m_input[1];
             if (la == '>') {
-                return op(TokenKind::NotEqual, 2);
+                return token(TokenKind::NotEqual, 2);
             }
             if (la == '=') {
-                return op(TokenKind::LessOrEqual, 2);
+                return token(TokenKind::LessOrEqual, 2);
             }
-            return op(TokenKind::LessThan);
+            return token(TokenKind::LessThan);
         }
         case '>':
             if (m_input[1] == '=') {
-                return op(TokenKind::GreaterOrEqual, 2);
+                return token(TokenKind::GreaterOrEqual, 2);
             }
-            return op(TokenKind::GreaterThan);
+            return token(TokenKind::GreaterThan);
         case '@':
-            return op(TokenKind::AddressOf);
+            return token(TokenKind::AddressOf);
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
             return numberLiteral();
@@ -139,7 +139,7 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
 }
 
 void Lexer::skipUntilLineEnd() noexcept {
-    // assume m_input[0] != \r, \n
+    // assume m_input[0] != \r || \n
     while (true) {
         switch (*++m_input) {
         case 0:
@@ -282,7 +282,7 @@ char Lexer::escape() noexcept {
     }
 }
 
-unique_ptr<Token> Lexer::op(TokenKind kind, int len) noexcept {
+unique_ptr<Token> Lexer::token(TokenKind kind, int len) noexcept {
     // assume m_input[0] == op[0], m_input[len] == next ch
     m_hasStmt = true;
     const auto* start = m_input;
@@ -291,10 +291,14 @@ unique_ptr<Token> Lexer::op(TokenKind kind, int len) noexcept {
 }
 
 unique_ptr<Token> Lexer::numberLiteral() noexcept {
-    // assume m_input[0] == '.' || digit
+    // assume m_input[0] == '.' digit || digit
     m_hasStmt = true;
     const auto* start = m_input;
+
     bool isFloatingPoint = *m_input == '.';
+    if (isFloatingPoint) {
+        m_input++;
+    }
 
     while (true) {
         auto ch = *++m_input;

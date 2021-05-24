@@ -29,7 +29,7 @@ private:
     [[nodiscard]] unique_ptr<Token> invalid(const char* loc) const noexcept;
     [[nodiscard]] unique_ptr<Token> stringLiteral() noexcept;
     [[nodiscard]] char escape() noexcept;
-    [[nodiscard]] unique_ptr<Token> op(TokenKind kind, int len = 1) noexcept;
+    [[nodiscard]] unique_ptr<Token> token(TokenKind kind, int len = 1) noexcept;
     [[nodiscard]] unique_ptr<Token> numberLiteral() noexcept;
     [[nodiscard]] unique_ptr<Token> identifier() noexcept;
 
