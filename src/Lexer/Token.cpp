@@ -42,7 +42,7 @@ TokenKind Token::findKind(StringRef str) noexcept {
     return TokenKind::Identifier;
 }
 
-string Token::lexeme() const noexcept{
+string Token::lexeme() const noexcept {
     constexpr auto visitor = lbc::Visitor{
         [](std::monostate /*value*/) {
             return "NULL"s;

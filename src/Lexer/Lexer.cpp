@@ -1,6 +1,10 @@
 //
 // Created by Albert Varaksin on 03/07/2020.
 //
+#if defined(__CLION_IDE__)
+#    pragma ide diagnostic ignored "cppcoreguidelines-pro-bounds-pointer-arithmetic"
+#endif
+
 #include "Lexer.h"
 #include "Driver/Context.h"
 #include "Token.h"
@@ -11,15 +15,11 @@ namespace {
 using llvm::isAlpha;
 using llvm::isDigit;
 
-inline bool isWhiteSpace(char ch) noexcept {
-    return ch == ' ' || ch == '\t' || ch == '\f' || ch == '\v';
-}
-
 inline bool isIdentifierChar(char ch) noexcept {
     return isAlpha(ch) || isDigit(ch) || ch == '_';
 }
 
-inline llvm::SMRange getRange(const char* start, const char* end) noexcept {
+inline llvm::SMRange makeRange(const char* start, const char* end) noexcept {
     return { llvm::SMLoc::getFromPointer(start), llvm::SMLoc::getFromPointer(end) };
 }
 } // namespace
@@ -28,83 +28,66 @@ Lexer::Lexer(Context& context, unsigned fileID) noexcept
 : m_context{ context },
   m_buffer{ m_context.getSourceMrg().getMemoryBuffer(fileID) },
   m_input{ m_buffer->getBufferStart() },
-  m_tokenStart{ m_input },
   m_eolPos{ m_input },
-  m_char{ *m_input },
-  m_hasStmt{ false } {
-    handleLineEnd();
-}
+  m_hasStmt{ false } {}
 
 unique_ptr<Token> Lexer::next() noexcept { // NOLINT
-    while (isValid()) {
-        // skip spaces
-        if (isWhiteSpace(m_char)) {
-            move();
-            continue;
-        }
-
-        // new line, emit statement if there is one
-        if (m_char == '\n') {
+    // clang-format off
+    while (true) {
+        switch (*m_input) {
+        case 0:
+            return endOfFile();
+        case '\r':
+            m_eolPos = m_input;
+            m_input++;
+            if (*m_input == '\n') { // CR+LF
+                m_input++;
+            }
             if (m_hasStmt) {
-                m_hasStmt = false;
                 return endOfStatement();
             }
-            move();
             continue;
-        }
-
-        // single line comments
-        if (m_char == '\'') {
+        case '\n':
+            m_eolPos = m_input;
+            m_input++;
+            if (m_hasStmt) {
+                return endOfStatement();
+            }
+            continue;
+        case '\t': case '\v': case '\f': case ' ':
+            m_input++;
+            continue;
+        case '\'':
             skipUntilLineEnd();
             continue;
-        }
-
-        // multi line comments
-        if (m_char == '/' && peek() == '\'') {
-            multilineComment();
-            continue;
-        }
-
-        // line continuation
-        if (m_char == '_') {
-            if (isIdentifierChar(peek())) {
-                m_hasStmt = true;
-                m_tokenStart = m_input;
+        case '/':
+            if (m_input[1] == '\'') {
+                multilineComment();
+                continue;
+            }
+            return op(TokenKind::Divide);
+        case '_':
+            if (isIdentifierChar(m_input[1])) {
                 return identifier();
             }
-            skipUntilLineEnd();
-            if (m_char == '\n') {
-                move();
-            }
+            skipToNextLine();
             continue;
-        }
-
-        // there is some parsable content. so set stmt to true
-        m_hasStmt = true;
-        m_tokenStart = m_input;
-
-        // identifier
-        if (isAlpha(m_char)) {
-            return identifier();
-        }
-
-        // number
-        if (isDigit(m_char) || (m_char == '.' && isDigit(peek()))) {
-            return number();
-        }
-
-        switch (m_char) {
         case '"':
-            return string();
+            return stringLiteral();
         case '=':
             return op(TokenKind::Assign);
         case ',':
             return op(TokenKind::Comma);
-        case '.':
-            if (peek(1) == '.' && peek(2) == '.') {
-                return ellipsis();
+        case '.': {
+            auto next = m_input[1];
+            if (next == '.' && m_input[2] == '.') {
+                return op(TokenKind::Ellipsis, 3);
+            }
+            if (isDigit(next)) {
+                return numberLiteral();
             }
             return op(TokenKind::Period);
+        }
         case '(':
             return op(TokenKind::ParenOpen);
         case ')':
@@ -119,73 +102,247 @@ unique_ptr<Token> Lexer::next() noexcept { // NOLINT
             return op(TokenKind::Minus);
         case '*':
             return op(TokenKind::Multiply);
-        case '/':
-            return op(TokenKind::Divide);
         case '<': {
-            auto la = peek(1);
+            auto la = m_input[1];
             if (la == '>') {
-                move();
-                return op(TokenKind::NotEqual);
+                return op(TokenKind::NotEqual, 2);
             }
             if (la == '=') {
-                move();
-                return op(TokenKind::LessOrEqual);
+                return op(TokenKind::LessOrEqual, 2);
             }
             return op(TokenKind::LessThan);
         }
         case '>':
-            if (peek(1) == '=') {
-                move();
-                return op(TokenKind::GreaterOrEqual);
+            if (m_input[1] == '=') {
+                return op(TokenKind::GreaterOrEqual, 2);
             }
             return op(TokenKind::GreaterThan);
         case '@':
             return op(TokenKind::AddressOf);
+        case '0': case '1': case '2': case '3': case '4':
+        case '5': case '6': case '7': case '8': case '9':
+            return numberLiteral();
+        case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
+        case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N':
+        case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U':
+        case 'V': case 'W': case 'X': case 'Y': case 'Z':
+        case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g':
+        case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
+        case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u':
+        case 'v': case 'w': case 'x': case 'y': case 'z':
+            return identifier();
+        }
+
+        return invalid(m_input);
+    }
+    // clang-format on
+}
+
+void Lexer::skipUntilLineEnd() noexcept {
+    // assume m_input[0] != \r, \n
+    while (true) {
+        switch (*++m_input) {
+        case 0:
+        case '\r':
+        case '\n':
+            return;
         default:
-            return invalid(m_input);
+            continue;
         }
     }
-
-    return endOfFile(); // NOLINT
 }
-/**
- * If `m_hasStmt` is true then return `EndOfLine`
- * before `EndOfFile`
- */
+
+void Lexer::skipToNextLine() noexcept {
+    // assume m_input != \r, \n
+    skipUntilLineEnd();
+    switch (*m_input) {
+    case '\r':
+        m_input++;
+        if (*m_input == '\n') { // CR+LF
+            m_input++;
+        }
+        return;
+    case '\n':
+        m_input++;
+        return;
+    }
+}
+
+void Lexer::multilineComment() noexcept {
+    // assume m_input[0] == '/' && m_input[1] == '\''
+    m_input++;
+    int level = 1;
+    while (true) {
+        switch (*++m_input) {
+        case '\0':
+            return;
+        case '\'':
+            if (m_input[1] == '/') {
+                m_input++;
+                level--;
+                if (level == 0) {
+                    m_input++;
+                    return;
+                }
+            }
+            continue;
+        case '/':
+            if (m_input[1] == '\'') {
+                m_input++;
+                level++;
+            }
+        }
+    }
+}
+
 unique_ptr<Token> Lexer::endOfFile() noexcept {
     if (m_hasStmt) {
-        m_hasStmt = false;
-        return Token::create(
-            TokenKind::EndOfStmt,
-            getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
+        m_eolPos = m_input;
+        return endOfStatement();
     }
-
-    return Token::create(
-        TokenKind::EndOfFile,
-        getRange(m_buffer->getBufferEnd(), m_buffer->getBufferEnd()));
+    return Token::create(TokenKind::EndOfFile, makeRange(m_input, m_input));
 }
 
 unique_ptr<Token> Lexer::endOfStatement() noexcept {
-    move();
-    return Token::create(TokenKind::EndOfStmt, getRange(m_eolPos, m_input));
+    m_hasStmt = false;
+    return Token::create(TokenKind::EndOfStmt, makeRange(m_eolPos, m_input));
 }
 
-unique_ptr<Token> Lexer::ellipsis() noexcept {
-    move(3);
-    return Token::create(TokenKind::Ellipsis, getRange(m_tokenStart, m_input));
+unique_ptr<Token> Lexer::invalid(const char* loc) const noexcept {
+    return Token::create(TokenKind::Invalid, makeRange(loc, m_input));
 }
+
+unique_ptr<Token> Lexer::stringLiteral() noexcept {
+    // assume m_input[0] == '"'
+    m_hasStmt = true;
+    const auto* start = m_input;
+
+    string literal;
+    const auto* begin = m_input + 1;
+    while (true) {
+        auto ch = *++m_input;
+        switch (ch) {
+        case '\t':
+            continue;
+        case '\\':
+            if (begin < m_input) {
+                literal.append(begin, m_input);
+            }
+            literal += escape();
+            begin = m_input + 1;
+            continue;
+        case '"':
+            if (begin < m_input) {
+                literal.append(begin, m_input);
+            }
+            m_input++;
+            break;
+        default:
+            constexpr char visibleFrom = 32;
+            if (ch < visibleFrom) {
+                return invalid(start);
+            }
+            continue;
+        }
+        break;
+    }
+
+    return Token::create(
+        TokenKind::StringLiteral,
+        m_context.retainCopy(literal),
+        makeRange(start, m_input));
+}
+
+char Lexer::escape() noexcept {
+    // assume m_input[0] == '\\'
+    switch (*++m_input) {
+    case 'a':
+        return '\a';
+    case 'b':
+        return '\b';
+    case 'f':
+        return '\f';
+    case 'n':
+        return '\n';
+    case 'r':
+        return '\r';
+    case 't':
+        return '\t';
+    case 'v':
+        return '\v';
+    case '\\':
+        return '\\';
+    case '\'':
+        return '\'';
+    case '"':
+        return '"';
+    default:
+        m_input--;
+        return '\\';
+    }
+}
+
+unique_ptr<Token> Lexer::op(TokenKind kind, int len) noexcept {
+    // assume m_input[0] == op[0], m_input[len] == next ch
+    m_hasStmt = true;
+    const auto* start = m_input;
+    m_input += len;
+    return Token::create(kind, makeRange(start, m_input));
+}
+
+unique_ptr<Token> Lexer::numberLiteral() noexcept {
+    // assume m_input[0] == '.' || digit
+    m_hasStmt = true;
+    const auto* start = m_input;
+    bool isFloatingPoint = *m_input == '.';
+
+    while (true) {
+        auto ch = *++m_input;
+        if (ch == '.') {
+            if (isFloatingPoint) {
+                return invalid(m_input);
+            }
+            isFloatingPoint = true;
+            continue;
+        }
+        if (isDigit(ch)) {
+            continue;
+        }
+        break;
+    }
+
+    if (isFloatingPoint) {
+        std::string number{ start, m_input };
+        std::size_t size{};
+        double value = std::stod(number, &size);
+        if (size == 0) {
+            return invalid(start);
+        }
+        return Token::create(value, makeRange(start, m_input));
+    }
+
+    uint64_t value{};
+    constexpr int base10 = 10;
+    if (std::from_chars(start, m_input, value, base10).ec != std::errc()) {
+        return invalid(start);
+    }
+    return Token::create(value, makeRange(start, m_input));
+}
+
 
 unique_ptr<Token> Lexer::identifier() noexcept {
-    size_t length = 1;
-    while (move() && isIdentifierChar(m_char)) {
-        length++;
-    }
-    const auto* end = m_tokenStart + length; // NOLINT
-    auto range = getRange(m_tokenStart, m_input);
+    // assume m_input[0] == '_' || char
+    m_hasStmt = true;
+    const auto* start = m_input;
+
+    while (isIdentifierChar(*++m_input)) {}
+
+    auto range = makeRange(start, m_input);
+    auto length = m_input - start;
 
     std::string uppercased;
     uppercased.reserve(length);
-    std::transform(m_tokenStart, end, std::back_inserter(uppercased), llvm::toUpper);
+    std::transform(start, m_input, std::back_inserter(uppercased), llvm::toUpper);
 
     auto kind = Token::findKind(uppercased);
     switch (kind) {
@@ -200,144 +357,4 @@ unique_ptr<Token> Lexer::identifier() noexcept {
     default:
         return Token::create(kind, range);
     }
-}
-
-unique_ptr<Token> Lexer::number() noexcept {
-    bool isFloatingPoint = m_char == '.';
-
-    size_t len = 1;
-    while (move()) {
-        if (m_char == '.') {
-            if (isFloatingPoint) {
-                return invalid(m_input);
-            }
-            isFloatingPoint = true;
-        } else if (!isDigit(m_char)) {
-            break;
-        }
-        len++;
-    }
-    const char* end = m_tokenStart + len; // NOLINT
-    auto range = getRange(m_tokenStart, end);
-
-    if (isFloatingPoint) {
-        std::string number{ m_tokenStart, end };
-        std::size_t size{};
-        double value = std::stod(number, &size);
-        if (size == 0) {
-            return invalid(m_tokenStart);
-        }
-        return Token::create(value, range);
-    }
-
-    uint64_t value{};
-    const int base10 = 10;
-    if (std::from_chars(m_tokenStart, end, value, base10).ec != std::errc()) {
-        return invalid(m_tokenStart);
-    }
-    return Token::create(value, range);
-}
-
-unique_ptr<Token> Lexer::string() noexcept {
-    constexpr char visibleFrom = 32;
-    std::string literal{};
-
-    while (move() && m_char >= visibleFrom && m_char != '"') {
-        if (m_char == '\\') {
-            switch (peek()) {
-            case '\\':
-            case '"':
-                move();
-                literal += m_char;
-                continue;
-            case 'n':
-                literal += '\n';
-                move();
-                continue;
-            case 't':
-                literal += '\t';
-                move();
-                continue;
-            default:
-                return invalid(m_input);
-            }
-        }
-        literal += m_char;
-    }
-
-    if (m_char != '"') {
-        return invalid(m_tokenStart);
-    }
-    move();
-
-    return Token::create(
-        TokenKind::StringLiteral,
-        m_context.retainCopy(literal),
-        getRange(m_tokenStart, m_input));
-}
-
-unique_ptr<Token> Lexer::op(TokenKind kind) noexcept {
-    move();
-    return Token::create(kind, getRange(m_tokenStart, m_input));
-}
-
-unique_ptr<Token> Lexer::invalid(const char* loc) noexcept {
-    return Token::create(TokenKind::Invalid, getRange(loc, loc));
-}
-
-void Lexer::skipUntilLineEnd() noexcept {
-    while (move() && m_char != '\n') {}
-}
-
-void Lexer::multilineComment() noexcept {
-    move();
-    int level = 1;
-    while (move()) {
-        if (m_char == '\'' && peek() == '/') {
-            move();
-            level--;
-            if (level == 0) {
-                move();
-                return;
-            }
-        } else if (m_char == '/' && peek() == '\'') {
-            move();
-            level++;
-        }
-    }
-}
-
-bool Lexer::move() noexcept {
-    m_char = *++m_input; // NOLINT
-    handleLineEnd();
-    return isValid();
-}
-
-bool Lexer::move(int steps) noexcept {
-    while (steps-- > 0 && move()) {}
-    return isValid();
-}
-
-void Lexer::handleLineEnd() noexcept {
-    if (m_char == '\r') {
-        if (peek() == '\n') {
-            m_eolPos = m_input;
-            m_input++; // NOLINT
-        }
-        m_char = '\n';
-    } else if (m_char == '\n') {
-        m_eolPos = m_input;
-    }
-}
-
-bool Lexer::isValid() const noexcept {
-    return m_char != 0;
-}
-
-char Lexer::peek(int ahead) const noexcept {
-    const auto* next = m_input + ahead; // NOLINT
-    if (next < m_buffer->getBufferEnd()) {
-        return *next;
-    }
-    return 0;
 }

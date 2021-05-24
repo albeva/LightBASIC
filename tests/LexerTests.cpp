@@ -28,7 +28,7 @@ protected:
     void expect(lbc::TokenKind kind, const string& lexeme = "", unsigned line = 0, unsigned col = 0, unsigned len = 0) {
         auto token = m_lexer->next();
         EXPECT_EQ(token->kind(), kind);
-        
+
         if (!lexeme.empty()) {
             EXPECT_EQ(token->lexeme(), lexeme);
         }
@@ -152,6 +152,71 @@ TEST_F(LexerTests, TokenLocation) {
     EXPECT_TOKEN(lbc::TokenKind::EndOfStmt,      "",      7, 12, 0)
     EXPECT_TOKEN(lbc::TokenKind::EndOfFile,      "",      7, 12, 0)
 
+    // clang-format on
+}
+
+TEST_F(LexerTests, StringLiterals) {
+    constexpr auto source = R"BAS(
+"hello"
+	"hello\nWorld!"
+"	Hello \"world\"\t"
+"Hello""World"
+    )BAS";
+    load(source);
+
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "hello", 2, 1, 7)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "hello\nWorld!", 3, 2, 15)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "\tHello \"world\"\t", 4, 1, 20)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "Hello", 5, 1, 7)
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "World", 5, 8, 7)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
+}
+
+TEST_F(LexerTests, NumberLiterals) {
+    constexpr auto source = R"BAS(
+10 .5 3.14 6. 0.10
+    )BAS";
+    load(source);
+
+    // clang-format off
+    EXPECT_TOKEN(lbc::TokenKind::IntegerLiteral,       "10",       2, 1, 2)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "0.500000", 2, 4, 2)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "3.140000", 2, 7, 4)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "6.000000", 2, 12, 2)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "0.100000", 2, 15, 4)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
+    // clang-format on
+}
+
+TEST_F(LexerTests, MiscLiterals) {
+    constexpr auto source = R"BAS(
+true false null
+True False Null
+TRUE FALSE NULL
+    )BAS";
+    load(source);
+
+    // clang-format off
+    EXPECT_TOKEN(lbc::TokenKind::BooleanLiteral, "TRUE",  2, 1,  4)
+    EXPECT_TOKEN(lbc::TokenKind::BooleanLiteral, "FALSE", 2, 6,  5)
+    EXPECT_TOKEN(lbc::TokenKind::NullLiteral,    "NULL",  2, 12, 4)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+
+    EXPECT_TOKEN(lbc::TokenKind::BooleanLiteral, "TRUE",  3, 1,  4)
+    EXPECT_TOKEN(lbc::TokenKind::BooleanLiteral, "FALSE", 3, 6,  5)
+    EXPECT_TOKEN(lbc::TokenKind::NullLiteral,    "NULL",  3, 12, 4)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+
+    EXPECT_TOKEN(lbc::TokenKind::BooleanLiteral, "TRUE",  4, 1,  4)
+    EXPECT_TOKEN(lbc::TokenKind::BooleanLiteral, "FALSE", 4, 6,  5)
+    EXPECT_TOKEN(lbc::TokenKind::NullLiteral,    "NULL",  4, 12, 4)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
     // clang-format on
 }
 

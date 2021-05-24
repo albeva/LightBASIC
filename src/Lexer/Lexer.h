@@ -20,29 +20,23 @@ public:
     [[nodiscard]] unique_ptr<Token> next() noexcept;
 
 private:
-    [[nodiscard]] unique_ptr<Token> ellipsis() noexcept;
-    [[nodiscard]] unique_ptr<Token> identifier() noexcept;
-    [[nodiscard]] unique_ptr<Token> number() noexcept;
-    [[nodiscard]] unique_ptr<Token> string() noexcept;
-    [[nodiscard]] unique_ptr<Token> op(TokenKind kind) noexcept;
-    [[nodiscard]] unique_ptr<Token> endOfStatement() noexcept;
-    [[nodiscard]] unique_ptr<Token> endOfFile() noexcept;
-    [[nodiscard]] static unique_ptr<Token> invalid(const char* loc) noexcept;
-
     void skipUntilLineEnd() noexcept;
+    void skipToNextLine() noexcept;
     void multilineComment() noexcept;
-    bool move() noexcept;
-    bool move(int steps) noexcept;
-    [[nodiscard]] bool isValid() const noexcept;
-    [[nodiscard]] char peek(int ahead = 1) const noexcept;
-    void handleLineEnd() noexcept;
+
+    [[nodiscard]] unique_ptr<Token> endOfFile() noexcept;
+    [[nodiscard]] unique_ptr<Token> endOfStatement() noexcept;
+    [[nodiscard]] unique_ptr<Token> invalid(const char* loc) const noexcept;
+    [[nodiscard]] unique_ptr<Token> stringLiteral() noexcept;
+    [[nodiscard]] char escape() noexcept;
+    [[nodiscard]] unique_ptr<Token> op(TokenKind kind, int len = 1) noexcept;
+    [[nodiscard]] unique_ptr<Token> numberLiteral() noexcept;
+    [[nodiscard]] unique_ptr<Token> identifier() noexcept;
 
     Context& m_context;
     const llvm::MemoryBuffer* m_buffer;
     const char* m_input;
-    const char * m_tokenStart;
-    const char * m_eolPos;
-    char m_char;
+    const char* m_eolPos;
     bool m_hasStmt;
 };
 
