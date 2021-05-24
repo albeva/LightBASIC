@@ -341,13 +341,12 @@ unique_ptr<Token> Lexer::identifier() noexcept {
 
     while (isIdentifierChar(*++m_input)) {}
 
-    auto range = makeRange(start, m_input);
-    auto length = std::distance(start, m_input);
-
     std::string uppercased;
+    auto length = std::distance(start, m_input);
     uppercased.reserve(static_cast<size_t>(length));
     std::transform(start, m_input, std::back_inserter(uppercased), llvm::toUpper);
 
+    auto range = makeRange(start, m_input);
     auto kind = Token::findKind(uppercased);
     switch (kind) {
     case TokenKind::True:
