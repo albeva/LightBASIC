@@ -153,7 +153,7 @@ void Lexer::skipUntilLineEnd() noexcept {
 }
 
 void Lexer::skipToNextLine() noexcept {
-    // assume m_input != \r, \n
+    // assume m_input != \r || \n
     skipUntilLineEnd();
     switch (*m_input) {
     case '\r':
