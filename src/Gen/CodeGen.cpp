@@ -516,7 +516,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
 }
 
 void CodeGen::visit(AstContinueStmt* /*ast*/) noexcept {
-    auto iter = m_controlStack.find(ControlFlowStatement::For);
+    auto iter = m_controlStack.cbegin();
     if (iter == m_controlStack.cend()) {
         fatalError("control statement not found");
     }
@@ -524,7 +524,7 @@ void CodeGen::visit(AstContinueStmt* /*ast*/) noexcept {
 }
 
 void CodeGen::visit(AstExitStmt* /*ast*/) noexcept {
-    auto iter = m_controlStack.find(ControlFlowStatement::For);
+    auto iter = m_controlStack.cbegin();
     if (iter == m_controlStack.cend()) {
         fatalError("control statement not found");
     }
@@ -604,8 +604,8 @@ llvm::Value* CodeGen::visit(AstLiteralExpr* ast) noexcept {
 }
 
 llvm::Value* CodeGen::getStringConstant(StringRef str) noexcept {
-    auto iter = m_stringLiterals.find(str);
-    if (iter != m_stringLiterals.end()) {
+    auto [iter, inserted] = m_stringLiterals.try_emplace(str, nullptr);
+    if (!inserted) {
         return iter->second;
     }
 
@@ -633,7 +633,7 @@ llvm::Value* CodeGen::getStringConstant(StringRef str) noexcept {
     };
 
     constant = llvm::ConstantExpr::getGetElementPtr(nullptr, value, indices, true);
-    m_stringLiterals.insert({ str, constant });
+    iter->second = constant;
 
     return constant;
 }

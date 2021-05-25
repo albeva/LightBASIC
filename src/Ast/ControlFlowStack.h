@@ -30,7 +30,7 @@ public:
         Data data;
     };
     using container = std::vector<Entry>;
-    using iterator = typename container::const_reverse_iterator;
+    using const_iterator = typename container::const_reverse_iterator;
 
     NO_COPY_AND_MOVE(ControlFlowStack)
     ControlFlowStack() noexcept = default;
@@ -52,28 +52,28 @@ public:
         return find(cbegin(), control, key) != cend();
     }
 
-    [[nodiscard]] iterator find(ControlFlowStatement control) const noexcept {
+    [[nodiscard]] const_iterator find(ControlFlowStatement control) const noexcept {
         return find(cbegin(), control);
     }
 
-    [[nodiscard]] iterator find(iterator from, ControlFlowStatement control) const noexcept {
+    [[nodiscard]] const_iterator find(const_iterator from, ControlFlowStatement control) const noexcept {
         return std::find_if(from, cend(), [&](const auto& entry) {
             return entry.control == control;
         });
     }
 
-    [[nodiscard]] iterator find(ControlFlowStatement control, Key key) const noexcept {
+    [[nodiscard]] const_iterator find(ControlFlowStatement control, Key key) const noexcept {
         return find(cbegin(), control, key);
     }
 
-    [[nodiscard]] iterator find(iterator from, ControlFlowStatement control, Key key) const noexcept {
+    [[nodiscard]] const_iterator find(const_iterator from, ControlFlowStatement control, Key key) const noexcept {
         return std::find_if(from, cend(), [&](const auto& entry) {
             return entry.control == control && entry.key == key;
         });
     }
 
-    [[nodiscard]] iterator cbegin() const noexcept { return m_vector.crbegin(); }
-    [[nodiscard]] iterator cend() const noexcept { return m_vector.crend(); }
+    [[nodiscard]] const_iterator cbegin() const noexcept { return m_vector.crbegin(); }
+    [[nodiscard]] const_iterator cend() const noexcept { return m_vector.crend(); }
 
 private:
     container m_vector;
