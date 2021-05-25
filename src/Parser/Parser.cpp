@@ -609,7 +609,7 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
  */
 unique_ptr<AstContinueStmt> Parser::kwContinue() noexcept {
     auto start = move()->range().Start;
-    return AstContinueStmt::create(llvm::SMRange{start, m_endLoc});
+    return AstContinueStmt::create(llvm::SMRange{ start, m_endLoc });
 }
 
 /**
@@ -619,7 +619,7 @@ unique_ptr<AstContinueStmt> Parser::kwContinue() noexcept {
  */
 unique_ptr<AstExitStmt> Parser::kwExit() noexcept {
     auto start = move()->range().Start;
-    return AstExitStmt::create(llvm::SMRange{start, m_endLoc});
+    return AstExitStmt::create(llvm::SMRange{ start, m_endLoc });
 }
 
 //----------------------------------------

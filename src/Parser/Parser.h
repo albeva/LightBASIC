@@ -105,7 +105,6 @@ private:
     unique_ptr<Token> m_next;
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
-
 };
 
 } // namespace lbc

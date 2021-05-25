@@ -269,7 +269,7 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
         },
         [](StringRef value) -> string {
             string result;
-            llvm::raw_string_ostream str{result};
+            llvm::raw_string_ostream str{ result };
             llvm::printEscapedString(value, str);
             return '"' + result + '"';
         },

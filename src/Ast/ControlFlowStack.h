@@ -37,7 +37,7 @@ public:
     ~ControlFlowStack() noexcept = default;
 
     void push(ControlFlowStatement control, Key key = {}, Data data = {}) noexcept {
-        m_vector.emplace_back(Entry{control, key, data});
+        m_vector.emplace_back(Entry{ control, key, data });
     }
 
     void pop() {
@@ -57,7 +57,7 @@ public:
     }
 
     [[nodiscard]] iterator find(iterator from, ControlFlowStatement control) const noexcept {
-        return std::find_if(from, cend(), [&](const auto& entry){
+        return std::find_if(from, cend(), [&](const auto& entry) {
             return entry.control == control;
         });
     }
@@ -67,7 +67,7 @@ public:
     }
 
     [[nodiscard]] iterator find(iterator from, ControlFlowStatement control, Key key) const noexcept {
-        return std::find_if(from, cend(), [&](const auto& entry){
+        return std::find_if(from, cend(), [&](const auto& entry) {
             return entry.control == control && entry.key == key;
         });
     }
