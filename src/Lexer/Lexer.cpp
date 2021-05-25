@@ -31,7 +31,7 @@ Lexer::Lexer(Context& context, unsigned fileID) noexcept
   m_eolPos{ m_input },
   m_hasStmt{ false } {}
 
-unique_ptr<Token> Lexer::next() noexcept { // NOLINT
+unique_ptr<Token> Lexer::next() noexcept {
     // clang-format off
     while (true) {
         switch (*m_input) {

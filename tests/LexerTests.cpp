@@ -161,6 +161,7 @@ TEST_F(LexerTests, StringLiterals) {
 	"hello\nWorld!"
 "	Hello \"world\"\t"
 "Hello""World"
+""
     )BAS";
     load(source);
 
@@ -173,21 +174,22 @@ TEST_F(LexerTests, StringLiterals) {
     EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "Hello", 5, 1, 7)
     EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "World", 5, 8, 7)
     EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
+    EXPECT_TOKEN(lbc::TokenKind::StringLiteral, "", 6, 1, 2)
+    EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
     EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
 }
 
 TEST_F(LexerTests, NumberLiterals) {
-    constexpr auto source = R"BAS(
-10 .5 3.14 6. 0.10
-    )BAS";
+    constexpr auto source = "10 .5 3.14 6. 0.10 5";
     load(source);
 
     // clang-format off
-    EXPECT_TOKEN(lbc::TokenKind::IntegerLiteral,       "10",       2, 1, 2)
-    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "0.500000", 2, 4, 2)
-    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "3.140000", 2, 7, 4)
-    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "6.000000", 2, 12, 2)
-    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "0.100000", 2, 15, 4)
+    EXPECT_TOKEN(lbc::TokenKind::IntegerLiteral,       "10",       1, 1, 2)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "0.500000", 1, 4, 2)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "3.140000", 1, 7, 4)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "6.000000", 1, 12, 2)
+    EXPECT_TOKEN(lbc::TokenKind::FloatingPointLiteral, "0.100000", 1, 15, 4)
+    EXPECT_TOKEN(lbc::TokenKind::IntegerLiteral,       "5",        1, 20, 1)
     EXPECT_TOKEN(lbc::TokenKind::EndOfStmt)
     EXPECT_TOKEN(lbc::TokenKind::EndOfFile)
     // clang-format on

@@ -7,14 +7,14 @@
 // clang-format off
 
 #define TOKEN_GENERAL(_) \
-    _( Invalid,         "Invalid"          ) \
-    _( EndOfFile,       "End-Of-File"      ) \
-    _( EndOfStmt,       "End-Of-StmtFirst" ) \
-    _( Identifier,      "Identifier"       )
+    _( Invalid,    "Invalid"     ) \
+    _( EndOfFile,  "End-Of-File" ) \
+    _( EndOfStmt,  "End-Of-Stmt" ) \
+    _( Identifier, "Identifier"  )
 
 #define TOKEN_LITERALS(_) \
     _( StringLiteral,        "String-Literal"         ) \
-    _( IntegerLiteral ,      "Number-Literal"         ) \
+    _( IntegerLiteral ,      "Integer-Literal"        ) \
     _( FloatingPointLiteral, "Floating-point-literal" ) \
     _( BooleanLiteral,       "Boolean-Literal"        ) \
     _( NullLiteral,          "Null-Literal"           )
@@ -30,7 +30,7 @@
     _( Assign,          "="   )
 
 #define TOKEN_OPERATORS(_) \
-    /* ID               Ch      Prec    Type    Assoc   Kind       */ \
+    /* ID               Str     Prec    Type    Assoc   Kind       */ \
     _( AddressOf,       "@",    10,     Unary,  Left,   Memory      ) \
     _( Dereference,     "*",    10,     Unary,  Left,   Memory      ) \
                                                                       \
@@ -59,32 +59,32 @@
     _( CommaAnd,        ",",    1,      Binary, Left,   Logical     )
 
 #define TOKEN_KEYWORDS(_)   \
-    _( Var,             "VAR"      ) \
-    _( As,              "AS"       ) \
-    _( Declare,         "DECLARE"  ) \
-    _( Function,        "FUNCTION" ) \
-    _( Sub,             "SUB"      ) \
-    _( End,             "END"      ) \
-    _( Return,          "RETURN"   ) \
-    _( True,            "TRUE"     ) \
-    _( False,           "FALSE"    ) \
-    _( Null,            "NULL"     ) \
-    _( If,              "IF"       ) \
-    _( Then,            "THEN"     ) \
-    _( Else,            "ELSE"     ) \
-    _( For,             "FOR"      ) \
-    _( Next,            "NEXT"     ) \
-    _( Step,            "STEP"     ) \
-    _( To,              "TO"       ) \
-    _( Do,              "DO"       ) \
-    _( Ptr,             "PTR"      ) \
-    _( Any,             "ANY"      )
+    _( Var,      "VAR"      ) \
+    _( As,       "AS"       ) \
+    _( Declare,  "DECLARE"  ) \
+    _( Function, "FUNCTION" ) \
+    _( Sub,      "SUB"      ) \
+    _( End,      "END"      ) \
+    _( Return,   "RETURN"   ) \
+    _( True,     "TRUE"     ) \
+    _( False,    "FALSE"    ) \
+    _( Null,     "NULL"     ) \
+    _( If,       "IF"       ) \
+    _( Then,     "THEN"     ) \
+    _( Else,     "ELSE"     ) \
+    _( For,      "FOR"      ) \
+    _( Next,     "NEXT"     ) \
+    _( Step,     "STEP"     ) \
+    _( To,       "TO"       ) \
+    _( Do,       "DO"       ) \
+    _( Ptr,      "PTR"      ) \
+    _( Any,      "ANY"      )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \
-    _( Modulus )    \
+    _( Modulus    ) \
     _( LogicalAnd ) \
-    _( LogicalOr )
+    _( LogicalOr  )
 
 // All tokens combined
 #define ALL_TOKENS(_)  \
