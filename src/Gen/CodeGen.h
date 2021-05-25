@@ -9,7 +9,7 @@ namespace lbc {
 
 class Context;
 
-class CodeGen final : public AstVisitor<CodeGen> {
+class CodeGen final : public AstVisitor<CodeGen, llvm::Value*> {
 public:
     explicit CodeGen(Context& context) noexcept;
 
@@ -37,11 +37,11 @@ private:
     void declareFunc(AstFuncDecl* ast) noexcept;
     void declareGlobalVar(AstVarDecl* ast) noexcept;
     void declareLocalVar(AstVarDecl* ast) noexcept;
-    static llvm::Value* getStoreValue(AstExpr* identExpr);
-    llvm::Constant* getStringConstant(StringRef str) noexcept;
-    void comparison(AstBinaryExpr* ast) noexcept;
-    void arithmetic(AstBinaryExpr* ast) noexcept;
-    void logical(AstBinaryExpr* ast) noexcept;
+    static llvm::Value* getStoreValue(AstExpr* identExpr) noexcept;
+    llvm::Value* getStringConstant(StringRef str) noexcept;
+    llvm::Value* comparison(AstBinaryExpr* ast) noexcept;
+    llvm::Value* arithmetic(AstBinaryExpr* ast) noexcept;
+    llvm::Value* logical(AstBinaryExpr* ast) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

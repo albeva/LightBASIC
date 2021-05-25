@@ -7,9 +7,11 @@
 
 namespace lbc {
 
-template<class This>
+template<class This, typename ExprTy = void>
 class AstVisitor {
 public:
+    using ExprRetTy = ExprTy;
+
 #define VISIT_CASE(KIND) \
     case AstKind::KIND:  \
         return static_cast<This*>(this)->visit(static_cast<Ast##KIND*>(ast));
@@ -47,7 +49,7 @@ public:
         }
     }
 
-    void visit(AstExpr* ast) noexcept {
+    ExprRetTy visit(AstExpr* ast) noexcept {
         switch (ast->kind) {
             AST_EXPR_NODES(VISIT_CASE)
         default:
@@ -57,10 +59,16 @@ public:
 #undef VISIT_CASE
 };
 
-#define VISIT_METHOD_FINAL(KIND) void visit(Ast##KIND*) noexcept;
+#define VISIT_METHOD(KIND) void visit(Ast##KIND*) noexcept;
+#define VISIT_METHOD_EXPR(KIND) ExprRetTy visit(Ast##KIND*) noexcept;
 
 #define AST_VISITOR_DECLARE_CONTENT_FUNCS() \
     using AstVisitor::visit;                \
-    AST_CONTENT_NODES(VISIT_METHOD_FINAL)
+    VISIT_METHOD(Module)                    \
+    AST_STMT_NODES(VISIT_METHOD)            \
+    AST_DECL_NODES(VISIT_METHOD)            \
+    AST_ATTRIB_NODES(VISIT_METHOD)          \
+    AST_TYPE_NODES(VISIT_METHOD)            \
+    AST_EXPR_NODES(VISIT_METHOD_EXPR)
 
 } // namespace lbc

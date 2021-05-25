@@ -68,7 +68,7 @@ bool TypeRoot::isSignedIntegral() const noexcept {
     if (!isIntegral()) {
         return false;
     }
-    return static_cast<const TypeIntegral*>(this)->isSigned(); // NOLINT
+    return static_cast<const TypeIntegral*>(this)->isSigned();
 }
 
 // clang-format off

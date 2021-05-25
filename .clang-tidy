@@ -11,6 +11,7 @@ Checks: '*,
         -misc-non-private-member-variables-in-classes,
         -readability-function-cognitive-complexity,
         -cppcoreguidelines-macro-usage,
+        -cppcoreguidelines-pro-type-static-cast-downcast,
         -readability-convert-member-functions-to-static,
         -bugprone-branch-clone'
 WarningsAsErrors: '*'

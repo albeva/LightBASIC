@@ -328,7 +328,6 @@ struct AstExpr : AstRoot {
     }
 
     const TypeRoot* type = nullptr;
-    llvm::Value* llvmValue = nullptr;
 };
 
 struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
