@@ -78,7 +78,9 @@
     _( To,       "TO"       ) \
     _( Do,       "DO"       ) \
     _( Ptr,      "PTR"      ) \
-    _( Any,      "ANY"      )
+    _( Any,      "ANY"      ) \
+    _( Exit,     "EXIT"     ) \
+    _( Continue, "CONTINUE" )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \

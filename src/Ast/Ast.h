@@ -184,6 +184,14 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     unique_ptr<SymbolTable> symbolTable;
 };
 
+struct AstContinueStmt final : AstNode<AstContinueStmt, AstStmt, AstKind::ContinueStmt> {
+    explicit AstContinueStmt(llvm::SMRange range_) noexcept : AstNode{ KIND, range_ } {};
+};
+
+struct AstExitStmt final : AstNode<AstExitStmt, AstStmt, AstKind::ExitStmt> {
+    explicit AstExitStmt(llvm::SMRange range_) noexcept : AstNode{ KIND, range_ } {};
+};
+
 //----------------------------------------
 // Attributes
 //----------------------------------------

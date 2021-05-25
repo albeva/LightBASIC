@@ -219,7 +219,27 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
         }
     }
 
+    m_controlFlowStack.push(ControlFlowStatement::For, ast->iterator->symbol);
     visit(ast->stmt.get());
+    m_controlFlowStack.pop();
+
+    if (!ast->next.empty()) {
+        if (ast->next != ast->iterator->name) {
+            fatalError("NEXT iterator names must match");
+        }
+    }
+}
+
+void SemanticAnalyzer::visit(AstContinueStmt* /*ast*/) noexcept {
+    if (!m_controlFlowStack.contains(ControlFlowStatement::For)) {
+        fatalError("CONTINUE expects a matching FOR");
+    }
+}
+
+void SemanticAnalyzer::visit(AstExitStmt* /*ast*/) noexcept {
+    if (!m_controlFlowStack.contains(ControlFlowStatement::For)) {
+        fatalError("EXIT expects a matching FOR");
+    }
 }
 
 //----------------------------------------

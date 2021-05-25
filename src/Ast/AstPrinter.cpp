@@ -158,6 +158,18 @@ void AstPrinter::visit(AstForStmt* ast) noexcept {
     });
 }
 
+void AstPrinter::visit(AstContinueStmt* ast) noexcept {
+    m_json.object([&]{
+        writeHeader(ast);
+    });
+}
+
+void AstPrinter::visit(AstExitStmt* ast) noexcept {
+    m_json.object([&]{
+        writeHeader(ast);
+    });
+}
+
 void AstPrinter::visit(AstAttributeList* ast) noexcept {
     m_json.array([&] {
         for (const auto& attr : ast->attribs) {

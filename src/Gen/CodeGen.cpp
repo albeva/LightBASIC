@@ -476,7 +476,9 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
 
     bodyBlock->insertInto(func);
     m_builder.SetInsertPoint(bodyBlock);
+    m_controlStack.push(ControlFlowStatement::For, ast->iterator->symbol, { condBlock, exitBlock });
     visit(ast->stmt.get());
+    m_controlStack.pop();
 
     if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
         m_builder.CreateBr(condBlock);
@@ -511,6 +513,22 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
 
     exitBlock->insertInto(func);
     m_builder.SetInsertPoint(exitBlock);
+}
+
+void CodeGen::visit(AstContinueStmt* /*ast*/) noexcept {
+    auto iter = m_controlStack.find(ControlFlowStatement::For);
+    if (iter == m_controlStack.cend()) {
+        fatalError("control statement not found");
+    }
+    m_builder.CreateBr(iter->data.continueBlock);
+}
+
+void CodeGen::visit(AstExitStmt* /*ast*/) noexcept {
+    auto iter = m_controlStack.find(ControlFlowStatement::For);
+    if (iter == m_controlStack.cend()) {
+        fatalError("control statement not found");
+    }
+    m_builder.CreateBr(iter->data.exitBlock);
 }
 
 //------------------------------------------------------------------

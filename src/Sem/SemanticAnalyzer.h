@@ -4,6 +4,7 @@
 #pragma once
 #include "pch.h"
 #include "Ast/AstVisitor.h"
+#include "Ast/ControlFlowStack.h"
 #include "Passes/ConstantFoldingPass.h"
 #include "Passes/TypePass.h"
 
@@ -44,6 +45,13 @@ private:
     SymbolTable* m_rootTable = nullptr;
     Sem::ConstantFoldingPass m_constantFolder;
     Sem::TypePass m_typePass;
+
+    struct ControlEntry final {
+        llvm::BasicBlock* continueBlock;
+        llvm::BasicBlock* exitBlock;
+    };
+
+    ControlFlowStack<Symbol*, ControlEntry> m_controlFlowStack;
 };
 
 } // namespace lbc

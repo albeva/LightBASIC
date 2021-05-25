@@ -4,6 +4,7 @@
 #pragma once
 #include "pch.h"
 #include "Ast/AstVisitor.h"
+#include "Ast/ControlFlowStack.h"
 
 namespace lbc {
 
@@ -57,6 +58,12 @@ private:
     llvm::ConstantInt* m_constantTrue = nullptr;
 
     bool m_declareAsGlobals = true;
+
+    struct ControlEntry final {
+        llvm::BasicBlock* continueBlock;
+        llvm::BasicBlock* exitBlock;
+    };
+    ControlFlowStack<Symbol*, ControlEntry> m_controlStack;
 };
 
 } // namespace lbc

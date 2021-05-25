@@ -57,6 +57,8 @@ private:
     [[nodiscard]] AstIfStmt::Block ifBlock() noexcept;
     [[nodiscard]] AstIfStmt::Block thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
     [[nodiscard]] unique_ptr<AstForStmt> kwFor() noexcept;
+    [[nodiscard]] unique_ptr<AstContinueStmt> kwContinue() noexcept;
+    [[nodiscard]] unique_ptr<AstExitStmt> kwExit() noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;
@@ -103,6 +105,7 @@ private:
     unique_ptr<Token> m_next;
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
+
 };
 
 } // namespace lbc

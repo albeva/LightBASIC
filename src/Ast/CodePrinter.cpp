@@ -232,6 +232,14 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
     }
 }
 
+void CodePrinter::visit(AstContinueStmt* /*ast*/) noexcept {
+    m_os << indent() << "CONTINUE";
+}
+
+void CodePrinter::visit(AstExitStmt* /*ast*/) noexcept {
+    m_os << indent() << "EXIT";
+}
+
 // Expressions
 
 void CodePrinter::visit(AstIdentExpr* ast) noexcept {

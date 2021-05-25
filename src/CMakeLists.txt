@@ -51,7 +51,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.h
     Utils/Version.h
-)
+    Ast/ControlFlowStack.h)
 
 target_precompile_headers(project_options INTERFACE pch.h)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

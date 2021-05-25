@@ -77,6 +77,8 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
  *   | IfStmt
  *   | ForStmt
  *   | RETURN
+ *   | EXIT
+ *   | CONTINUE
  *   .
  */
 unique_ptr<AstStmt> Parser::statement() noexcept {
@@ -100,6 +102,10 @@ unique_ptr<AstStmt> Parser::statement() noexcept {
         return kwIf();
     case TokenKind::For:
         return kwFor();
+    case TokenKind::Continue:
+        return kwContinue();
+    case TokenKind::Exit:
+        return kwExit();
     default:
         error("Expected statement");
     }
@@ -594,6 +600,26 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
         std::move(step),
         std::move(stmt),
         next);
+}
+
+/**
+ * CONTINUE
+ *   = "CONTINUE" // { "FOR" | "DO" }
+ *   .
+ */
+unique_ptr<AstContinueStmt> Parser::kwContinue() noexcept {
+    auto start = move()->range().Start;
+    return AstContinueStmt::create(llvm::SMRange{start, m_endLoc});
+}
+
+/**
+ * EXIT
+ *   = "EXIT" // { "FOR" | "DO" | "SELECT" }
+ *   .
+ */
+unique_ptr<AstExitStmt> Parser::kwExit() noexcept {
+    auto start = move()->range().Start;
+    return AstExitStmt::create(llvm::SMRange{start, m_endLoc});
 }
 
 //----------------------------------------
