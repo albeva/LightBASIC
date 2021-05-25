@@ -260,20 +260,10 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
             return "NULL";
         },
         [](StringRef value) -> string {
-            constexpr std::array chars{
-                std::make_pair('\"', "\\\""),
-                std::make_pair('\n', "\\n"),
-                std::make_pair('\t', "\\t")
-            };
-            string s = value.str();
-            for (const auto& r : chars) {
-                std::string::size_type pos = 0u;
-                while ((pos = s.find(r.first, pos)) != std::string::npos) {
-                    s.replace(pos, 1, r.second);
-                    pos += 2;
-                }
-            }
-            return '"' + s + '"';
+            string result;
+            llvm::raw_string_ostream str{result};
+            llvm::printEscapedString(value, str);
+            return '"' + result + '"';
         },
         [&](uint64_t value) -> string {
             if (ast->type->isSignedIntegral()) {
@@ -334,7 +324,7 @@ void CodePrinter::visit(AstCastExpr* ast) noexcept {
     visit(ast->expr.get());
     m_os << " AS ";
     if (ast->implicit) {
-        if (ast->type) {
+        if (ast->type != nullptr) {
             m_os << ast->type->asString();
         } else {
             m_os << "ANY";

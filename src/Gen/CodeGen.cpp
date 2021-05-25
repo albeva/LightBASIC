@@ -676,8 +676,6 @@ llvm::Value* CodeGen::visit(AstBinaryExpr* ast) noexcept {
 llvm::Value* CodeGen::logical(AstBinaryExpr* ast) noexcept {
     // lhs
     auto* lhsValue = visit(ast->lhs.get());
-    ;
-
     auto* lhsBlock = m_builder.GetInsertBlock();
 
     auto* func = lhsBlock->getParent();
