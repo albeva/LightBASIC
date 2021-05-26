@@ -16,40 +16,31 @@ enum class ControlFlowStatement : uint8_t {
  *
  * This class acts as a stack, we can push & pop structures from it
  *
- * Each control structure can have a key (e.g. symbol) and data (e.g. control exit and continue labels)
+ * Each control structure can have data (e.g. control exit and continue labels)
  */
 template<
-    typename Key,
     typename Data = std::monostate,
-    std::enable_if_t<std::is_trivial_v<Key> && std::is_trivial_v<Data>, int> = 0>
+    std::enable_if_t<std::is_trivial_v<Data>, int> = 0>
 class ControlFlowStack final {
 public:
-    struct Entry final {
-        ControlFlowStatement control;
-        Key key;
-        Data data;
-    };
-    using container = std::vector<Entry>;
+    using entry = std::pair<ControlFlowStatement, Data>;
+    using container = std::vector<entry>;
     using const_iterator = typename container::const_reverse_iterator;
 
     NO_COPY_AND_MOVE(ControlFlowStack)
     ControlFlowStack() noexcept = default;
     ~ControlFlowStack() noexcept = default;
 
-    void push(ControlFlowStatement control, Key key = {}, Data data = {}) noexcept {
-        m_vector.emplace_back(Entry{ control, key, data });
+    void push(ControlFlowStatement control, Data data = {}) noexcept {
+        m_container.emplace_back( control, data );
     }
 
     void pop() {
-        m_vector.pop_back();
+        m_container.pop_back();
     }
 
     [[nodiscard]] bool contains(ControlFlowStatement control) const noexcept {
         return find(cbegin(), control) != cend();
-    }
-
-    [[nodiscard]] bool contains(ControlFlowStatement control, Key key) const noexcept {
-        return find(cbegin(), control, key) != cend();
     }
 
     [[nodiscard]] const_iterator find(ControlFlowStatement control) const noexcept {
@@ -58,25 +49,16 @@ public:
 
     [[nodiscard]] const_iterator find(const_iterator from, ControlFlowStatement control) const noexcept {
         return std::find_if(from, cend(), [&](const auto& entry) {
-            return entry.control == control;
+            return entry.first == control;
         });
     }
 
-    [[nodiscard]] const_iterator find(ControlFlowStatement control, Key key) const noexcept {
-        return find(cbegin(), control, key);
-    }
-
-    [[nodiscard]] const_iterator find(const_iterator from, ControlFlowStatement control, Key key) const noexcept {
-        return std::find_if(from, cend(), [&](const auto& entry) {
-            return entry.control == control && entry.key == key;
-        });
-    }
-
-    [[nodiscard]] const_iterator cbegin() const noexcept { return m_vector.crbegin(); }
-    [[nodiscard]] const_iterator cend() const noexcept { return m_vector.crend(); }
+    [[nodiscard]] bool empty() const noexcept { return m_container.empty();  }
+    [[nodiscard]] const_iterator cbegin() const noexcept { return m_container.crbegin(); }
+    [[nodiscard]] const_iterator cend() const noexcept { return m_container.crend(); }
 
 private:
-    container m_vector;
+    container m_container;
 };
 
 } // namespace lbc

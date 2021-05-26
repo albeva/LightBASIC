@@ -219,7 +219,7 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
         }
     }
 
-    m_controlFlowStack.push(ControlFlowStatement::For, ast->iterator->symbol);
+    m_controlFlowStack.push(ControlFlowStatement::For);
     visit(ast->stmt.get());
     m_controlFlowStack.pop();
 
@@ -231,14 +231,14 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstContinueStmt* /*ast*/) noexcept {
-    if (!m_controlFlowStack.contains(ControlFlowStatement::For)) {
-        fatalError("CONTINUE expects a matching FOR");
+    if (m_controlFlowStack.empty()) {
+        fatalError("CONTINUE required a control block (FOR, DO)");
     }
 }
 
 void SemanticAnalyzer::visit(AstExitStmt* /*ast*/) noexcept {
-    if (!m_controlFlowStack.contains(ControlFlowStatement::For)) {
-        fatalError("EXIT expects a matching FOR");
+    if (m_controlFlowStack.empty()) {
+        fatalError("EXIT requires a control block (FOR, DO)");
     }
 }
 

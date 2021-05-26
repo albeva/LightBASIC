@@ -46,12 +46,7 @@ private:
     Sem::ConstantFoldingPass m_constantFolder;
     Sem::TypePass m_typePass;
 
-    struct ControlEntry final {
-        llvm::BasicBlock* continueBlock;
-        llvm::BasicBlock* exitBlock;
-    };
-
-    ControlFlowStack<Symbol*, ControlEntry> m_controlFlowStack;
+    ControlFlowStack<> m_controlFlowStack;
 };
 
 } // namespace lbc

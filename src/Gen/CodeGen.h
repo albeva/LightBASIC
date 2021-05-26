@@ -63,7 +63,7 @@ private:
         llvm::BasicBlock* continueBlock;
         llvm::BasicBlock* exitBlock;
     };
-    ControlFlowStack<Symbol*, ControlEntry> m_controlStack;
+    ControlFlowStack<ControlEntry> m_controlStack;
 };
 
 } // namespace lbc
