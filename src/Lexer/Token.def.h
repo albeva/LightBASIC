@@ -15,7 +15,7 @@
 #define TOKEN_LITERALS(_) \
     _( StringLiteral,        "String-Literal"         ) \
     _( IntegerLiteral ,      "Integer-Literal"        ) \
-    _( FloatingPointLiteral, "Floating-point-literal" ) \
+    _( FloatingPointLiteral, "Floating-Point-Literal" ) \
     _( BooleanLiteral,       "Boolean-Literal"        ) \
     _( NullLiteral,          "Null-Literal"           )
 
@@ -58,29 +58,29 @@
     _( LogicalOr,       "OR",   2,      Binary, Left,   Logical     ) \
     _( CommaAnd,        ",",    1,      Binary, Left,   Logical     )
 
-#define TOKEN_KEYWORDS(_)   \
-    _( Var,      "VAR"      ) \
-    _( As,       "AS"       ) \
-    _( Declare,  "DECLARE"  ) \
-    _( Function, "FUNCTION" ) \
-    _( Sub,      "SUB"      ) \
-    _( End,      "END"      ) \
-    _( Return,   "RETURN"   ) \
-    _( True,     "TRUE"     ) \
-    _( False,    "FALSE"    ) \
-    _( Null,     "NULL"     ) \
-    _( If,       "IF"       ) \
-    _( Then,     "THEN"     ) \
-    _( Else,     "ELSE"     ) \
-    _( For,      "FOR"      ) \
-    _( Next,     "NEXT"     ) \
-    _( Step,     "STEP"     ) \
-    _( To,       "TO"       ) \
-    _( Do,       "DO"       ) \
-    _( Ptr,      "PTR"      ) \
+#define TOKEN_KEYWORDS(_) \
     _( Any,      "ANY"      ) \
+    _( As,       "AS"       ) \
+    _( Continue, "CONTINUE" ) \
+    _( Declare,  "DECLARE"  ) \
+    _( Do,       "DO"       ) \
+    _( Else,     "ELSE"     ) \
+    _( End,      "END"      ) \
     _( Exit,     "EXIT"     ) \
-    _( Continue, "CONTINUE" )
+    _( False,    "FALSE"    ) \
+    _( For,      "FOR"      ) \
+    _( Function, "FUNCTION" ) \
+    _( If,       "IF"       ) \
+    _( Next,     "NEXT"     ) \
+    _( Null,     "NULL"     ) \
+    _( Ptr,      "PTR"      ) \
+    _( Return,   "RETURN"   ) \
+    _( Step,     "STEP"     ) \
+    _( Sub,      "SUB"      ) \
+    _( Then,     "THEN"     ) \
+    _( To,       "TO"       ) \
+    _( True,     "TRUE"     ) \
+    _( Var,      "VAR"      )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \
@@ -89,7 +89,7 @@
     _( LogicalOr  )
 
 // All tokens combined
-#define ALL_TOKENS(_)  \
+#define ALL_TOKENS(_) \
     TOKEN_GENERAL(_)   \
     TOKEN_LITERALS(_)  \
     TOKEN_SYMBOLS(_)   \
