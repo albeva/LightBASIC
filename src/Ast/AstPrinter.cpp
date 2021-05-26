@@ -158,15 +158,35 @@ void AstPrinter::visit(AstForStmt* ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstContinueStmt* ast) noexcept {
+void AstPrinter::visit(AstControlFlowBranch* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);
-    });
-}
 
-void AstPrinter::visit(AstExitStmt* ast) noexcept {
-    m_json.object([&] {
-        writeHeader(ast);
+        m_json.attributeBegin("destination");
+        switch (ast->destination) {
+        case AstControlFlowBranch::Destination::Exit:
+            m_json.value("EXIT");
+            break;
+        case AstControlFlowBranch::Destination::Continue:
+            m_json.value("CONTINUE");
+            break;
+        }
+        m_json.attributeEnd();
+
+        if (!ast->returnControl.empty()) {
+            m_json.attributeArray("target", [&] {
+                for (auto target : ast->returnControl) {
+                    switch (target) {
+                    case ControlFlowStatement::For:
+                        m_json.value("FOR");
+                        continue;
+                    case ControlFlowStatement::Do:
+                        m_json.value("DO");
+                        continue;
+                    }
+                }
+            });
+        }
     });
 }
 

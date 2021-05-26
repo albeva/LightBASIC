@@ -4,6 +4,7 @@
 #pragma once
 #include "pch.h"
 #include "Ast.def.h"
+#include "ControlFlowStack.h"
 #include "Lexer/Token.h"
 #include "Symbol/SymbolTable.h"
 
@@ -184,13 +185,33 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     unique_ptr<SymbolTable> symbolTable;
 };
 
-struct AstContinueStmt final : AstNode<AstContinueStmt, AstStmt, AstKind::ContinueStmt> {
-    explicit AstContinueStmt(llvm::SMRange range_) noexcept : AstNode{ KIND, range_ } {};
+struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKind::ControlFlowBranch> {
+    enum class Destination {
+        Continue,
+        Exit
+    };
+
+    explicit AstControlFlowBranch(
+        llvm::SMRange range_,
+        Destination destination_,
+        std::vector<ControlFlowStatement> returnControl_) noexcept
+    : AstNode{ KIND, range_ },
+      destination{ destination_ },
+      returnControl{ std::move(returnControl_) } {}
+
+    Destination destination;
+    std::vector<ControlFlowStatement> returnControl;
 };
 
-struct AstExitStmt final : AstNode<AstExitStmt, AstStmt, AstKind::ExitStmt> {
-    explicit AstExitStmt(llvm::SMRange range_) noexcept : AstNode{ KIND, range_ } {};
-};
+//struct AstExitStmt final : AstNode<AstExitStmt, AstStmt, AstKind::ExitStmt> {
+//    explicit AstExitStmt(
+//        llvm::SMRange range_,
+//        std::vector<ControlFlowStatement> returnControl_) noexcept
+//    : AstNode{ KIND, range_ },
+//      returnControl{ std::move(returnControl_) } {}
+//
+//    std::vector<ControlFlowStatement> returnControl;
+//};
 
 //----------------------------------------
 // Attributes

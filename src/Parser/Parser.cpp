@@ -604,22 +604,56 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
 
 /**
  * CONTINUE
- *   = "CONTINUE" // { "FOR" | "DO" }
+ *   = "CONTINUE" { "FOR" }
  *   .
  */
-unique_ptr<AstContinueStmt> Parser::kwContinue() noexcept {
+unique_ptr<AstControlFlowBranch> Parser::kwContinue() noexcept {
     auto start = move()->range().Start;
-    return AstContinueStmt::create(llvm::SMRange{ start, m_endLoc });
+    std::vector<ControlFlowStatement> returnControl;
+
+    while(true) {
+        switch (m_token->kind()) {
+        case TokenKind::For:
+            move();
+            returnControl.emplace_back(ControlFlowStatement::For);
+            continue;
+        default:
+            break;
+        }
+        break;
+    }
+
+    return AstControlFlowBranch::create(
+        llvm::SMRange{ start, m_endLoc },
+        AstControlFlowBranch::Destination::Continue,
+        std::move(returnControl));
 }
 
 /**
  * EXIT
- *   = "EXIT" // { "FOR" | "DO" | "SELECT" }
+ *   = "EXIT" { "FOR" }
  *   .
  */
-unique_ptr<AstExitStmt> Parser::kwExit() noexcept {
+unique_ptr<AstControlFlowBranch> Parser::kwExit() noexcept {
     auto start = move()->range().Start;
-    return AstExitStmt::create(llvm::SMRange{ start, m_endLoc });
+    std::vector<ControlFlowStatement> returnControl;
+
+    while(true) {
+        switch (m_token->kind()) {
+        case TokenKind::For:
+            move();
+            returnControl.emplace_back(ControlFlowStatement::For);
+            continue;
+        default:
+            break;
+        }
+        break;
+    }
+
+    return AstControlFlowBranch::create(
+        llvm::SMRange{ start, m_endLoc },
+        AstControlFlowBranch::Destination::Exit,
+        std::move(returnControl));
 }
 
 //----------------------------------------

@@ -230,15 +230,19 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
     }
 }
 
-void SemanticAnalyzer::visit(AstContinueStmt* /*ast*/) noexcept {
-    if (m_controlFlowStack.empty()) {
-        fatalError("CONTINUE required a control block (FOR, DO)");
+void SemanticAnalyzer::visit(AstControlFlowBranch* ast) noexcept {
+    auto target = m_controlFlowStack.cbegin();
+    auto iter = target;
+    for (auto control: ast->returnControl) {
+        target = m_controlFlowStack.find(iter, control);
+        if (target == m_controlFlowStack.cend()) {
+            fatalError("No matching control structure found");
+        }
+        iter = target + 1;
     }
-}
 
-void SemanticAnalyzer::visit(AstExitStmt* /*ast*/) noexcept {
-    if (m_controlFlowStack.empty()) {
-        fatalError("EXIT requires a control block (FOR, DO)");
+    if (target == m_controlFlowStack.cend()) {
+        fatalError("control statement not found");
     }
 }
 

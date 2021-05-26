@@ -44,6 +44,8 @@ private:
     llvm::Value* arithmetic(AstBinaryExpr* ast) noexcept;
     llvm::Value* logical(AstBinaryExpr* ast) noexcept;
 
+    void addBlock() noexcept;
+
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;
     AstModule* m_astRootModule = nullptr;

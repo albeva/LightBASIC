@@ -15,18 +15,17 @@
  * Statements
  */
 #define AST_STMT_NODES(_) \
-    _( StmtList     ) \
-    _( AssignStmt   ) \
-    _( ExprStmt     ) \
-    _( FuncStmt     ) \
-    _( ReturnStmt   ) \
-    _( IfStmt       ) \
-    _( ForStmt      ) \
-    _( ContinueStmt ) \
-    _( ExitStmt     )
+    _( StmtList          ) \
+    _( AssignStmt        ) \
+    _( ExprStmt          ) \
+    _( FuncStmt          ) \
+    _( ReturnStmt        ) \
+    _( IfStmt            ) \
+    _( ForStmt           ) \
+    _( ControlFlowBranch ) \
 
 // include declarations
-#define AST_STMT_RANGE(_) _(StmtList, ExitStmt)
+#define AST_STMT_RANGE(_) _(StmtList, ControlFlowBranch)
 
 /**
  * Declarations

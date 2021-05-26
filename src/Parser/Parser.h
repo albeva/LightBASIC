@@ -57,8 +57,8 @@ private:
     [[nodiscard]] AstIfStmt::Block ifBlock() noexcept;
     [[nodiscard]] AstIfStmt::Block thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
     [[nodiscard]] unique_ptr<AstForStmt> kwFor() noexcept;
-    [[nodiscard]] unique_ptr<AstContinueStmt> kwContinue() noexcept;
-    [[nodiscard]] unique_ptr<AstExitStmt> kwExit() noexcept;
+    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwContinue() noexcept;
+    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwExit() noexcept;
 
     [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
     [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;

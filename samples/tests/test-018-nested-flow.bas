@@ -1,16 +1,19 @@
 ''------------------------------------------------------------------------------
-'' test-017-cont-exit.bas
-'' - continue for statement
-'' - exit for statement
+'' test-018-nested-flow.bas
+'' - nested continue statement
+'' - nested exit statement
 ''
-'' CHECK: 1, 3
+'' CHECK: 1, 2, 4
 ''------------------------------------------------------------------------------
 [Alias = "printf"] _
 Declare Function printf(fmt As ZString, ...) As Integer
 
-for i = 1 to 10
-    if i mod 2 = 0 then continue
-    if i = 5 then exit
+for i = 1 to 3
     if i <> 1 then printf ", "
     printf "%d", i
+    for x = 4 to 7
+        if i = 1 then continue for for
+        if x = 5 then exit for for
+        printf ", %d", x
+    next
 next

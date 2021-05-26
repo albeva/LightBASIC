@@ -246,6 +246,7 @@ void Driver::emitExecutable() noexcept {
             .addArg("-m", "i386pep")
             .addPath("-o", output)
             .addArg("-subsystem", "console")
+            .addArg("--stack", "1048576,1048576")
             .addPath("-L", sysLibPath)
             .addPath(sysLibPath / "crt2.o")
             .addPath(sysLibPath / "crtbegin.o");

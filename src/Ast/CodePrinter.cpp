@@ -232,12 +232,29 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
     }
 }
 
-void CodePrinter::visit(AstContinueStmt* /*ast*/) noexcept {
-    m_os << indent() << "CONTINUE";
-}
+void CodePrinter::visit(AstControlFlowBranch* ast) noexcept {
+    m_os << indent();
+    switch (ast->destination) {
+    case AstControlFlowBranch::Destination::Continue:
+        m_os << "CONTINUE";
+        break;
+    case AstControlFlowBranch::Destination::Exit:
+        m_os << "EXIT";
+        break;
+    }
 
-void CodePrinter::visit(AstExitStmt* /*ast*/) noexcept {
-    m_os << indent() << "EXIT";
+    if (!ast->returnControl.empty()) {
+        for (auto target : ast->returnControl) {
+            switch (target) {
+            case ControlFlowStatement::For:
+                m_os << " FOR";
+                continue;
+            case ControlFlowStatement::Do:
+                m_os << " DO";
+                continue;
+            }
+        }
+    }
 }
 
 // Expressions

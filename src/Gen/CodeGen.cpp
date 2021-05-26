@@ -84,6 +84,13 @@ bool CodeGen::validate() const noexcept {
     return !llvm::verifyModule(*m_module, &llvm::outs());
 }
 
+void CodeGen::addBlock() noexcept {
+    auto* func = m_builder.GetInsertBlock()->getParent();
+    auto* block = llvm::BasicBlock::Create(m_llvmContext, "", func);
+    m_builder.SetInsertPoint(block);
+}
+
+
 void CodeGen::visit(AstModule* ast) noexcept {
     m_astRootModule = ast;
     m_fileId = ast->fileId;
@@ -94,6 +101,20 @@ void CodeGen::visit(AstModule* ast) noexcept {
     m_module->setTargetTriple(m_context.getTriple().str());
 
     declareFuncs();
+
+    if (m_context.getTriple().isOSWindows()) {
+        auto* chkstk = llvm::Function::Create(
+            llvm::FunctionType::get(llvm::Type::getVoidTy(m_llvmContext), false),
+            llvm::Function::InternalLinkage,
+            "__chkstk",
+            *m_module);
+        chkstk->setCallingConv(llvm::CallingConv::C);
+        chkstk->setDSOLocal(true);
+        chkstk->setUnnamedAddr(llvm::GlobalValue::UnnamedAddr::Local);
+        auto* block = llvm::BasicBlock::Create(m_llvmContext, "entry", chkstk);
+        m_builder.SetInsertPoint(block);
+        m_builder.CreateRetVoid();
+    }
 
     bool hasMainDefined = false;
     if (auto* main = ast->symbolTable->find("MAIN")) {
@@ -515,20 +536,31 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     m_builder.SetInsertPoint(exitBlock);
 }
 
-void CodeGen::visit(AstContinueStmt* /*ast*/) noexcept {
-    auto iter = m_controlStack.cbegin();
-    if (iter == m_controlStack.cend()) {
-        fatalError("control statement not found");
+void CodeGen::visit(AstControlFlowBranch* ast) noexcept {
+    auto target = m_controlStack.cbegin();
+    auto iter = target;
+    for (auto control: ast->returnControl) {
+        target = m_controlStack.find(iter, control);
+        if (target == m_controlStack.cend()) {
+            fatalError("No matching control structure found");
+        }
+        iter = target + 1;
     }
-    m_builder.CreateBr(iter->second.continueBlock);
-}
 
-void CodeGen::visit(AstExitStmt* /*ast*/) noexcept {
-    auto iter = m_controlStack.cbegin();
-    if (iter == m_controlStack.cend()) {
+    if (target == m_controlStack.cend()) {
         fatalError("control statement not found");
     }
-    m_builder.CreateBr(iter->second.exitBlock);
+
+    switch (ast->destination) {
+    case AstControlFlowBranch::Destination::Continue:
+        m_builder.CreateBr(target->second.continueBlock);
+        break;
+    case AstControlFlowBranch::Destination::Exit:
+        m_builder.CreateBr(target->second.exitBlock);
+        break;
+    }
+
+    addBlock();
 }
 
 //------------------------------------------------------------------
