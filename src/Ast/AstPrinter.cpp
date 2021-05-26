@@ -162,7 +162,7 @@ void AstPrinter::visit(AstControlFlowBranch* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);
 
-        m_json.attributeBegin("destination");
+        m_json.attributeBegin("op");
         switch (ast->destination) {
         case AstControlFlowBranch::Destination::Exit:
             m_json.value("EXIT");
@@ -174,7 +174,7 @@ void AstPrinter::visit(AstControlFlowBranch* ast) noexcept {
         m_json.attributeEnd();
 
         if (!ast->returnControl.empty()) {
-            m_json.attributeArray("target", [&] {
+            m_json.attributeArray("dest", [&] {
                 for (auto target : ast->returnControl) {
                     switch (target) {
                     case ControlFlowStatement::For:
