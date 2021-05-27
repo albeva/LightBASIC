@@ -35,7 +35,7 @@ public:
         m_container.emplace_back(control, data);
     }
 
-    void pop() {
+    void pop() noexcept {
         m_container.pop_back();
     }
 
@@ -59,7 +59,6 @@ public:
         });
     }
 
-    [[nodiscard]] bool empty() const noexcept { return m_container.empty(); }
     [[nodiscard]] const_iterator cbegin() const noexcept { return m_container.crbegin(); }
     [[nodiscard]] const_iterator cend() const noexcept { return m_container.crend(); }
 
