@@ -237,7 +237,7 @@ void CodePrinter::visit(AstDoLoopStmt* ast) noexcept {
 
     if (!ast->decls.empty()) {
         bool first = true;
-        for (const auto& decl: ast->decls) {
+        for (const auto& decl : ast->decls) {
             if (first) {
                 first = false;
                 m_os << " ";

@@ -243,8 +243,8 @@ void SemanticAnalyzer::visit(AstDoLoopStmt* ast) noexcept {
         expression(ast->expr);
         if (!ast->expr->type->isBoolean()) {
             fatalError("type '"_t
-                       + ast->expr->type->asString()
-                       + "' cannot be used as boolean");
+                + ast->expr->type->asString()
+                + "' cannot be used as boolean");
         }
     }
 

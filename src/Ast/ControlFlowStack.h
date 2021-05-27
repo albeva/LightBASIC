@@ -32,7 +32,7 @@ public:
     ~ControlFlowStack() noexcept = default;
 
     void push(ControlFlowStatement control, Data data = {}) noexcept {
-        m_container.emplace_back( control, data );
+        m_container.emplace_back(control, data);
     }
 
     void pop() {
@@ -42,7 +42,7 @@ public:
     [[nodiscard]] const_iterator find(const std::vector<ControlFlowStatement>& destination) const noexcept {
         auto iter = cbegin();
         auto target = iter;
-        for (auto control: destination) {
+        for (auto control : destination) {
             iter = find(iter, control);
             if (iter == cend()) {
                 return cend();
@@ -59,7 +59,7 @@ public:
         });
     }
 
-    [[nodiscard]] bool empty() const noexcept { return m_container.empty();  }
+    [[nodiscard]] bool empty() const noexcept { return m_container.empty(); }
     [[nodiscard]] const_iterator cbegin() const noexcept { return m_container.crbegin(); }
     [[nodiscard]] const_iterator cend() const noexcept { return m_container.crend(); }
 

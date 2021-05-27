@@ -159,7 +159,7 @@ void AstPrinter::visit(AstForStmt* ast) noexcept {
 }
 
 void AstPrinter::visit(AstDoLoopStmt* ast) noexcept {
-    m_json.object([&]{
+    m_json.object([&] {
         writeHeader(ast);
 
         switch (ast->condition) {

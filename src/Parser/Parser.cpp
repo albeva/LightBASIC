@@ -676,7 +676,7 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
     }
 
     return AstDoLoopStmt::create(
-        llvm::SMRange{start, m_endLoc},
+        llvm::SMRange{ start, m_endLoc },
         std::move(decls),
         condition,
         std::move(expr),
@@ -696,7 +696,7 @@ unique_ptr<AstControlFlowBranch> Parser::kwContinue() noexcept {
     auto start = move()->range().Start;
     std::vector<ControlFlowStatement> returnControl;
 
-    while(true) {
+    while (true) {
         switch (m_token->kind()) {
         case TokenKind::For:
             move();
@@ -727,7 +727,7 @@ unique_ptr<AstControlFlowBranch> Parser::kwExit() noexcept {
     auto start = move()->range().Start;
     std::vector<ControlFlowStatement> returnControl;
 
-    while(true) {
+    while (true) {
         switch (m_token->kind()) {
         case TokenKind::For:
             move();
