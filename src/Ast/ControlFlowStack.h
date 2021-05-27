@@ -23,9 +23,9 @@ template<
     std::enable_if_t<std::is_trivial_v<Data>, int> = 0>
 class ControlFlowStack final {
 public:
-    using entry = std::pair<ControlFlowStatement, Data>;
-    using container = std::vector<entry>;
-    using const_iterator = typename container::const_reverse_iterator;
+    using Entry = std::pair<ControlFlowStatement, Data>;
+    using Container = std::vector<Entry>;
+    using const_iterator = typename Container::const_reverse_iterator;
 
     NO_COPY_AND_MOVE(ControlFlowStack)
     ControlFlowStack() noexcept = default;
@@ -64,7 +64,7 @@ public:
     [[nodiscard]] const_iterator cend() const noexcept { return m_container.crend(); }
 
 private:
-    container m_container;
+    Container m_container;
 };
 
 } // namespace lbc
