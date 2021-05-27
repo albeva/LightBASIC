@@ -625,7 +625,7 @@ unique_ptr<AstControlFlowBranch> Parser::kwContinue() noexcept {
 
     return AstControlFlowBranch::create(
         llvm::SMRange{ start, m_endLoc },
-        AstControlFlowBranch::Destination::Continue,
+        AstControlFlowBranch::Action::Continue,
         std::move(returnControl));
 }
 
@@ -652,7 +652,7 @@ unique_ptr<AstControlFlowBranch> Parser::kwExit() noexcept {
 
     return AstControlFlowBranch::create(
         llvm::SMRange{ start, m_endLoc },
-        AstControlFlowBranch::Destination::Exit,
+        AstControlFlowBranch::Action::Exit,
         std::move(returnControl));
 }
 

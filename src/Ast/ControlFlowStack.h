@@ -39,12 +39,18 @@ public:
         m_container.pop_back();
     }
 
-    [[nodiscard]] bool contains(ControlFlowStatement control) const noexcept {
-        return find(cbegin(), control) != cend();
-    }
-
-    [[nodiscard]] const_iterator find(ControlFlowStatement control) const noexcept {
-        return find(cbegin(), control);
+    [[nodiscard]] const_iterator find(const std::vector<ControlFlowStatement>& destination) const noexcept {
+        auto iter = cbegin();
+        auto target = iter;
+        for (auto control: destination) {
+            iter = find(iter, control);
+            if (iter == cend()) {
+                return cend();
+            }
+            target = iter;
+            iter++;
+        }
+        return target;
     }
 
     [[nodiscard]] const_iterator find(const_iterator from, ControlFlowStatement control) const noexcept {

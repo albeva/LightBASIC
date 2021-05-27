@@ -234,17 +234,17 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
 
 void CodePrinter::visit(AstControlFlowBranch* ast) noexcept {
     m_os << indent();
-    switch (ast->destination) {
-    case AstControlFlowBranch::Destination::Continue:
+    switch (ast->action) {
+    case AstControlFlowBranch::Action::Continue:
         m_os << "CONTINUE";
         break;
-    case AstControlFlowBranch::Destination::Exit:
+    case AstControlFlowBranch::Action::Exit:
         m_os << "EXIT";
         break;
     }
 
-    if (!ast->returnControl.empty()) {
-        for (auto target : ast->returnControl) {
+    if (!ast->destination.empty()) {
+        for (auto target : ast->destination) {
             switch (target) {
             case ControlFlowStatement::For:
                 m_os << " FOR";

@@ -186,32 +186,22 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
 };
 
 struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKind::ControlFlowBranch> {
-    enum class Destination {
+    enum class Action {
         Continue,
         Exit
     };
 
     explicit AstControlFlowBranch(
         llvm::SMRange range_,
-        Destination destination_,
-        std::vector<ControlFlowStatement> returnControl_) noexcept
+        Action action_,
+        std::vector<ControlFlowStatement> destination_) noexcept
     : AstNode{ KIND, range_ },
-      destination{ destination_ },
-      returnControl{ std::move(returnControl_) } {}
+      action{ action_ },
+      destination{ std::move(destination_) } {}
 
-    Destination destination;
-    std::vector<ControlFlowStatement> returnControl;
+    Action action;
+    std::vector<ControlFlowStatement> destination;
 };
-
-//struct AstExitStmt final : AstNode<AstExitStmt, AstStmt, AstKind::ExitStmt> {
-//    explicit AstExitStmt(
-//        llvm::SMRange range_,
-//        std::vector<ControlFlowStatement> returnControl_) noexcept
-//    : AstNode{ KIND, range_ },
-//      returnControl{ std::move(returnControl_) } {}
-//
-//    std::vector<ControlFlowStatement> returnControl;
-//};
 
 //----------------------------------------
 // Attributes

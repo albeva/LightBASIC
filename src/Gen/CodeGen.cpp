@@ -537,25 +537,16 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
 }
 
 void CodeGen::visit(AstControlFlowBranch* ast) noexcept {
-    auto target = m_controlStack.cbegin();
-    auto iter = target;
-    for (auto control: ast->returnControl) {
-        target = m_controlStack.find(iter, control);
-        if (target == m_controlStack.cend()) {
-            fatalError("No matching control structure found");
-        }
-        iter = target + 1;
-    }
-
+    auto target = m_controlStack.find(ast->destination);
     if (target == m_controlStack.cend()) {
         fatalError("control statement not found");
     }
 
-    switch (ast->destination) {
-    case AstControlFlowBranch::Destination::Continue:
+    switch (ast->action) {
+    case AstControlFlowBranch::Action::Continue:
         m_builder.CreateBr(target->second.continueBlock);
         break;
-    case AstControlFlowBranch::Destination::Exit:
+    case AstControlFlowBranch::Action::Exit:
         m_builder.CreateBr(target->second.exitBlock);
         break;
     }

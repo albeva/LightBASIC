@@ -219,9 +219,9 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
         }
     }
 
-    m_controlFlowStack.push(ControlFlowStatement::For);
+    m_controlStack.push(ControlFlowStatement::For);
     visit(ast->stmt.get());
-    m_controlFlowStack.pop();
+    m_controlStack.pop();
 
     if (!ast->next.empty()) {
         if (ast->next != ast->iterator->name) {
@@ -231,17 +231,7 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstControlFlowBranch* ast) noexcept {
-    auto target = m_controlFlowStack.cbegin();
-    auto iter = target;
-    for (auto control: ast->returnControl) {
-        target = m_controlFlowStack.find(iter, control);
-        if (target == m_controlFlowStack.cend()) {
-            fatalError("No matching control structure found");
-        }
-        iter = target + 1;
-    }
-
-    if (target == m_controlFlowStack.cend()) {
+    if (m_controlStack.find(ast->destination) == m_controlStack.cend()) {
         fatalError("control statement not found");
     }
 }

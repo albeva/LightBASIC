@@ -46,7 +46,7 @@ private:
     Sem::ConstantFoldingPass m_constantFolder;
     Sem::TypePass m_typePass;
 
-    ControlFlowStack<> m_controlFlowStack;
+    ControlFlowStack<> m_controlStack;
 };
 
 } // namespace lbc
