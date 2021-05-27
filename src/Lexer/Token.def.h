@@ -71,6 +71,7 @@
     _( For,      "FOR"      ) \
     _( Function, "FUNCTION" ) \
     _( If,       "IF"       ) \
+    _( Loop,     "LOOP"     ) \
     _( Next,     "NEXT"     ) \
     _( Null,     "NULL"     ) \
     _( Ptr,      "PTR"      ) \
@@ -80,7 +81,9 @@
     _( Then,     "THEN"     ) \
     _( To,       "TO"       ) \
     _( True,     "TRUE"     ) \
-    _( Var,      "VAR"      )
+    _( Until,    "UNTIL"    ) \
+    _( Var,      "VAR"      ) \
+    _( While,    "WHILE"    )
 
 #define TOKEN_OPERAOTR_KEYWORD_MAP(_) \
     _( LogicalNot ) \

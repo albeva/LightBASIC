@@ -222,9 +222,53 @@ void CodePrinter::visit(AstForStmt* ast) noexcept {
         m_indent++;
         visit(ast->stmt.get());
         m_indent--;
-        m_os << "NEXT";
+        m_os << indent() << "NEXT";
         if (!ast->next.empty()) {
             m_os << " " << ast->next;
+        }
+    } else {
+        m_os << " DO ";
+        visit(ast->stmt.get());
+    }
+}
+
+void CodePrinter::visit(AstDoLoopStmt* ast) noexcept {
+    m_os << indent() << "DO";
+
+    if (!ast->decls.empty()) {
+        bool first = true;
+        for (const auto& decl: ast->decls) {
+            if (first) {
+                first = false;
+                m_os << " ";
+            } else {
+                m_os << ", ";
+            }
+            visit(decl.get());
+        }
+    }
+
+    if (ast->condition == AstDoLoopStmt::Condition::PreWhile) {
+        m_os << " WHILE ";
+        visit(ast->expr.get());
+    } else if (ast->condition == AstDoLoopStmt::Condition::PreUntil) {
+        m_os << " UNTIL ";
+        visit(ast->expr.get());
+    }
+
+    if (ast->stmt->kind == AstKind::StmtList) {
+        m_os << "\n";
+        m_indent++;
+        visit(ast->stmt.get());
+        m_indent--;
+        m_os << indent() << "LOOP";
+
+        if (ast->condition == AstDoLoopStmt::Condition::PostWhile) {
+            m_os << " WHILE ";
+            visit(ast->expr.get());
+        } else if (ast->condition == AstDoLoopStmt::Condition::PostUntil) {
+            m_os << " UNTIL ";
+            visit(ast->expr.get());
         }
     } else {
         m_os << " DO ";

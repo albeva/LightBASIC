@@ -158,6 +158,38 @@ void AstPrinter::visit(AstForStmt* ast) noexcept {
     });
 }
 
+void AstPrinter::visit(AstDoLoopStmt* ast) noexcept {
+    m_json.object([&]{
+        writeHeader(ast);
+
+        switch (ast->condition) {
+        case AstDoLoopStmt::Condition::None:
+            break;
+        case AstDoLoopStmt::Condition::PreWhile:
+            m_json.attribute("condition", "PreWhile");
+            break;
+        case AstDoLoopStmt::Condition::PreUntil:
+            m_json.attribute("condition", "PreUntil");
+            break;
+        case AstDoLoopStmt::Condition::PostWhile:
+            m_json.attribute("condition", "PostWhile");
+            break;
+        case AstDoLoopStmt::Condition::PostUntil:
+            m_json.attribute("condition", "PostUntil");
+            break;
+        }
+        writeExpr(ast->expr.get());
+
+        if (auto* list = dyn_cast<AstStmtList>(ast->stmt.get())) {
+            writeStmts(list);
+        } else {
+            m_json.attributeBegin("stmt");
+            visit(ast->stmt.get());
+            m_json.attributeEnd();
+        }
+    });
+}
+
 void AstPrinter::visit(AstControlFlowBranch* ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);

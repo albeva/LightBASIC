@@ -51,6 +51,7 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
         case TokenKind::End:
         case TokenKind::Else:
         case TokenKind::Next:
+        case TokenKind::Loop:
             return true;
         default:
             return false;
@@ -76,6 +77,7 @@ unique_ptr<AstStmtList> Parser::stmtList() noexcept {
  *   | CallStmt
  *   | IfStmt
  *   | ForStmt
+ *   | DoLoopStmt
  *   | RETURN
  *   | EXIT
  *   | CONTINUE
@@ -102,6 +104,8 @@ unique_ptr<AstStmt> Parser::statement() noexcept {
         return kwIf();
     case TokenKind::For:
         return kwFor();
+    case TokenKind::Do:
+        return kwDo();
     case TokenKind::Continue:
         return kwContinue();
     case TokenKind::Exit:
@@ -602,6 +606,87 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
         next);
 }
 
+//----------------------------------------
+// DO ... LOOP statement
+//----------------------------------------
+
+/**
+ * DO = "DO" [ VAR { "," VAR } ]
+ *    ( EndOfStmt StmtList "LOOP" [ LoopCondition ]
+ *    | [ LoopCondition ] ( EoS StmtList "LOOP" | "DO" Statement )
+ *    )
+ *    .
+ * LoopCondition
+ *   = ("UNTIL" | "WHILE") expression
+ *   .
+ */
+[[nodiscard]] unique_ptr<AstDoLoopStmt> Parser::kwDo() noexcept {
+    auto start = m_token->range().Start;
+    expect(TokenKind::Do);
+
+    auto condition = AstDoLoopStmt::Condition::None;
+    unique_ptr<AstStmt> stmt;
+    unique_ptr<AstExpr> expr;
+    std::vector<unique_ptr<AstVarDecl>> decls;
+
+    // [ VAR { "," VAR } ]
+    auto firstVar = true;
+    while (match(TokenKind::Var)) {
+        if (firstVar) {
+            firstVar = false;
+        } else {
+            expect(TokenKind::Comma);
+        }
+        decls.emplace_back(kwVar(nullptr));
+    }
+
+    // ( EoS StmtList "LOOP" [ Condition ]
+    if (accept(TokenKind::EndOfStmt)) {
+        stmt = stmtList();
+        expect(TokenKind::Loop);
+
+        // [ Condition ]
+        if (accept(TokenKind::Until)) {
+            condition = AstDoLoopStmt::Condition::PostUntil;
+            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+        } else if (accept(TokenKind::While)) {
+            condition = AstDoLoopStmt::Condition::PostWhile;
+            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+        }
+    } else {
+        // [ Condition ]
+        if (accept(TokenKind::Until)) {
+            condition = AstDoLoopStmt::Condition::PreUntil;
+            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+        } else if (accept(TokenKind::While)) {
+            condition = AstDoLoopStmt::Condition::PreWhile;
+            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+        }
+
+        // EoS StmtList "LOOP"
+        if (accept(TokenKind::EndOfStmt)) {
+            stmt = stmtList();
+            expect(TokenKind::Loop);
+        }
+        // "DO" Statement
+        else {
+            expect(TokenKind::Do);
+            stmt = statement();
+        }
+    }
+
+    return AstDoLoopStmt::create(
+        llvm::SMRange{start, m_endLoc},
+        std::move(decls),
+        condition,
+        std::move(expr),
+        std::move(stmt));
+}
+
+//----------------------------------------
+// Branching
+//----------------------------------------
+
 /**
  * CONTINUE
  *   = "CONTINUE" { "FOR" }
@@ -616,6 +701,10 @@ unique_ptr<AstControlFlowBranch> Parser::kwContinue() noexcept {
         case TokenKind::For:
             move();
             returnControl.emplace_back(ControlFlowStatement::For);
+            continue;
+        case TokenKind::Do:
+            move();
+            returnControl.emplace_back(ControlFlowStatement::Do);
             continue;
         default:
             break;
@@ -643,6 +732,10 @@ unique_ptr<AstControlFlowBranch> Parser::kwExit() noexcept {
         case TokenKind::For:
             move();
             returnControl.emplace_back(ControlFlowStatement::For);
+            continue;
+        case TokenKind::Do:
+            move();
+            returnControl.emplace_back(ControlFlowStatement::Do);
             continue;
         default:
             break;

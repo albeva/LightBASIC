@@ -90,6 +90,11 @@ void CodeGen::addBlock() noexcept {
     m_builder.SetInsertPoint(block);
 }
 
+void CodeGen::branch(llvm::BasicBlock* dest) noexcept {
+    if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
+        m_builder.CreateBr(dest);
+    }
+}
 
 void CodeGen::visit(AstModule* ast) noexcept {
     m_astRootModule = ast;
@@ -403,9 +408,7 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
         }
 
         visit(block.stmt.get());
-        if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
-            m_builder.CreateBr(endBlock);
-        }
+        branch(endBlock);
 
         elseBlock->moveAfter(m_builder.GetInsertBlock());
         m_builder.SetInsertPoint(elseBlock);
@@ -491,9 +494,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
         m_builder.CreateStore(stepVal, step);
     }
 
-    if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
-        m_builder.CreateBr(bodyBlock);
-    }
+    branch(bodyBlock);
 
     bodyBlock->insertInto(func);
     m_builder.SetInsertPoint(bodyBlock);
@@ -501,9 +502,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     visit(ast->stmt.get());
     m_controlStack.pop();
 
-    if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
-        m_builder.CreateBr(condBlock);
-    }
+    branch(condBlock);
 
     condBlock->insertInto(func);
     m_builder.SetInsertPoint(condBlock);
@@ -532,6 +531,77 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     conditional(incrBlock, true);
     conditional(decrBlock, false);
 
+    exitBlock->insertInto(func);
+    m_builder.SetInsertPoint(exitBlock);
+}
+
+void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
+    RESTORE_ON_EXIT(m_declareAsGlobals);
+    m_declareAsGlobals = false;
+
+    // blocks
+    auto* func = m_builder.GetInsertBlock()->getParent();
+    auto* exitBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.end");
+    auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.body");
+    auto* condBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.cond");
+    auto* continueBlock = condBlock;
+
+    for (const auto& decl : ast->decls) {
+        visit(decl.get());
+    }
+
+    const auto condition = [&](bool until) {
+        condBlock->insertInto(func);
+        m_builder.SetInsertPoint(condBlock);
+        auto* value = visit(ast->expr.get());
+        if (until) {
+            m_builder.CreateCondBr(value, exitBlock, bodyBlock);
+        } else {
+            m_builder.CreateCondBr(value, bodyBlock, exitBlock);
+        }
+    };
+
+    // pre condition
+    switch (ast->condition) {
+    case AstDoLoopStmt::Condition::None:
+        continueBlock = bodyBlock;
+        break;
+    case AstDoLoopStmt::Condition::PreUntil:
+        branch(condBlock);
+        condition(true);
+        break;
+    case AstDoLoopStmt::Condition::PreWhile:
+        branch(condBlock);
+        condition(false);
+        break;
+    default:
+        break;
+    }
+
+    // body
+    branch(bodyBlock);
+    bodyBlock->insertInto(func);
+    m_builder.SetInsertPoint(bodyBlock);
+
+    m_controlStack.push(ControlFlowStatement::Do, { continueBlock, exitBlock });
+    visit(ast->stmt.get());
+    m_controlStack.pop();
+    branch(continueBlock);
+
+    // post condition
+    switch (ast->condition) {
+    case AstDoLoopStmt::Condition::PostUntil:
+        condition(true);
+        break;
+    case AstDoLoopStmt::Condition::PostWhile:
+        condition(false);
+        break;
+    default:
+        break;
+    }
+
+    // exit
+    branch(exitBlock);
     exitBlock->insertInto(func);
     m_builder.SetInsertPoint(exitBlock);
 }

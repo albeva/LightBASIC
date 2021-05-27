@@ -22,10 +22,11 @@
     _( ReturnStmt        ) \
     _( IfStmt            ) \
     _( ForStmt           ) \
-    _( ControlFlowBranch ) \
+    _( DoLoopStmt        ) \
+    _( ControlFlowBranch )
 
 // include declarations
-#define AST_STMT_RANGE(_) _(StmtList, ControlFlowBranch)
+#define AST_STMT_RANGE(_) _(StmtList, DoLoopStmt)
 
 /**
  * Declarations

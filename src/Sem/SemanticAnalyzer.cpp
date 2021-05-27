@@ -230,6 +230,29 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
     }
 }
 
+void SemanticAnalyzer::visit(AstDoLoopStmt* ast) noexcept {
+    RESTORE_ON_EXIT(m_table);
+    ast->symbolTable = make_unique<SymbolTable>(m_table);
+    m_table = ast->symbolTable.get();
+
+    for (auto& var : ast->decls) {
+        visit(var.get());
+    }
+
+    if (ast->expr) {
+        expression(ast->expr);
+        if (!ast->expr->type->isBoolean()) {
+            fatalError("type '"_t
+                       + ast->expr->type->asString()
+                       + "' cannot be used as boolean");
+        }
+    }
+
+    m_controlStack.push(ControlFlowStatement::Do);
+    visit(ast->stmt.get());
+    m_controlStack.pop();
+}
+
 void SemanticAnalyzer::visit(AstControlFlowBranch* ast) noexcept {
     if (m_controlStack.find(ast->destination) == m_controlStack.cend()) {
         fatalError("control statement not found");

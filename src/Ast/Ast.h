@@ -185,6 +185,34 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     unique_ptr<SymbolTable> symbolTable;
 };
 
+struct AstDoLoopStmt final : AstNode<AstDoLoopStmt, AstStmt, AstKind::DoLoopStmt> {
+    enum class Condition {
+        None,
+        PreWhile,
+        PreUntil,
+        PostWhile,
+        PostUntil
+    };
+
+    AstDoLoopStmt(
+        llvm::SMRange range_,
+        std::vector<unique_ptr<AstVarDecl>> decls_,
+        Condition condition_,
+        unique_ptr<AstExpr> expr_,
+        unique_ptr<AstStmt> stmt_) noexcept
+    : AstNode{ KIND, range_ },
+      decls{ std::move(decls_) },
+      condition{ condition_ },
+      expr{ std::move(expr_) },
+      stmt{ std::move(stmt_) } {}
+
+    std::vector<unique_ptr<AstVarDecl>> decls;
+    const Condition condition;
+    unique_ptr<AstExpr> expr;
+    unique_ptr<AstStmt> stmt;
+    unique_ptr<SymbolTable> symbolTable;
+};
+
 struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKind::ControlFlowBranch> {
     enum class Action {
         Continue,
