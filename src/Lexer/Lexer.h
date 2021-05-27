@@ -22,7 +22,7 @@ public:
 private:
     void skipUntilLineEnd() noexcept;
     void skipToNextLine() noexcept;
-    void multilineComment() noexcept;
+    void skipMultilineComment() noexcept;
 
     [[nodiscard]] unique_ptr<Token> endOfFile() noexcept;
     [[nodiscard]] unique_ptr<Token> endOfStatement() noexcept;

@@ -62,7 +62,7 @@ unique_ptr<Token> Lexer::next() noexcept {
             continue;
         case '/':
             if (m_input[1] == '\'') {
-                multilineComment();
+                skipMultilineComment();
                 continue;
             }
             return token(TokenKind::Divide);
@@ -168,7 +168,7 @@ void Lexer::skipToNextLine() noexcept {
     }
 }
 
-void Lexer::multilineComment() noexcept {
+void Lexer::skipMultilineComment() noexcept {
     // assume m_input[0] == '/' && m_input[1] == '\''
     m_input++;
     int level = 1;
