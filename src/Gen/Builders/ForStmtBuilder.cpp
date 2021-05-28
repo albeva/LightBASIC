@@ -25,7 +25,7 @@ ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept
     createBlocks();
     declareVars();
     checkDirection();
-    m_step = getStep();
+    configureStep();
     build();
 }
 
@@ -39,7 +39,7 @@ void ForStmtBuilder::declareVars() noexcept {
     m_llvmType = m_type->getLlvmType(m_gen.getContext());
 
     m_iterator = ValueHandler{ &m_gen, m_ast->iterator->symbol };
-    m_limit = ValueHandler(&m_gen, m_ast->limit.get(), "for.limit");
+    m_limit = ValueHandler{ &m_gen, m_ast->limit.get(), "for.limit" };
 }
 
 void ForStmtBuilder::checkDirection() noexcept {
@@ -61,7 +61,7 @@ void ForStmtBuilder::createBlocks() noexcept {
     m_exitBlock = llvm::BasicBlock::Create(m_llvmContext, "for.end");
 }
 
-ValueHandler ForStmtBuilder::getStep() noexcept {
+void ForStmtBuilder::configureStep() noexcept {
     // No step
     if (!m_ast->step) {
         llvm::Constant* stepVal = nullptr;
@@ -72,7 +72,8 @@ ValueHandler ForStmtBuilder::getStep() noexcept {
         } else {
             llvm_unreachable("Unknown type");
         }
-        return ValueHandler{ &m_gen, stepVal };
+        m_step = ValueHandler{ &m_gen, stepVal };
+        return;
     }
 
     // Literal value
@@ -97,12 +98,13 @@ ValueHandler ForStmtBuilder::getStep() noexcept {
         } else {
             llvm_unreachable("Unkown type");
         }
-        return ValueHandler{ &m_gen, stepVal };
+        m_step = ValueHandler{ &m_gen, stepVal };
+        return;
     }
 
     // Unknown value
-    auto step = ValueHandler{ &m_gen, m_ast->step.get(), "__for.step" };
-    auto* stepValue = step.get();
+    m_step = ValueHandler{ &m_gen, m_ast->step.get(), "for.step" };
+    auto* stepValue = m_step.get();
 
     auto* isStepNeg = m_builder.CreateCmp(
         getCmpPred(m_ast->step->type, TokenKind::LessThan),
@@ -137,10 +139,8 @@ ValueHandler ForStmtBuilder::getStep() noexcept {
 
     m_gen.switchBlock(negateBlock);
     stepValue = m_builder.CreateNeg(stepValue);
-    step.set(stepValue);
+    m_step.set(stepValue);
     m_builder.CreateBr(m_condBlock);
-
-    return step;
 }
 
 void ForStmtBuilder::build() noexcept {
@@ -187,23 +187,19 @@ void ForStmtBuilder::build() noexcept {
         m_builder.CreateCondBr(m_isDecr, iterDecrBlock, iterIncrBlock);
 
         m_gen.switchBlock(iterIncrBlock);
-        makeIteration(true);
-        m_builder.CreateBr(incrBlock);
+        makeIteration(true, incrBlock);
 
         m_gen.switchBlock(iterDecrBlock);
-        makeIteration(false);
-        m_builder.CreateBr(decrBlock);
+        makeIteration(false, decrBlock);
         break;
     }
     case AstForStmt::Direction::Skip:
         break;
     case AstForStmt::Direction::Increment:
-        makeIteration(true);
-        m_builder.CreateBr(m_condBlock);
+        makeIteration(true, m_condBlock);
         break;
     case AstForStmt::Direction::Decrement:
-        makeIteration(false);
-        m_builder.CreateBr(m_condBlock);
+        makeIteration(false, m_condBlock);
         break;
     }
 
@@ -222,11 +218,12 @@ void ForStmtBuilder::makeCondition(bool incr) noexcept {
     m_builder.CreateCondBr(cmp, m_bodyBlock, m_exitBlock);
 }
 
-void ForStmtBuilder::makeIteration(bool incr) noexcept {
+void ForStmtBuilder::makeIteration(bool incr, llvm::BasicBlock* branch) noexcept {
     auto* stepValue = m_step.get();
     auto* iterValue = m_iterator.get();
     auto* result = incr
         ? m_builder.CreateAdd(iterValue, stepValue)
         : m_builder.CreateSub(iterValue, stepValue);
     m_iterator.set(result);
+    m_builder.CreateBr(branch);
 }

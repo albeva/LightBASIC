@@ -2,7 +2,10 @@
 // Created by Albert Varaksin on 05/07/2020.
 //
 #include "CodeGen.hpp"
+#include "Builders/BinaryExprBuilder.hpp"
+#include "Builders/DoLoopBuilder.hpp"
 #include "Builders/ForStmtBuilder.hpp"
+#include "Builders/IfStmtBuilder.hpp"
 #include "Driver/Context.hpp"
 #include "Helpers.hpp"
 #include "Type/Type.hpp"
@@ -43,6 +46,8 @@ void CodeGen::terminateBlock(llvm::BasicBlock* dest) noexcept {
 }
 
 void CodeGen::switchBlock(llvm::BasicBlock* block) noexcept {
+    assert(block != nullptr);
+
     terminateBlock(block);
     if (block->getParent() != nullptr) {
         block->moveAfter(m_builder.GetInsertBlock());
@@ -333,40 +338,7 @@ void CodeGen::visit(AstReturnStmt* ast) noexcept {
 void CodeGen::visit(AstIfStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
-
-    auto* func = m_builder.GetInsertBlock()->getParent();
-    auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, "if.end", func);
-
-    const auto count = ast->blocks.size();
-    for (size_t idx = 0; idx < count; idx++) {
-        const auto& block = ast->blocks[idx];
-        llvm::BasicBlock* elseBlock = nullptr;
-
-        for (const auto& decl : block.decls) {
-            visit(decl.get());
-        }
-
-        if (block.expr) {
-            auto* condition = visit(block.expr.get());
-
-            auto* thenBlock = llvm::BasicBlock::Create(m_llvmContext, "if.then", func);
-            if (idx == count - 1) {
-                elseBlock = endBlock;
-            } else {
-                elseBlock = llvm::BasicBlock::Create(m_llvmContext, "if.else", func);
-            }
-            m_builder.CreateCondBr(condition, thenBlock, elseBlock);
-
-            switchBlock(thenBlock);
-        } else {
-            elseBlock = endBlock;
-        }
-
-        visit(block.stmt.get());
-        terminateBlock(endBlock);
-
-        switchBlock(elseBlock);
-    }
+    Gen::IfStmtBuilder(*this, ast);
 }
 
 void CodeGen::visit(AstForStmt* ast) noexcept {
@@ -378,64 +350,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
 void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
-
-    auto* exitBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.end");
-    auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.body");
-    auto* condBlock = (ast->condition == AstDoLoopStmt::Condition::None)
-        ? nullptr
-        : llvm::BasicBlock::Create(m_llvmContext, "do_loop.cond");
-    auto* continueBlock = condBlock;
-
-    for (const auto& decl : ast->decls) {
-        visit(decl.get());
-    }
-
-    const auto condition = [&](bool until) {
-        switchBlock(condBlock);
-        auto* value = visit(ast->expr.get());
-        if (until) {
-            m_builder.CreateCondBr(value, exitBlock, bodyBlock);
-        } else {
-            m_builder.CreateCondBr(value, bodyBlock, exitBlock);
-        }
-    };
-
-    // pre makeCondition
-    switch (ast->condition) {
-    case AstDoLoopStmt::Condition::None:
-        continueBlock = bodyBlock;
-        break;
-    case AstDoLoopStmt::Condition::PreUntil:
-        condition(true);
-        break;
-    case AstDoLoopStmt::Condition::PreWhile:
-        condition(false);
-        break;
-    default:
-        break;
-    }
-
-    // body
-    switchBlock(bodyBlock);
-    m_controlStack.push(ControlFlowStatement::Do, { continueBlock, exitBlock });
-    visit(ast->stmt.get());
-    m_controlStack.pop();
-
-    // post makeCondition
-    switch (ast->condition) {
-    case AstDoLoopStmt::Condition::PostUntil:
-        condition(true);
-        break;
-    case AstDoLoopStmt::Condition::PostWhile:
-        condition(false);
-        break;
-    default:
-        terminateBlock(continueBlock);
-        break;
-    }
-
-    // exit
-    switchBlock(exitBlock);
+    Gen::DoLoopBuilder(*this, ast);
 }
 
 void CodeGen::visit(AstControlFlowBranch* ast) noexcept {
@@ -604,114 +519,7 @@ llvm::Value* CodeGen::visit(AstAddressOf* ast) noexcept {
 //------------------------------------------------------------------
 
 llvm::Value* CodeGen::visit(AstBinaryExpr* ast) noexcept {
-    switch (Token::getOperatorType(ast->tokenKind)) {
-    case OperatorType::Arithmetic:
-        return arithmetic(ast);
-    case OperatorType::Logical:
-        return logical(ast);
-    case OperatorType::Comparison:
-        return comparison(ast);
-    default:
-        llvm_unreachable("invalid operator type");
-    }
-}
-
-llvm::Value* CodeGen::logical(AstBinaryExpr* ast) noexcept {
-    // lhs
-    auto* lhsValue = visit(ast->lhs.get());
-    auto* lhsBlock = m_builder.GetInsertBlock();
-
-    auto* func = lhsBlock->getParent();
-    const auto isAnd = ast->tokenKind == TokenKind::LogicalAnd;
-    auto prefix = isAnd ? "and"s : "or"s;
-    auto* elseBlock = llvm::BasicBlock::Create(m_llvmContext, prefix, func);
-    auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, prefix + ".end", func);
-
-    if (isAnd) {
-        m_builder.CreateCondBr(lhsValue, elseBlock, endBlock);
-    } else {
-        m_builder.CreateCondBr(lhsValue, endBlock, elseBlock);
-    }
-
-    // rhs
-    m_builder.SetInsertPoint(elseBlock);
-    auto* rhsValue = visit(ast->rhs.get());
-    auto* rhsBlock = m_builder.GetInsertBlock();
-
-    // phi
-    switchBlock(endBlock);
-    auto* phi = m_builder.CreatePHI(ast->type->getLlvmType(m_context), 2);
-
-    if (isAnd) {
-        phi->addIncoming(m_constantFalse, lhsBlock);
-    } else {
-        phi->addIncoming(m_constantTrue, lhsBlock);
-    }
-    phi->addIncoming(rhsValue, rhsBlock);
-    return phi;
-}
-
-llvm::Value* CodeGen::comparison(AstBinaryExpr* ast) noexcept {
-    auto* lhsValue = visit(ast->lhs.get());
-    auto* rhsValue = visit(ast->rhs.get());
-
-    const auto* ty = ast->lhs->type;
-    auto pred = Gen::getCmpPred(ty, ast->tokenKind);
-    return m_builder.CreateCmp(pred, lhsValue, rhsValue);
-}
-
-llvm::Value* CodeGen::arithmetic(AstBinaryExpr* ast) noexcept {
-    auto* lhsValue = visit(ast->lhs.get());
-    auto* rhsValue = visit(ast->rhs.get());
-
-    const auto* ty = ast->lhs->type;
-    llvm::Instruction::BinaryOps op{};
-
-    if (ty->isIntegral()) {
-        auto sign = ty->isSignedIntegral();
-        switch (ast->tokenKind) {
-        case TokenKind::Multiply:
-            op = llvm::Instruction::Mul;
-            break;
-        case TokenKind::Divide:
-            op = sign ? llvm::Instruction::SDiv : llvm::Instruction::UDiv;
-            break;
-        case TokenKind::Modulus:
-            op = sign ? llvm::Instruction::SRem : llvm::Instruction::URem;
-            break;
-        case TokenKind::Plus:
-            op = llvm::Instruction::Add;
-            break;
-        case TokenKind::Minus:
-            op = llvm::Instruction::Sub;
-            break;
-        default:
-            llvm_unreachable("Unknown binary op");
-        }
-    } else if (ty->isFloatingPoint()) {
-        switch (ast->tokenKind) {
-        case TokenKind::Multiply:
-            op = llvm::Instruction::FMul;
-            break;
-        case TokenKind::Divide:
-            op = llvm::Instruction::FDiv;
-            break;
-        case TokenKind::Modulus:
-            op = llvm::Instruction::FRem;
-            break;
-        case TokenKind::Plus:
-            op = llvm::Instruction::FAdd;
-            break;
-        case TokenKind::Minus:
-            op = llvm::Instruction::FSub;
-            break;
-        default:
-            llvm_unreachable("Unknown binary op");
-        }
-    } else {
-        llvm_unreachable("Unsupported binary op type");
-    }
-    return m_builder.CreateBinOp(op, lhsValue, rhsValue);
+    return Gen::BinaryExprBuilder(*this, ast).build();
 }
 
 //------------------------------------------------------------------

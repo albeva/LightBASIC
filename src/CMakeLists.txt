@@ -57,7 +57,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.hpp
     Utils/Version.hpp
-)
+    Gen/Builders/DoLoopBuilder.cpp Gen/Builders/DoLoopBuilder.hpp Gen/Builders/IfStmtBuilder.cpp Gen/Builders/IfStmtBuilder.hpp Gen/Builders/BinaryExprBuilder.cpp Gen/Builders/BinaryExprBuilder.hpp)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

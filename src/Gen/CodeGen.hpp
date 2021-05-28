@@ -22,6 +22,9 @@ public:
 
     [[nodiscard]] llvm::IRBuilder<>& getBuilder() noexcept { return m_builder; }
 
+    [[nodiscard]] llvm::ConstantInt* getTrue() noexcept { return m_constantTrue; }
+    [[nodiscard]] llvm::ConstantInt* getFalse() noexcept { return m_constantFalse; }
+
     void addBlock() noexcept;
 
     void terminateBlock(llvm::BasicBlock* dest) noexcept;
@@ -47,9 +50,6 @@ private:
     void declareLocalVar(AstVarDecl* ast) noexcept;
     static llvm::Value* getStoreValue(AstExpr* identExpr) noexcept;
     llvm::Value* getStringConstant(StringRef str) noexcept;
-    llvm::Value* comparison(AstBinaryExpr* ast) noexcept;
-    llvm::Value* arithmetic(AstBinaryExpr* ast) noexcept;
-    llvm::Value* logical(AstBinaryExpr* ast) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

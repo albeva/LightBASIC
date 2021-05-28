@@ -1,5 +1,5 @@
 //
-// Created by Albert on 22/05/2021.
+// Created by Albert Varaksin on 22/05/2021.
 //
 #include "TypePass.hpp"
 #include "Ast/Ast.hpp"

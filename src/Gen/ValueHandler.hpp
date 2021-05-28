@@ -13,7 +13,7 @@ class ValueHandler final {
 public:
     constexpr ValueHandler() noexcept = default;
 
-    constexpr ValueHandler(CodeGen* gen_, AstExpr* ast, StringRef name = "") noexcept
+    ValueHandler(CodeGen* gen_, AstExpr* ast, StringRef name = "") noexcept
     : gen{ gen_ },
       literal{ ast->kind == lbc::AstKind::LiteralExpr } {
         auto* expr = gen->visit(ast);
@@ -33,7 +33,7 @@ public:
       literal{ true },
       value{ constant } {}
 
-    constexpr ValueHandler(CodeGen* gen_, Symbol* symbol) noexcept
+    ValueHandler(CodeGen* gen_, Symbol* symbol) noexcept
     : gen{ gen_ },
       value{ symbol->getLlvmValue() } {}
 

@@ -19,11 +19,11 @@ private:
     void declareVars() noexcept;
     void build() noexcept;
     void createBlocks() noexcept;
-    ValueHandler getStep() noexcept;
+    void configureStep() noexcept;
     void checkDirection() noexcept;
 
     void makeCondition(bool incr) noexcept;
-    void makeIteration(bool incr) noexcept;
+    void makeIteration(bool incr, llvm::BasicBlock* branch) noexcept;
 
     CodeGen& m_gen;
     llvm::IRBuilder<>& m_builder;
