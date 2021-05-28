@@ -45,7 +45,8 @@ private:
     llvm::Value* logical(AstBinaryExpr* ast) noexcept;
 
     void addBlock() noexcept;
-    void branch(llvm::BasicBlock* dest) noexcept;
+    void terminateBlock(llvm::BasicBlock* dest) noexcept;
+    void switchBlock(llvm::BasicBlock* block) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

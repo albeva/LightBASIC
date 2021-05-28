@@ -90,10 +90,20 @@ void CodeGen::addBlock() noexcept {
     m_builder.SetInsertPoint(block);
 }
 
-void CodeGen::branch(llvm::BasicBlock* dest) noexcept {
+void CodeGen::terminateBlock(llvm::BasicBlock* dest) noexcept {
     if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
         m_builder.CreateBr(dest);
     }
+}
+
+void CodeGen::switchBlock(llvm::BasicBlock* block) noexcept {
+    terminateBlock(block);
+    if (block->getParent() != nullptr) {
+        block->moveAfter(m_builder.GetInsertBlock());
+    } else {
+        block->insertInto(m_builder.GetInsertBlock()->getParent());
+    }
+    m_builder.SetInsertPoint(block);
 }
 
 void CodeGen::visit(AstModule* ast) noexcept {
@@ -401,17 +411,15 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
             }
             m_builder.CreateCondBr(condition, thenBlock, elseBlock);
 
-            thenBlock->moveAfter(m_builder.GetInsertBlock());
-            m_builder.SetInsertPoint(thenBlock);
+            switchBlock(thenBlock);
         } else {
             elseBlock = endBlock;
         }
 
         visit(block.stmt.get());
-        branch(endBlock);
+        terminateBlock(endBlock);
 
-        elseBlock->moveAfter(m_builder.GetInsertBlock());
-        m_builder.SetInsertPoint(elseBlock);
+        switchBlock(elseBlock);
     }
 }
 
@@ -433,8 +441,6 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     const auto* type = ast->iterator->symbol->type();
     auto* llvmType = type->getLlvmType(m_context);
 
-    bool isIntegral = type->isIntegral();
-    auto isSigned = type->isSignedIntegral();
     auto lessThanPred = getCmpPred(type, TokenKind::LessThan);
     auto lessOrEqualPred = getCmpPred(type, TokenKind::LessOrEqual);
 
@@ -464,27 +470,24 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
         auto* negateEndBlock = llvm::BasicBlock::Create(m_llvmContext, "for.negate.end");
         m_builder.CreateCondBr(isStepNeg, negateBlock, negateEndBlock);
 
-        negateBlock->insertInto(func);
-        m_builder.SetInsertPoint(negateBlock);
+        switchBlock(negateBlock);
+
         stepValue = m_builder.CreateNeg(stepValue);
         m_builder.CreateStore(stepValue, step);
-        m_builder.CreateBr(negateEndBlock);
-
-        negateEndBlock->insertInto(func);
-        m_builder.SetInsertPoint(negateEndBlock);
+        switchBlock(negateEndBlock);
 
         auto* isDecrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.isdecr");
         auto* isIncrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.isincr");
         m_builder.CreateCondBr(isDecr, isDecrBlock, isIncrBlock);
 
-        isDecrBlock->insertInto(func);
-        m_builder.SetInsertPoint(isDecrBlock);
+        switchBlock(isDecrBlock);
         m_builder.CreateCondBr(isStepNeg, bodyBlock, exitBlock);
 
-        isIncrBlock->insertInto(func);
-        m_builder.SetInsertPoint(isIncrBlock);
+        switchBlock(isIncrBlock);
         m_builder.CreateCondBr(isStepNeg, exitBlock, bodyBlock);
     } else {
+        bool isIntegral = type->isIntegral();
+        auto isSigned = type->isSignedIntegral();
         llvm::Value* stepVal = nullptr;
         if (isIntegral) {
             stepVal = llvm::ConstantInt::get(llvmType, 1, isSigned);
@@ -494,25 +497,18 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
         m_builder.CreateStore(stepVal, step);
     }
 
-    branch(bodyBlock);
-
-    bodyBlock->insertInto(func);
-    m_builder.SetInsertPoint(bodyBlock);
+    switchBlock(bodyBlock);
     m_controlStack.push(ControlFlowStatement::For, { condBlock, exitBlock });
     visit(ast->stmt.get());
     m_controlStack.pop();
 
-    branch(condBlock);
-
-    condBlock->insertInto(func);
-    m_builder.SetInsertPoint(condBlock);
+    switchBlock(condBlock);
     auto* incrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond.incr");
     auto* decrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond.decr");
     m_builder.CreateCondBr(isDecr, decrBlock, incrBlock);
 
     const auto conditional = [&](llvm::BasicBlock* block, bool incr) {
-        block->insertInto(func);
-        m_builder.SetInsertPoint(block);
+        switchBlock(block);
 
         iterValue = m_builder.CreateLoad(iterator);
         auto* stepValue = m_builder.CreateLoad(step);
@@ -531,8 +527,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     conditional(incrBlock, true);
     conditional(decrBlock, false);
 
-    exitBlock->insertInto(func);
-    m_builder.SetInsertPoint(exitBlock);
+    switchBlock(exitBlock);
 }
 
 void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
@@ -551,8 +546,7 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
     }
 
     const auto condition = [&](bool until) {
-        condBlock->insertInto(func);
-        m_builder.SetInsertPoint(condBlock);
+        switchBlock(condBlock);
         auto* value = visit(ast->expr.get());
         if (until) {
             m_builder.CreateCondBr(value, exitBlock, bodyBlock);
@@ -567,11 +561,9 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
         continueBlock = bodyBlock;
         break;
     case AstDoLoopStmt::Condition::PreUntil:
-        branch(condBlock);
         condition(true);
         break;
     case AstDoLoopStmt::Condition::PreWhile:
-        branch(condBlock);
         condition(false);
         break;
     default:
@@ -579,14 +571,10 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
     }
 
     // body
-    branch(bodyBlock);
-    bodyBlock->insertInto(func);
-    m_builder.SetInsertPoint(bodyBlock);
-
+    switchBlock(bodyBlock);
     m_controlStack.push(ControlFlowStatement::Do, { continueBlock, exitBlock });
     visit(ast->stmt.get());
     m_controlStack.pop();
-    branch(continueBlock);
 
     // post condition
     switch (ast->condition) {
@@ -597,13 +585,12 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
         condition(false);
         break;
     default:
+        terminateBlock(continueBlock);
         break;
     }
 
     // exit
-    branch(exitBlock);
-    exitBlock->insertInto(func);
-    m_builder.SetInsertPoint(exitBlock);
+    switchBlock(exitBlock);
 }
 
 void CodeGen::visit(AstControlFlowBranch* ast) noexcept {
@@ -805,11 +792,9 @@ llvm::Value* CodeGen::logical(AstBinaryExpr* ast) noexcept {
     m_builder.SetInsertPoint(elseBlock);
     auto* rhsValue = visit(ast->rhs.get());
     auto* rhsBlock = m_builder.GetInsertBlock();
-    m_builder.CreateBr(endBlock);
 
     // phi
-    endBlock->moveAfter(rhsBlock);
-    m_builder.SetInsertPoint(endBlock);
+    switchBlock(endBlock);
     auto* phi = m_builder.CreatePHI(ast->type->getLlvmType(m_context), 2);
 
     if (isAnd) {
