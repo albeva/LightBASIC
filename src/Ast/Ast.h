@@ -160,6 +160,12 @@ struct AstIfStmt final : AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
 };
 
 struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
+    enum class Direction {
+        Unknown,
+        Skip,
+        Increment,
+        Decrement
+    };
     AstForStmt(
         llvm::SMRange range_,
         std::vector<unique_ptr<AstVarDecl>> decls_,
@@ -182,6 +188,8 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     unique_ptr<AstExpr> step;
     unique_ptr<AstStmt> stmt;
     const StringRef next;
+
+    Direction direction = Direction::Unknown;
     unique_ptr<SymbolTable> symbolTable;
 };
 
@@ -409,6 +417,12 @@ struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralE
         Value value_) noexcept
     : AstNode{ KIND, range_ },
       value{ value_ } {};
+
+    /**
+     * Return true when type is set, and contains signed integer or floatingpoint
+     * value which is less than 0
+     */
+    [[nodiscard]] bool isNegative() const noexcept;
 
     const Value value;
 };

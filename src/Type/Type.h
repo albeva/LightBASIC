@@ -70,6 +70,7 @@ public:
     [[nodiscard]] constexpr bool isZString() const noexcept { return m_kind == TypeFamily::ZString; }
     [[nodiscard]] bool isAnyPointer() const noexcept;
     [[nodiscard]] bool isSignedIntegral() const noexcept;
+    [[nodiscard]] bool isUnsignedIntegral() const noexcept;
 
     [[nodiscard]] TypeComparison compare(const TypeRoot* other) const noexcept;
 
@@ -209,6 +210,9 @@ public:
     }
 
     [[nodiscard]] constexpr bool isSigned() const noexcept { return m_signed; }
+
+    [[nodiscard]] const TypeIntegral* getSigned() const noexcept;
+    [[nodiscard]] const TypeIntegral* getUnsigned() const noexcept;
 
     [[nodiscard]] string asString() const noexcept final;
 

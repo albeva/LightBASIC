@@ -2,68 +2,14 @@
 // Created by Albert Varaksin on 05/07/2020.
 //
 #include "CodeGen.h"
+#include "Builders/ForStmtBuilder.hpp"
 #include "Driver/Context.h"
+#include "Helpers.hpp"
 #include "Type/Type.h"
+#include "ValueHandler.h"
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
-
 using namespace lbc;
-
-namespace {
-[[nodiscard]] llvm::CmpInst::Predicate getCmpPred(const TypeRoot* type, TokenKind op) noexcept {
-    if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
-        bool isSigned = integral->isSigned();
-        switch (op) {
-        case TokenKind::Equal:
-            return llvm::CmpInst::Predicate::ICMP_EQ;
-        case TokenKind::NotEqual:
-            return llvm::CmpInst::Predicate::ICMP_NE;
-        case TokenKind::LessThan:
-            return isSigned ? llvm::CmpInst::Predicate::ICMP_SLT : llvm::CmpInst::Predicate::ICMP_ULT;
-        case TokenKind::LessOrEqual:
-            return isSigned ? llvm::CmpInst::Predicate::ICMP_SLE : llvm::CmpInst::Predicate::ICMP_ULE;
-        case TokenKind::GreaterOrEqual:
-            return isSigned ? llvm::CmpInst::Predicate::ICMP_SGE : llvm::CmpInst::Predicate::ICMP_UGE;
-        case TokenKind::GreaterThan:
-            return isSigned ? llvm::CmpInst::Predicate::ICMP_SGT : llvm::CmpInst::Predicate::ICMP_UGT;
-        default:
-            llvm_unreachable("Unkown comparison op");
-        }
-    }
-
-    if (type->isFloatingPoint()) {
-        switch (op) {
-        case TokenKind::Equal:
-            return llvm::CmpInst::Predicate::FCMP_OEQ;
-        case TokenKind::NotEqual:
-            return llvm::CmpInst::Predicate::FCMP_UNE;
-        case TokenKind::LessThan:
-            return llvm::CmpInst::Predicate::FCMP_OLT;
-        case TokenKind::LessOrEqual:
-            return llvm::CmpInst::Predicate::FCMP_OLE;
-        case TokenKind::GreaterOrEqual:
-            return llvm::CmpInst::Predicate::FCMP_OGE;
-        case TokenKind::GreaterThan:
-            return llvm::CmpInst::Predicate::FCMP_OGT;
-        default:
-            llvm_unreachable("Unkown comparison op");
-        }
-    }
-
-    if (type->isBoolean() || type->isPointer()) {
-        switch (op) {
-        case TokenKind::Equal:
-            return llvm::CmpInst::Predicate::ICMP_EQ;
-        case TokenKind::NotEqual:
-            return llvm::CmpInst::Predicate::ICMP_NE;
-        default:
-            llvm_unreachable("Unkown comparison op");
-        }
-    }
-
-    llvm_unreachable("Unsupported type");
-}
-} // namespace
 
 CodeGen::CodeGen(Context& context) noexcept
 : m_context{ context },
@@ -426,108 +372,7 @@ void CodeGen::visit(AstIfStmt* ast) noexcept {
 void CodeGen::visit(AstForStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
-
-    // blocks
-    auto* exitBlock = llvm::BasicBlock::Create(m_llvmContext, "for.end");
-    auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "for.body");
-    auto* condBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond");
-
-    for (const auto& decl : ast->decls) {
-        visit(decl.get());
-    }
-
-    visit(ast->iterator.get());
-    auto* iterator = ast->iterator->symbol->getLlvmValue();
-    const auto* type = ast->iterator->symbol->type();
-    auto* llvmType = type->getLlvmType(m_context);
-
-    auto lessThanPred = getCmpPred(type, TokenKind::LessThan);
-    auto lessOrEqualPred = getCmpPred(type, TokenKind::LessOrEqual);
-
-    auto* rlimit = visit(ast->limit.get());
-    auto* limit = m_builder.CreateAlloca(llvmType, nullptr, "__for.limit");
-    m_builder.CreateStore(rlimit, limit);
-
-    auto* limitValue = m_builder.CreateLoad(limit);
-    auto* iterValue = m_builder.CreateLoad(iterator);
-    auto* isDecr = m_builder.CreateCmp(
-        lessThanPred,
-        limitValue,
-        iterValue);
-
-    auto* step = m_builder.CreateAlloca(llvmType, nullptr, "__for.step");
-    if (ast->step) {
-        auto* rstep = visit(ast->step.get());
-        m_builder.CreateStore(rstep, step);
-
-        llvm::Value* stepValue = m_builder.CreateLoad(step);
-        auto* isStepNeg = m_builder.CreateCmp(
-            lessThanPred,
-            stepValue,
-            llvm::Constant::getNullValue(llvmType));
-
-        auto* negateBlock = llvm::BasicBlock::Create(m_llvmContext, "for.negate");
-        auto* negateEndBlock = llvm::BasicBlock::Create(m_llvmContext, "for.negate.end");
-        m_builder.CreateCondBr(isStepNeg, negateBlock, negateEndBlock);
-
-        switchBlock(negateBlock);
-
-        stepValue = m_builder.CreateNeg(stepValue);
-        m_builder.CreateStore(stepValue, step);
-        switchBlock(negateEndBlock);
-
-        auto* isDecrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.isdecr");
-        auto* isIncrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.isincr");
-        m_builder.CreateCondBr(isDecr, isDecrBlock, isIncrBlock);
-
-        switchBlock(isDecrBlock);
-        m_builder.CreateCondBr(isStepNeg, bodyBlock, exitBlock);
-
-        switchBlock(isIncrBlock);
-        m_builder.CreateCondBr(isStepNeg, exitBlock, bodyBlock);
-    } else {
-        bool isIntegral = type->isIntegral();
-        auto isSigned = type->isSignedIntegral();
-        llvm::Value* stepVal = nullptr;
-        if (isIntegral) {
-            stepVal = llvm::ConstantInt::get(llvmType, 1, isSigned);
-        } else {
-            stepVal = llvm::ConstantFP::get(llvmType, 1);
-        }
-        m_builder.CreateStore(stepVal, step);
-    }
-
-    switchBlock(bodyBlock);
-    m_controlStack.push(ControlFlowStatement::For, { condBlock, exitBlock });
-    visit(ast->stmt.get());
-    m_controlStack.pop();
-
-    switchBlock(condBlock);
-    auto* incrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond.incr");
-    auto* decrBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond.decr");
-    m_builder.CreateCondBr(isDecr, decrBlock, incrBlock);
-
-    const auto conditional = [&](llvm::BasicBlock* block, bool incr) {
-        switchBlock(block);
-
-        iterValue = m_builder.CreateLoad(iterator);
-        auto* stepValue = m_builder.CreateLoad(step);
-        auto* result = incr
-            ? m_builder.CreateAdd(iterValue, stepValue)
-            : m_builder.CreateSub(iterValue, stepValue);
-        m_builder.CreateStore(result, iterator);
-
-        limitValue = m_builder.CreateLoad(limit);
-        auto* cmp = incr
-            ? m_builder.CreateCmp(lessOrEqualPred, result, limitValue)
-            : m_builder.CreateCmp(lessOrEqualPred, limitValue, result);
-        m_builder.CreateCondBr(cmp, bodyBlock, exitBlock);
-    };
-
-    conditional(incrBlock, true);
-    conditional(decrBlock, false);
-
-    switchBlock(exitBlock);
+    Gen::ForStmtBuilder(*this, ast);
 }
 
 void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
@@ -555,7 +400,7 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
         }
     };
 
-    // pre condition
+    // pre makeCondition
     switch (ast->condition) {
     case AstDoLoopStmt::Condition::None:
         continueBlock = bodyBlock;
@@ -576,7 +421,7 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
     visit(ast->stmt.get());
     m_controlStack.pop();
 
-    // post condition
+    // post makeCondition
     switch (ast->condition) {
     case AstDoLoopStmt::Condition::PostUntil:
         condition(true);
@@ -811,7 +656,7 @@ llvm::Value* CodeGen::comparison(AstBinaryExpr* ast) noexcept {
     auto* rhsValue = visit(ast->rhs.get());
 
     const auto* ty = ast->lhs->type;
-    auto pred = getCmpPred(ty, ast->tokenKind);
+    auto pred = Gen::getCmpPred(ty, ast->tokenKind);
     return m_builder.CreateCmp(pred, lhsValue, rhsValue);
 }
 

@@ -14,18 +14,25 @@ class CodeGen final : public AstVisitor<CodeGen, llvm::Value*> {
 public:
     explicit CodeGen(Context& context) noexcept;
 
-    /**
-     * Give up ownership of the generated module.
-     */
     [[nodiscard]] unique_ptr<llvm::Module> getModule() noexcept;
 
-    /**
-     * Validate module
-     */
     [[nodiscard]] bool validate() const noexcept;
 
-    AST_VISITOR_DECLARE_CONTENT_FUNCS()
+    [[nodiscard]] Context& getContext() noexcept { return m_context; }
 
+    [[nodiscard]] llvm::IRBuilder<>& getBuilder() noexcept { return m_builder; }
+
+    void addBlock() noexcept;
+
+    void terminateBlock(llvm::BasicBlock* dest) noexcept;
+
+    void switchBlock(llvm::BasicBlock* block) noexcept;
+
+    [[nodiscard]] auto& getControlStack() noexcept {
+        return m_controlStack;
+    }
+
+    AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
     enum class Scope {
         Root,
@@ -43,10 +50,6 @@ private:
     llvm::Value* comparison(AstBinaryExpr* ast) noexcept;
     llvm::Value* arithmetic(AstBinaryExpr* ast) noexcept;
     llvm::Value* logical(AstBinaryExpr* ast) noexcept;
-
-    void addBlock() noexcept;
-    void terminateBlock(llvm::BasicBlock* dest) noexcept;
-    void switchBlock(llvm::BasicBlock* block) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

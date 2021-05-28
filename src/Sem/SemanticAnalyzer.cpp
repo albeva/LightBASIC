@@ -170,10 +170,12 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
     for (auto& var : ast->decls) {
         visit(var.get());
     }
+
     visit(ast->iterator.get());
-    visit(ast->limit.get());
+    expression(ast->limit);
+
     if (ast->step) {
-        visit(ast->step.get());
+        expression(ast->step);
     }
 
     const auto* type = ast->iterator->symbol->type();
@@ -211,9 +213,33 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
         case TypeComparison::Incompatible:
             fatalError("Incompatible types in STEP");
         case TypeComparison::Downcast:
-        case TypeComparison::Upcast:
-            convert(ast->step, type);
+        case TypeComparison::Upcast: {
+            const auto* dstTy = type;
+            const auto* iterTy = dyn_cast<TypeIntegral>(type);
+            if (iterTy != nullptr && !iterTy->isSigned()) {
+                if (const auto* stepIntTy = dyn_cast<TypeIntegral>(ast->step->type)) {
+                    if (stepIntTy->isSigned()) {
+                        if (auto* literal = dyn_cast<AstLiteralExpr>(ast->step.get())) {
+                            if (static_cast<int64_t>(std::get<uint64_t>(literal->value)) < 0) {
+                                dstTy = iterTy->getSigned();
+                            }
+                        } else {
+                            dstTy = iterTy->getSigned();
+                        }
+                    }
+                } else if (const auto* stepFpTy = dyn_cast<TypeFloatingPoint>(ast->step->type)) {
+                    if (auto* literal = dyn_cast<AstLiteralExpr>(ast->step.get())) {
+                        if (std::get<double>(literal->value) < 0.0) {
+                            dstTy = iterTy->getSigned();
+                        }
+                    } else {
+                        dstTy = iterTy->getSigned();
+                    }
+                }
+            }
+            convert(ast->step, dstTy);
             break;
+        }
         case TypeComparison::Equal:
             break;
         }
@@ -226,6 +252,98 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
     if (!ast->next.empty()) {
         if (ast->next != ast->iterator->name) {
             fatalError("NEXT iterator names must match");
+        }
+    }
+
+    // iteration direction
+    determineForDirection(ast);
+}
+
+void SemanticAnalyzer::determineForDirection(AstForStmt* ast) noexcept {
+    auto* from = dyn_cast<AstLiteralExpr>(ast->iterator->expr.get());
+    auto* to = dyn_cast<AstLiteralExpr>(ast->limit.get());
+    const auto* type = ast->iterator->symbol->type();
+
+    if (from != nullptr && to != nullptr) {
+        if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
+            auto lhs = std::get<uint64_t>(from->value);
+            auto rhs = std::get<uint64_t>(to->value);
+            if (lhs == rhs) {
+                ast->direction = AstForStmt::Direction::Skip;
+            } else if (integral->isSigned()) {
+                auto slhs = static_cast<int64_t>(lhs);
+                auto srhs = static_cast<int64_t>(rhs);
+                if (slhs < srhs) {
+                    ast->direction = AstForStmt::Direction::Increment;
+                } else if (slhs > srhs) {
+                    ast->direction = AstForStmt::Direction::Decrement;
+                }
+            } else {
+                if (lhs < rhs) {
+                    ast->direction = AstForStmt::Direction::Increment;
+                } else if (lhs > rhs) {
+                    ast->direction = AstForStmt::Direction::Decrement;
+                }
+            }
+        } else if (isa<TypeFloatingPoint>(type)) {
+            auto lhs = std::get<double>(from->value);
+            auto rhs = std::get<double>(to->value);
+            if (lhs == rhs) {
+                ast->direction = AstForStmt::Direction::Skip;
+            } else if (lhs < rhs) {
+                ast->direction = AstForStmt::Direction::Increment;
+            } else {
+                ast->direction = AstForStmt::Direction::Decrement;
+            }
+        }
+    }
+
+    if (ast->step) {
+        auto* step = dyn_cast<AstLiteralExpr>(ast->step.get());
+        if (step == nullptr) {
+            return;
+        }
+        if (step->type->isSignedIntegral()) {
+            auto val = static_cast<int64_t>(std::get<uint64_t>(step->value));
+            if (val < 0) {
+                if (ast->direction == AstForStmt::Direction::Increment) {
+                    ast->direction = AstForStmt::Direction::Skip;
+                } else if (ast->direction == AstForStmt::Direction::Unknown) {
+                    ast->direction = AstForStmt::Direction::Decrement;
+                }
+            } else if (val > 0) {
+                if (ast->direction == AstForStmt::Direction::Decrement) {
+                    ast->direction = AstForStmt::Direction::Skip;
+                } else if (ast->direction == AstForStmt::Direction::Unknown) {
+                    ast->direction = AstForStmt::Direction::Increment;
+                }
+            } else {
+                ast->direction = AstForStmt::Direction::Skip;
+            }
+        } else if (step->type->isUnsignedIntegral()) {
+            auto val = std::get<uint64_t>(step->value);
+            if (val == 0 || ast->direction == AstForStmt::Direction::Decrement) {
+                ast->direction = AstForStmt::Direction::Skip;
+            } else if (ast->direction == AstForStmt::Direction::Unknown) {
+                ast->direction = AstForStmt::Direction::Increment;
+            }
+        } else if (step->type->isFloatingPoint()) {
+            auto val = std::get<double>(step->value);
+            if (val < 0.0) {
+                if (ast->direction == AstForStmt::Direction::Increment) {
+                    ast->direction = AstForStmt::Direction::Skip;
+                } else if (ast->direction == AstForStmt::Direction::Unknown) {
+                    ast->direction = AstForStmt::Direction::Decrement;
+                }
+            } else if (val > 0.0) {
+                if (ast->direction == AstForStmt::Direction::Decrement) {
+                    ast->direction = AstForStmt::Direction::Skip;
+                } else if (ast->direction == AstForStmt::Direction::Unknown) {
+                    ast->direction = AstForStmt::Direction::Increment;
+                }
+            } else {
+                ast->direction = AstForStmt::Direction::Skip;
+            }
         }
     }
 }

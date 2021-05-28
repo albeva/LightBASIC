@@ -10,6 +10,7 @@ add_library(
     Ast/AstVisitor.h
     Ast/CodePrinter.cpp
     Ast/CodePrinter.h
+    Ast/ControlFlowStack.h
     Driver/CmdLineParser.cpp
     Driver/CmdLineParser.h
     Driver/Context.cpp
@@ -19,13 +20,18 @@ add_library(
     Driver/Source.h
     Driver/TempFileCache.cpp
     Driver/TempFileCache.h
-    Driver/Toolchain/ToolTask.cpp
-    Driver/Toolchain/ToolTask.h
     Driver/Toolchain/Toolchain.cpp
     Driver/Toolchain/Toolchain.h
+    Driver/Toolchain/ToolTask.cpp
+    Driver/Toolchain/ToolTask.h
     Driver/TranslationUnit.h
+    Gen/Builders/ForStmtBuilder.cpp
+    Gen/Builders/ForStmtBuilder.hpp
     Gen/CodeGen.cpp
     Gen/CodeGen.h
+    Gen/Helpers.cpp
+    Gen/Helpers.hpp
+    Gen/ValueHandler.h
     Lexer/Lexer.cpp
     Lexer/Lexer.h
     Lexer/Token.cpp
@@ -51,7 +57,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.h
     Utils/Version.h
-    Ast/ControlFlowStack.h)
+)
 
 target_precompile_headers(project_options INTERFACE pch.h)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

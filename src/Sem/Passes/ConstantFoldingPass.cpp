@@ -23,9 +23,9 @@ constexpr inline BASE castLiteral(const AstLiteralExpr* ast) noexcept {
 } // namespace
 
 void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
-    if (m_context.getOptimizationLevel() == Context::OptimizationLevel::O0) {
-        return;
-    }
+    //    if (m_context.getOptimizationLevel() == Context::OptimizationLevel::O0) {
+    //        return;
+    //    }
 
     unique_ptr<AstExpr> replace;
     switch (ast->kind) {

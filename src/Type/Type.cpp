@@ -71,6 +71,13 @@ bool TypeRoot::isSignedIntegral() const noexcept {
     return static_cast<const TypeIntegral*>(this)->isSigned();
 }
 
+bool TypeRoot::isUnsignedIntegral() const noexcept {
+    if (!isIntegral()) {
+        return false;
+    }
+    return !static_cast<const TypeIntegral*>(this)->isSigned();
+}
+
 // clang-format off
 #define CHECK_TYPE_IMPL(ID, ...)             \
     bool TypeRoot::is##ID() const noexcept { \
@@ -208,6 +215,14 @@ const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) noexcept {
 #undef USE_TYPE
 
     fatalError("Invalid integer type size: "_t + Twine(bits), false);
+}
+
+const TypeIntegral* TypeIntegral::getSigned() const noexcept {
+    return TypeIntegral::get(getBits(), true);
+}
+
+const TypeIntegral* TypeIntegral::getUnsigned() const noexcept {
+    return TypeIntegral::get(getBits(), false);
 }
 
 llvm::Type* TypeIntegral::genLlvmType(Context& context) const noexcept {

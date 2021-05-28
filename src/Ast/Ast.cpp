@@ -27,7 +27,7 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const
                 fatalError("Attribute "_t + key + " must have 1 value", false);
             }
             if (auto* literal = dyn_cast<AstLiteralExpr>(attr->argExprs[0].get())) {
-                if (auto* str = std::get_if<StringRef>(&literal->value)) {
+                if (const auto* str = std::get_if<StringRef>(&literal->value)) {
                     return *str;
                 }
                 fatalError("Attribute "_t + key + " must be a string literal", false);
@@ -35,4 +35,23 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const
         }
     }
     return "";
+}
+
+bool AstLiteralExpr::isNegative() const noexcept {
+    if (type == nullptr) {
+        return false;
+    }
+
+    if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
+        if (!integral->isSigned()) {
+            return false;
+        }
+        return static_cast<int64_t>(std::get<uint64_t>(value)) < 0;
+    }
+
+    if (const auto* fp = dyn_cast<TypeFloatingPoint>(type)) {
+        return std::get<double>(value) < 0.0;
+    }
+
+    return false;
 }

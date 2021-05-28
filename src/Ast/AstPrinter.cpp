@@ -166,16 +166,16 @@ void AstPrinter::visit(AstDoLoopStmt* ast) noexcept {
         case AstDoLoopStmt::Condition::None:
             break;
         case AstDoLoopStmt::Condition::PreWhile:
-            m_json.attribute("condition", "PreWhile");
+            m_json.attribute("makeCondition", "PreWhile");
             break;
         case AstDoLoopStmt::Condition::PreUntil:
-            m_json.attribute("condition", "PreUntil");
+            m_json.attribute("makeCondition", "PreUntil");
             break;
         case AstDoLoopStmt::Condition::PostWhile:
-            m_json.attribute("condition", "PostWhile");
+            m_json.attribute("makeCondition", "PostWhile");
             break;
         case AstDoLoopStmt::Condition::PostUntil:
-            m_json.attribute("condition", "PostUntil");
+            m_json.attribute("makeCondition", "PostUntil");
             break;
         }
         writeExpr(ast->expr.get());
@@ -301,6 +301,9 @@ void AstPrinter::visit(AstLiteralExpr* ast) noexcept {
         auto [kind, value] = std::visit(visitor, ast->value);
         m_json.attribute("kind", Token::description(kind));
         m_json.attribute("value", value);
+        if (ast->type) {
+            m_json.attribute("type", ast->type->asString());
+        }
     });
 }
 
