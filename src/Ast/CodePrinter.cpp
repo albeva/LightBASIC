@@ -1,10 +1,10 @@
 ////
 //// Created by Albert Varaksin on 05/07/2020.
 ////
-#include "CodePrinter.h"
-#include "Ast.h"
-#include "Lexer/Token.h"
-#include "Type/Type.h"
+#include "CodePrinter.hpp"
+#include "Ast.hpp"
+#include "Lexer/Token.hpp"
+#include "Type/Type.hpp"
 using namespace lbc;
 
 void CodePrinter::visit(AstModule* ast) noexcept {

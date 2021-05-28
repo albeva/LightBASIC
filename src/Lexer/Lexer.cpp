@@ -5,9 +5,9 @@
 #    pragma ide diagnostic ignored "cppcoreguidelines-pro-bounds-pointer-arithmetic"
 #endif
 
-#include "Lexer.h"
-#include "Driver/Context.h"
-#include "Token.h"
+#include "Lexer.hpp"
+#include "Driver/Context.hpp"
+#include "Token.hpp"
 #include <charconv>
 using namespace lbc;
 

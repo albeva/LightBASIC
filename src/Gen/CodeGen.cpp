@@ -1,12 +1,12 @@
 //
 // Created by Albert Varaksin on 05/07/2020.
 //
-#include "CodeGen.h"
+#include "CodeGen.hpp"
 #include "Builders/ForStmtBuilder.hpp"
-#include "Driver/Context.h"
+#include "Driver/Context.hpp"
 #include "Helpers.hpp"
-#include "Type/Type.h"
-#include "ValueHandler.h"
+#include "Type/Type.hpp"
+#include "ValueHandler.hpp"
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
 using namespace lbc;

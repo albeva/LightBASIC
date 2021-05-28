@@ -1,8 +1,8 @@
 //
 // Created by Albert Varaksin on 18/04/2021.
 //
-#include "Utils.h"
-#include "Driver/TempFileCache.h"
+#include "Utils.hpp"
+#include "Driver/TempFileCache.hpp"
 
 void lbc::fatalError(const Twine& message, bool prefix) noexcept {
     TempFileCache::removeTemporaryFiles();

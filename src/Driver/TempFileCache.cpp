@@ -4,7 +4,7 @@
 //
 //  Created by Albert Varaksin on 26/04/2021.
 //
-#include "TempFileCache.h"
+#include "TempFileCache.hpp"
 #include <llvm/Support/FileSystem.h>
 using namespace lbc;
 

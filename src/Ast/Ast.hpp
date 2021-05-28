@@ -2,11 +2,11 @@
 // Created by Albert Varaksin on 05/07/2020.
 //
 #pragma once
-#include "pch.h"
-#include "Ast.def.h"
-#include "ControlFlowStack.h"
-#include "Lexer/Token.h"
-#include "Symbol/SymbolTable.h"
+#include "Ast.def.hpp"
+#include "ControlFlowStack.hpp"
+#include "Lexer/Token.hpp"
+#include "Symbol/SymbolTable.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 

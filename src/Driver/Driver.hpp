@@ -2,11 +2,11 @@
 // Created by Albert Varaksin on 13/07/2020.
 //
 #pragma once
-#include "pch.h"
-#include "Ast/Ast.h"
-#include "Context.h"
-#include "Source.h"
-#include "TranslationUnit.h"
+#include "Ast/Ast.hpp"
+#include "Context.hpp"
+#include "Source.hpp"
+#include "TranslationUnit.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 

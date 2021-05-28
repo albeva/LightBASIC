@@ -1,9 +1,9 @@
 //
 // Created by Albert Varaksin on 07/07/2020.
 //
-#include "Type.h"
-#include "Driver/Context.h"
-#include "Lexer/Token.h"
+#include "Type.hpp"
+#include "Driver/Context.hpp"
+#include "Lexer/Token.hpp"
 using namespace lbc;
 
 namespace {

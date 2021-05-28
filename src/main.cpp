@@ -1,9 +1,9 @@
 //
 // Created by Albert Varaksin on 03/07/2020.
 //
-#include "Driver/CmdLineParser.h"
-#include "Driver/Context.h"
-#include "Driver/Driver.h"
+#include "Driver/CmdLineParser.hpp"
+#include "Driver/Context.hpp"
+#include "Driver/Driver.hpp"
 using namespace lbc;
 
 int main(int argc, const char* argv[]) {

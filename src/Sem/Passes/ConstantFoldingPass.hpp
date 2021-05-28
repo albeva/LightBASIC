@@ -2,8 +2,8 @@
 // Created by Albert Varaksin on 05/05/2021.
 //
 #pragma once
-#include "pch.h"
-#include "Ast/Ast.h"
+#include "Ast/Ast.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 class Context;

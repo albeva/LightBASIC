@@ -2,9 +2,9 @@
 // Created by Albert Varaksin on 08/05/2021.
 //
 #pragma once
-#include "pch.h"
-#include "Ast/Ast.h"
-#include "Source.h"
+#include "Ast/Ast.hpp"
+#include "Source.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 

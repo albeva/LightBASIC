@@ -1,15 +1,15 @@
 //
 // Created by Albert Varaksin on 13/07/2020.
 //
-#include "Driver.h"
-#include "Ast/AstPrinter.h"
-#include "Ast/CodePrinter.h"
-#include "Gen/CodeGen.h"
-#include "Parser/Parser.h"
-#include "Sem/SemanticAnalyzer.h"
-#include "TempFileCache.h"
-#include "Toolchain/ToolTask.h"
-#include "Toolchain/Toolchain.h"
+#include "Driver.hpp"
+#include "Ast/AstPrinter.hpp"
+#include "Ast/CodePrinter.hpp"
+#include "Driver/Toolchain/Toolchain.hpp"
+#include "Gen/CodeGen.hpp"
+#include "Parser/Parser.hpp"
+#include "Sem/SemanticAnalyzer.hpp"
+#include "TempFileCache.hpp"
+#include "Toolchain/ToolTask.hpp"
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Support/FileSystem.h>
 

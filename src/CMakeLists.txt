@@ -1,65 +1,65 @@
 # lbc library
 add_library(
     lbc_lib
-    pch.h
+    pch.hpp
     Ast/Ast.cpp
-    Ast/Ast.def.h
-    Ast/Ast.h
+    Ast/Ast.def.hpp
+    Ast/Ast.hpp
     Ast/AstPrinter.cpp
-    Ast/AstPrinter.h
+    Ast/AstPrinter.hpp
     Ast/AstVisitor.h
     Ast/CodePrinter.cpp
-    Ast/CodePrinter.h
-    Ast/ControlFlowStack.h
+    Ast/CodePrinter.hpp
+    Ast/ControlFlowStack.hpp
     Driver/CmdLineParser.cpp
-    Driver/CmdLineParser.h
+    Driver/CmdLineParser.hpp
     Driver/Context.cpp
-    Driver/Context.h
+    Driver/Context.hpp
     Driver/Driver.cpp
-    Driver/Driver.h
-    Driver/Source.h
+    Driver/Driver.hpp
+    Driver/Source.hpp
     Driver/TempFileCache.cpp
-    Driver/TempFileCache.h
+    Driver/TempFileCache.hpp
     Driver/Toolchain/Toolchain.cpp
-    Driver/Toolchain/Toolchain.h
+    Driver/Toolchain/Toolchain.hpp
     Driver/Toolchain/ToolTask.cpp
-    Driver/Toolchain/ToolTask.h
-    Driver/TranslationUnit.h
+    Driver/Toolchain/ToolTask.hpp
+    Driver/TranslationUnit.hpp
     Gen/Builders/ForStmtBuilder.cpp
     Gen/Builders/ForStmtBuilder.hpp
     Gen/CodeGen.cpp
-    Gen/CodeGen.h
+    Gen/CodeGen.hpp
     Gen/Helpers.cpp
     Gen/Helpers.hpp
-    Gen/ValueHandler.h
+    Gen/ValueHandler.hpp
     Lexer/Lexer.cpp
-    Lexer/Lexer.h
+    Lexer/Lexer.hpp
     Lexer/Token.cpp
-    Lexer/Token.def.h
-    Lexer/Token.h
+    Lexer/Token.def.hpp
+    Lexer/Token.hpp
     Parser/Parser.cpp
-    Parser/Parser.h
+    Parser/Parser.hpp
     Sem/Passes/ConstantFoldingPass.cpp
-    Sem/Passes/ConstantFoldingPass.h
+    Sem/Passes/ConstantFoldingPass.hpp
     Sem/Passes/FuncDeclarerPass.cpp
-    Sem/Passes/FuncDeclarerPass.h
+    Sem/Passes/FuncDeclarerPass.hpp
     Sem/Passes/TypePass.cpp
-    Sem/Passes/TypePass.h
+    Sem/Passes/TypePass.hpp
     Sem/SemanticAnalyzer.cpp
-    Sem/SemanticAnalyzer.h
-    Symbol/Symbol.h
+    Sem/SemanticAnalyzer.hpp
+    Symbol/Symbol.hpp
     Symbol/SymbolTable.cpp
-    Symbol/SymbolTable.h
+    Symbol/SymbolTable.hpp
     Type/Type.cpp
-    Type/Type.def.h
-    Type/Type.h
-    Utils/EnumFlags.h
+    Type/Type.def.hpp
+    Type/Type.hpp
+    Utils/EnumFlags.hpp
     Utils/Utils.cpp
-    Utils/Utils.h
-    Utils/Version.h
+    Utils/Utils.hpp
+    Utils/Version.hpp
 )
 
-target_precompile_headers(project_options INTERFACE pch.h)
+target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)
 configure_llvm(lbc_lib)
 target_link_libraries(lbc_lib PUBLIC project_options project_warnings)

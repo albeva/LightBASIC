@@ -1,13 +1,13 @@
 //
 // Created by Albert Varaksin on 08/07/2020.
 //
-#include "SemanticAnalyzer.h"
-#include "Ast/Ast.h"
-#include "Lexer/Token.h"
-#include "Passes/FuncDeclarerPass.h"
-#include "Symbol/Symbol.h"
-#include "Symbol/SymbolTable.h"
-#include "Type/Type.h"
+#include "SemanticAnalyzer.hpp"
+#include "Ast/Ast.hpp"
+#include "Lexer/Token.hpp"
+#include "Passes/FuncDeclarerPass.hpp"
+#include "Symbol/Symbol.hpp"
+#include "Symbol/SymbolTable.hpp"
+#include "Type/Type.hpp"
 #include <charconv>
 
 using namespace lbc;

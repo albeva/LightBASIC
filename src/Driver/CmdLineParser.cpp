@@ -1,8 +1,8 @@
 //
 // Created by Albert Varaksin on 17/04/2021.
 //
-#include "CmdLineParser.h"
-#include "Context.h"
+#include "CmdLineParser.hpp"
+#include "Context.hpp"
 #include <llvm/Support/FileSystem.h>
 using namespace lbc;
 

@@ -1,8 +1,8 @@
 //
 // Created by Albert Varaksin on 06/07/2020.
 //
-#include "SymbolTable.h"
-#include "Symbol.h"
+#include "SymbolTable.hpp"
+#include "Symbol.hpp"
 using namespace lbc;
 
 Symbol* SymbolTable::insert(StringRef name) noexcept {

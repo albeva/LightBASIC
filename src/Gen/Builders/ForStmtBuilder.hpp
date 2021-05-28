@@ -2,10 +2,10 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #pragma once
-#include "pch.h"
-#include "Ast/Ast.h"
-#include "Gen/CodeGen.h"
-#include "Gen/ValueHandler.h"
+#include "Ast/Ast.hpp"
+#include "Gen/CodeGen.hpp"
+#include "Gen/ValueHandler.hpp"
+#include "pch.hpp"
 
 namespace lbc::Gen {
 

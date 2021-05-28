@@ -2,8 +2,8 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #include "Helpers.hpp"
-#include "Lexer/Token.h"
-#include "Type/Type.h"
+#include "Lexer/Token.hpp"
+#include "Type/Type.hpp"
 using namespace lbc;
 using namespace Gen;
 

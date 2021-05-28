@@ -2,11 +2,11 @@
 // Created by Albert Varaksin on 08/07/2020.
 //
 #pragma once
-#include "pch.h"
 #include "Ast/AstVisitor.h"
-#include "Ast/ControlFlowStack.h"
-#include "Passes/ConstantFoldingPass.h"
-#include "Passes/TypePass.h"
+#include "Ast/ControlFlowStack.hpp"
+#include "Passes/ConstantFoldingPass.hpp"
+#include "Passes/TypePass.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 

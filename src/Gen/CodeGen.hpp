@@ -2,9 +2,9 @@
 // Created by Albert Varaksin on 05/07/2020.
 //
 #pragma once
-#include "pch.h"
 #include "Ast/AstVisitor.h"
-#include "Ast/ControlFlowStack.h"
+#include "Ast/ControlFlowStack.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 

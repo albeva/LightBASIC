@@ -1,12 +1,12 @@
 //
 // Created by Albert Varaksin on 03/07/2020.
 //
-#include "Parser.h"
-#include "Ast/Ast.h"
-#include "Driver/Context.h"
-#include "Lexer/Lexer.h"
-#include "Lexer/Token.h"
-#include "Type/Type.h"
+#include "Parser.hpp"
+#include "Ast/Ast.hpp"
+#include "Driver/Context.hpp"
+#include "Lexer/Lexer.hpp"
+#include "Lexer/Token.hpp"
+#include "Type/Type.hpp"
 #include <limits>
 using namespace lbc;
 

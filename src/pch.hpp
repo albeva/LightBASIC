@@ -71,5 +71,5 @@ using llvm::StringRef;
 using llvm::Twine;
 
 // APP
-#include "Utils/Utils.h"
-#include "Utils/Version.h"
+#include "Utils/Utils.hpp"
+#include "Utils/Version.hpp"

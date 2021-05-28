@@ -1,11 +1,11 @@
 //
 // Created by Albert Varaksin on 01/05/2021.
 //
-#include "FuncDeclarerPass.h"
-#include "Ast/Ast.h"
-#include "Symbol/SymbolTable.h"
-#include "Type/Type.h"
-#include "TypePass.h"
+#include "FuncDeclarerPass.hpp"
+#include "Ast/Ast.hpp"
+#include "Symbol/SymbolTable.hpp"
+#include "Type/Type.hpp"
+#include "TypePass.hpp"
 
 using namespace lbc;
 using namespace Sem;

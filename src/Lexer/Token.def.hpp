@@ -2,7 +2,7 @@
 // Created by Albert Varaksin on 03/07/2020.
 //
 #pragma once
-#include "Type/Type.def.h"
+#include "Type/Type.def.hpp"
 
 // clang-format off
 

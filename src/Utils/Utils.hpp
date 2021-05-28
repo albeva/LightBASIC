@@ -3,7 +3,7 @@
 //
 #pragma once
 // do not include pch.h!
-#include "EnumFlags.h"
+#include "EnumFlags.hpp"
 
 #define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
 

@@ -1,9 +1,9 @@
 //
 // Created by Albert Varaksin on 05/07/2020.
 //
-#include "Ast.h"
+#include "Ast.hpp"
 #include "AstVisitor.h"
-#include "Type/Type.h"
+#include "Type/Type.hpp"
 using namespace lbc;
 
 namespace literals {

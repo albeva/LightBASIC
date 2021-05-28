@@ -2,8 +2,8 @@
 // Created by Albert Varaksin on 18/04/2021.
 //
 #pragma once
-#include "pch.h"
-#include "Toolchain/Toolchain.h"
+#include "Driver/Toolchain/Toolchain.hpp"
+#include "pch.hpp"
 
 namespace lbc {
 

@@ -2,10 +2,10 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #pragma once
-#include "Ast/Ast.h"
-#include "CodeGen.h"
-#include "Symbol/Symbol.h"
-#include "Type/Type.h"
+#include "Ast/Ast.hpp"
+#include "CodeGen.hpp"
+#include "Symbol/Symbol.hpp"
+#include "Type/Type.hpp"
 
 namespace lbc {
 

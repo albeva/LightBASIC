@@ -1,11 +1,11 @@
 //
 // Created by Albert Varaksin on 22/07/2020.
 //
-#include "AstPrinter.h"
-#include "Ast.h"
-#include "Driver/Context.h"
-#include "Lexer/Token.h"
-#include "Type/Type.h"
+#include "AstPrinter.hpp"
+#include "Ast.hpp"
+#include "Driver/Context.hpp"
+#include "Lexer/Token.hpp"
+#include "Type/Type.hpp"
 using namespace lbc;
 
 AstPrinter::AstPrinter(Context& context, llvm::raw_ostream& os) noexcept

@@ -2,13 +2,13 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #include "ForStmtBuilder.hpp"
-#include "Ast/Ast.h"
-#include "Driver/Context.h"
-#include "Gen/CodeGen.h"
+#include "Ast/Ast.hpp"
+#include "Driver/Context.hpp"
+#include "Gen/CodeGen.hpp"
 #include "Gen/Helpers.hpp"
-#include "Gen/ValueHandler.h"
-#include "Symbol/Symbol.h"
-#include "Type/Type.h"
+#include "Gen/ValueHandler.hpp"
+#include "Symbol/Symbol.hpp"
+#include "Type/Type.hpp"
 using namespace lbc;
 using namespace Gen;
 

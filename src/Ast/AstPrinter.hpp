@@ -2,8 +2,8 @@
 // Created by Albert Varaksin on 22/07/2020.
 //
 #pragma once
-#include "pch.h"
 #include "AstVisitor.h"
+#include "pch.hpp"
 
 namespace lbc {
 

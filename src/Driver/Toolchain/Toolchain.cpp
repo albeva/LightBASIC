@@ -1,8 +1,8 @@
 //
 // Created by Albert Varaksin on 07/02/2021.
 //
-#include "Toolchain.h"
-#include "ToolTask.h"
+#include "Toolchain.hpp"
+#include "ToolTask.hpp"
 
 using namespace lbc;
 

@@ -1,7 +1,7 @@
 //
 // Created by Albert Varaksin on 03/07/2020.
 //
-#include "Token.h"
+#include "Token.hpp"
 
 using namespace lbc;
 

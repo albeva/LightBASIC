@@ -10,8 +10,8 @@
 #    pragma ide diagnostic ignored "cppcoreguidelines-avoid-magic-numbers"
 #endif
 
-#include "Driver/Context.h"
-#include "Lexer/Lexer.h"
+#include "Driver/Context.hpp"
+#include "Lexer/Lexer.hpp"
 #include <gtest/gtest.h>
 namespace {
 

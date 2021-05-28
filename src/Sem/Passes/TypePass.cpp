@@ -1,9 +1,9 @@
 //
 // Created by Albert on 22/05/2021.
 //
-#include "TypePass.h"
-#include "Ast/Ast.h"
-#include "Type/Type.h"
+#include "TypePass.hpp"
+#include "Ast/Ast.hpp"
+#include "Type/Type.hpp"
 
 using namespace lbc;
 using namespace Sem;
