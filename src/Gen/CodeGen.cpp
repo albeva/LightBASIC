@@ -428,7 +428,6 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     m_declareAsGlobals = false;
 
     // blocks
-    auto* func = m_builder.GetInsertBlock()->getParent();
     auto* exitBlock = llvm::BasicBlock::Create(m_llvmContext, "for.end");
     auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "for.body");
     auto* condBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond");
@@ -436,6 +435,7 @@ void CodeGen::visit(AstForStmt* ast) noexcept {
     for (const auto& decl : ast->decls) {
         visit(decl.get());
     }
+
     visit(ast->iterator.get());
     auto* iterator = ast->iterator->symbol->getLlvmValue();
     const auto* type = ast->iterator->symbol->type();
@@ -534,11 +534,11 @@ void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
 
-    // blocks
-    auto* func = m_builder.GetInsertBlock()->getParent();
     auto* exitBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.end");
     auto* bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.body");
-    auto* condBlock = llvm::BasicBlock::Create(m_llvmContext, "do_loop.cond");
+    auto* condBlock = (ast->condition == AstDoLoopStmt::Condition::None)
+        ? nullptr
+        : llvm::BasicBlock::Create(m_llvmContext, "do_loop.cond");
     auto* continueBlock = condBlock;
 
     for (const auto& decl : ast->decls) {
