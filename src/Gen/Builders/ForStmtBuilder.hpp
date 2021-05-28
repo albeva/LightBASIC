@@ -12,9 +12,7 @@ namespace lbc::Gen {
 class ForStmtBuilder final {
 public:
     NO_COPY_AND_MOVE(ForStmtBuilder);
-
     ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept;
-
     ~ForStmtBuilder() noexcept = default;
 
 private:
