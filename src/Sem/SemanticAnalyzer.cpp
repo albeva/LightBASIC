@@ -197,6 +197,14 @@ void SemanticAnalyzer::visit(AstControlFlowBranch& ast) noexcept {
 }
 
 //----------------------------------------
+// Type (user defined)
+//----------------------------------------
+
+void SemanticAnalyzer::visit(AstTypeDecl& /*ast*/) noexcept {
+    // llvm_unreachable("SemanticAnalyzer::AstTypeDecl");
+}
+
+//----------------------------------------
 // Attributes
 //----------------------------------------
 

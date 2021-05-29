@@ -82,7 +82,9 @@ void CodePrinter::visit(AstVarDecl& ast) noexcept {
     }
 
     m_os << indent();
-    m_os << "VAR ";
+    if (emitVARkeyword) {
+        m_os << "VAR ";
+    }
     m_os << ast.name;
 
     if (ast.typeExpr) {
@@ -159,6 +161,33 @@ void CodePrinter::visit(AstReturnStmt& ast) noexcept {
         visit(*ast.expr);
     }
 }
+
+//----------------------------------------
+// Type (user defined)
+//----------------------------------------
+
+void CodePrinter::visit(AstTypeDecl& ast) noexcept {
+    RESTORE_ON_EXIT(emitVARkeyword);
+    emitVARkeyword = false;
+
+    if (ast.attributes) {
+        visit(*ast.attributes);
+        m_os << " _" << '\n';
+    }
+
+    m_os << indent() << "TYPE " << ast.name << '\n';
+    m_indent++;
+    for (const auto& decl: ast.decls) {
+        visit(*decl);
+        m_os << '\n';
+    }
+    m_indent--;
+    m_os << indent() << "END TYPE";
+}
+
+//----------------------------------------
+// IF statement
+//----------------------------------------
 
 void CodePrinter::visit(AstIfStmt& ast) noexcept {
     bool isFirst = true;

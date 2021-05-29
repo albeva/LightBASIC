@@ -74,6 +74,10 @@ private:
     [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstStmt> kwReturn() noexcept;
 
+    [[nodiscard]] unique_ptr<AstTypeDecl> kwType(unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] std::vector<unique_ptr<AstDecl>> typeDeclList() noexcept;
+    [[nodiscard]] unique_ptr<AstDecl> typeMember(unique_ptr<AstAttributeList> attribs) noexcept;
+
     // return true if has more content to parse
     [[nodiscard]] bool isValid() const noexcept;
 

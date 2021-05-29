@@ -81,6 +81,7 @@
     _( Then,     "THEN"     ) \
     _( To,       "TO"       ) \
     _( True,     "TRUE"     ) \
+    _( Type,     "TYPE"     ) \
     _( Until,    "UNTIL"    ) \
     _( Var,      "VAR"      ) \
     _( While,    "WHILE"    )

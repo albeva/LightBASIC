@@ -34,9 +34,10 @@
 #define AST_DECL_NODES(_) \
     _( VarDecl       ) \
     _( FuncDecl      ) \
-    _( FuncParamDecl )
+    _( FuncParamDecl ) \
+    _( TypeDecl      )
 
-#define AST_DECL_RANGE(_) _(VarDecl, FuncParamDecl)
+#define AST_DECL_RANGE(_) _(VarDecl, TypeDecl)
 
 /**
  * Attributes

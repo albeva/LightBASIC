@@ -98,6 +98,27 @@ void AstPrinter::visit(AstReturnStmt& ast) noexcept {
     });
 }
 
+//----------------------------------------
+// Type (user defined)
+//----------------------------------------
+
+void AstPrinter::visit(AstTypeDecl& ast) noexcept {
+    m_json.object([&]{
+        writeHeader(ast);
+        writeAttributes(ast.attributes.get());
+        m_json.attribute("id", ast.name);
+        m_json.attributeArray("members", [&]{
+            for (const auto& decl: ast.decls) {
+                visit(*decl);
+            }
+        });
+    });
+}
+
+//----------------------------------------
+// IF statement
+//----------------------------------------
+
 void AstPrinter::visit(AstIfStmt& ast) noexcept {
     m_json.object([&] {
         writeHeader(ast);

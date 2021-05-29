@@ -139,6 +139,8 @@ unique_ptr<AstStmt> Parser::declaration() noexcept {
     case TokenKind::Function:
     case TokenKind::Sub:
         return kwFunction(std::move(attribs));
+    case TokenKind::Type:
+        return kwType(std::move(attribs));
     default:
         break;
     }
@@ -350,6 +352,82 @@ unique_ptr<AstFuncParamDecl> Parser::funcParam() noexcept {
         std::get<StringRef>(id->getValue()),
         nullptr,
         std::move(type));
+}
+
+//----------------------------------------
+// TYPE
+//----------------------------------------
+
+/**
+ * TYPE
+ *   = "TYPE" id EoS
+ *     typeDeclList
+ *     "END" "TYPE"
+ *   .
+ */
+unique_ptr<AstTypeDecl> Parser::kwType(unique_ptr<AstAttributeList> attribs) noexcept {
+    auto start = m_token->range().Start;
+    expect(TokenKind::Type);
+
+    auto id = std::get<StringRef>(expect(TokenKind::Identifier)->getValue());
+    expect(TokenKind::EndOfStmt);
+
+    auto decls = typeDeclList();
+
+    expect(TokenKind::End);
+    expect(TokenKind::Type);
+
+    return AstTypeDecl::create(
+        llvm::SMRange{ start, m_endLoc },
+        id,
+        std::move(attribs),
+        std::move(decls));
+}
+
+/**
+ * typeDeclList
+ *   = { [ AttributeList ] typeMember EoS }
+ *   .
+ */
+std::vector<unique_ptr<AstDecl>> Parser::typeDeclList() noexcept {
+    std::vector<unique_ptr<AstDecl>> decls;
+
+    while (true) {
+        unique_ptr<AstAttributeList> attribs;
+        switch (m_token->kind()) {
+        case TokenKind::BracketOpen:
+            attribs = attributeList();
+            [[fallthrough]];
+        case TokenKind::Identifier:
+            decls.emplace_back(typeMember(std::move(attribs)));
+            expect(TokenKind::EndOfStmt);
+            continue;
+        default:
+            break;
+        }
+        break;
+    }
+
+    return decls;
+}
+
+/**
+ * typeMember
+ *   = id "AS" TypeExpr
+ *   .
+ */
+unique_ptr<AstDecl> Parser::typeMember(unique_ptr<AstAttributeList> attribs) noexcept {
+    auto start = m_token->range().Start;
+    auto id = std::get<StringRef>(move()->getValue());
+    expect(TokenKind::As);
+    auto type = typeExpr();
+
+    return AstVarDecl::create(
+        llvm::SMRange{start, m_endLoc},
+        id,
+        std::move(attribs),
+        std::move(type),
+        nullptr);
 }
 
 //----------------------------------------

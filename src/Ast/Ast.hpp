@@ -346,6 +346,18 @@ struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::Func
     unique_ptr<AstTypeExpr> typeExpr;
 };
 
+struct AstTypeDecl final : AstNode<AstTypeDecl, AstDecl, AstKind::TypeDecl> {
+    AstTypeDecl(
+        llvm::SMRange range_,
+        StringRef name_,
+        unique_ptr<AstAttributeList> attrs,
+        std::vector<unique_ptr<AstDecl>> decls_)
+    : AstNode{ KIND, range_, name_, std::move(attrs) },
+      decls{ std::move(decls_) } {}
+
+    std::vector<unique_ptr<AstDecl>> decls;
+};
+
 //----------------------------------------
 // Types
 //----------------------------------------
