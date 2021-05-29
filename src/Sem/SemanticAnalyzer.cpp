@@ -660,7 +660,6 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) no
     case TypeComparison::Downcast:
     case TypeComparison::Upcast:
         return cast(ast, type);
-        break;
     case TypeComparison::Equal:
         return;
     }
