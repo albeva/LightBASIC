@@ -227,7 +227,7 @@ void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
                             dstTy = iterTy->getSigned();
                         }
                     }
-                } else if (const auto* stepFpTy = dyn_cast<TypeFloatingPoint>(ast->step->type)) {
+                } else if (isa<TypeFloatingPoint>(ast->step->type)) {
                     if (auto* literal = dyn_cast<AstLiteralExpr>(ast->step.get())) {
                         if (std::get<double>(literal->value) < 0.0) {
                             dstTy = iterTy->getSigned();

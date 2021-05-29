@@ -49,7 +49,7 @@ bool AstLiteralExpr::isNegative() const noexcept {
         return static_cast<int64_t>(std::get<uint64_t>(value)) < 0;
     }
 
-    if (const auto* fp = dyn_cast<TypeFloatingPoint>(type)) {
+    if (isa<TypeFloatingPoint>(type)) {
         return std::get<double>(value) < 0.0;
     }
 
