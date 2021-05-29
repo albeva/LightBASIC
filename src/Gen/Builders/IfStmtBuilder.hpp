@@ -11,7 +11,7 @@ namespace lbc::Gen {
 
 class IfStmtBuilder final : Builder<AstIfStmt> {
 public:
-    IfStmtBuilder(CodeGen& gen, AstIfStmt* ast) noexcept;
+    IfStmtBuilder(CodeGen& gen, AstIfStmt& ast) noexcept;
 
 private:
     void build() noexcept;

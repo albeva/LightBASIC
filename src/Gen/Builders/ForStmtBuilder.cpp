@@ -12,9 +12,9 @@
 using namespace lbc;
 using namespace Gen;
 
-ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept
+ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast) noexcept
 : Builder{ codeGen, ast },
-  m_direction{ ast->direction } {
+  m_direction{ ast.direction } {
     if (m_direction == AstForStmt::Direction::Skip) {
         return;
     }
@@ -27,16 +27,16 @@ ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept
 }
 
 void ForStmtBuilder::declareVars() noexcept {
-    for (const auto& decl : m_ast->decls) {
+    for (const auto& decl : m_ast.decls) {
         m_gen.visit(decl.get());
     }
-    m_gen.visit(m_ast->iterator.get());
+    m_gen.visit(m_ast.iterator.get());
 
-    m_type = m_ast->iterator->symbol->type();
+    m_type = m_ast.iterator->symbol->type();
     m_llvmType = m_type->getLlvmType(m_gen.getContext());
 
-    m_iterator = ValueHandler{ &m_gen, m_ast->iterator->symbol };
-    m_limit = ValueHandler{ &m_gen, m_ast->limit.get(), "for.limit" };
+    m_iterator = ValueHandler{ &m_gen, m_ast.iterator->symbol };
+    m_limit = ValueHandler{ &m_gen, m_ast.limit.get(), "for.limit" };
 }
 
 void ForStmtBuilder::checkDirection() noexcept {
@@ -60,7 +60,7 @@ void ForStmtBuilder::createBlocks() noexcept {
 
 void ForStmtBuilder::configureStep() noexcept {
     // No step
-    if (!m_ast->step) {
+    if (!m_ast.step) {
         llvm::Constant* stepVal = nullptr;
         if (const auto* integral = dyn_cast<TypeIntegral>(m_type)) {
             stepVal = llvm::ConstantInt::get(m_llvmType, 1, integral->isSigned());
@@ -74,7 +74,7 @@ void ForStmtBuilder::configureStep() noexcept {
     }
 
     // Literal value
-    if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast->step.get())) {
+    if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step.get())) {
         const auto* stepTy = literal->type;
         llvm::Constant* stepVal = nullptr;
         if (const auto* integral = dyn_cast<TypeIntegral>(stepTy)) {
@@ -100,11 +100,11 @@ void ForStmtBuilder::configureStep() noexcept {
     }
 
     // Unknown value
-    m_step = ValueHandler{ &m_gen, m_ast->step.get(), "for.step" };
+    m_step = ValueHandler{ &m_gen, m_ast.step.get(), "for.step" };
     auto* stepValue = m_step.get();
 
     auto* isStepNeg = m_builder.CreateCmp(
-        getCmpPred(m_ast->step->type, TokenKind::LessThan),
+        getCmpPred(m_ast.step->type, TokenKind::LessThan),
         stepValue,
         llvm::Constant::getNullValue(m_llvmType),
         "for.isStepNeg");
@@ -172,7 +172,7 @@ void ForStmtBuilder::build() noexcept {
     // Body
     m_gen.switchBlock(m_bodyBlock);
     m_gen.getControlStack().push(ControlFlowStatement::For, { m_iterBlock, m_exitBlock });
-    m_gen.visit(m_ast->stmt.get());
+    m_gen.visit(m_ast.stmt.get());
     m_gen.getControlStack().pop();
 
     // Iteration

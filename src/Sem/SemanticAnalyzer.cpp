@@ -4,6 +4,7 @@
 #include "SemanticAnalyzer.hpp"
 #include "Ast/Ast.hpp"
 #include "Lexer/Token.hpp"
+#include "Passes/ForStmtPass.hpp"
 #include "Passes/FuncDeclarerPass.hpp"
 #include "Symbol/Symbol.hpp"
 #include "Symbol/SymbolTable.hpp"
@@ -163,189 +164,7 @@ void SemanticAnalyzer::visit(AstIfStmt* ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstForStmt* ast) noexcept {
-    RESTORE_ON_EXIT(m_table);
-    ast->symbolTable = make_unique<SymbolTable>(m_table);
-    m_table = ast->symbolTable.get();
-
-    for (auto& var : ast->decls) {
-        visit(var.get());
-    }
-
-    visit(ast->iterator.get());
-    expression(ast->limit);
-
-    if (ast->step) {
-        expression(ast->step);
-    }
-
-    const auto* type = ast->iterator->symbol->type();
-    if (!type->isNumeric()) {
-        fatalError("NEXT iterator must be of numeric type");
-    }
-
-    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) noexcept {
-        cast(expr, ty);
-        m_constantFolder.fold(expr);
-    };
-
-    // type TO type check
-    switch (type->compare(ast->limit->type)) {
-    case TypeComparison::Incompatible:
-        fatalError("Incompatible types in FOR");
-    case TypeComparison::Downcast:
-        convert(ast->limit, type);
-        break;
-    case TypeComparison::Equal:
-        break;
-    case TypeComparison::Upcast:
-        if (ast->iterator->typeExpr) {
-            convert(ast->limit, type);
-        } else {
-            convert(ast->iterator->expr, ast->limit->type);
-            ast->iterator->symbol->setType(ast->limit->type);
-        }
-        break;
-    }
-
-    // type STEP type check
-    if (ast->step) {
-        switch (type->compare(ast->step->type)) {
-        case TypeComparison::Incompatible:
-            fatalError("Incompatible types in STEP");
-        case TypeComparison::Downcast:
-        case TypeComparison::Upcast: {
-            const auto* dstTy = type;
-            const auto* iterTy = dyn_cast<TypeIntegral>(type);
-            if (iterTy != nullptr && !iterTy->isSigned()) {
-                if (const auto* stepIntTy = dyn_cast<TypeIntegral>(ast->step->type)) {
-                    if (stepIntTy->isSigned()) {
-                        if (auto* literal = dyn_cast<AstLiteralExpr>(ast->step.get())) {
-                            if (static_cast<int64_t>(std::get<uint64_t>(literal->value)) < 0) {
-                                dstTy = iterTy->getSigned();
-                            }
-                        } else {
-                            dstTy = iterTy->getSigned();
-                        }
-                    }
-                } else if (isa<TypeFloatingPoint>(ast->step->type)) {
-                    if (auto* literal = dyn_cast<AstLiteralExpr>(ast->step.get())) {
-                        if (std::get<double>(literal->value) < 0.0) {
-                            dstTy = iterTy->getSigned();
-                        }
-                    } else {
-                        dstTy = iterTy->getSigned();
-                    }
-                }
-            }
-            convert(ast->step, dstTy);
-            break;
-        }
-        case TypeComparison::Equal:
-            break;
-        }
-    }
-
-    m_controlStack.push(ControlFlowStatement::For);
-    visit(ast->stmt.get());
-    m_controlStack.pop();
-
-    if (!ast->next.empty()) {
-        if (ast->next != ast->iterator->name) {
-            fatalError("NEXT iterator names must match");
-        }
-    }
-
-    // iteration direction
-    determineForDirection(ast);
-}
-
-void SemanticAnalyzer::determineForDirection(AstForStmt* ast) noexcept {
-    auto* from = dyn_cast<AstLiteralExpr>(ast->iterator->expr.get());
-    auto* to = dyn_cast<AstLiteralExpr>(ast->limit.get());
-    const auto* type = ast->iterator->symbol->type();
-
-    if (from != nullptr && to != nullptr) {
-        if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
-            auto lhs = std::get<uint64_t>(from->value);
-            auto rhs = std::get<uint64_t>(to->value);
-            if (lhs == rhs) {
-                ast->direction = AstForStmt::Direction::Skip;
-            } else if (integral->isSigned()) {
-                auto slhs = static_cast<int64_t>(lhs);
-                auto srhs = static_cast<int64_t>(rhs);
-                if (slhs < srhs) {
-                    ast->direction = AstForStmt::Direction::Increment;
-                } else if (slhs > srhs) {
-                    ast->direction = AstForStmt::Direction::Decrement;
-                }
-            } else {
-                if (lhs < rhs) {
-                    ast->direction = AstForStmt::Direction::Increment;
-                } else if (lhs > rhs) {
-                    ast->direction = AstForStmt::Direction::Decrement;
-                }
-            }
-        } else if (isa<TypeFloatingPoint>(type)) {
-            auto lhs = std::get<double>(from->value);
-            auto rhs = std::get<double>(to->value);
-            if (lhs == rhs) {
-                ast->direction = AstForStmt::Direction::Skip;
-            } else if (lhs < rhs) {
-                ast->direction = AstForStmt::Direction::Increment;
-            } else {
-                ast->direction = AstForStmt::Direction::Decrement;
-            }
-        }
-    }
-
-    if (ast->step) {
-        auto* step = dyn_cast<AstLiteralExpr>(ast->step.get());
-        if (step == nullptr) {
-            return;
-        }
-        if (step->type->isSignedIntegral()) {
-            auto val = static_cast<int64_t>(std::get<uint64_t>(step->value));
-            if (val < 0) {
-                if (ast->direction == AstForStmt::Direction::Increment) {
-                    ast->direction = AstForStmt::Direction::Skip;
-                } else if (ast->direction == AstForStmt::Direction::Unknown) {
-                    ast->direction = AstForStmt::Direction::Decrement;
-                }
-            } else if (val > 0) {
-                if (ast->direction == AstForStmt::Direction::Decrement) {
-                    ast->direction = AstForStmt::Direction::Skip;
-                } else if (ast->direction == AstForStmt::Direction::Unknown) {
-                    ast->direction = AstForStmt::Direction::Increment;
-                }
-            } else {
-                ast->direction = AstForStmt::Direction::Skip;
-            }
-        } else if (step->type->isUnsignedIntegral()) {
-            auto val = std::get<uint64_t>(step->value);
-            if (val == 0 || ast->direction == AstForStmt::Direction::Decrement) {
-                ast->direction = AstForStmt::Direction::Skip;
-            } else if (ast->direction == AstForStmt::Direction::Unknown) {
-                ast->direction = AstForStmt::Direction::Increment;
-            }
-        } else if (step->type->isFloatingPoint()) {
-            auto val = std::get<double>(step->value);
-            if (val < 0.0) {
-                if (ast->direction == AstForStmt::Direction::Increment) {
-                    ast->direction = AstForStmt::Direction::Skip;
-                } else if (ast->direction == AstForStmt::Direction::Unknown) {
-                    ast->direction = AstForStmt::Direction::Decrement;
-                }
-            } else if (val > 0.0) {
-                if (ast->direction == AstForStmt::Direction::Decrement) {
-                    ast->direction = AstForStmt::Direction::Skip;
-                } else if (ast->direction == AstForStmt::Direction::Unknown) {
-                    ast->direction = AstForStmt::Direction::Increment;
-                }
-            } else {
-                ast->direction = AstForStmt::Direction::Skip;
-            }
-        }
-    }
+    Sem::ForStmtPass(*this, *ast);
 }
 
 void SemanticAnalyzer::visit(AstDoLoopStmt* ast) noexcept {
@@ -642,6 +461,11 @@ void SemanticAnalyzer::visit(AstCastExpr* ast) noexcept {
     if (ast->expr->type->compare(ast->type) == TypeComparison::Incompatible) {
         fatalError("Incompatible cast");
     }
+}
+
+void SemanticAnalyzer::convert(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {
+    cast(ast, type);
+    m_constantFolder.fold(ast);
 }
 
 void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept {

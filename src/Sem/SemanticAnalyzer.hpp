@@ -20,24 +20,33 @@ class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
     explicit SemanticAnalyzer(Context& context) noexcept;
 
+    [[nodiscard]] Context& getContext() noexcept { return m_context; }
+
+    /// analyze the expression, optionally coerce result to given type
+    void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
+
+    /// Checks types and if they are convertible, create CAST expression
+    static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
+
+    /// Cast expression and fold the value
+    void convert(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
+
+    /// Creates a CAST expression, without folding
+    static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
+
+    [[nodiscard]] SymbolTable* getSymbolTable() noexcept { return m_table; }
+    void setSymbolTable(SymbolTable* table) { m_table = table; }
+
+    [[nodiscard]] auto& getControlStack() noexcept { return m_controlStack; }
+
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
-    /**
-     * Process expression. if `type` is provided then coerce the type (implicit cast)
-     * If `literal` is true, then coerce type only for literal value. E.g. default integral
-     * to `INTEGER`
-     */
-    void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, StringRef id) noexcept;
+
     void arithmetic(AstBinaryExpr* ast) noexcept;
     void logical(AstBinaryExpr* ast) noexcept;
     void comparison(AstBinaryExpr* ast) noexcept;
     [[nodiscard]] bool canPerformBinary(TokenKind op, const TypeRoot* left, const TypeRoot* right) const noexcept;
-
-    void determineForDirection(AstForStmt* ast) noexcept;
-
-    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, StringRef id) noexcept;
-    static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type) noexcept;
-    static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
 
     Context& m_context;
     unsigned int m_fileId = ~0U;

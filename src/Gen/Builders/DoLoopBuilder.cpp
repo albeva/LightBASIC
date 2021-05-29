@@ -6,10 +6,10 @@
 using namespace lbc;
 using namespace Gen;
 
-DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt* ast) noexcept
+DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt& ast) noexcept
 : Builder{ gen, ast },
   m_bodyBlock{ llvm::BasicBlock::Create(m_llvmContext, "do_loop.body") },
-  m_condBlock{ (m_ast->condition == AstDoLoopStmt::Condition::None)
+  m_condBlock{ (m_ast.condition == AstDoLoopStmt::Condition::None)
           ? nullptr
           : llvm::BasicBlock::Create(m_llvmContext, "do_loop.cond") },
   m_exitBlock{ llvm::BasicBlock::Create(m_llvmContext, "do_loop.end") },
@@ -18,12 +18,12 @@ DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt* ast) noexcept
 }
 
 void DoLoopBuilder::build() noexcept {
-    for (const auto& decl : m_ast->decls) {
+    for (const auto& decl : m_ast.decls) {
         m_gen.visit(decl.get());
     }
 
     // pre makeCondition
-    switch (m_ast->condition) {
+    switch (m_ast.condition) {
     case AstDoLoopStmt::Condition::None:
         m_continueBlock = m_bodyBlock;
         break;
@@ -40,11 +40,11 @@ void DoLoopBuilder::build() noexcept {
     // body
     m_gen.switchBlock(m_bodyBlock);
     m_gen.getControlStack().push(ControlFlowStatement::Do, { m_continueBlock, m_exitBlock });
-    m_gen.visit(m_ast->stmt.get());
+    m_gen.visit(m_ast.stmt.get());
     m_gen.getControlStack().pop();
 
     // post makeCondition
-    switch (m_ast->condition) {
+    switch (m_ast.condition) {
     case AstDoLoopStmt::Condition::PostUntil:
         makeCondition(true);
         break;
@@ -62,7 +62,7 @@ void DoLoopBuilder::build() noexcept {
 
 void DoLoopBuilder::makeCondition(bool isUntil) noexcept {
     m_gen.switchBlock(m_condBlock);
-    auto* value = m_gen.visit(m_ast->expr.get());
+    auto* value = m_gen.visit(m_ast.expr.get());
     if (isUntil) {
         m_builder.CreateCondBr(value, m_exitBlock, m_bodyBlock);
     } else {

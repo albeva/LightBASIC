@@ -6,7 +6,7 @@
 using namespace lbc;
 using namespace Gen;
 
-IfStmtBuilder::IfStmtBuilder(CodeGen& gen, AstIfStmt* ast) noexcept
+IfStmtBuilder::IfStmtBuilder(CodeGen& gen, AstIfStmt& ast) noexcept
 : Builder{ gen, ast } {
     build();
 }
@@ -15,9 +15,9 @@ void IfStmtBuilder::build() noexcept {
     auto* func = m_builder.GetInsertBlock()->getParent();
     auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, "if.end", func);
 
-    const auto count = m_ast->blocks.size();
+    const auto count = m_ast.blocks.size();
     for (size_t idx = 0; idx < count; idx++) {
-        const auto& block = m_ast->blocks[idx];
+        const auto& block = m_ast.blocks[idx];
         llvm::BasicBlock* elseBlock = nullptr;
 
         for (const auto& decl : block.decls) {

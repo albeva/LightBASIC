@@ -12,7 +12,7 @@ namespace lbc::Gen {
 
 class ForStmtBuilder final : Builder<AstForStmt> {
 public:
-    ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept;
+    ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast) noexcept;
 
 private:
     void declareVars() noexcept;

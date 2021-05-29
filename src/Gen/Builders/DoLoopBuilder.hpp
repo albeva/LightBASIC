@@ -11,7 +11,7 @@ namespace lbc::Gen {
 
 class DoLoopBuilder final : Builder<AstDoLoopStmt> {
 public:
-    DoLoopBuilder(CodeGen& gen, AstDoLoopStmt* ast) noexcept;
+    DoLoopBuilder(CodeGen& gen, AstDoLoopStmt& ast) noexcept;
 
 private:
     void makeCondition(bool isUntil) noexcept;

@@ -338,19 +338,19 @@ void CodeGen::visit(AstReturnStmt* ast) noexcept {
 void CodeGen::visit(AstIfStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
-    Gen::IfStmtBuilder(*this, ast);
+    Gen::IfStmtBuilder(*this, *ast);
 }
 
 void CodeGen::visit(AstForStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
-    Gen::ForStmtBuilder(*this, ast);
+    Gen::ForStmtBuilder(*this, *ast);
 }
 
 void CodeGen::visit(AstDoLoopStmt* ast) noexcept {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
-    Gen::DoLoopBuilder(*this, ast);
+    Gen::DoLoopBuilder(*this, *ast);
 }
 
 void CodeGen::visit(AstControlFlowBranch* ast) noexcept {
@@ -519,7 +519,7 @@ llvm::Value* CodeGen::visit(AstAddressOf* ast) noexcept {
 //------------------------------------------------------------------
 
 llvm::Value* CodeGen::visit(AstBinaryExpr* ast) noexcept {
-    return Gen::BinaryExprBuilder(*this, ast).build();
+    return Gen::BinaryExprBuilder(*this, *ast).build();
 }
 
 //------------------------------------------------------------------

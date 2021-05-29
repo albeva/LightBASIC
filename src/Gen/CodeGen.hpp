@@ -19,21 +19,14 @@ public:
     [[nodiscard]] bool validate() const noexcept;
 
     [[nodiscard]] Context& getContext() noexcept { return m_context; }
-
     [[nodiscard]] llvm::IRBuilder<>& getBuilder() noexcept { return m_builder; }
-
     [[nodiscard]] llvm::ConstantInt* getTrue() noexcept { return m_constantTrue; }
     [[nodiscard]] llvm::ConstantInt* getFalse() noexcept { return m_constantFalse; }
+    [[nodiscard]] auto& getControlStack() noexcept { return m_controlStack; }
 
     void addBlock() noexcept;
-
     void terminateBlock(llvm::BasicBlock* dest) noexcept;
-
     void switchBlock(llvm::BasicBlock* block) noexcept;
-
-    [[nodiscard]] auto& getControlStack() noexcept {
-        return m_controlStack;
-    }
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
