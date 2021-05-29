@@ -4,12 +4,12 @@
 #pragma once
 #include "pch.hpp"
 #include "Ast/Ast.hpp"
-#include "Gen/CodeGen.hpp"
 #include "Builder.hpp"
+#include "Gen/CodeGen.hpp"
 
 namespace lbc::Gen {
 
-class IfStmtBuilder final: Builder<AstIfStmt> {
+class IfStmtBuilder final : Builder<AstIfStmt> {
 public:
     IfStmtBuilder(CodeGen& gen, AstIfStmt* ast) noexcept;
 

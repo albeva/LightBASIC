@@ -9,7 +9,7 @@
 
 namespace lbc::Gen {
 
-class DoLoopBuilder final: Builder<AstDoLoopStmt> {
+class DoLoopBuilder final : Builder<AstDoLoopStmt> {
 public:
     DoLoopBuilder(CodeGen& gen, AstDoLoopStmt* ast) noexcept;
 

@@ -9,7 +9,7 @@
 
 namespace lbc::Gen {
 
-class BinaryExprBuilder final: Builder<AstBinaryExpr> {
+class BinaryExprBuilder final : Builder<AstBinaryExpr> {
 public:
     using Builder::Builder;
     llvm::Value* build() noexcept;

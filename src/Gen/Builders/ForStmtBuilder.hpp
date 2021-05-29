@@ -10,7 +10,7 @@
 
 namespace lbc::Gen {
 
-class ForStmtBuilder final: Builder<AstForStmt> {
+class ForStmtBuilder final : Builder<AstForStmt> {
 public:
     ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept;
 
