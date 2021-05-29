@@ -60,3 +60,42 @@ llvm::CmpInst::Predicate lbc::Gen::getCmpPred(const TypeRoot* type, TokenKind op
 
     llvm_unreachable("Unsupported type");
 }
+
+llvm::Instruction::BinaryOps lbc::Gen::getBinOpPred(const TypeRoot* type, TokenKind op) noexcept {
+    if (type->isIntegral()) {
+        auto sign = type->isSignedIntegral();
+        switch (op) {
+        case TokenKind::Multiply:
+            return llvm::Instruction::Mul;
+        case TokenKind::Divide:
+            return sign ? llvm::Instruction::SDiv : llvm::Instruction::UDiv;
+        case TokenKind::Modulus:
+            return sign ? llvm::Instruction::SRem : llvm::Instruction::URem;
+        case TokenKind::Plus:
+            return llvm::Instruction::Add;
+        case TokenKind::Minus:
+            return llvm::Instruction::Sub;
+        default:
+            llvm_unreachable("Unknown binary op");
+        }
+    }
+
+    if (type->isFloatingPoint()) {
+        switch (op) {
+        case TokenKind::Multiply:
+            return llvm::Instruction::FMul;
+        case TokenKind::Divide:
+            return llvm::Instruction::FDiv;
+        case TokenKind::Modulus:
+            return llvm::Instruction::FRem;
+        case TokenKind::Plus:
+            return llvm::Instruction::FAdd;
+        case TokenKind::Minus:
+            return llvm::Instruction::FSub;
+        default:
+            llvm_unreachable("Unknown binary op");
+        }
+    }
+
+    llvm_unreachable("Unsupported binary op type");
+}

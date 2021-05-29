@@ -2,18 +2,17 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #pragma once
+#include "pch.hpp"
 #include "Ast/Ast.hpp"
+#include "Builder.hpp"
 #include "Gen/CodeGen.hpp"
 #include "Gen/ValueHandler.hpp"
-#include "pch.hpp"
 
 namespace lbc::Gen {
 
-class ForStmtBuilder final {
+class ForStmtBuilder final: Builder<AstForStmt> {
 public:
-    NO_COPY_AND_MOVE(ForStmtBuilder);
     ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept;
-    ~ForStmtBuilder() noexcept = default;
 
 private:
     void declareVars() noexcept;
@@ -25,10 +24,6 @@ private:
     void makeCondition(bool incr) noexcept;
     void makeIteration(bool incr, llvm::BasicBlock* branch) noexcept;
 
-    CodeGen& m_gen;
-    llvm::IRBuilder<>& m_builder;
-    llvm::LLVMContext& m_llvmContext;
-    AstForStmt* m_ast;
     const AstForStmt::Direction m_direction;
 
     const TypeRoot* m_type = nullptr;

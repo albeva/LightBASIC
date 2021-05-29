@@ -55,7 +55,7 @@ ExperimentalAutoDetectBinPacking: true
 FixNamespaceComments: true
 IncludeCategories:
 - Priority: 1
-  Regex: ^"pch\.h"
+  Regex: ^"pch\.hpp"
 - Priority: 4
   Regex: ^"(llvm|llvm-c|clang|clang-c)/
 - Priority: 3

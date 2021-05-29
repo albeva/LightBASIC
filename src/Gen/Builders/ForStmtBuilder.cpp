@@ -13,10 +13,7 @@ using namespace lbc;
 using namespace Gen;
 
 ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt* ast) noexcept
-: m_gen{ codeGen },
-  m_builder{ codeGen.getBuilder() },
-  m_llvmContext{ codeGen.getContext().getLlvmContext() },
-  m_ast{ ast },
+: Builder{ codeGen, ast },
   m_direction{ ast->direction } {
     if (m_direction == AstForStmt::Direction::Skip) {
         return;

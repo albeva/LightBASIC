@@ -2,26 +2,19 @@
 // Created by Albert on 28/05/2021.
 //
 #pragma once
+#include "pch.hpp"
 #include "Ast/Ast.hpp"
 #include "Gen/CodeGen.hpp"
-#include "pch.hpp"
+#include "Builder.hpp"
 
 namespace lbc::Gen {
 
-class IfStmtBuilder final {
+class IfStmtBuilder final: Builder<AstIfStmt> {
 public:
-    NO_COPY_AND_MOVE(IfStmtBuilder);
-
     IfStmtBuilder(CodeGen& gen, AstIfStmt* ast) noexcept;
-    ~IfStmtBuilder() noexcept = default;
 
 private:
     void build() noexcept;
-
-    CodeGen& m_gen;
-    llvm::IRBuilder<>& m_builder;
-    llvm::LLVMContext& m_llvmContext;
-    AstIfStmt* m_ast;
 };
 
 } // namespace lbc::Gen

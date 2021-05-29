@@ -7,10 +7,7 @@ using namespace lbc;
 using namespace Gen;
 
 DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt* ast) noexcept
-: m_gen{ gen },
-  m_builder{ gen.getBuilder() },
-  m_llvmContext{ gen.getContext().getLlvmContext() },
-  m_ast{ ast },
+: Builder{ gen, ast },
   m_bodyBlock{ llvm::BasicBlock::Create(m_llvmContext, "do_loop.body") },
   m_condBlock{ (m_ast->condition == AstDoLoopStmt::Condition::None)
           ? nullptr

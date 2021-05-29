@@ -7,10 +7,7 @@ using namespace lbc;
 using namespace Gen;
 
 IfStmtBuilder::IfStmtBuilder(CodeGen& gen, AstIfStmt* ast) noexcept
-: m_gen{ gen },
-  m_builder{ gen.getBuilder() },
-  m_llvmContext{ gen.getContext().getLlvmContext() },
-  m_ast{ ast } {
+: Builder{ gen, ast } {
     build();
 }
 

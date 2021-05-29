@@ -2,9 +2,9 @@
 // Created by Albert Varaksin on 03/07/2020.
 //
 #pragma once
+#include "pch.hpp"
 #include "Ast/Ast.hpp"
 #include "Lexer/Lexer.hpp"
-#include "pch.hpp"
 
 namespace lbc {
 
