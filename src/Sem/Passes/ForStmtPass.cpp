@@ -21,9 +21,9 @@ ForStmtPass::ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast) noexcept
 
 void ForStmtPass::ceclare() noexcept {
     for (auto& var : m_ast.decls) {
-        m_sem.visit(var.get());
+        m_sem.visit(*var);
     }
-    m_sem.visit(m_ast.iterator.get());
+    m_sem.visit(*m_ast.iterator);
 }
 
 void ForStmtPass::analyze() noexcept {
@@ -96,7 +96,7 @@ void ForStmtPass::analyze() noexcept {
     }
 
     m_sem.getControlStack().push(ControlFlowStatement::For);
-    m_sem.visit(m_ast.stmt.get());
+    m_sem.visit(*m_ast.stmt);
     m_sem.getControlStack().pop();
 
     if (!m_ast.next.empty()) {

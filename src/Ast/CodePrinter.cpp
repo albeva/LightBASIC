@@ -7,162 +7,162 @@
 #include "Type/Type.hpp"
 using namespace lbc;
 
-void CodePrinter::visit(AstModule* ast) noexcept {
-    visit(ast->stmtList.get());
+void CodePrinter::visit(AstModule& ast) noexcept {
+    visit(*ast.stmtList);
 }
 
 // Statements
 
-void CodePrinter::visit(AstStmtList* ast) noexcept {
-    for (const auto& stmt : ast->stmts) {
-        visit(stmt.get());
+void CodePrinter::visit(AstStmtList& ast) noexcept {
+    for (const auto& stmt : ast.stmts) {
+        visit(*stmt);
         m_os << '\n';
     }
 }
 
-void CodePrinter::visit(AstAssignStmt* ast) noexcept {
+void CodePrinter::visit(AstAssignStmt& ast) noexcept {
     m_os << indent();
-    visit(ast->lhs.get());
+    visit(*ast.lhs);
     m_os << " = ";
-    visit(ast->rhs.get());
+    visit(*ast.rhs);
 }
 
-void CodePrinter::visit(AstExprStmt* ast) noexcept {
+void CodePrinter::visit(AstExprStmt& ast) noexcept {
     m_os << indent();
-    visit(ast->expr.get());
+    visit(*ast.expr);
 }
 
 // Attributes
 
-void CodePrinter::visit(AstAttributeList* ast) noexcept {
+void CodePrinter::visit(AstAttributeList& ast) noexcept {
     m_os << indent();
     m_os << '[';
     bool isFirst = true;
-    for (const auto& attr : ast->attribs) {
+    for (const auto& attr : ast.attribs) {
         if (isFirst) {
             isFirst = false;
         } else {
             m_os << ", ";
         }
-        visit(attr.get());
+        visit(*attr);
     }
     m_os << "]";
 }
 
-void CodePrinter::visit(AstAttribute* ast) noexcept {
-    visit(ast->identExpr.get());
-    if (ast->argExprs.size() == 1) {
+void CodePrinter::visit(AstAttribute& ast) noexcept {
+    visit(*ast.identExpr);
+    if (ast.argExprs.size() == 1) {
         m_os << " = ";
-        visit(ast->argExprs[0].get());
-    } else if (ast->argExprs.size() > 1) {
+        visit(*ast.argExprs[0]);
+    } else if (ast.argExprs.size() > 1) {
         bool isFirst = true;
         m_os << "(";
-        for (const auto& arg : ast->argExprs) {
+        for (const auto& arg : ast.argExprs) {
             if (isFirst) {
                 isFirst = false;
             } else {
                 m_os << ", ";
             }
-            visit(arg.get());
+            visit(*arg);
         }
         m_os << ")";
     }
 }
 
-void CodePrinter::visit(AstTypeExpr* ast) noexcept {
-    m_os << Token::description(ast->tokenKind);
+void CodePrinter::visit(AstTypeExpr& ast) noexcept {
+    m_os << Token::description(ast.tokenKind);
 }
 
 // Declarations
 
-void CodePrinter::visit(AstVarDecl* ast) noexcept {
-    if (ast->attributes) {
-        visit(ast->attributes.get());
+void CodePrinter::visit(AstVarDecl& ast) noexcept {
+    if (ast.attributes) {
+        visit(*ast.attributes);
         m_os << " _" << '\n';
     }
 
     m_os << indent();
     m_os << "VAR ";
-    m_os << ast->name;
+    m_os << ast.name;
 
-    if (ast->typeExpr) {
+    if (ast.typeExpr) {
         m_os << " AS ";
-        visit(ast->typeExpr.get());
+        visit(*ast.typeExpr);
     }
 
-    if (ast->expr) {
+    if (ast.expr) {
         m_os << " = ";
-        visit(ast->expr.get());
+        visit(*ast.expr);
     }
 }
 
-void CodePrinter::visit(AstFuncDecl* ast) noexcept {
-    if (ast->attributes) {
-        visit(ast->attributes.get());
+void CodePrinter::visit(AstFuncDecl& ast) noexcept {
+    if (ast.attributes) {
+        visit(*ast.attributes);
         m_os << " _" << '\n';
     }
 
     m_os << indent();
 
-    if (!ast->hasImpl) {
+    if (!ast.hasImpl) {
         m_os << "DECLARE ";
     }
 
-    if (ast->retTypeExpr) {
+    if (ast.retTypeExpr) {
         m_os << "FUNCTION ";
     } else {
         m_os << "SUB ";
     }
-    m_os << ast->name;
+    m_os << ast.name;
 
-    if (!ast->paramDecls.empty()) {
+    if (!ast.paramDecls.empty()) {
         m_os << "(";
         bool isFirst = true;
-        for (const auto& param : ast->paramDecls) {
+        for (const auto& param : ast.paramDecls) {
             if (isFirst) {
                 isFirst = false;
             } else {
                 m_os << ", ";
             }
-            visit(param.get());
+            visit(*param);
         }
         m_os << ")";
     }
 
-    if (ast->retTypeExpr) {
+    if (ast.retTypeExpr) {
         m_os << " AS ";
-        visit(ast->retTypeExpr.get());
+        visit(*ast.retTypeExpr);
     }
 }
 
-void CodePrinter::visit(AstFuncParamDecl* ast) noexcept {
-    m_os << ast->name;
+void CodePrinter::visit(AstFuncParamDecl& ast) noexcept {
+    m_os << ast.name;
     m_os << " AS ";
-    visit(ast->typeExpr.get());
+    visit(*ast.typeExpr);
 }
 
-void CodePrinter::visit(AstFuncStmt* ast) noexcept {
-    visit(ast->decl.get());
+void CodePrinter::visit(AstFuncStmt& ast) noexcept {
+    visit(*ast.decl);
     m_os << '\n';
     m_indent++;
-    visit(ast->stmtList.get());
+    visit(*ast.stmtList);
     m_indent--;
 
     m_os << indent();
-    m_os << "END " << (ast->decl->retTypeExpr ? "FUNCTION" : "SUB");
+    m_os << "END " << (ast.decl->retTypeExpr ? "FUNCTION" : "SUB");
 }
 
-void CodePrinter::visit(AstReturnStmt* ast) noexcept {
+void CodePrinter::visit(AstReturnStmt& ast) noexcept {
     m_os << indent() << "RETURN";
-    if (ast->expr) {
+    if (ast.expr) {
         m_os << " ";
-        visit(ast->expr.get());
+        visit(*ast.expr);
     }
 }
 
-void CodePrinter::visit(AstIfStmt* ast) noexcept {
+void CodePrinter::visit(AstIfStmt& ast) noexcept {
     bool isFirst = true;
-    for (const auto& block : ast->blocks) {
+    for (const auto& block : ast.blocks) {
         m_os << indent();
         if (!isFirst) {
             m_os << "ELSE";
@@ -175,16 +175,16 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
             }
             m_os << "IF ";
             for (const auto& var : block.decls) {
-                visit(var.get());
+                visit(*var);
                 m_os << ", ";
             }
-            visit(block.expr.get());
+            visit(*block.expr);
             m_os << " THEN\n";
         } else {
             m_os << "\n";
         }
         m_indent++;
-        visit(block.stmt.get());
+        visit(*block.stmt);
         if (block.stmt->kind != AstKind::StmtList) {
             m_os << '\n';
         }
@@ -194,91 +194,91 @@ void CodePrinter::visit(AstIfStmt* ast) noexcept {
     m_os << indent() << "END IF";
 }
 
-void CodePrinter::visit(AstForStmt* ast) noexcept {
+void CodePrinter::visit(AstForStmt& ast) noexcept {
     m_os << indent() << "FOR ";
 
-    for (const auto& decl : ast->decls) {
-        visit(decl.get());
+    for (const auto& decl : ast.decls) {
+        visit(*decl);
         m_os << ", ";
     }
 
-    m_os << ast->iterator->name;
-    if (ast->iterator->typeExpr) {
+    m_os << ast.iterator->name;
+    if (ast.iterator->typeExpr) {
         m_os << " AS ";
-        visit(ast->iterator->typeExpr.get());
+        visit(*ast.iterator->typeExpr);
     }
 
     m_os << " = ";
-    visit(ast->iterator->expr.get());
+    visit(*ast.iterator->expr);
     m_os << " TO ";
-    visit(ast->limit.get());
-    if (ast->step) {
+    visit(*ast.limit);
+    if (ast.step) {
         m_os << " STEP ";
-        visit(ast->step.get());
+        visit(*ast.step);
     }
 
-    if (ast->stmt->kind == AstKind::StmtList) {
+    if (ast.stmt->kind == AstKind::StmtList) {
         m_os << '\n';
         m_indent++;
-        visit(ast->stmt.get());
+        visit(*ast.stmt);
         m_indent--;
         m_os << indent() << "NEXT";
-        if (!ast->next.empty()) {
-            m_os << " " << ast->next;
+        if (!ast.next.empty()) {
+            m_os << " " << ast.next;
         }
     } else {
         m_os << " DO ";
-        visit(ast->stmt.get());
+        visit(*ast.stmt);
     }
 }
 
-void CodePrinter::visit(AstDoLoopStmt* ast) noexcept {
+void CodePrinter::visit(AstDoLoopStmt& ast) noexcept {
     m_os << indent() << "DO";
 
-    if (!ast->decls.empty()) {
+    if (!ast.decls.empty()) {
         bool first = true;
-        for (const auto& decl : ast->decls) {
+        for (const auto& decl : ast.decls) {
             if (first) {
                 first = false;
                 m_os << " ";
             } else {
                 m_os << ", ";
             }
-            visit(decl.get());
+            visit(*decl);
         }
     }
 
-    if (ast->condition == AstDoLoopStmt::Condition::PreWhile) {
+    if (ast.condition == AstDoLoopStmt::Condition::PreWhile) {
         m_os << " WHILE ";
-        visit(ast->expr.get());
-    } else if (ast->condition == AstDoLoopStmt::Condition::PreUntil) {
+        visit(*ast.expr);
+    } else if (ast.condition == AstDoLoopStmt::Condition::PreUntil) {
         m_os << " UNTIL ";
-        visit(ast->expr.get());
+        visit(*ast.expr);
     }
 
-    if (ast->stmt->kind == AstKind::StmtList) {
+    if (ast.stmt->kind == AstKind::StmtList) {
         m_os << "\n";
         m_indent++;
-        visit(ast->stmt.get());
+        visit(*ast.stmt);
         m_indent--;
         m_os << indent() << "LOOP";
 
-        if (ast->condition == AstDoLoopStmt::Condition::PostWhile) {
+        if (ast.condition == AstDoLoopStmt::Condition::PostWhile) {
             m_os << " WHILE ";
-            visit(ast->expr.get());
-        } else if (ast->condition == AstDoLoopStmt::Condition::PostUntil) {
+            visit(*ast.expr);
+        } else if (ast.condition == AstDoLoopStmt::Condition::PostUntil) {
             m_os << " UNTIL ";
-            visit(ast->expr.get());
+            visit(*ast.expr);
         }
     } else {
         m_os << " DO ";
-        visit(ast->stmt.get());
+        visit(*ast.stmt);
     }
 }
 
-void CodePrinter::visit(AstControlFlowBranch* ast) noexcept {
+void CodePrinter::visit(AstControlFlowBranch& ast) noexcept {
     m_os << indent();
-    switch (ast->action) {
+    switch (ast.action) {
     case AstControlFlowBranch::Action::Continue:
         m_os << "CONTINUE";
         break;
@@ -287,8 +287,8 @@ void CodePrinter::visit(AstControlFlowBranch* ast) noexcept {
         break;
     }
 
-    if (!ast->destination.empty()) {
-        for (auto target : ast->destination) {
+    if (!ast.destination.empty()) {
+        for (auto target : ast.destination) {
             switch (target) {
             case ControlFlowStatement::For:
                 m_os << " FOR";
@@ -303,27 +303,27 @@ void CodePrinter::visit(AstControlFlowBranch* ast) noexcept {
 
 // Expressions
 
-void CodePrinter::visit(AstIdentExpr* ast) noexcept {
-    m_os << ast->name;
+void CodePrinter::visit(AstIdentExpr& ast) noexcept {
+    m_os << ast.name;
 }
 
-void CodePrinter::visit(AstCallExpr* ast) noexcept {
-    visit(ast->identExpr.get());
+void CodePrinter::visit(AstCallExpr& ast) noexcept {
+    visit(*ast.identExpr);
     m_os << "(";
     bool isFirst = true;
-    for (const auto& arg : ast->argExprs) {
+    for (const auto& arg : ast.argExprs) {
         if (isFirst) {
             isFirst = false;
         } else {
             m_os << ", ";
         }
 
-        visit(arg.get());
+        visit(*arg);
     }
     m_os << ")";
 }
 
-void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
+void CodePrinter::visit(AstLiteralExpr& ast) noexcept {
     const auto visitor = Visitor{
         [](std::monostate /*value*/) -> string {
             return "NULL";
@@ -335,7 +335,7 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
             return '"' + result + '"';
         },
         [&](uint64_t value) -> string {
-            if (ast->type->isSignedIntegral()) {
+            if (ast.type->isSignedIntegral()) {
                 auto sval = static_cast<int64_t>(value);
                 return std::to_string(sval);
             }
@@ -349,69 +349,69 @@ void CodePrinter::visit(AstLiteralExpr* ast) noexcept {
         }
     };
 
-    m_os << std::visit(visitor, ast->value);
+    m_os << std::visit(visitor, ast.value);
 }
 
-void CodePrinter::visit(AstUnaryExpr* ast) noexcept {
+void CodePrinter::visit(AstUnaryExpr& ast) noexcept {
     m_os << "(";
-    auto tkn = Token::create(ast->tokenKind, ast->range);
+    auto tkn = Token::create(ast.tokenKind, ast.range);
     if (tkn->isRightToLeft()) {
-        visit(ast->expr.get());
+        visit(*ast.expr);
         m_os << " " << tkn->description();
     } else {
         m_os << tkn->description() << " ";
-        visit(ast->expr.get());
+        visit(*ast.expr);
     }
     m_os << ")";
 }
 
-void CodePrinter::visit(AstDereference* ast) noexcept {
+void CodePrinter::visit(AstDereference& ast) noexcept {
     m_os << "*(";
-    visit(ast->expr.get());
+    visit(*ast.expr);
     m_os << ")";
 }
 
-void CodePrinter::visit(AstAddressOf* ast) noexcept {
+void CodePrinter::visit(AstAddressOf& ast) noexcept {
     m_os << "@(";
-    visit(ast->expr.get());
+    visit(*ast.expr);
     m_os << ")";
 }
 
-void CodePrinter::visit(AstBinaryExpr* ast) noexcept {
+void CodePrinter::visit(AstBinaryExpr& ast) noexcept {
     m_os << "(";
-    visit(ast->lhs.get());
+    visit(*ast.lhs);
 
-    auto tkn = Token::create(ast->tokenKind, ast->range);
+    auto tkn = Token::create(ast.tokenKind, ast.range);
     m_os << " " << tkn->description() << " ";
 
-    visit(ast->rhs.get());
+    visit(*ast.rhs);
     m_os << ")";
 }
 
-void CodePrinter::visit(AstCastExpr* ast) noexcept {
+void CodePrinter::visit(AstCastExpr& ast) noexcept {
     m_os << "(";
-    visit(ast->expr.get());
+    visit(*ast.expr);
     m_os << " AS ";
-    if (ast->implicit) {
-        if (ast->type != nullptr) {
-            m_os << ast->type->asString();
+    if (ast.implicit) {
+        if (ast.type != nullptr) {
+            m_os << ast.type->asString();
         } else {
             m_os << "ANY";
         }
         m_os << " /' implicit '/";
     } else {
-        visit(ast->typeExpr.get());
+        visit(*ast.typeExpr);
     }
     m_os << ")";
 }
 
-void CodePrinter::visit(AstIfExpr* ast) noexcept {
+void CodePrinter::visit(AstIfExpr& ast) noexcept {
     m_os << "(IF ";
-    visit(ast->expr.get());
+    visit(*ast.expr);
     m_os << " THEN ";
-    visit(ast->trueExpr.get());
+    visit(*ast.trueExpr);
     m_os << " ELSE ";
-    visit(ast->falseExpr.get());
+    visit(*ast.falseExpr);
     m_os << ")";
 }
 

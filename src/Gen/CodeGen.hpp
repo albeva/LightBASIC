@@ -38,10 +38,10 @@ private:
     llvm::BasicBlock* getGlobalCtorBlock() noexcept;
 
     void declareFuncs() noexcept;
-    void declareFunc(AstFuncDecl* ast) noexcept;
-    void declareGlobalVar(AstVarDecl* ast) noexcept;
-    void declareLocalVar(AstVarDecl* ast) noexcept;
-    static llvm::Value* getStoreValue(AstExpr* identExpr) noexcept;
+    void declareFunc(AstFuncDecl& ast) noexcept;
+    void declareGlobalVar(AstVarDecl& ast) noexcept;
+    void declareLocalVar(AstVarDecl& ast) noexcept;
+    static llvm::Value* getStoreValue(AstExpr& ast) noexcept;
     llvm::Value* getStringConstant(StringRef str) noexcept;
 
     Context& m_context;

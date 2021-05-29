@@ -22,8 +22,8 @@ llvm::Value* BinaryExprBuilder::build() noexcept {
 }
 
 llvm::Value* BinaryExprBuilder::comparison() noexcept {
-    auto* lhsValue = m_gen.visit(m_ast.lhs.get());
-    auto* rhsValue = m_gen.visit(m_ast.rhs.get());
+    auto* lhsValue = m_gen.visit(*m_ast.lhs);
+    auto* rhsValue = m_gen.visit(*m_ast.rhs);
 
     const auto* ty = m_ast.lhs->type;
     auto pred = Gen::getCmpPred(ty, m_ast.tokenKind);
@@ -31,8 +31,8 @@ llvm::Value* BinaryExprBuilder::comparison() noexcept {
 }
 
 llvm::Value* BinaryExprBuilder::arithmetic() noexcept {
-    auto* lhsValue = m_gen.visit(m_ast.lhs.get());
-    auto* rhsValue = m_gen.visit(m_ast.rhs.get());
+    auto* lhsValue = m_gen.visit(*m_ast.lhs);
+    auto* rhsValue = m_gen.visit(*m_ast.rhs);
 
     auto op = getBinOpPred(m_ast.lhs->type, m_ast.tokenKind);
     return m_builder.CreateBinOp(op, lhsValue, rhsValue);
@@ -40,7 +40,7 @@ llvm::Value* BinaryExprBuilder::arithmetic() noexcept {
 
 llvm::Value* BinaryExprBuilder::logical() noexcept {
     // lhs
-    auto* lhsValue = m_gen.visit(m_ast.lhs.get());
+    auto* lhsValue = m_gen.visit(*m_ast.lhs);
     auto* lhsBlock = m_builder.GetInsertBlock();
 
     auto* func = lhsBlock->getParent();
@@ -57,7 +57,7 @@ llvm::Value* BinaryExprBuilder::logical() noexcept {
 
     // rhs
     m_builder.SetInsertPoint(elseBlock);
-    auto* rhsValue = m_gen.visit(m_ast.rhs.get());
+    auto* rhsValue = m_gen.visit(*m_ast.rhs);
     auto* rhsBlock = m_builder.GetInsertBlock();
 
     // phi

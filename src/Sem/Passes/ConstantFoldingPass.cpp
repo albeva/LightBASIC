@@ -9,7 +9,7 @@ using namespace Sem;
 
 namespace {
 template<typename BASE, typename T>
-constexpr inline BASE castLiteral(const AstLiteralExpr* ast) noexcept {
+constexpr inline BASE castLiteral(const AstLiteralExpr& ast) noexcept {
     constexpr auto visitor = [](const auto& val) -> T {
         using R = std::decay_t<decltype(val)>;
         if constexpr (std::is_convertible_v<R, T>) {
@@ -18,7 +18,7 @@ constexpr inline BASE castLiteral(const AstLiteralExpr* ast) noexcept {
             llvm_unreachable("Unsupported type conversion");
         }
     };
-    return static_cast<BASE>(std::visit(visitor, ast->value));
+    return static_cast<BASE>(std::visit(visitor, ast.value));
 }
 } // namespace
 
@@ -30,16 +30,16 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     unique_ptr<AstExpr> replace;
     switch (ast->kind) {
     case AstKind::UnaryExpr:
-        replace = visitUnaryExpr(static_cast<AstUnaryExpr*>(ast.get()));
+        replace = visitUnaryExpr(static_cast<AstUnaryExpr&>(*ast));
         break;
     case AstKind::BinaryExpr:
-        replace = visitBinaryExpr(static_cast<AstBinaryExpr*>(ast.get()));
+        replace = visitBinaryExpr(static_cast<AstBinaryExpr&>(*ast));
         break;
     case AstKind::CastExpr:
-        replace = visitCastExpr(static_cast<AstCastExpr*>(ast.get()));
+        replace = visitCastExpr(static_cast<AstCastExpr&>(*ast));
         break;
     case AstKind::IfExpr:
-        replace = visitIfExpr(static_cast<AstIfExpr*>(ast.get()));
+        replace = visitIfExpr(static_cast<AstIfExpr&>(*ast));
         break;
     default:
         return;
@@ -49,19 +49,19 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     }
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr* ast) noexcept {
-    auto* literal = dyn_cast<AstLiteralExpr>(ast->expr.get());
+unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast) noexcept {
+    auto* literal = dyn_cast<AstLiteralExpr>(ast.expr.get());
     if (literal == nullptr) {
         return nullptr;
     }
 
-    auto value = unary(ast->tokenKind, literal);
-    auto repl = AstLiteralExpr::create(ast->range, value);
-    repl->type = ast->type;
+    auto value = unary(ast.tokenKind, *literal);
+    auto repl = AstLiteralExpr::create(ast.range, value);
+    repl->type = ast.type;
     return repl;
 }
 
-AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralExpr* ast) noexcept {
+AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralExpr& ast) noexcept {
     switch (op) {
     case TokenKind::Negate: {
         constexpr auto visitor = Visitor{
@@ -75,7 +75,7 @@ AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralE
                 llvm_unreachable("Non supported type");
             }
         };
-        return std::visit(visitor, ast->value);
+        return std::visit(visitor, ast.value);
     }
     case TokenKind::LogicalNot: {
         constexpr auto visitor = Visitor{
@@ -86,7 +86,7 @@ AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralE
                 llvm_unreachable("Non supported type");
             }
         };
-        return std::visit(visitor, ast->value);
+        return std::visit(visitor, ast.value);
     }
     default:
         llvm_unreachable("Unsupported unary operation");
@@ -94,12 +94,12 @@ AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralE
 }
 
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr* ast) noexcept {
-    if (auto* expr = dyn_cast<AstLiteralExpr>(ast->expr.get())) {
+unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr& ast) noexcept {
+    if (auto* expr = dyn_cast<AstLiteralExpr>(ast.expr.get())) {
         if (std::get<bool>(expr->value)) {
-            return std::move(ast->trueExpr);
+            return std::move(ast.trueExpr);
         }
-        return std::move(ast->falseExpr);
+        return std::move(ast.falseExpr);
     }
 
     if (auto repl = optimizeIifToCast(ast)) {
@@ -109,90 +109,90 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr* ast) noexcept {
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr* ast) noexcept {
-    auto* lhs = dyn_cast<AstLiteralExpr>(ast->trueExpr.get());
+unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) noexcept {
+    auto* lhs = dyn_cast<AstLiteralExpr>(ast.trueExpr.get());
     if (lhs == nullptr) {
         return nullptr;
     }
-    auto* lval = std::get_if<uint64_t>(&lhs->value);
+    const auto* lval = std::get_if<uint64_t>(&lhs->value);
     if (lval == nullptr) {
         return nullptr;
     }
 
-    auto* rhs = dyn_cast<AstLiteralExpr>(ast->falseExpr.get());
+    auto* rhs = dyn_cast<AstLiteralExpr>(ast.falseExpr.get());
     if (rhs == nullptr) {
         return nullptr;
     }
-    auto* rval = std::get_if<uint64_t>(&rhs->value);
+    const auto* rval = std::get_if<uint64_t>(&rhs->value);
     if (rval == nullptr) {
         return nullptr;
     }
 
     if (*lval == 1 && *rval == 0) {
         auto cast = AstCastExpr::create(
-            ast->range,
-            std::move(ast->expr),
+            ast.range,
+            std::move(ast.expr),
             nullptr,
             true);
-        cast->type = ast->type;
+        cast->type = ast.type;
         return cast;
     }
 
     if (*lval == 0 && *rval == 1) {
         auto unary = AstUnaryExpr::create(
-            ast->range,
+            ast.range,
             TokenKind::LogicalNot,
-            std::move(ast->expr));
+            std::move(ast.expr));
 
         auto cast = AstCastExpr::create(
-            ast->range,
+            ast.range,
             std::move(unary),
             nullptr,
             true);
-        cast->type = ast->type;
+        cast->type = ast.type;
         return cast;
     }
 
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr* /*ast*/) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr& /*ast*/) noexcept {
     // TODO
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr* ast) noexcept {
-    auto* literal = dyn_cast<AstLiteralExpr>(ast->expr.get());
+unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) noexcept {
+    auto* literal = dyn_cast<AstLiteralExpr>(ast.expr.get());
     if (literal == nullptr) {
         return nullptr;
     }
 
-    auto value = cast(ast->type, literal);
-    auto repl = AstLiteralExpr::create(ast->range, value);
-    repl->type = ast->type;
+    auto value = cast(ast.type, *literal);
+    auto repl = AstLiteralExpr::create(ast.range, value);
+    repl->type = ast.type;
     return repl;
 }
 
-AstLiteralExpr::Value ConstantFoldingPass::cast(const TypeRoot* type, const AstLiteralExpr* literal) noexcept {
+AstLiteralExpr::Value ConstantFoldingPass::cast(const TypeRoot* type, const AstLiteralExpr& ast) noexcept {
     // clang-format off
     if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
         #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                          \
             if (integral->getBits() == (BITS) && integral->isSigned() == (SIGNED)) { \
-                return castLiteral<uint64_t, TYPE>(literal);                         \
+                return castLiteral<uint64_t, TYPE>(ast);                         \
             }
         INTEGRAL_TYPES(INTEGRAL)
         #undef INTEGRAL
     } else if (const auto* fp = dyn_cast<TypeFloatingPoint>(type)) {
         #define FLOATINGPOINT(ID, STR, KIND, BITS, TYPE)   \
             if (fp->getBits() == (BITS)) {                 \
-                return castLiteral<double, TYPE>(literal); \
+                return castLiteral<double, TYPE>(ast); \
             }
         FLOATINGPOINT_TYPES(FLOATINGPOINT)
         #undef INTEGRAL
     } else if (type->isBoolean()) {
-        return castLiteral<bool, bool>(literal);
-    } else if (literal->type->isAnyPointer()) {
-        return literal->value;
+        return castLiteral<bool, bool>(ast);
+    } else if (ast.type->isAnyPointer()) {
+        return ast.value;
     }
     // clang-format on
     llvm_unreachable("Unsupported castLiteral");

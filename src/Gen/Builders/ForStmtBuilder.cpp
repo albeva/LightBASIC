@@ -28,9 +28,9 @@ ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast) noexcept
 
 void ForStmtBuilder::declareVars() noexcept {
     for (const auto& decl : m_ast.decls) {
-        m_gen.visit(decl.get());
+        m_gen.visit(*decl);
     }
-    m_gen.visit(m_ast.iterator.get());
+    m_gen.visit(*m_ast.iterator);
 
     m_type = m_ast.iterator->symbol->type();
     m_llvmType = m_type->getLlvmType(m_gen.getContext());
@@ -172,7 +172,7 @@ void ForStmtBuilder::build() noexcept {
     // Body
     m_gen.switchBlock(m_bodyBlock);
     m_gen.getControlStack().push(ControlFlowStatement::For, { m_iterBlock, m_exitBlock });
-    m_gen.visit(m_ast.stmt.get());
+    m_gen.visit(*m_ast.stmt);
     m_gen.getControlStack().pop();
 
     // Iteration

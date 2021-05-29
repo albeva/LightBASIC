@@ -16,7 +16,7 @@ public:
     ValueHandler(CodeGen* gen_, AstExpr* ast, StringRef name = "") noexcept
     : gen{ gen_ },
       literal{ ast->kind == lbc::AstKind::LiteralExpr } {
-        auto* expr = gen->visit(ast);
+        auto* expr = gen->visit(*ast);
         if (literal) {
             value = expr;
             return;

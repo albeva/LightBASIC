@@ -10,15 +10,15 @@
 using namespace lbc;
 using namespace Sem;
 
-void FuncDeclarerPass::visit(AstModule* ast) noexcept {
-    m_table = ast->symbolTable.get();
-    for (const auto& stmt : ast->stmtList->stmts) {
+void FuncDeclarerPass::visit(AstModule& ast) noexcept {
+    m_table = ast.symbolTable.get();
+    for (const auto& stmt : ast.stmtList->stmts) {
         switch (stmt->kind) {
         case AstKind::FuncDecl:
-            visitFuncDecl(static_cast<AstFuncDecl*>(stmt.get()), true);
+            visitFuncDecl(static_cast<AstFuncDecl&>(*stmt), true);
             break;
         case AstKind::FuncStmt:
-            visitFuncDecl(static_cast<AstFuncStmt*>(stmt.get())->decl.get(), false);
+            visitFuncDecl(*static_cast<AstFuncStmt&>(*stmt).decl, false);
             break;
         default:
             break;
@@ -26,16 +26,16 @@ void FuncDeclarerPass::visit(AstModule* ast) noexcept {
     }
 }
 
-void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
-    const auto& name = ast->name;
+void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) noexcept {
+    const auto& name = ast.name;
     if (m_table->exists(name)) {
         fatalError("Redefinition of "_t + name);
     }
     auto* symbol = m_table->insert(name);
 
     // alias?
-    if (ast->attributes) {
-        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+    if (ast.attributes) {
+        if (auto alias = ast.attributes->getStringLiteral("ALIAS")) {
             symbol->setAlias(*alias);
         }
     }
@@ -49,51 +49,51 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl* ast, bool external) noexcept {
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
-    paramTypes.reserve(ast->paramDecls.size());
+    paramTypes.reserve(ast.paramDecls.size());
     {
         RESTORE_ON_EXIT(m_table);
-        ast->symbolTable = make_unique<SymbolTable>(m_table);
-        m_table = ast->symbolTable.get();
-        for (auto& param : ast->paramDecls) {
-            visitFuncParamDecl(param.get());
+        ast.symbolTable = make_unique<SymbolTable>(m_table);
+        m_table = ast.symbolTable.get();
+        for (auto& param : ast.paramDecls) {
+            visitFuncParamDecl(*param);
             paramTypes.emplace_back(param->symbol->type());
         }
     }
 
     // return typeExpr. subs don't have one so default to Void
     const TypeRoot* retType = nullptr;
-    if (ast->retTypeExpr) {
-        m_typePass.visit(ast->retTypeExpr.get());
-        retType = ast->retTypeExpr->type;
+    if (ast.retTypeExpr) {
+        m_typePass.visit(*ast.retTypeExpr);
+        retType = ast.retTypeExpr->type;
     } else {
         retType = TypeVoid::get();
     }
 
     // create function symbol
-    const auto* type = TypeFunction::get(retType, std::move(paramTypes), ast->variadic);
+    const auto* type = TypeFunction::get(retType, std::move(paramTypes), ast.variadic);
     symbol->setType(type);
-    ast->symbol = symbol;
+    ast.symbol = symbol;
 }
 
-void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl* ast) noexcept {
+void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl& ast) noexcept {
     auto* symbol = createParamSymbol(ast);
 
-    m_typePass.visit(ast->typeExpr.get());
-    symbol->setType(ast->typeExpr->type);
+    m_typePass.visit(*ast.typeExpr);
+    symbol->setType(ast.typeExpr->type);
 
-    ast->symbol = symbol;
+    ast.symbol = symbol;
 }
 
-Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl* ast) noexcept {
-    const auto& name = ast->name;
+Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl& ast) noexcept {
+    const auto& name = ast.name;
     if (m_table->find(name, false) != nullptr) {
         fatalError("Redefinition of "_t + name);
     }
     auto* symbol = m_table->insert(name);
 
     // alias?
-    if (ast->attributes) {
-        if (auto alias = ast->attributes->getStringLiteral("ALIAS")) {
+    if (ast.attributes) {
+        if (auto alias = ast.attributes->getStringLiteral("ALIAS")) {
             symbol->setAlias(*alias);
         }
     }

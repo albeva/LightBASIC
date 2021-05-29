@@ -338,7 +338,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
 
     // Analyze
     SemanticAnalyzer sem{ m_context };
-    sem.visit(ast.get());
+    sem.visit(*ast);
 
     if (m_context.getDumpAst() || m_context.getDumpCode()) {
         m_modules.emplace_back(std::make_unique<TranslationUnit>(
@@ -350,7 +350,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
 
     // generate IR
     CodeGen gen{ m_context };
-    gen.visit(ast.get());
+    gen.visit(*ast);
 
     // done
     if (!gen.validate()) {
@@ -368,7 +368,7 @@ void Driver::dumpAst() noexcept {
     auto print = [&](llvm::raw_ostream& stream) {
         AstPrinter printer{ m_context, stream };
         for (const auto& module : m_modules) {
-            printer.visit(module->ast.get());
+            printer.visit(*module->ast);
         }
     };
 
@@ -398,7 +398,7 @@ void Driver::dumpCode() {
     auto print = [&](llvm::raw_ostream& stream) {
         CodePrinter printer{ stream };
         for (const auto& module : m_modules) {
-            printer.visit(module->ast.get());
+            printer.visit(*module->ast);
         }
     };
 

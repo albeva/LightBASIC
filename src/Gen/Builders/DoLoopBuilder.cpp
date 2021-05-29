@@ -19,7 +19,7 @@ DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt& ast) noexcept
 
 void DoLoopBuilder::build() noexcept {
     for (const auto& decl : m_ast.decls) {
-        m_gen.visit(decl.get());
+        m_gen.visit(*decl);
     }
 
     // pre makeCondition
@@ -40,7 +40,7 @@ void DoLoopBuilder::build() noexcept {
     // body
     m_gen.switchBlock(m_bodyBlock);
     m_gen.getControlStack().push(ControlFlowStatement::Do, { m_continueBlock, m_exitBlock });
-    m_gen.visit(m_ast.stmt.get());
+    m_gen.visit(*m_ast.stmt);
     m_gen.getControlStack().pop();
 
     // post makeCondition
@@ -62,7 +62,7 @@ void DoLoopBuilder::build() noexcept {
 
 void DoLoopBuilder::makeCondition(bool isUntil) noexcept {
     m_gen.switchBlock(m_condBlock);
-    auto* value = m_gen.visit(m_ast.expr.get());
+    auto* value = m_gen.visit(*m_ast.expr);
     if (isUntil) {
         m_builder.CreateCondBr(value, m_exitBlock, m_bodyBlock);
     } else {

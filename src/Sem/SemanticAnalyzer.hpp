@@ -41,11 +41,11 @@ public:
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
-    [[nodiscard]] Symbol* createNewSymbol(AstDecl* ast, StringRef id) noexcept;
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl& ast, StringRef id) noexcept;
 
-    void arithmetic(AstBinaryExpr* ast) noexcept;
-    void logical(AstBinaryExpr* ast) noexcept;
-    void comparison(AstBinaryExpr* ast) noexcept;
+    void arithmetic(AstBinaryExpr& ast) noexcept;
+    void logical(AstBinaryExpr& ast) noexcept;
+    void comparison(AstBinaryExpr& ast) noexcept;
     [[nodiscard]] bool canPerformBinary(TokenKind op, const TypeRoot* left, const TypeRoot* right) const noexcept;
 
     Context& m_context;

@@ -21,11 +21,11 @@ void IfStmtBuilder::build() noexcept {
         llvm::BasicBlock* elseBlock = nullptr;
 
         for (const auto& decl : block.decls) {
-            m_gen.visit(decl.get());
+            m_gen.visit(*decl);
         }
 
         if (block.expr) {
-            auto* condition = m_gen.visit(block.expr.get());
+            auto* condition = m_gen.visit(*block.expr);
 
             auto* thenBlock = llvm::BasicBlock::Create(m_llvmContext, "if.then", func);
             if (idx == count - 1) {
@@ -40,7 +40,7 @@ void IfStmtBuilder::build() noexcept {
             elseBlock = endBlock;
         }
 
-        m_gen.visit(block.stmt.get());
+        m_gen.visit(*block.stmt);
         m_gen.terminateBlock(endBlock);
 
         m_gen.switchBlock(elseBlock);

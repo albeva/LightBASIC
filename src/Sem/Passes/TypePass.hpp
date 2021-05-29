@@ -18,7 +18,7 @@ namespace Sem {
         explicit TypePass(Context& context) noexcept : m_context{ context } {}
         ~TypePass() noexcept = default;
 
-        void visit(AstTypeExpr* ast) noexcept;
+        void visit(AstTypeExpr& ast) noexcept;
 
     private:
         Context& m_context;

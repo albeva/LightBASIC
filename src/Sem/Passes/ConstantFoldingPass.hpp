@@ -21,13 +21,13 @@ namespace Sem {
         void fold(unique_ptr<AstExpr>& ast) noexcept;
 
     private:
-        static unique_ptr<AstExpr> visitUnaryExpr(const AstUnaryExpr* ast) noexcept;
-        static AstLiteralExpr::Value unary(TokenKind op, const AstLiteralExpr* ast) noexcept;
-        static unique_ptr<AstExpr> visitIfExpr(AstIfExpr* ast) noexcept;
-        static unique_ptr<AstExpr> optimizeIifToCast(AstIfExpr* ast) noexcept;
-        static unique_ptr<AstExpr> visitBinaryExpr(AstBinaryExpr* ast) noexcept;
-        static unique_ptr<AstExpr> visitCastExpr(const AstCastExpr* ast) noexcept;
-        static AstLiteralExpr::Value cast(const TypeRoot* type, const AstLiteralExpr* literal) noexcept;
+        static unique_ptr<AstExpr> visitUnaryExpr(const AstUnaryExpr& ast) noexcept;
+        static AstLiteralExpr::Value unary(TokenKind op, const AstLiteralExpr& ast) noexcept;
+        static unique_ptr<AstExpr> visitIfExpr(AstIfExpr& ast) noexcept;
+        static unique_ptr<AstExpr> optimizeIifToCast(AstIfExpr& ast) noexcept;
+        static unique_ptr<AstExpr> visitBinaryExpr(AstBinaryExpr& ast) noexcept;
+        static unique_ptr<AstExpr> visitCastExpr(const AstCastExpr& ast) noexcept;
+        static AstLiteralExpr::Value cast(const TypeRoot* type, const AstLiteralExpr& ast) noexcept;
 
         Context& m_context;
     };

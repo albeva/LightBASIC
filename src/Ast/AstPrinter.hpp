@@ -16,8 +16,9 @@ public:
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
 private:
-    void writeHeader(AstRoot* ast) noexcept;
-    void writeLocation(AstRoot* ast) noexcept;
+    void writeHeader(AstRoot& ast) noexcept;
+    void writeLocation(AstRoot& ast) noexcept;
+
     void writeAttributes(AstAttributeList* ast) noexcept;
     void writeStmts(AstStmtList* ast) noexcept;
     void writeExpr(AstExpr* ast, StringRef name = "expr") noexcept;
