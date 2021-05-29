@@ -9,7 +9,6 @@
 #include "Type/Type.hpp"
 #include <limits>
 using namespace lbc;
-ENABLE_BITMASK_OPERATORS(ExprFlags)
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
 : m_context{ context },

@@ -18,6 +18,7 @@ enum class ExprFlags : unsigned {
     AssignAsEqual = 2,
     Default = AssignAsEqual
 };
+ENABLE_BITMASK_OPERATORS(lbc::ExprFlags)
 
 class Parser final {
 public:
