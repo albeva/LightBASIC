@@ -18,6 +18,8 @@ enum class TypeFamily {
 
     Function, // function
     ZString,  // nil terminated string, byte ptr / char*
+
+    UDT, // User defined Type (C struct)
 };
 
 class TypePointer;
@@ -68,6 +70,7 @@ public:
     [[nodiscard]] constexpr bool isFloatingPoint() const noexcept { return m_kind == TypeFamily::FloatingPoint; }
     [[nodiscard]] constexpr bool isFunction() const noexcept { return m_kind == TypeFamily::Function; }
     [[nodiscard]] constexpr bool isZString() const noexcept { return m_kind == TypeFamily::ZString; }
+    [[nodiscard]] constexpr bool isUDT() const noexcept { return m_kind == TypeFamily::UDT; }
     [[nodiscard]] bool isAnyPointer() const noexcept;
     [[nodiscard]] bool isSignedIntegral() const noexcept;
     [[nodiscard]] bool isUnsignedIntegral() const noexcept;
@@ -279,8 +282,8 @@ private:
 };
 
 /**
- * ZString zero terminated string literal.
- * Equivalent to C `char*`
+ * ZString - a zero terminated string literal.
+ * Equivalent to C `const char*`
  */
 class TypeZString final : public TypeRoot {
 public:

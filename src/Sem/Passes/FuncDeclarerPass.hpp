@@ -5,14 +5,12 @@
 #include "pch.hpp"
 
 namespace lbc {
-
 class SymbolTable;
 class Symbol;
 class Context;
 struct AstModule;
 struct AstFuncDecl;
 struct AstFuncParamDecl;
-struct AstTypeExpr;
 
 namespace Sem {
     class TypePass;

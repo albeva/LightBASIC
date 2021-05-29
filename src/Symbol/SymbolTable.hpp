@@ -8,9 +8,13 @@
 namespace lbc {
 
 class SymbolTable final {
-public:
-    NO_COPY_AND_MOVE(SymbolTable)
+    using Container = llvm::StringMap<unique_ptr<Symbol>>;
 
+public:
+    using iterator = Container::iterator;
+    using const_iterator = Container::const_iterator;
+
+    NO_COPY_AND_MOVE(SymbolTable)
     explicit SymbolTable(SymbolTable* parent = nullptr) noexcept : m_parent{ parent } {}
     ~SymbolTable() noexcept = default;
 
@@ -22,9 +26,15 @@ public:
     [[nodiscard]] bool exists(StringRef name, bool recursive = false) const noexcept;
     [[nodiscard]] Symbol* find(StringRef id, bool recursive = true) const noexcept;
 
+    [[nodiscard]] iterator begin() noexcept { return m_symbols.begin(); }
+    [[nodiscard]] iterator end() noexcept { return m_symbols.end(); }
+
+    [[nodiscard]] const_iterator begin() const noexcept { return m_symbols.begin(); }
+    [[nodiscard]] const_iterator end() const noexcept { return m_symbols.end(); }
+
 private:
     SymbolTable* m_parent;
-    llvm::StringMap<unique_ptr<Symbol>> m_symbols;
+    Container m_symbols;
     llvm::StringMap<Symbol*> m_references;
 };
 

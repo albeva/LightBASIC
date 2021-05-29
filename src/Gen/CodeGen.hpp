@@ -7,7 +7,6 @@
 #include "Ast/ControlFlowStack.hpp"
 
 namespace lbc {
-
 class Context;
 
 class CodeGen final : public AstVisitor<CodeGen, llvm::Value*> {

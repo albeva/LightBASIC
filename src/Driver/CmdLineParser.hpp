@@ -5,7 +5,6 @@
 #include "pch.hpp"
 
 namespace lbc {
-
 class Context;
 
 /**

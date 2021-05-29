@@ -103,12 +103,12 @@ void AstPrinter::visit(AstReturnStmt& ast) noexcept {
 //----------------------------------------
 
 void AstPrinter::visit(AstTypeDecl& ast) noexcept {
-    m_json.object([&]{
+    m_json.object([&] {
         writeHeader(ast);
         writeAttributes(ast.attributes.get());
         m_json.attribute("id", ast.name);
-        m_json.attributeArray("members", [&]{
-            for (const auto& decl: ast.decls) {
+        m_json.attributeArray("members", [&] {
+            for (const auto& decl : ast.decls) {
                 visit(*decl);
             }
         });

@@ -2,6 +2,8 @@
 // Created by Albert on 29/05/2021.
 //
 #include "ForStmtPass.hpp"
+#include "Ast/Ast.hpp"
+#include "Sem/SemanticAnalyzer.hpp"
 #include "Type/Type.hpp"
 using namespace lbc;
 using namespace Sem;

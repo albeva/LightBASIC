@@ -3,7 +3,6 @@
 ////
 #pragma once
 #include "pch.hpp"
-#include "Ast.hpp"
 #include "AstVisitor.h"
 
 namespace lbc {

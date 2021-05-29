@@ -10,6 +10,7 @@
 #include "Helpers.hpp"
 #include "Type/Type.hpp"
 #include "ValueHandler.hpp"
+#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/IRPrintingPasses.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
 using namespace lbc;
@@ -336,7 +337,7 @@ void CodeGen::visit(AstReturnStmt& ast) noexcept {
 //------------------------------------------------------------------
 
 void CodeGen::visit(AstTypeDecl& /*ast*/) noexcept {
-    llvm_unreachable("CodeGen::AstTypeDecl");
+    // NOOP
 }
 
 //------------------------------------------------------------------

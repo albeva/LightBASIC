@@ -9,6 +9,7 @@
 #include "Type/Type.hpp"
 #include <limits>
 using namespace lbc;
+ENABLE_BITMASK_OPERATORS(ExprFlags)
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
 : m_context{ context },
@@ -20,6 +21,8 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain) noexcept
     m_next = m_lexer->next();
     m_endLoc = m_token->range().End; // NOLINT
 }
+
+Parser::~Parser() noexcept = default;
 
 /**
  * Module
@@ -423,7 +426,7 @@ unique_ptr<AstDecl> Parser::typeMember(unique_ptr<AstAttributeList> attribs) noe
     auto type = typeExpr();
 
     return AstVarDecl::create(
-        llvm::SMRange{start, m_endLoc},
+        llvm::SMRange{ start, m_endLoc },
         id,
         std::move(attribs),
         std::move(type),
@@ -544,7 +547,7 @@ unique_ptr<AstStmt> Parser::kwReturn() noexcept {
  */
 unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
     auto start = m_token->range().Start;
-    std::vector<AstIfStmt::Block> m_blocks;
+    std::vector<AstIfStmtBlock> m_blocks;
 
     expect(TokenKind::If);
     m_blocks.emplace_back(ifBlock());
@@ -580,7 +583,7 @@ unique_ptr<AstIfStmt> Parser::kwIf() noexcept {
  *   = [ VAR { "," VAR } "," ] Expression "THEN" ThenBlock
  *   .
  */
-AstIfStmt::Block Parser::ifBlock() noexcept {
+AstIfStmtBlock Parser::ifBlock() noexcept {
     std::vector<unique_ptr<AstVarDecl>> decls;
     while (match(TokenKind::Var)) {
         decls.emplace_back(kwVar(nullptr));
@@ -600,14 +603,14 @@ AstIfStmt::Block Parser::ifBlock() noexcept {
  *   )
  *   .
  */
-[[nodiscard]] AstIfStmt::Block Parser::thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept {
+[[nodiscard]] AstIfStmtBlock Parser::thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept {
     unique_ptr<AstStmt> stmt;
     if (accept(TokenKind::EndOfStmt)) {
         stmt = stmtList();
     } else {
         stmt = statement();
     }
-    return AstIfStmt::Block{ std::move(decls), nullptr, std::move(expr), std::move(stmt) };
+    return AstIfStmtBlock{ std::move(decls), nullptr, std::move(expr), std::move(stmt) };
 }
 
 //----------------------------------------
@@ -836,19 +839,25 @@ unique_ptr<AstControlFlowBranch> Parser::kwExit() noexcept {
  */
 unique_ptr<AstTypeExpr> Parser::typeExpr() noexcept {
     auto start = m_token->range().Start;
+    auto kind = m_token->kind();
 
-    if (!match(TokenKind::Any) && !m_token->isTypeKeyword()) {
-        error("Expected type, got "_t + m_token->description());
+    unique_ptr<AstIdentExpr> ident;
+    if (match(TokenKind::Any) || m_token->isTypeKeyword()) {
+        move();
+    } else {
+        ident = identifier();
     }
-
-    auto token = move();
 
     auto deref = 0;
     while (accept(TokenKind::Ptr)) {
         deref++;
     }
 
-    return AstTypeExpr::create(llvm::SMRange{ start, m_endLoc }, token->kind(), deref);
+    return AstTypeExpr::create(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(ident),
+        kind,
+        deref);
 }
 
 //----------------------------------------

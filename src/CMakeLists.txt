@@ -64,7 +64,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.hpp
     Utils/Version.hpp
-    Sem/Passes/ForStmtPass.cpp Sem/Passes/ForStmtPass.hpp)
+    Sem/Passes/ForStmtPass.cpp Sem/Passes/ForStmtPass.hpp Sem/Passes/TypeDeclPass.cpp Sem/Passes/TypeDeclPass.hpp Type/TypeUdt.cpp Type/TypeUdt.hpp)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

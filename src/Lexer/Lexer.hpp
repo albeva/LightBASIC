@@ -3,10 +3,9 @@
 //
 #pragma once
 #include "pch.hpp"
-#include "Token.hpp"
 
 namespace lbc {
-
+class Token;
 class Context;
 enum class TokenKind;
 

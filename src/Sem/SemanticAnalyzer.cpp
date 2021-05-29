@@ -6,17 +6,17 @@
 #include "Lexer/Token.hpp"
 #include "Passes/ForStmtPass.hpp"
 #include "Passes/FuncDeclarerPass.hpp"
+#include "Passes/TypeDeclPass.hpp"
 #include "Symbol/Symbol.hpp"
 #include "Symbol/SymbolTable.hpp"
 #include "Type/Type.hpp"
-#include <charconv>
 
 using namespace lbc;
 
 SemanticAnalyzer::SemanticAnalyzer(Context& context) noexcept
 : m_context{ context },
   m_constantFolder{ context },
-  m_typePass{ context } {}
+  m_typePass{ *this } {}
 
 void SemanticAnalyzer::visit(AstModule& ast) noexcept {
     m_astRootModule = &ast;
@@ -48,7 +48,7 @@ void SemanticAnalyzer::visit(AstExprStmt& ast) noexcept {
 }
 
 void SemanticAnalyzer::visit(AstVarDecl& ast) noexcept {
-    auto* symbol = createNewSymbol(ast, ast.name);
+    auto* symbol = createNewSymbol(ast);
     symbol->setExternal(false);
 
     // m_type expr?
@@ -200,8 +200,8 @@ void SemanticAnalyzer::visit(AstControlFlowBranch& ast) noexcept {
 // Type (user defined)
 //----------------------------------------
 
-void SemanticAnalyzer::visit(AstTypeDecl& /*ast*/) noexcept {
-    // llvm_unreachable("SemanticAnalyzer::AstTypeDecl");
+void SemanticAnalyzer::visit(AstTypeDecl& ast) noexcept {
+    Sem::TypeDeclPass(*this, ast);
 }
 
 //----------------------------------------
@@ -541,11 +541,11 @@ void SemanticAnalyzer::visit(AstIfExpr& ast) noexcept {
 // Utils
 //------------------------------------------------------------------
 
-Symbol* SemanticAnalyzer::createNewSymbol(AstDecl& ast, StringRef id) noexcept {
-    if (m_table->find(id, false) != nullptr) {
-        fatalError("Redefinition of "_t + id);
+Symbol* SemanticAnalyzer::createNewSymbol(AstDecl& ast) noexcept {
+    if (m_table->find(ast.name, false) != nullptr) {
+        fatalError("Redefinition of "_t + ast.name);
     }
-    auto* symbol = m_table->insert(id);
+    auto* symbol = m_table->insert(ast.name);
 
     // alias?
     if (ast.attributes) {

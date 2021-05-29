@@ -9,7 +9,6 @@
 #include "Symbol/SymbolTable.hpp"
 
 namespace lbc {
-
 class TypeRoot;
 AST_FORWARD_DECLARE()
 
@@ -142,21 +141,21 @@ struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt
     unique_ptr<AstExpr> expr;
 };
 
-struct AstIfStmt final : AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
-    struct Block final {
-        std::vector<unique_ptr<AstVarDecl>> decls;
-        unique_ptr<SymbolTable> symbolTable;
-        unique_ptr<AstExpr> expr;
-        unique_ptr<AstStmt> stmt;
-    };
+struct AstIfStmtBlock final {
+    std::vector<unique_ptr<AstVarDecl>> decls;
+    unique_ptr<SymbolTable> symbolTable;
+    unique_ptr<AstExpr> expr;
+    unique_ptr<AstStmt> stmt;
+};
 
+struct AstIfStmt final : AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
     AstIfStmt(
         llvm::SMRange range_,
-        std::vector<Block> list) noexcept
+        std::vector<AstIfStmtBlock> list) noexcept
     : AstNode{ KIND, range_ },
       blocks{ std::move(list) } {};
 
-    std::vector<Block> blocks;
+    std::vector<AstIfStmtBlock> blocks;
 };
 
 struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
@@ -356,6 +355,7 @@ struct AstTypeDecl final : AstNode<AstTypeDecl, AstDecl, AstKind::TypeDecl> {
       decls{ std::move(decls_) } {}
 
     std::vector<unique_ptr<AstDecl>> decls;
+    std::unique_ptr<SymbolTable> symbolTable;
 };
 
 //----------------------------------------
@@ -374,12 +374,15 @@ struct AstType : AstRoot {
 struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
     AstTypeExpr(
         llvm::SMRange range_,
+        unique_ptr<AstIdentExpr> ident_,
         TokenKind tokenKind_,
         int deref) noexcept
     : AstNode{ KIND, range_ },
+      ident{ std::move(ident_) },
       tokenKind{ tokenKind_ },
       dereference{ deref } {};
 
+    unique_ptr<AstIdentExpr> ident;
     const TokenKind tokenKind;
     const int dereference;
 };

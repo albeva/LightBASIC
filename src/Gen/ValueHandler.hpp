@@ -2,6 +2,7 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #pragma once
+#include "pch.hpp"
 #include "Ast/Ast.hpp"
 #include "CodeGen.hpp"
 #include "Symbol/Symbol.hpp"

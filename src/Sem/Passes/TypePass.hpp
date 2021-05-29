@@ -5,24 +5,21 @@
 #include "pch.hpp"
 
 namespace lbc {
-
-class Context;
+class SemanticAnalyzer;
 struct AstTypeExpr;
 
 namespace Sem {
-
     class TypePass final {
     public:
         NO_COPY_AND_MOVE(TypePass)
 
-        explicit TypePass(Context& context) noexcept : m_context{ context } {}
+        explicit TypePass(SemanticAnalyzer& sem) noexcept : m_sem{ sem } {}
         ~TypePass() noexcept = default;
 
         void visit(AstTypeExpr& ast) noexcept;
 
     private:
-        Context& m_context;
+        SemanticAnalyzer& m_sem;
     };
-
 } // namespace Sem
 } // namespace lbc

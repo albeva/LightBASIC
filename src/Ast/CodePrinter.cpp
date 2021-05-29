@@ -177,7 +177,7 @@ void CodePrinter::visit(AstTypeDecl& ast) noexcept {
 
     m_os << indent() << "TYPE " << ast.name << '\n';
     m_indent++;
-    for (const auto& decl: ast.decls) {
+    for (const auto& decl : ast.decls) {
         visit(*decl);
         m_os << '\n';
     }

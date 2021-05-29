@@ -3,13 +3,14 @@
 //
 #pragma once
 #include "pch.hpp"
-#include "Ast/Ast.hpp"
-#include "Lexer/Lexer.hpp"
+#include "Ast/Ast.def.hpp"
 
 namespace lbc {
-
 class Context;
+class Lexer;
+class Token;
 enum class TokenKind;
+struct AstIfStmtBlock;
 AST_FORWARD_DECLARE()
 
 enum class ExprFlags : unsigned {
@@ -17,14 +18,13 @@ enum class ExprFlags : unsigned {
     AssignAsEqual = 2,
     Default = AssignAsEqual
 };
-ENABLE_BITMASK_OPERATORS(ExprFlags)
 
 class Parser final {
 public:
     NO_COPY_AND_MOVE(Parser)
 
     Parser(Context& context, unsigned int fileId, bool isMain) noexcept;
-    ~Parser() noexcept = default;
+    ~Parser() noexcept;
 
     [[nodiscard]] unique_ptr<AstModule> parse() noexcept;
 
@@ -54,8 +54,8 @@ private:
     [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
     [[nodiscard]] unique_ptr<AstIfStmt> kwIf() noexcept;
-    [[nodiscard]] AstIfStmt::Block ifBlock() noexcept;
-    [[nodiscard]] AstIfStmt::Block thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
+    [[nodiscard]] AstIfStmtBlock ifBlock() noexcept;
+    [[nodiscard]] AstIfStmtBlock thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
     [[nodiscard]] unique_ptr<AstForStmt> kwFor() noexcept;
     [[nodiscard]] unique_ptr<AstDoLoopStmt> kwDo() noexcept;
     [[nodiscard]] unique_ptr<AstControlFlowBranch> kwContinue() noexcept;

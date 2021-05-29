@@ -3,22 +3,23 @@
 //
 #pragma once
 #include "pch.hpp"
-#include "Ast/Ast.hpp"
-#include "Sem/SemanticAnalyzer.hpp"
 
-namespace lbc::Sem {
+namespace lbc {
+class SemanticAnalyzer;
+struct AstForStmt;
 
-class ForStmtPass final {
-public:
-    ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast) noexcept;
+namespace Sem {
+    class ForStmtPass final {
+    public:
+        ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast) noexcept;
 
-private:
-    void ceclare() noexcept;
-    void analyze() noexcept;
-    void determineForDirection() noexcept;
+    private:
+        void ceclare() noexcept;
+        void analyze() noexcept;
+        void determineForDirection() noexcept;
 
-    SemanticAnalyzer& m_sem;
-    AstForStmt& m_ast;
-};
-
-} // namespace lbc::Sem
+        SemanticAnalyzer& m_sem;
+        AstForStmt& m_ast;
+    };
+} // namespace Sem
+} // namespace lbc

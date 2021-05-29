@@ -9,7 +9,6 @@
 #include "Passes/TypePass.hpp"
 
 namespace lbc {
-
 class Token;
 class Symbol;
 class SymbolTable;
@@ -22,7 +21,7 @@ public:
 
     [[nodiscard]] Context& getContext() noexcept { return m_context; }
 
-    /// analyze the expression, optionally coerce result to given type
+    /// declareMembers the expression, optionally coerce result to given type
     void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr) noexcept;
 
     /// Checks types and if they are convertible, create CAST expression
@@ -34,6 +33,8 @@ public:
     /// Creates a CAST expression, without folding
     static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) noexcept;
 
+    [[nodiscard]] Symbol* createNewSymbol(AstDecl& ast) noexcept;
+
     [[nodiscard]] SymbolTable* getSymbolTable() noexcept { return m_table; }
     void setSymbolTable(SymbolTable* table) { m_table = table; }
 
@@ -41,8 +42,6 @@ public:
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
-    [[nodiscard]] Symbol* createNewSymbol(AstDecl& ast, StringRef id) noexcept;
-
     void arithmetic(AstBinaryExpr& ast) noexcept;
     void logical(AstBinaryExpr& ast) noexcept;
     void comparison(AstBinaryExpr& ast) noexcept;
