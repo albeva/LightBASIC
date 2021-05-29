@@ -20,13 +20,20 @@ add_library(
     Driver/Source.hpp
     Driver/TempFileCache.cpp
     Driver/TempFileCache.hpp
-    Driver/Toolchain/Toolchain.cpp
-    Driver/Toolchain/Toolchain.hpp
     Driver/Toolchain/ToolTask.cpp
     Driver/Toolchain/ToolTask.hpp
+    Driver/Toolchain/Toolchain.cpp
+    Driver/Toolchain/Toolchain.hpp
     Driver/TranslationUnit.hpp
+    Gen/Builders/BinaryExprBuilder.cpp
+    Gen/Builders/BinaryExprBuilder.hpp
+    Gen/Builders/Builder.hpp
+    Gen/Builders/DoLoopBuilder.cpp
+    Gen/Builders/DoLoopBuilder.hpp
     Gen/Builders/ForStmtBuilder.cpp
     Gen/Builders/ForStmtBuilder.hpp
+    Gen/Builders/IfStmtBuilder.cpp
+    Gen/Builders/IfStmtBuilder.hpp
     Gen/CodeGen.cpp
     Gen/CodeGen.hpp
     Gen/Helpers.cpp
@@ -57,7 +64,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.hpp
     Utils/Version.hpp
-    Gen/Builders/DoLoopBuilder.cpp Gen/Builders/DoLoopBuilder.hpp Gen/Builders/IfStmtBuilder.cpp Gen/Builders/IfStmtBuilder.hpp Gen/Builders/BinaryExprBuilder.cpp Gen/Builders/BinaryExprBuilder.hpp Gen/Builders/Builder.hpp)
+)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)
