@@ -9,7 +9,7 @@
 using namespace lbc;
 using namespace Sem;
 
-TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast) noexcept
+TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
 : m_sem(sem),
   m_ast(ast) {
     auto* symbol = m_sem.createNewSymbol(ast);
@@ -24,7 +24,7 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast) noexcept
     m_sem.setSymbolTable(current);
 }
 
-void TypeDeclPass::declareMembers() noexcept {
+void TypeDeclPass::declareMembers() {
     for (const auto& decl : m_ast.decls) {
         m_sem.visit(*decl);
     }

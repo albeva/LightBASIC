@@ -12,7 +12,7 @@
 using namespace lbc;
 using namespace Gen;
 
-ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast) noexcept
+ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast)
 : Builder{ codeGen, ast },
   m_direction{ ast.direction } {
     if (m_direction == AstForStmt::Direction::Skip) {
@@ -26,7 +26,7 @@ ForStmtBuilder::ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast) noexcept
     build();
 }
 
-void ForStmtBuilder::declareVars() noexcept {
+void ForStmtBuilder::declareVars() {
     for (const auto& decl : m_ast.decls) {
         m_gen.visit(*decl);
     }
@@ -39,7 +39,7 @@ void ForStmtBuilder::declareVars() noexcept {
     m_limit = ValueHandler::createTempOrConstant(m_gen, *m_ast.limit, "for.limit");
 }
 
-void ForStmtBuilder::checkDirection() noexcept {
+void ForStmtBuilder::checkDirection() {
     if (m_direction == AstForStmt::Direction::Unknown) {
         auto* limitValue = m_limit.get();
         auto* iterValue = m_iterator.get();
@@ -51,14 +51,14 @@ void ForStmtBuilder::checkDirection() noexcept {
     }
 }
 
-void ForStmtBuilder::createBlocks() noexcept {
+void ForStmtBuilder::createBlocks() {
     m_condBlock = llvm::BasicBlock::Create(m_llvmContext, "for.cond");
     m_bodyBlock = llvm::BasicBlock::Create(m_llvmContext, "for.body");
     m_iterBlock = llvm::BasicBlock::Create(m_llvmContext, "for.iter");
     m_exitBlock = llvm::BasicBlock::Create(m_llvmContext, "for.end");
 }
 
-void ForStmtBuilder::configureStep() noexcept {
+void ForStmtBuilder::configureStep() {
     // No step
     if (!m_ast.step) {
         llvm::Constant* stepVal = nullptr;
@@ -140,7 +140,7 @@ void ForStmtBuilder::configureStep() noexcept {
     m_builder.CreateBr(m_condBlock);
 }
 
-void ForStmtBuilder::build() noexcept {
+void ForStmtBuilder::build() {
     llvm::BasicBlock* incrBlock = nullptr;
     llvm::BasicBlock* decrBlock = nullptr;
 
@@ -204,7 +204,7 @@ void ForStmtBuilder::build() noexcept {
     m_gen.switchBlock(m_exitBlock);
 }
 
-void ForStmtBuilder::makeCondition(bool incr) noexcept {
+void ForStmtBuilder::makeCondition(bool incr) {
     auto lessOrEqualPred = getCmpPred(m_type, TokenKind::LessOrEqual);
     auto* iterValue = m_iterator.get();
     auto* limitValue = m_limit.get();
@@ -215,7 +215,7 @@ void ForStmtBuilder::makeCondition(bool incr) noexcept {
     m_builder.CreateCondBr(cmp, m_bodyBlock, m_exitBlock);
 }
 
-void ForStmtBuilder::makeIteration(bool incr, llvm::BasicBlock* branch) noexcept {
+void ForStmtBuilder::makeIteration(bool incr, llvm::BasicBlock* branch) {
     auto* stepValue = m_step.get();
     auto* iterValue = m_iterator.get();
     auto* result = incr

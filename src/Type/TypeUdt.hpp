@@ -13,12 +13,12 @@ class SymbolTable;
  * User defined type
  */
 class TypeUDT final : public TypeRoot {
-    TypeUDT(Symbol& symbol, SymbolTable& symbolTable) noexcept;
+    TypeUDT(Symbol& symbol, SymbolTable& symbolTable);
 
 public:
-    static const TypeUDT* get(Symbol& symbol, SymbolTable& symbolTable) noexcept;
+    static const TypeUDT* get(Symbol& symbol, SymbolTable& symbolTable);
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::UDT;
     }
 

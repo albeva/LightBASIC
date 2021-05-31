@@ -10,7 +10,7 @@
 using namespace lbc;
 using namespace Sem;
 
-void FuncDeclarerPass::visit(AstModule& ast) noexcept {
+void FuncDeclarerPass::visit(AstModule& ast) {
     m_table = ast.symbolTable.get();
     for (const auto& stmt : ast.stmtList->stmts) {
         switch (stmt->kind) {
@@ -26,7 +26,7 @@ void FuncDeclarerPass::visit(AstModule& ast) noexcept {
     }
 }
 
-void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) noexcept {
+void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
     const auto& name = ast.name;
     if (m_table->exists(name)) {
         fatalError("Redefinition of "_t + name);
@@ -75,7 +75,7 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) noexcept {
     ast.symbol = symbol;
 }
 
-void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl& ast) noexcept {
+void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl& ast) {
     auto* symbol = createParamSymbol(ast);
 
     m_typePass.visit(*ast.typeExpr);
@@ -84,7 +84,7 @@ void FuncDeclarerPass::visitFuncParamDecl(AstFuncParamDecl& ast) noexcept {
     ast.symbol = symbol;
 }
 
-Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl& ast) noexcept {
+Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl& ast) {
     const auto& name = ast.name;
     if (m_table->find(name, false) != nullptr) {
         fatalError("Redefinition of "_t + name);

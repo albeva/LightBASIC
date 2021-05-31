@@ -57,7 +57,7 @@ public:
         return m_llvmType;
     }
     virtual ~TypeRoot() noexcept = default;
-    [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind) noexcept;
+    [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind);
     [[nodiscard]] virtual string asString() const noexcept = 0;
 
     // Type queries
@@ -103,9 +103,9 @@ private:
 class TypeVoid final : public TypeRoot {
 public:
     constexpr TypeVoid() noexcept : TypeRoot{ TypeFamily::Void } {}
-    static const TypeVoid* get() noexcept;
+    static const TypeVoid* get();
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::Void;
     }
 
@@ -121,9 +121,9 @@ protected:
 class TypeAny final : public TypeRoot {
 public:
     constexpr TypeAny() noexcept : TypeRoot{ TypeFamily::Any } {}
-    [[nodiscard]] static const TypeAny* get() noexcept;
+    [[nodiscard]] static const TypeAny* get();
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::Any;
     }
 
@@ -141,9 +141,9 @@ public:
     constexpr explicit TypePointer(const TypeRoot* base) noexcept
     : TypeRoot{ TypeFamily::Pointer }, m_base{ base } {}
 
-    [[nodiscard]] static const TypePointer* get(const TypeRoot* base) noexcept;
+    [[nodiscard]] static const TypePointer* get(const TypeRoot* base);
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::Pointer;
     }
 
@@ -165,9 +165,9 @@ class TypeBoolean final : public TypeRoot {
 public:
     constexpr TypeBoolean() noexcept : TypeRoot{ TypeFamily::Boolean } {}
 
-    [[nodiscard]] static const TypeBoolean* get() noexcept;
+    [[nodiscard]] static const TypeBoolean* get();
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::Boolean;
     }
 
@@ -183,7 +183,7 @@ protected:
  */
 class TypeNumeric : public TypeRoot {
 public:
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         auto kind = type->getKind();
         return kind == TypeFamily::Integral || kind == TypeFamily::FloatingPoint;
     }
@@ -206,9 +206,9 @@ public:
     constexpr TypeIntegral(unsigned bits, bool isSigned) noexcept
     : TypeNumeric{ TypeFamily::Integral, bits }, m_signed{ isSigned } {}
 
-    [[nodiscard]] static const TypeIntegral* get(unsigned bits, bool isSigned) noexcept;
+    [[nodiscard]] static const TypeIntegral* get(unsigned bits, bool isSigned);
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::Integral;
     }
 
@@ -234,9 +234,9 @@ public:
     constexpr explicit TypeFloatingPoint(unsigned bits) noexcept
     : TypeNumeric{ TypeFamily::FloatingPoint, bits } {}
 
-    [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits) noexcept;
+    [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits);
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::FloatingPoint;
     }
 
@@ -260,9 +260,9 @@ public:
     [[nodiscard]] static const TypeFunction* get(
         const TypeRoot* retType,
         std::vector<const TypeRoot*>&& paramTypes,
-        bool variadic) noexcept;
+        bool variadic);
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::Function;
     }
 
@@ -289,9 +289,9 @@ class TypeZString final : public TypeRoot {
 public:
     constexpr TypeZString() noexcept : TypeRoot{ TypeFamily::ZString } {}
 
-    [[nodiscard]] static const TypeZString* get() noexcept;
+    [[nodiscard]] static const TypeZString* get();
 
-    constexpr static bool classof(const TypeRoot* type) noexcept {
+    constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::ZString;
     }
 

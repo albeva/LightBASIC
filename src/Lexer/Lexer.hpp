@@ -13,24 +13,24 @@ class Lexer final {
 public:
     NO_COPY_AND_MOVE(Lexer)
 
-    Lexer(Context& context, unsigned fileID) noexcept;
+    Lexer(Context& context, unsigned fileID);
     ~Lexer() noexcept = default;
 
-    [[nodiscard]] unique_ptr<Token> next() noexcept;
+    [[nodiscard]] unique_ptr<Token> next();
 
 private:
-    void skipUntilLineEnd() noexcept;
-    void skipToNextLine() noexcept;
-    void skipMultilineComment() noexcept;
+    void skipUntilLineEnd();
+    void skipToNextLine();
+    void skipMultilineComment();
 
-    [[nodiscard]] unique_ptr<Token> endOfFile() noexcept;
-    [[nodiscard]] unique_ptr<Token> endOfStatement() noexcept;
+    [[nodiscard]] unique_ptr<Token> endOfFile();
+    [[nodiscard]] unique_ptr<Token> endOfStatement();
     [[nodiscard]] unique_ptr<Token> invalid(const char* loc) const noexcept;
-    [[nodiscard]] unique_ptr<Token> stringLiteral() noexcept;
-    [[nodiscard]] char escape() noexcept;
-    [[nodiscard]] unique_ptr<Token> token(TokenKind kind, int len = 1) noexcept;
-    [[nodiscard]] unique_ptr<Token> numberLiteral() noexcept;
-    [[nodiscard]] unique_ptr<Token> identifier() noexcept;
+    [[nodiscard]] unique_ptr<Token> stringLiteral();
+    [[nodiscard]] char escape();
+    [[nodiscard]] unique_ptr<Token> token(TokenKind kind, int len = 1);
+    [[nodiscard]] unique_ptr<Token> numberLiteral();
+    [[nodiscard]] unique_ptr<Token> identifier();
 
     Context& m_context;
     const llvm::MemoryBuffer* m_buffer;

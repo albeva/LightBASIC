@@ -15,7 +15,7 @@
 
 using namespace lbc;
 
-void Driver::drive() noexcept {
+void Driver::drive() {
     processInputs();
     compileSources();
 
@@ -70,7 +70,7 @@ void Driver::drive() noexcept {
  * Process provided input files from the context, resolve their path,
  * ansure they exost and store in driver paths structure
  */
-void Driver::processInputs() noexcept {
+void Driver::processInputs() {
     for (size_t index = 0; index < Context::fileTypeCount; index++) {
         auto type = static_cast<Context::FileType>(index);
         auto& dst = getSources(type);
@@ -89,20 +89,20 @@ std::unique_ptr<Source> Driver::deriveSource(const Source& source, Context::File
     return source.derive(type, path);
 }
 
-void Driver::emitLLVMIr(bool temporary) noexcept {
+void Driver::emitLLVMIr(bool temporary) {
     emitLlvm(Context::FileType::LLVMIr, temporary, [](auto& stream, auto& module) {
         auto* printer = llvm::createPrintModulePass(stream);
         printer->runOnModule(module);
     });
 }
 
-void Driver::emitBitCode(bool temporary) noexcept {
+void Driver::emitBitCode(bool temporary) {
     emitLlvm(Context::FileType::BitCode, temporary, [](auto& stream, auto& module) {
         llvm::WriteBitcodeToFile(module, stream);
     });
 }
 
-void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(llvm::raw_fd_ostream&, llvm::Module&)) noexcept {
+void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(llvm::raw_fd_ostream&, llvm::Module&)) {
     auto& dstFiles = getSources(type);
     dstFiles.reserve(dstFiles.size() + m_modules.size());
 
@@ -126,15 +126,15 @@ void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(
     }
 }
 
-void Driver::emitAssembly(bool temporary) noexcept {
+void Driver::emitAssembly(bool temporary) {
     emitNative(Context::FileType::Assembly, temporary);
 }
 
-void Driver::emitObjects(bool temporary) noexcept {
+void Driver::emitObjects(bool temporary) {
     emitNative(Context::FileType::Object, temporary);
 }
 
-void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
+void Driver::emitNative(Context::FileType type, bool temporary) {
     const auto& bcFiles = getSources(Context::FileType::BitCode);
     auto& dstFiles = getSources(type);
     string filetype;
@@ -165,7 +165,7 @@ void Driver::emitNative(Context::FileType type, bool temporary) noexcept {
     }
 }
 
-void Driver::optimize() noexcept {
+void Driver::optimize() {
     auto level = m_context.getOptimizationLevel();
     if (level == Context::OptimizationLevel::O0) {
         return;
@@ -206,7 +206,7 @@ void Driver::optimize() noexcept {
     }
 }
 
-void Driver::emitExecutable() noexcept {
+void Driver::emitExecutable() {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
     const auto& objFiles = getSources(Context::FileType::Object);
     const auto& triple = m_context.getTriple();
@@ -302,7 +302,7 @@ void Driver::emitExecutable() noexcept {
 
 // Compile
 
-void Driver::compileSources() noexcept {
+void Driver::compileSources() {
     if (m_context.isVerbose()) {
         std::cout << "Compile:\n";
     }
@@ -323,7 +323,7 @@ void Driver::compileSources() noexcept {
     }
 }
 
-void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
+void Driver::compileSource(const Source* source, unsigned int ID) {
     const auto& path = source->path;
     if (m_context.isVerbose()) {
         std::cout << path.string() << '\n';
@@ -364,7 +364,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) noexcept {
         std::move(ast)));
 }
 
-void Driver::dumpAst() noexcept {
+void Driver::dumpAst() {
     auto print = [&](llvm::raw_ostream& stream) {
         AstPrinter printer{ m_context, stream };
         for (const auto& module : m_modules) {

@@ -26,15 +26,15 @@ public:
     using Value = std::variant<std::monostate, StringRef, uint64_t, double, bool>;
 
     // Describe given token kind
-    static StringRef description(TokenKind kind) noexcept;
+    static StringRef description(TokenKind kind);
 
     // find matching token for string or return TokenKind::Identifier
-    static TokenKind findKind(StringRef str) noexcept;
+    static TokenKind findKind(StringRef str);
 
     // constructors
 
     template<typename... Args>
-    static unique_ptr<Token> create(Args&&... args) noexcept {
+    static unique_ptr<Token> create(Args&&... args) {
         return make_unique<Token>(std::forward<Args>(args)...);
     }
 
@@ -93,7 +93,7 @@ public:
     [[nodiscard]] bool isLeftToRight() const noexcept;
     [[nodiscard]] bool isRightToLeft() const noexcept;
 
-    static OperatorType getOperatorType(TokenKind kind) noexcept;
+    static OperatorType getOperatorType(TokenKind kind);
 
     // Query keyword types
 

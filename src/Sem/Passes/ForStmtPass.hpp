@@ -11,12 +11,12 @@ struct AstForStmt;
 namespace Sem {
     class ForStmtPass final {
     public:
-        ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast) noexcept;
+        ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast);
 
     private:
-        void ceclare() noexcept;
-        void analyze() noexcept;
-        void determineForDirection() noexcept;
+        void ceclare();
+        void analyze();
+        void determineForDirection();
 
         SemanticAnalyzer& m_sem;
         AstForStmt& m_ast;

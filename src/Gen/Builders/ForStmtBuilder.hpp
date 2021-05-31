@@ -12,17 +12,17 @@ namespace lbc::Gen {
 
 class ForStmtBuilder final : Builder<AstForStmt> {
 public:
-    ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast) noexcept;
+    ForStmtBuilder(CodeGen& codeGen, AstForStmt& ast);
 
 private:
-    void declareVars() noexcept;
-    void build() noexcept;
-    void createBlocks() noexcept;
-    void configureStep() noexcept;
-    void checkDirection() noexcept;
+    void declareVars();
+    void build();
+    void createBlocks();
+    void configureStep();
+    void checkDirection();
 
-    void makeCondition(bool incr) noexcept;
-    void makeIteration(bool incr, llvm::BasicBlock* branch) noexcept;
+    void makeCondition(bool incr);
+    void makeIteration(bool incr, llvm::BasicBlock* branch);
 
     const AstForStmt::Direction m_direction;
 

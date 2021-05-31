@@ -4,7 +4,7 @@
 #include "Utils.hpp"
 #include "Driver/TempFileCache.hpp"
 
-void lbc::fatalError(const Twine& message, bool prefix) noexcept {
+void lbc::fatalError(const Twine& message, bool prefix) {
     TempFileCache::removeTemporaryFiles();
 
     if (prefix) {
@@ -15,7 +15,7 @@ void lbc::fatalError(const Twine& message, bool prefix) noexcept {
     std::exit(EXIT_FAILURE);
 }
 
-void lbc::warning(const Twine& message, bool prefix) noexcept {
+void lbc::warning(const Twine& message, bool prefix) {
     if (prefix) {
         std::cout << "lbc: warning: ";
     }

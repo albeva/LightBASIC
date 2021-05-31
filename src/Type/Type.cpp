@@ -39,7 +39,7 @@ const TypePointer anyPtrTy{ &anyTy }; // void*
 
 } // namespace
 
-const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) noexcept {
+const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
     #define CASE_TYPE(ID, ...) case TokenKind::ID: return &ID##Ty;
     switch (kind) {
     PRIMITIVE_TYPES(CASE_TYPE)
@@ -142,7 +142,7 @@ TypeComparison TypeRoot::compare(const TypeRoot* other) const noexcept {
 
 // Void
 
-const TypeVoid* TypeVoid::get() noexcept {
+const TypeVoid* TypeVoid::get() {
     return &voidTy;
 }
 
@@ -155,7 +155,7 @@ string TypeVoid::asString() const noexcept {
 }
 
 // Any
-const TypeAny* TypeAny::get() noexcept {
+const TypeAny* TypeAny::get() {
     return &anyTy;
 }
 
@@ -169,7 +169,7 @@ string TypeAny::asString() const noexcept {
 
 // Pointer
 
-const TypePointer* TypePointer::get(const TypeRoot* base) noexcept {
+const TypePointer* TypePointer::get(const TypeRoot* base) {
     if (base == &anyTy) {
         return &anyPtrTy;
     }
@@ -193,7 +193,7 @@ string TypePointer::asString() const noexcept {
 
 // Bool
 
-const TypeBoolean* TypeBoolean::get() noexcept {
+const TypeBoolean* TypeBoolean::get() {
     return &BoolTy;
 }
 
@@ -207,7 +207,7 @@ string TypeBoolean::asString() const noexcept {
 
 // Integer
 
-const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) noexcept {
+const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) {
 #define USE_TYPE(ID, STR, KIND, BITS, IS_SIGNED, ...) \
     if (bits == BITS && isSigned == IS_SIGNED)        \
         return &ID##Ty;
@@ -241,7 +241,7 @@ string TypeIntegral::asString() const noexcept {
 
 // Floating Point
 
-const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) noexcept {
+const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
     switch (bits) {
 #define USE_TYPE(ID, STR, KIND, BITS, ...) \
     case BITS:                             \
@@ -276,7 +276,7 @@ string TypeFloatingPoint::asString() const noexcept {
 
 // Function
 
-const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) noexcept {
+const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) {
     for (const auto& ptr : declaredFunc) {
         if (ptr->getReturn() == retType && ptr->getParams() == paramTypes && ptr->isVariadic() == variadic) {
             return ptr.get();
@@ -315,7 +315,7 @@ string TypeFunction::asString() const noexcept {
 }
 
 // ZString
-const TypeZString* TypeZString::get() noexcept {
+const TypeZString* TypeZString::get() {
     return &ZStringTy;
 }
 

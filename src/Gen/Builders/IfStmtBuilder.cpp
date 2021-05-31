@@ -6,12 +6,12 @@
 using namespace lbc;
 using namespace Gen;
 
-IfStmtBuilder::IfStmtBuilder(CodeGen& gen, AstIfStmt& ast) noexcept
+IfStmtBuilder::IfStmtBuilder(CodeGen& gen, AstIfStmt& ast)
 : Builder{ gen, ast } {
     build();
 }
 
-void IfStmtBuilder::build() noexcept {
+void IfStmtBuilder::build() {
     auto* func = m_builder.GetInsertBlock()->getParent();
     auto* endBlock = llvm::BasicBlock::Create(m_llvmContext, "if.end", func);
 

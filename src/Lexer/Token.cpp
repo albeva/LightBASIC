@@ -29,12 +29,12 @@ constexpr std::array kindToDescription {
 
 } // namespace
 
-StringRef Token::description(TokenKind kind) noexcept {
+StringRef Token::description(TokenKind kind) {
     auto index = static_cast<size_t>(kind);
     return kindToDescription.at(index);
 }
 
-TokenKind Token::findKind(StringRef str) noexcept {
+TokenKind Token::findKind(StringRef str) {
     auto iter = keywordsToKind.find(str);
     if (iter != keywordsToKind.end()) {
         return iter->second;
@@ -194,7 +194,7 @@ bool Token::isRightToLeft() const noexcept {
     #undef CASE_OPERATOR
 }
 
-OperatorType Token::getOperatorType(TokenKind kind) noexcept {
+OperatorType Token::getOperatorType(TokenKind kind) {
     #define CASE_OPERATOR(ID, CH, PREC, BINARY, DIR, KIND, ...) \
         case TokenKind::ID:                                     \
             return OperatorType::KIND;

@@ -17,28 +17,28 @@ public:
 
     ~Symbol() noexcept = default;
 
-    [[nodiscard]] const TypeRoot* type() const { return m_type; }
+    [[nodiscard]] const TypeRoot* type() const noexcept { return m_type; }
     void setType(const TypeRoot* type) { m_type = type; }
 
-    [[nodiscard]] bool isExternal() const { return m_external; }
+    [[nodiscard]] bool isExternal() const noexcept { return m_external; }
     void setExternal(bool external) { m_external = external; }
 
-    [[nodiscard]] StringRef name() const { return m_name; }
+    [[nodiscard]] StringRef name() const noexcept { return m_name; }
 
-    [[nodiscard]] llvm::Value* getLlvmValue() const { return m_llvmValue; }
+    [[nodiscard]] llvm::Value* getLlvmValue() const noexcept { return m_llvmValue; }
     void setLlvmValue(llvm::Value* value) { m_llvmValue = value; }
 
-    [[nodiscard]] StringRef alias() const { return m_alias; }
+    [[nodiscard]] StringRef alias() const noexcept { return m_alias; }
     void setAlias(StringRef alias) { m_alias = alias; }
 
-    [[nodiscard]] StringRef identifier() const {
+    [[nodiscard]] StringRef identifier() const noexcept {
         if (m_alias.empty()) {
             return m_name;
         }
         return m_alias;
     }
 
-    [[nodiscard]] llvm::GlobalValue::LinkageTypes getLlvmLinkage() const {
+    [[nodiscard]] llvm::GlobalValue::LinkageTypes getLlvmLinkage() const noexcept {
         if (m_external) {
             return llvm::GlobalValue::LinkageTypes::ExternalLinkage;
         }

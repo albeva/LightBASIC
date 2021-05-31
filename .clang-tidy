@@ -14,7 +14,8 @@ Checks: '*,
         -cppcoreguidelines-pro-type-static-cast-downcast,
         -readability-convert-member-functions-to-static,
         -bugprone-branch-clone,
-        -llvmlibc-*'
+        -llvmlibc-*,
+        -misc-no-recursion'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 FormatStyle: none

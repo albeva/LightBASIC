@@ -12,14 +12,14 @@ AstPrinter::AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
 : m_context{ context }, m_json{ os, 4 } {
 }
 
-void AstPrinter::visit(AstModule& ast) noexcept {
+void AstPrinter::visit(AstModule& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeStmts(ast.stmtList.get());
     });
 }
 
-void AstPrinter::visit(AstStmtList& ast) noexcept {
+void AstPrinter::visit(AstStmtList& ast) {
     m_json.array([&] {
         for (const auto& stmt : ast.stmts) {
             visit(*stmt);
@@ -27,7 +27,7 @@ void AstPrinter::visit(AstStmtList& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstAssignStmt& ast) noexcept {
+void AstPrinter::visit(AstAssignStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.lhs.get(), "lhs");
@@ -35,14 +35,14 @@ void AstPrinter::visit(AstAssignStmt& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstExprStmt& ast) noexcept {
+void AstPrinter::visit(AstExprStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.expr.get());
     });
 }
 
-void AstPrinter::visit(AstVarDecl& ast) noexcept {
+void AstPrinter::visit(AstVarDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeAttributes(ast.attributes.get());
@@ -52,7 +52,7 @@ void AstPrinter::visit(AstVarDecl& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstFuncDecl& ast) noexcept {
+void AstPrinter::visit(AstFuncDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("id", ast.name);
@@ -70,7 +70,7 @@ void AstPrinter::visit(AstFuncDecl& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstFuncParamDecl& ast) noexcept {
+void AstPrinter::visit(AstFuncParamDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeAttributes(ast.attributes.get());
@@ -79,7 +79,7 @@ void AstPrinter::visit(AstFuncParamDecl& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstFuncStmt& ast) noexcept {
+void AstPrinter::visit(AstFuncStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
 
@@ -91,7 +91,7 @@ void AstPrinter::visit(AstFuncStmt& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstReturnStmt& ast) noexcept {
+void AstPrinter::visit(AstReturnStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.expr.get());
@@ -102,7 +102,7 @@ void AstPrinter::visit(AstReturnStmt& ast) noexcept {
 // Type (user defined)
 //----------------------------------------
 
-void AstPrinter::visit(AstTypeDecl& ast) noexcept {
+void AstPrinter::visit(AstTypeDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeAttributes(ast.attributes.get());
@@ -119,7 +119,7 @@ void AstPrinter::visit(AstTypeDecl& ast) noexcept {
 // IF statement
 //----------------------------------------
 
-void AstPrinter::visit(AstIfStmt& ast) noexcept {
+void AstPrinter::visit(AstIfStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attributeArray("blocks", [&] {
@@ -148,7 +148,7 @@ void AstPrinter::visit(AstIfStmt& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstForStmt& ast) noexcept {
+void AstPrinter::visit(AstForStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
         if (!ast.decls.empty()) {
@@ -179,7 +179,7 @@ void AstPrinter::visit(AstForStmt& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstDoLoopStmt& ast) noexcept {
+void AstPrinter::visit(AstDoLoopStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
 
@@ -211,7 +211,7 @@ void AstPrinter::visit(AstDoLoopStmt& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstControlFlowBranch& ast) noexcept {
+void AstPrinter::visit(AstControlFlowBranch& ast) {
     m_json.object([&] {
         writeHeader(ast);
 
@@ -243,7 +243,7 @@ void AstPrinter::visit(AstControlFlowBranch& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstAttributeList& ast) noexcept {
+void AstPrinter::visit(AstAttributeList& ast) {
     m_json.array([&] {
         for (const auto& attr : ast.attribs) {
             visit(*attr);
@@ -251,7 +251,7 @@ void AstPrinter::visit(AstAttributeList& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstAttribute& ast) noexcept {
+void AstPrinter::visit(AstAttribute& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeIdent(ast.identExpr.get());
@@ -265,21 +265,21 @@ void AstPrinter::visit(AstAttribute& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstTypeExpr& ast) noexcept {
+void AstPrinter::visit(AstTypeExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("id", Token::description(ast.tokenKind));
     });
 }
 
-void AstPrinter::visit(AstIdentExpr& ast) noexcept {
+void AstPrinter::visit(AstIdentExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("id", ast.name);
     });
 }
 
-void AstPrinter::visit(AstCallExpr& ast) noexcept {
+void AstPrinter::visit(AstCallExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeIdent(ast.identExpr.get());
@@ -293,7 +293,7 @@ void AstPrinter::visit(AstCallExpr& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstLiteralExpr& ast) noexcept {
+void AstPrinter::visit(AstLiteralExpr& ast) {
     using Ret = std::pair<TokenKind, string>;
     const auto visitor = Visitor{
         [](std::monostate /*value*/) -> Ret {
@@ -328,7 +328,7 @@ void AstPrinter::visit(AstLiteralExpr& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstUnaryExpr& ast) noexcept {
+void AstPrinter::visit(AstUnaryExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("op", Token::description(ast.tokenKind));
@@ -336,21 +336,21 @@ void AstPrinter::visit(AstUnaryExpr& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstDereference& ast) noexcept {
+void AstPrinter::visit(AstDereference& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(&ast);
     });
 }
 
-void AstPrinter::visit(AstAddressOf& ast) noexcept {
+void AstPrinter::visit(AstAddressOf& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.expr.get());
     });
 }
 
-void AstPrinter::visit(AstBinaryExpr& ast) noexcept {
+void AstPrinter::visit(AstBinaryExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("op", Token::description(ast.tokenKind));
@@ -359,7 +359,7 @@ void AstPrinter::visit(AstBinaryExpr& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstCastExpr& ast) noexcept {
+void AstPrinter::visit(AstCastExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("implicit", ast.implicit);
@@ -368,7 +368,7 @@ void AstPrinter::visit(AstCastExpr& ast) noexcept {
     });
 }
 
-void AstPrinter::visit(AstIfExpr& ast) noexcept {
+void AstPrinter::visit(AstIfExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.expr.get(), "expr");
@@ -377,14 +377,14 @@ void AstPrinter::visit(AstIfExpr& ast) noexcept {
     });
 }
 
-void AstPrinter::writeHeader(AstRoot& ast) noexcept {
+void AstPrinter::writeHeader(AstRoot& ast) {
     m_json.attribute("class", ast.getClassName());
     m_json.attributeBegin("loc");
     writeLocation(ast);
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeLocation(AstRoot& ast) noexcept {
+void AstPrinter::writeLocation(AstRoot& ast) {
     auto [startLine, startCol] = m_context.getSourceMrg().getLineAndColumn(ast.range.Start);
     auto [endLine, endCol] = m_context.getSourceMrg().getLineAndColumn(ast.range.End);
 
@@ -395,7 +395,7 @@ void AstPrinter::writeLocation(AstRoot& ast) noexcept {
     }
 }
 
-void AstPrinter::writeAttributes(AstAttributeList* ast) noexcept {
+void AstPrinter::writeAttributes(AstAttributeList* ast) {
     if (ast == nullptr || ast->attribs.empty()) {
         return;
     }
@@ -404,7 +404,7 @@ void AstPrinter::writeAttributes(AstAttributeList* ast) noexcept {
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeStmts(AstStmtList* ast) noexcept {
+void AstPrinter::writeStmts(AstStmtList* ast) {
     if (ast == nullptr || ast->stmts.empty()) {
         return;
     }
@@ -413,7 +413,7 @@ void AstPrinter::writeStmts(AstStmtList* ast) noexcept {
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeExpr(AstExpr* ast, StringRef name) noexcept {
+void AstPrinter::writeExpr(AstExpr* ast, StringRef name) {
     if (ast == nullptr) {
         return;
     }
@@ -422,7 +422,7 @@ void AstPrinter::writeExpr(AstExpr* ast, StringRef name) noexcept {
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeIdent(AstIdentExpr* ast) noexcept {
+void AstPrinter::writeIdent(AstIdentExpr* ast) {
     if (ast == nullptr) {
         return;
     }
@@ -431,7 +431,7 @@ void AstPrinter::writeIdent(AstIdentExpr* ast) noexcept {
     m_json.attributeEnd();
 }
 
-void AstPrinter::writeType(AstTypeExpr* ast) noexcept {
+void AstPrinter::writeType(AstTypeExpr* ast) {
     if (ast == nullptr) {
         return;
     }

@@ -21,13 +21,13 @@ public:
 
     ~ToolTask() noexcept = default;
 
-    ToolTask& reset() noexcept;
+    ToolTask& reset();
 
-    ToolTask& addArg(const string& arg) noexcept;
-    ToolTask& addArg(const string& name, const string& value) noexcept;
-    ToolTask& addPath(const fs::path& path) noexcept;
-    ToolTask& addPath(const string& name, const fs::path& value) noexcept;
-    ToolTask& addArgs(std::initializer_list<string> arghs) noexcept;
+    ToolTask& addArg(const string& arg);
+    ToolTask& addArg(const string& name, const string& value);
+    ToolTask& addPath(const fs::path& path);
+    ToolTask& addPath(const string& name, const fs::path& value);
+    ToolTask& addArgs(std::initializer_list<string> arghs);
 
     [[nodiscard]] int execute() const noexcept;
 

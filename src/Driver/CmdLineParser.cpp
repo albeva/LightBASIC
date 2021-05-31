@@ -6,7 +6,7 @@
 #include <llvm/Support/FileSystem.h>
 using namespace lbc;
 
-void CmdLineParser::parse(const Args& args) noexcept {
+void CmdLineParser::parse(const Args& args) {
     if (args.size() < 2) {
         showError("no input.");
     }
@@ -28,7 +28,7 @@ void CmdLineParser::parse(const Args& args) noexcept {
     }
 }
 
-void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
+void CmdLineParser::processOption(const Args& args, size_t& index) {
     const StringRef arg{ args[index] };
     if (arg == "-v") {
         m_context.setVerbose(true);
@@ -89,7 +89,7 @@ void CmdLineParser::processOption(const Args& args, size_t& index) noexcept {
     }
 }
 
-void CmdLineParser::processToolchainPath(const fs::path& path) noexcept {
+void CmdLineParser::processToolchainPath(const fs::path& path) {
     if (path.is_absolute()) {
         if (fs::exists(path)) {
             m_context.getToolchain().setBasePath(path);
@@ -112,7 +112,7 @@ void CmdLineParser::processToolchainPath(const fs::path& path) noexcept {
 }
 
 
-void CmdLineParser::showHelp() noexcept {
+void CmdLineParser::showHelp() {
     // TODO in new *near* future
     // -I <dir>         Add directory to include search path
     // -L <dir>         Add directory to library search path
@@ -141,7 +141,7 @@ OPTIONS:
     std::exit(EXIT_SUCCESS);
 }
 
-void CmdLineParser::showVersion() noexcept {
+void CmdLineParser::showVersion() {
     std::cout << "LightBASIC version " << LBC_VERSION_STRING
               << " (Based on LLVM " << LLVM_VERSION_STRING << ")\n"
               << "(c) Albert Varaksin 2021"
@@ -149,7 +149,7 @@ void CmdLineParser::showVersion() noexcept {
     std::exit(EXIT_SUCCESS);
 }
 
-void CmdLineParser::showError(const string& message) noexcept {
+void CmdLineParser::showError(const string& message) {
     std::cerr << message
               << " Use --help for more info"
               << '\n';

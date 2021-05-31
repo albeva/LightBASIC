@@ -7,34 +7,34 @@
 #include "Type/Type.hpp"
 using namespace lbc;
 
-void CodePrinter::visit(AstModule& ast) noexcept {
+void CodePrinter::visit(AstModule& ast) {
     visit(*ast.stmtList);
 }
 
 // Statements
 
-void CodePrinter::visit(AstStmtList& ast) noexcept {
+void CodePrinter::visit(AstStmtList& ast) {
     for (const auto& stmt : ast.stmts) {
         visit(*stmt);
         m_os << '\n';
     }
 }
 
-void CodePrinter::visit(AstAssignStmt& ast) noexcept {
+void CodePrinter::visit(AstAssignStmt& ast) {
     m_os << indent();
     visit(*ast.lhs);
     m_os << " = ";
     visit(*ast.rhs);
 }
 
-void CodePrinter::visit(AstExprStmt& ast) noexcept {
+void CodePrinter::visit(AstExprStmt& ast) {
     m_os << indent();
     visit(*ast.expr);
 }
 
 // Attributes
 
-void CodePrinter::visit(AstAttributeList& ast) noexcept {
+void CodePrinter::visit(AstAttributeList& ast) {
     m_os << indent();
     m_os << '[';
     bool isFirst = true;
@@ -49,7 +49,7 @@ void CodePrinter::visit(AstAttributeList& ast) noexcept {
     m_os << "]";
 }
 
-void CodePrinter::visit(AstAttribute& ast) noexcept {
+void CodePrinter::visit(AstAttribute& ast) {
     visit(*ast.identExpr);
     if (ast.argExprs.size() == 1) {
         m_os << " = ";
@@ -69,13 +69,13 @@ void CodePrinter::visit(AstAttribute& ast) noexcept {
     }
 }
 
-void CodePrinter::visit(AstTypeExpr& ast) noexcept {
+void CodePrinter::visit(AstTypeExpr& ast) {
     m_os << Token::description(ast.tokenKind);
 }
 
 // Declarations
 
-void CodePrinter::visit(AstVarDecl& ast) noexcept {
+void CodePrinter::visit(AstVarDecl& ast) {
     if (ast.attributes) {
         visit(*ast.attributes);
         m_os << " _" << '\n';
@@ -98,7 +98,7 @@ void CodePrinter::visit(AstVarDecl& ast) noexcept {
     }
 }
 
-void CodePrinter::visit(AstFuncDecl& ast) noexcept {
+void CodePrinter::visit(AstFuncDecl& ast) {
     if (ast.attributes) {
         visit(*ast.attributes);
         m_os << " _" << '\n';
@@ -137,13 +137,13 @@ void CodePrinter::visit(AstFuncDecl& ast) noexcept {
     }
 }
 
-void CodePrinter::visit(AstFuncParamDecl& ast) noexcept {
+void CodePrinter::visit(AstFuncParamDecl& ast) {
     m_os << ast.name;
     m_os << " AS ";
     visit(*ast.typeExpr);
 }
 
-void CodePrinter::visit(AstFuncStmt& ast) noexcept {
+void CodePrinter::visit(AstFuncStmt& ast) {
     visit(*ast.decl);
     m_os << '\n';
     m_indent++;
@@ -154,7 +154,7 @@ void CodePrinter::visit(AstFuncStmt& ast) noexcept {
     m_os << "END " << (ast.decl->retTypeExpr ? "FUNCTION" : "SUB");
 }
 
-void CodePrinter::visit(AstReturnStmt& ast) noexcept {
+void CodePrinter::visit(AstReturnStmt& ast) {
     m_os << indent() << "RETURN";
     if (ast.expr) {
         m_os << " ";
@@ -166,7 +166,7 @@ void CodePrinter::visit(AstReturnStmt& ast) noexcept {
 // Type (user defined)
 //----------------------------------------
 
-void CodePrinter::visit(AstTypeDecl& ast) noexcept {
+void CodePrinter::visit(AstTypeDecl& ast) {
     RESTORE_ON_EXIT(emitVARkeyword);
     emitVARkeyword = false;
 
@@ -189,7 +189,7 @@ void CodePrinter::visit(AstTypeDecl& ast) noexcept {
 // IF statement
 //----------------------------------------
 
-void CodePrinter::visit(AstIfStmt& ast) noexcept {
+void CodePrinter::visit(AstIfStmt& ast) {
     bool isFirst = true;
     for (const auto& block : ast.blocks) {
         m_os << indent();
@@ -223,7 +223,7 @@ void CodePrinter::visit(AstIfStmt& ast) noexcept {
     m_os << indent() << "END IF";
 }
 
-void CodePrinter::visit(AstForStmt& ast) noexcept {
+void CodePrinter::visit(AstForStmt& ast) {
     m_os << indent() << "FOR ";
 
     for (const auto& decl : ast.decls) {
@@ -261,7 +261,7 @@ void CodePrinter::visit(AstForStmt& ast) noexcept {
     }
 }
 
-void CodePrinter::visit(AstDoLoopStmt& ast) noexcept {
+void CodePrinter::visit(AstDoLoopStmt& ast) {
     m_os << indent() << "DO";
 
     if (!ast.decls.empty()) {
@@ -305,7 +305,7 @@ void CodePrinter::visit(AstDoLoopStmt& ast) noexcept {
     }
 }
 
-void CodePrinter::visit(AstControlFlowBranch& ast) noexcept {
+void CodePrinter::visit(AstControlFlowBranch& ast) {
     m_os << indent();
     switch (ast.action) {
     case AstControlFlowBranch::Action::Continue:
@@ -332,11 +332,11 @@ void CodePrinter::visit(AstControlFlowBranch& ast) noexcept {
 
 // Expressions
 
-void CodePrinter::visit(AstIdentExpr& ast) noexcept {
+void CodePrinter::visit(AstIdentExpr& ast) {
     m_os << ast.name;
 }
 
-void CodePrinter::visit(AstCallExpr& ast) noexcept {
+void CodePrinter::visit(AstCallExpr& ast) {
     visit(*ast.identExpr);
     m_os << "(";
     bool isFirst = true;
@@ -352,7 +352,7 @@ void CodePrinter::visit(AstCallExpr& ast) noexcept {
     m_os << ")";
 }
 
-void CodePrinter::visit(AstLiteralExpr& ast) noexcept {
+void CodePrinter::visit(AstLiteralExpr& ast) {
     const auto visitor = Visitor{
         [](std::monostate /*value*/) -> string {
             return "NULL";
@@ -381,7 +381,7 @@ void CodePrinter::visit(AstLiteralExpr& ast) noexcept {
     m_os << std::visit(visitor, ast.value);
 }
 
-void CodePrinter::visit(AstUnaryExpr& ast) noexcept {
+void CodePrinter::visit(AstUnaryExpr& ast) {
     m_os << "(";
     auto tkn = Token::create(ast.tokenKind, ast.range);
     if (tkn->isRightToLeft()) {
@@ -394,19 +394,19 @@ void CodePrinter::visit(AstUnaryExpr& ast) noexcept {
     m_os << ")";
 }
 
-void CodePrinter::visit(AstDereference& ast) noexcept {
+void CodePrinter::visit(AstDereference& ast) {
     m_os << "*(";
     visit(*ast.expr);
     m_os << ")";
 }
 
-void CodePrinter::visit(AstAddressOf& ast) noexcept {
+void CodePrinter::visit(AstAddressOf& ast) {
     m_os << "@(";
     visit(*ast.expr);
     m_os << ")";
 }
 
-void CodePrinter::visit(AstBinaryExpr& ast) noexcept {
+void CodePrinter::visit(AstBinaryExpr& ast) {
     m_os << "(";
     visit(*ast.lhs);
 
@@ -417,7 +417,7 @@ void CodePrinter::visit(AstBinaryExpr& ast) noexcept {
     m_os << ")";
 }
 
-void CodePrinter::visit(AstCastExpr& ast) noexcept {
+void CodePrinter::visit(AstCastExpr& ast) {
     m_os << "(";
     visit(*ast.expr);
     m_os << " AS ";
@@ -434,7 +434,7 @@ void CodePrinter::visit(AstCastExpr& ast) noexcept {
     m_os << ")";
 }
 
-void CodePrinter::visit(AstIfExpr& ast) noexcept {
+void CodePrinter::visit(AstIfExpr& ast) {
     m_os << "(IF ";
     visit(*ast.expr);
     m_os << " THEN ";

@@ -50,14 +50,14 @@ inline Twine operator"" _t(const char* s, size_t /*len*/) {
  * @param message to print
  * @param prefix add standard prefix before the message
  */
-[[noreturn]] void fatalError(const Twine& message, bool prefix = true) noexcept;
+[[noreturn]] void fatalError(const Twine& message, bool prefix = true);
 
 /**
  * Emit compiler warning, but continue compilation process
  * @param message to print
  * @param prefix add standard prefix before the message
  */
-void warning(const Twine& message, bool prefix = true) noexcept;
+void warning(const Twine& message, bool prefix = true);
 
 /**
  * Helper class that restores variable value when existing scope
@@ -78,7 +78,7 @@ struct ValueRestorer final {
 
     constexpr explicit ValueRestorer(T& value) noexcept : m_target{ value }, m_value{ value } {}
 
-    ~ValueRestorer() noexcept {
+    ~ValueRestorer() {
         m_target = m_value;
     }
 

@@ -8,7 +8,7 @@
 using namespace lbc;
 using namespace Gen;
 
-ValueHandler BinaryExprBuilder::build() noexcept {
+ValueHandler BinaryExprBuilder::build() {
     switch (Token::getOperatorType(m_ast.tokenKind)) {
     case OperatorType::Arithmetic:
         return arithmetic();
@@ -21,7 +21,7 @@ ValueHandler BinaryExprBuilder::build() noexcept {
     }
 }
 
-ValueHandler BinaryExprBuilder::comparison() noexcept {
+ValueHandler BinaryExprBuilder::comparison() {
     auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
     auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
 
@@ -30,7 +30,7 @@ ValueHandler BinaryExprBuilder::comparison() noexcept {
     return { &m_gen, m_builder.CreateCmp(pred, lhsValue, rhsValue) };
 }
 
-ValueHandler BinaryExprBuilder::arithmetic() noexcept {
+ValueHandler BinaryExprBuilder::arithmetic() {
     auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
     auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
 
@@ -38,7 +38,7 @@ ValueHandler BinaryExprBuilder::arithmetic() noexcept {
     return { &m_gen, m_builder.CreateBinOp(op, lhsValue, rhsValue) };
 }
 
-ValueHandler BinaryExprBuilder::logical() noexcept {
+ValueHandler BinaryExprBuilder::logical() {
     // lhs
     auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
     auto* lhsBlock = m_builder.GetInsertBlock();

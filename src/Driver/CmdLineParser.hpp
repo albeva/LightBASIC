@@ -20,15 +20,15 @@ public:
     explicit CmdLineParser(Context& context) noexcept : m_context{ context } {}
     ~CmdLineParser() noexcept = default;
 
-    void parse(const Args& args) noexcept;
+    void parse(const Args& args);
 
 private:
-    void processOption(const Args& args, size_t& index) noexcept;
-    void processToolchainPath(const fs::path& path) noexcept;
+    void processOption(const Args& args, size_t& index);
+    void processToolchainPath(const fs::path& path);
 
-    [[noreturn]] static void showError(const string& message) noexcept;
-    [[noreturn]] static void showHelp() noexcept;
-    [[noreturn]] static void showVersion() noexcept;
+    [[noreturn]] static void showError(const string& message);
+    [[noreturn]] static void showHelp();
+    [[noreturn]] static void showVersion();
 
     Context& m_context;
 };

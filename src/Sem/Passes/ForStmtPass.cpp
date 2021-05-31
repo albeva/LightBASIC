@@ -8,7 +8,7 @@
 using namespace lbc;
 using namespace Sem;
 
-ForStmtPass::ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast) noexcept
+ForStmtPass::ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast)
 : m_sem{ sem }, m_ast{ ast } {
     auto* current = sem.getSymbolTable();
     m_ast.symbolTable = make_unique<SymbolTable>(current);
@@ -21,14 +21,14 @@ ForStmtPass::ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast) noexcept
     sem.setSymbolTable(current);
 }
 
-void ForStmtPass::ceclare() noexcept {
+void ForStmtPass::ceclare() {
     for (auto& var : m_ast.decls) {
         m_sem.visit(*var);
     }
     m_sem.visit(*m_ast.iterator);
 }
 
-void ForStmtPass::analyze() noexcept {
+void ForStmtPass::analyze() {
     m_sem.expression(m_ast.limit);
 
     if (m_ast.step) {
@@ -108,7 +108,7 @@ void ForStmtPass::analyze() noexcept {
     }
 }
 
-void ForStmtPass::determineForDirection() noexcept {
+void ForStmtPass::determineForDirection() {
     auto* from = dyn_cast<AstLiteralExpr>(m_ast.iterator->expr.get());
     auto* to = dyn_cast<AstLiteralExpr>(m_ast.limit.get());
     const auto* type = m_ast.iterator->symbol->type();

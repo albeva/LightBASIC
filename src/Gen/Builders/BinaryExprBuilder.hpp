@@ -13,12 +13,12 @@ namespace lbc::Gen {
 class BinaryExprBuilder final : Builder<AstBinaryExpr> {
 public:
     using Builder::Builder;
-    ValueHandler build() noexcept;
+    ValueHandler build();
 
 private:
-    ValueHandler comparison() noexcept;
-    ValueHandler arithmetic() noexcept;
-    ValueHandler logical() noexcept;
+    ValueHandler comparison();
+    ValueHandler arithmetic();
+    ValueHandler logical();
 };
 
 } // namespace lbc::Gen

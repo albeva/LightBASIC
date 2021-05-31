@@ -11,10 +11,10 @@ namespace lbc::Gen {
 
 class IfStmtBuilder final : Builder<AstIfStmt> {
 public:
-    IfStmtBuilder(CodeGen& gen, AstIfStmt& ast) noexcept;
+    IfStmtBuilder(CodeGen& gen, AstIfStmt& ast);
 
 private:
-    void build() noexcept;
+    void build();
 };
 
 } // namespace lbc::Gen

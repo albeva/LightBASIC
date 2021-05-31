@@ -8,34 +8,34 @@
 
 using namespace lbc;
 
-ToolTask& ToolTask::reset() noexcept {
+ToolTask& ToolTask::reset() {
     m_args.clear();
     return *this;
 }
 
-ToolTask& ToolTask::addArg(const string& arg) noexcept {
+ToolTask& ToolTask::addArg(const string& arg) {
     m_args.push_back(arg);
     return *this;
 }
 
-ToolTask& ToolTask::addArg(const string& name, const string& value) noexcept {
+ToolTask& ToolTask::addArg(const string& name, const string& value) {
     m_args.push_back(name);
     m_args.push_back(value);
     return *this;
 }
 
-ToolTask& ToolTask::addPath(const fs::path& path) noexcept {
+ToolTask& ToolTask::addPath(const fs::path& path) {
     addArg(path.string());
     return *this;
 }
 
-ToolTask& ToolTask::addPath(const string& name, const fs::path& value) noexcept {
+ToolTask& ToolTask::addPath(const string& name, const fs::path& value) {
     m_args.push_back(name);
     addPath(value);
     return *this;
 }
 
-ToolTask& ToolTask::addArgs(std::initializer_list<string> args) noexcept {
+ToolTask& ToolTask::addArgs(std::initializer_list<string> args) {
     if (m_args.capacity() < m_args.size() + args.size()) {
         m_args.reserve(m_args.size() + args.size());
     }

@@ -12,21 +12,21 @@ class Context;
 
 class CodeGen final : public AstVisitor<CodeGen, Gen::ValueHandler> {
 public:
-    explicit CodeGen(Context& context) noexcept;
+    explicit CodeGen(Context& context);
 
-    [[nodiscard]] unique_ptr<llvm::Module> getModule() noexcept;
+    [[nodiscard]] unique_ptr<llvm::Module> getModule();
 
     [[nodiscard]] bool validate() const noexcept;
 
-    [[nodiscard]] Context& getContext() noexcept { return m_context; }
-    [[nodiscard]] llvm::IRBuilder<>& getBuilder() noexcept { return m_builder; }
-    [[nodiscard]] llvm::ConstantInt* getTrue() noexcept { return m_constantTrue; }
-    [[nodiscard]] llvm::ConstantInt* getFalse() noexcept { return m_constantFalse; }
-    [[nodiscard]] auto& getControlStack() noexcept { return m_controlStack; }
+    [[nodiscard]] Context& getContext() { return m_context; }
+    [[nodiscard]] llvm::IRBuilder<>& getBuilder() { return m_builder; }
+    [[nodiscard]] llvm::ConstantInt* getTrue() { return m_constantTrue; }
+    [[nodiscard]] llvm::ConstantInt* getFalse() { return m_constantFalse; }
+    [[nodiscard]] auto& getControlStack() { return m_controlStack; }
 
-    void addBlock() noexcept;
-    void terminateBlock(llvm::BasicBlock* dest) noexcept;
-    void switchBlock(llvm::BasicBlock* block) noexcept;
+    void addBlock();
+    void terminateBlock(llvm::BasicBlock* dest);
+    void switchBlock(llvm::BasicBlock* block);
 
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 private:
@@ -35,14 +35,14 @@ private:
         Function
     };
 
-    llvm::BasicBlock* getGlobalCtorBlock() noexcept;
+    llvm::BasicBlock* getGlobalCtorBlock();
 
-    void declareFuncs() noexcept;
-    void declareFunc(AstFuncDecl& ast) noexcept;
-    void declareGlobalVar(AstVarDecl& ast) noexcept;
-    void declareLocalVar(AstVarDecl& ast) noexcept;
-    static llvm::Value* getStoreValue(AstExpr& ast) noexcept;
-    llvm::Constant* getStringConstant(StringRef str) noexcept;
+    void declareFuncs();
+    void declareFunc(AstFuncDecl& ast);
+    void declareGlobalVar(AstVarDecl& ast);
+    void declareLocalVar(AstVarDecl& ast);
+    static llvm::Value* getStoreValue(AstExpr& ast);
+    llvm::Constant* getStringConstant(StringRef str);
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

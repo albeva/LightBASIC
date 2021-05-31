@@ -12,7 +12,7 @@
 using namespace lbc;
 using namespace Sem;
 
-void TypePass::visit(AstTypeExpr& ast) noexcept {
+void TypePass::visit(AstTypeExpr& ast) {
     const TypeRoot* type = nullptr;
     if (ast.tokenKind == TokenKind::Identifier) {
         auto* table = m_sem.getSymbolTable();

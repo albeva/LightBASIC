@@ -46,7 +46,7 @@ struct AstNode : Base {
     }
 
     template<typename... Args>
-    constexpr static unique_ptr<This> create(Args&&... args) noexcept {
+    constexpr static unique_ptr<This> create(Args&&... args) {
         return make_unique<This>(std::forward<Args>(args)...);
     }
 };
@@ -256,7 +256,7 @@ struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::Attr
     : AstNode{ KIND, range_ },
       attribs{ std::move(attribs_) } {};
 
-    [[nodiscard]] std::optional<StringRef> getStringLiteral(StringRef key) const;
+    [[nodiscard]] std::optional<StringRef> getStringLiteral(StringRef key) const noexcept;
 
     std::vector<unique_ptr<AstAttribute>> attribs;
 };
@@ -350,7 +350,7 @@ struct AstTypeDecl final : AstNode<AstTypeDecl, AstDecl, AstKind::TypeDecl> {
         llvm::SMRange range_,
         StringRef name_,
         unique_ptr<AstAttributeList> attrs,
-        std::vector<unique_ptr<AstDecl>> decls_)
+        std::vector<unique_ptr<AstDecl>> decls_) noexcept
     : AstNode{ KIND, range_, name_, std::move(attrs) },
       decls{ std::move(decls_) } {}
 

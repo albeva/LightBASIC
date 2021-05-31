@@ -16,7 +16,7 @@
 using namespace lbc;
 using namespace Gen;
 
-CodeGen::CodeGen(Context& context) noexcept
+CodeGen::CodeGen(Context& context)
 : m_context{ context },
   m_llvmContext{ context.getLlvmContext() },
   m_builder{ m_llvmContext } {
@@ -35,19 +35,19 @@ bool CodeGen::validate() const noexcept {
     return !llvm::verifyModule(*m_module, &llvm::outs());
 }
 
-void CodeGen::addBlock() noexcept {
+void CodeGen::addBlock() {
     auto* func = m_builder.GetInsertBlock()->getParent();
     auto* block = llvm::BasicBlock::Create(m_llvmContext, "", func);
     m_builder.SetInsertPoint(block);
 }
 
-void CodeGen::terminateBlock(llvm::BasicBlock* dest) noexcept {
+void CodeGen::terminateBlock(llvm::BasicBlock* dest) {
     if (m_builder.GetInsertBlock()->getTerminator() == nullptr) {
         m_builder.CreateBr(dest);
     }
 }
 
-void CodeGen::switchBlock(llvm::BasicBlock* block) noexcept {
+void CodeGen::switchBlock(llvm::BasicBlock* block) {
     assert(block != nullptr);
 
     terminateBlock(block);
@@ -59,7 +59,7 @@ void CodeGen::switchBlock(llvm::BasicBlock* block) noexcept {
     m_builder.SetInsertPoint(block);
 }
 
-void CodeGen::visit(AstModule& ast) noexcept {
+void CodeGen::visit(AstModule& ast) {
     m_astRootModule = &ast;
     m_fileId = ast.fileId;
     m_scope = Scope::Root;
@@ -127,7 +127,7 @@ void CodeGen::visit(AstModule& ast) noexcept {
     }
 }
 
-llvm::BasicBlock* CodeGen::getGlobalCtorBlock() noexcept {
+llvm::BasicBlock* CodeGen::getGlobalCtorBlock() {
     if (m_globalCtorFunc == nullptr) {
         m_globalCtorFunc = llvm::Function::Create(
             llvm::FunctionType::get(llvm::Type::getVoidTy(m_llvmContext), false),
@@ -145,32 +145,32 @@ llvm::BasicBlock* CodeGen::getGlobalCtorBlock() noexcept {
     return &m_globalCtorFunc->getBasicBlockList().back();
 }
 
-void CodeGen::visit(AstStmtList& ast) noexcept {
+void CodeGen::visit(AstStmtList& ast) {
     for (const auto& stmt : ast.stmts) {
         visit(*stmt);
     }
 }
 
-void CodeGen::visit(AstAssignStmt& ast) noexcept {
+void CodeGen::visit(AstAssignStmt& ast) {
     auto* lvalue = getStoreValue(*ast.lhs);
     auto rvalue = visit(*ast.rhs);
     m_builder.CreateStore(rvalue.get(), lvalue);
 }
 
-llvm::Value* CodeGen::getStoreValue(AstExpr& ast) noexcept {
+llvm::Value* CodeGen::getStoreValue(AstExpr& ast) {
     if (auto* id = dyn_cast<AstIdentExpr>(&ast)) {
         return id->symbol->getLlvmValue();
     }
     fatalError("Unsupported assign target");
 }
 
-void CodeGen::visit(AstExprStmt& ast) noexcept {
+void CodeGen::visit(AstExprStmt& ast) {
     visit(*ast.expr);
 }
 
 // Variables
 
-void CodeGen::visit(AstVarDecl& ast) noexcept {
+void CodeGen::visit(AstVarDecl& ast) {
     if (m_declareAsGlobals) {
         declareGlobalVar(ast);
     } else {
@@ -178,7 +178,7 @@ void CodeGen::visit(AstVarDecl& ast) noexcept {
     }
 }
 
-void CodeGen::declareGlobalVar(AstVarDecl& ast) noexcept {
+void CodeGen::declareGlobalVar(AstVarDecl& ast) {
     auto* sym = ast.symbol;
     llvm::Constant* constant = nullptr;
     llvm::Type* exprType = sym->type()->getLlvmType(m_context);
@@ -216,7 +216,7 @@ void CodeGen::declareGlobalVar(AstVarDecl& ast) noexcept {
     sym->setLlvmValue(lvalue);
 }
 
-void CodeGen::declareLocalVar(AstVarDecl& ast) noexcept {
+void CodeGen::declareLocalVar(AstVarDecl& ast) {
     ValueHandler rvalue{};
     llvm::Type* exprType = ast.symbol->type()->getLlvmType(m_context);
 
@@ -236,11 +236,11 @@ void CodeGen::declareLocalVar(AstVarDecl& ast) noexcept {
 
 // Functions
 
-void CodeGen::visit(AstFuncDecl& /*ast*/) noexcept {
+void CodeGen::visit(AstFuncDecl& /*ast*/) {
     // NOOP
 }
 
-void CodeGen::declareFuncs() noexcept {
+void CodeGen::declareFuncs() {
     for (const auto& stmt : m_astRootModule->stmtList->stmts) {
         switch (stmt->kind) {
         case AstKind::FuncDecl:
@@ -255,7 +255,7 @@ void CodeGen::declareFuncs() noexcept {
     }
 }
 
-void CodeGen::declareFunc(AstFuncDecl& ast) noexcept {
+void CodeGen::declareFunc(AstFuncDecl& ast) {
     auto* sym = ast.symbol;
     auto* fnTy = llvm::cast<llvm::FunctionType>(ast.symbol->type()->getLlvmType(m_context));
     auto* fn = llvm::Function::Create(
@@ -275,11 +275,11 @@ void CodeGen::declareFunc(AstFuncDecl& ast) noexcept {
     }
 }
 
-void CodeGen::visit(AstFuncParamDecl& /*ast*/) noexcept {
+void CodeGen::visit(AstFuncParamDecl& /*ast*/) {
     llvm_unreachable("visitFuncParamDecl");
 }
 
-void CodeGen::visit(AstFuncStmt& ast) noexcept {
+void CodeGen::visit(AstFuncStmt& ast) {
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
 
@@ -316,7 +316,7 @@ void CodeGen::visit(AstFuncStmt& ast) noexcept {
     m_builder.SetInsertPoint(current);
 }
 
-void CodeGen::visit(AstReturnStmt& ast) noexcept {
+void CodeGen::visit(AstReturnStmt& ast) {
     if (ast.expr) {
         auto value = visit(*ast.expr);
         m_builder.CreateRet(value.get());
@@ -337,7 +337,7 @@ void CodeGen::visit(AstReturnStmt& ast) noexcept {
 // Type (user defined)
 //------------------------------------------------------------------
 
-void CodeGen::visit(AstTypeDecl& /*ast*/) noexcept {
+void CodeGen::visit(AstTypeDecl& /*ast*/) {
     // NOOP
 }
 
@@ -345,25 +345,25 @@ void CodeGen::visit(AstTypeDecl& /*ast*/) noexcept {
 // IF stmt
 //------------------------------------------------------------------
 
-void CodeGen::visit(AstIfStmt& ast) noexcept {
+void CodeGen::visit(AstIfStmt& ast) {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
     Gen::IfStmtBuilder(*this, ast);
 }
 
-void CodeGen::visit(AstForStmt& ast) noexcept {
+void CodeGen::visit(AstForStmt& ast) {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
     Gen::ForStmtBuilder(*this, ast);
 }
 
-void CodeGen::visit(AstDoLoopStmt& ast) noexcept {
+void CodeGen::visit(AstDoLoopStmt& ast) {
     RESTORE_ON_EXIT(m_declareAsGlobals);
     m_declareAsGlobals = false;
     Gen::DoLoopBuilder(*this, ast);
 }
 
-void CodeGen::visit(AstControlFlowBranch& ast) noexcept {
+void CodeGen::visit(AstControlFlowBranch& ast) {
     auto target = m_controlStack.find(ast.destination);
     if (target == m_controlStack.cend()) {
         fatalError("control statement not found");
@@ -385,15 +385,15 @@ void CodeGen::visit(AstControlFlowBranch& ast) noexcept {
 // Attributes
 //------------------------------------------------------------------
 
-void CodeGen::visit(AstAttributeList& /*ast*/) noexcept {
+void CodeGen::visit(AstAttributeList& /*ast*/) {
     llvm_unreachable("visitAttributeList");
 }
 
-void CodeGen::visit(AstAttribute& /*ast*/) noexcept {
+void CodeGen::visit(AstAttribute& /*ast*/) {
     llvm_unreachable("visitAttribute");
 }
 
-ValueHandler CodeGen::visit(AstIdentExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstIdentExpr& ast) {
     const auto* type = ast.type;
     if (type->isFunction()) {
         return { this, ast.symbol->getLlvmValue() };
@@ -404,7 +404,7 @@ ValueHandler CodeGen::visit(AstIdentExpr& ast) noexcept {
     return { this, load };
 }
 
-void CodeGen::visit(AstTypeExpr& /*ast*/) noexcept {
+void CodeGen::visit(AstTypeExpr& /*ast*/) {
     // NOOP
 }
 
@@ -412,7 +412,7 @@ void CodeGen::visit(AstTypeExpr& /*ast*/) noexcept {
 // Expressions
 //------------------------------------------------------------------
 
-ValueHandler CodeGen::visit(AstCallExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstCallExpr& ast) {
     auto* fn = llvm::cast<llvm::Function>(visit(*ast.identExpr).get());
 
     std::vector<llvm::Value*> args;
@@ -427,7 +427,7 @@ ValueHandler CodeGen::visit(AstCallExpr& ast) noexcept {
     return { this, call };
 }
 
-ValueHandler CodeGen::visit(AstLiteralExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstLiteralExpr& ast) {
     auto visitor = Visitor{
         [&](std::monostate /*value*/) -> llvm::Value* {
             return llvm::ConstantPointerNull::get(
@@ -454,7 +454,7 @@ ValueHandler CodeGen::visit(AstLiteralExpr& ast) noexcept {
     return { this, std::visit(visitor, ast.value) };
 }
 
-llvm::Constant* CodeGen::getStringConstant(StringRef str) noexcept {
+llvm::Constant* CodeGen::getStringConstant(StringRef str) {
     auto [iter, inserted] = m_stringLiterals.try_emplace(str, nullptr);
     if (inserted) {
         iter->second = m_builder.CreateGlobalStringPtr(str);
@@ -462,7 +462,7 @@ llvm::Constant* CodeGen::getStringConstant(StringRef str) noexcept {
     return iter->second;
 }
 
-ValueHandler CodeGen::visit(AstUnaryExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstUnaryExpr& ast) {
     switch (ast.tokenKind) {
     case TokenKind::Negate: {
         auto* value = visit(*ast.expr).get();
@@ -486,12 +486,12 @@ ValueHandler CodeGen::visit(AstUnaryExpr& ast) noexcept {
     }
 }
 
-ValueHandler CodeGen::visit(AstDereference& ast) noexcept {
+ValueHandler CodeGen::visit(AstDereference& ast) {
     auto value = visit(*ast.expr);
     return { this, m_builder.CreateLoad(value.get()) };
 }
 
-ValueHandler CodeGen::visit(AstAddressOf& ast) noexcept {
+ValueHandler CodeGen::visit(AstAddressOf& ast) {
     if (auto* ident = dyn_cast<AstIdentExpr>(ast.expr.get())) {
         return { this, ident->symbol->getLlvmValue() };
     }
@@ -502,7 +502,7 @@ ValueHandler CodeGen::visit(AstAddressOf& ast) noexcept {
 // Binary Operation
 //------------------------------------------------------------------
 
-ValueHandler CodeGen::visit(AstBinaryExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstBinaryExpr& ast) {
     return Gen::BinaryExprBuilder(*this, ast).build();
 }
 
@@ -510,7 +510,7 @@ ValueHandler CodeGen::visit(AstBinaryExpr& ast) noexcept {
 // Casting
 //------------------------------------------------------------------
 
-ValueHandler CodeGen::visit(AstCastExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstCastExpr& ast) {
     auto* value = visit(*ast.expr).get();
 
     bool srcIsSigned = ast.expr->type->isSignedIntegral();
@@ -526,15 +526,15 @@ ValueHandler CodeGen::visit(AstCastExpr& ast) noexcept {
     return { this, casted };
 }
 
-ValueHandler CodeGen::visit(AstIfExpr& ast) noexcept {
+ValueHandler CodeGen::visit(AstIfExpr& ast) {
     auto condValue = visit(*ast.expr);
     auto trueValue = visit(*ast.trueExpr);
     auto falseValue = visit(*ast.falseExpr);
 
-    auto value = m_builder.CreateSelect(condValue.get(), trueValue.get(), falseValue.get());
+    auto* value = m_builder.CreateSelect(condValue.get(), trueValue.get(), falseValue.get());
     return { this, value };
 }
 
-unique_ptr<llvm::Module> CodeGen::getModule() noexcept {
+unique_ptr<llvm::Module> CodeGen::getModule() {
     return std::move(m_module);
 }

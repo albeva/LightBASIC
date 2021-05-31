@@ -11,7 +11,7 @@ using namespace lbc;
 using namespace Gen;
 using namespace value_handler_detail;
 
-ValueHandler ValueHandler::createTemp(CodeGen& gen, AstExpr& expr, StringRef name) noexcept {
+ValueHandler ValueHandler::createTemp(CodeGen& gen, AstExpr& expr, StringRef name) {
     auto* value = gen.visit(expr).get();
     auto* var = gen.getBuilder().CreateAlloca(
         expr.type->getLlvmType(gen.getContext()),
@@ -21,7 +21,7 @@ ValueHandler ValueHandler::createTemp(CodeGen& gen, AstExpr& expr, StringRef nam
     return { &gen, { var, true } };
 }
 
-ValueHandler ValueHandler::createTempOrConstant(CodeGen& gen, AstExpr& expr, StringRef name) noexcept {
+ValueHandler ValueHandler::createTempOrConstant(CodeGen& gen, AstExpr& expr, StringRef name) {
     auto* value = gen.visit(expr).get();
     if (isa<llvm::Constant>(value)) {
         return { &gen, { value, false } };
@@ -35,16 +35,16 @@ ValueHandler ValueHandler::createTempOrConstant(CodeGen& gen, AstExpr& expr, Str
     return { &gen, { var, true } };
 }
 
-ValueHandler::ValueHandler(CodeGen* gen, ValuePtr ptr) noexcept
+ValueHandler::ValueHandler(CodeGen* gen, ValuePtr ptr)
 : PointerUnion{ ptr }, m_gen{ gen } {}
 
-ValueHandler::ValueHandler(CodeGen* gen, Symbol* symbol) noexcept
+ValueHandler::ValueHandler(CodeGen* gen, Symbol* symbol)
 : PointerUnion{ symbol }, m_gen{ gen } {}
 
-ValueHandler::ValueHandler(CodeGen* gen, llvm::Value* value) noexcept
+ValueHandler::ValueHandler(CodeGen* gen, llvm::Value* value)
 : PointerUnion{ ValuePtr{ value, false } }, m_gen{ gen } {}
 
-llvm::Value* ValueHandler::get() noexcept {
+llvm::Value* ValueHandler::get() {
     if (is<ValuePtr>()) {
         auto ptr = PointerUnion::get<ValuePtr>();
         if (ptr.getInt()) {
@@ -65,7 +65,7 @@ llvm::Value* ValueHandler::get() noexcept {
     llvm_unreachable("Unknown ValueHandler type");
 }
 
-void ValueHandler::set(llvm::Value* val) noexcept {
+void ValueHandler::set(llvm::Value* val) {
     if (auto* symbol = dyn_cast<Symbol*>()) {
         m_gen->getBuilder().CreateStore(val, symbol->getLlvmValue());
         return;

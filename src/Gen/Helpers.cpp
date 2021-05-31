@@ -7,7 +7,7 @@
 using namespace lbc;
 using namespace Gen;
 
-llvm::CmpInst::Predicate lbc::Gen::getCmpPred(const TypeRoot* type, TokenKind op) noexcept {
+llvm::CmpInst::Predicate lbc::Gen::getCmpPred(const TypeRoot* type, TokenKind op) {
     if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
         bool isSigned = integral->isSigned();
         switch (op) {
@@ -61,7 +61,7 @@ llvm::CmpInst::Predicate lbc::Gen::getCmpPred(const TypeRoot* type, TokenKind op
     llvm_unreachable("Unsupported type");
 }
 
-llvm::Instruction::BinaryOps lbc::Gen::getBinOpPred(const TypeRoot* type, TokenKind op) noexcept {
+llvm::Instruction::BinaryOps lbc::Gen::getBinOpPred(const TypeRoot* type, TokenKind op) {
     if (type->isIntegral()) {
         auto sign = type->isSignedIntegral();
         switch (op) {

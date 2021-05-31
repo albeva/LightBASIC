@@ -16,7 +16,7 @@ namespace Sem {
         explicit TypePass(SemanticAnalyzer& sem) noexcept : m_sem{ sem } {}
         ~TypePass() noexcept = default;
 
-        void visit(AstTypeExpr& ast) noexcept;
+        void visit(AstTypeExpr& ast);
 
     private:
         SemanticAnalyzer& m_sem;

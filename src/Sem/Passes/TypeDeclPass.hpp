@@ -11,10 +11,10 @@ struct AstTypeDecl;
 namespace Sem {
     class TypeDeclPass final {
     public:
-        TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast) noexcept;
+        TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast);
 
     private:
-        void declareMembers() noexcept;
+        void declareMembers();
 
         SemanticAnalyzer& m_sem;
         AstTypeDecl& m_ast;

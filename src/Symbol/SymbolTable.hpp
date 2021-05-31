@@ -20,14 +20,14 @@ public:
 
     [[nodiscard]] SymbolTable* parent() const noexcept { return m_parent; }
 
-    Symbol* insert(StringRef name) noexcept;
-    void addReference(Symbol*) noexcept;
+    Symbol* insert(StringRef name);
+    void addReference(Symbol*);
 
     [[nodiscard]] bool exists(StringRef name, bool recursive = false) const noexcept;
     [[nodiscard]] Symbol* find(StringRef id, bool recursive = true) const noexcept;
 
-    [[nodiscard]] iterator begin() noexcept { return m_symbols.begin(); }
-    [[nodiscard]] iterator end() noexcept { return m_symbols.end(); }
+    [[nodiscard]] iterator begin() { return m_symbols.begin(); }
+    [[nodiscard]] iterator end() { return m_symbols.end(); }
 
     [[nodiscard]] const_iterator begin() const noexcept { return m_symbols.begin(); }
     [[nodiscard]] const_iterator end() const noexcept { return m_symbols.end(); }

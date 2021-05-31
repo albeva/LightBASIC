@@ -9,7 +9,7 @@ using namespace Sem;
 
 namespace {
 template<typename BASE, typename T>
-constexpr inline BASE castLiteral(const AstLiteralExpr& ast) noexcept {
+constexpr inline BASE castLiteral(const AstLiteralExpr& ast) {
     constexpr auto visitor = [](const auto& val) -> T {
         using R = std::decay_t<decltype(val)>;
         if constexpr (std::is_convertible_v<R, T>) {
@@ -22,7 +22,7 @@ constexpr inline BASE castLiteral(const AstLiteralExpr& ast) noexcept {
 }
 } // namespace
 
-void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
+void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) {
     //    if (m_context.getOptimizationLevel() == Context::OptimizationLevel::O0) {
     //        return;
     //    }
@@ -49,7 +49,7 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) noexcept {
     }
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast) {
     auto* literal = dyn_cast<AstLiteralExpr>(ast.expr.get());
     if (literal == nullptr) {
         return nullptr;
@@ -61,7 +61,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast)
     return repl;
 }
 
-AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralExpr& ast) noexcept {
+AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralExpr& ast) {
     switch (op) {
     case TokenKind::Negate: {
         constexpr auto visitor = Visitor{
@@ -94,7 +94,7 @@ AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralE
 }
 
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr& ast) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr& ast) {
     if (auto* expr = dyn_cast<AstLiteralExpr>(ast.expr.get())) {
         if (std::get<bool>(expr->value)) {
             return std::move(ast.trueExpr);
@@ -109,7 +109,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr& ast) noexcept {
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
     auto* lhs = dyn_cast<AstLiteralExpr>(ast.trueExpr.get());
     if (lhs == nullptr) {
         return nullptr;
@@ -156,12 +156,12 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) noexc
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr& /*ast*/) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr& /*ast*/) {
     // TODO
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) noexcept {
+unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) {
     auto* literal = dyn_cast<AstLiteralExpr>(ast.expr.get());
     if (literal == nullptr) {
         return nullptr;
@@ -173,7 +173,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) n
     return repl;
 }
 
-AstLiteralExpr::Value ConstantFoldingPass::cast(const TypeRoot* type, const AstLiteralExpr& ast) noexcept {
+AstLiteralExpr::Value ConstantFoldingPass::cast(const TypeRoot* type, const AstLiteralExpr& ast) {
     // clang-format off
     if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
         #define INTEGRAL(ID, STR, KIND, BITS, SIGNED, TYPE)                          \

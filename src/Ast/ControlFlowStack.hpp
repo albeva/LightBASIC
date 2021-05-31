@@ -28,10 +28,10 @@ public:
     using const_iterator = typename Container::const_reverse_iterator;
 
     NO_COPY_AND_MOVE(ControlFlowStack)
-    ControlFlowStack() noexcept = default;
+    ControlFlowStack() noexcept(noexcept(Container())) = default;
     ~ControlFlowStack() noexcept = default;
 
-    void push(ControlFlowStatement control, Data data = {}) noexcept {
+    void push(ControlFlowStatement control, Data data = {}) {
         m_container.emplace_back(control, data);
     }
 

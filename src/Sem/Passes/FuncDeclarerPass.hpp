@@ -31,12 +31,12 @@ namespace Sem {
 
         ~FuncDeclarerPass() noexcept = default;
 
-        void visit(AstModule& ast) noexcept;
+        void visit(AstModule& ast);
 
     private:
-        void visitFuncDecl(AstFuncDecl& ast, bool external) noexcept;
-        void visitFuncParamDecl(AstFuncParamDecl& ast) noexcept;
-        [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl& ast) noexcept;
+        void visitFuncDecl(AstFuncDecl& ast, bool external);
+        void visitFuncParamDecl(AstFuncParamDecl& ast);
+        [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl& ast);
 
         SymbolTable* m_table{};
         Context& m_context;

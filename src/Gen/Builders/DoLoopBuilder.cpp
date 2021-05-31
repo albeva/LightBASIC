@@ -6,7 +6,7 @@
 using namespace lbc;
 using namespace Gen;
 
-DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt& ast) noexcept
+DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt& ast)
 : Builder{ gen, ast },
   m_bodyBlock{ llvm::BasicBlock::Create(m_llvmContext, "do_loop.body") },
   m_condBlock{ (m_ast.condition == AstDoLoopStmt::Condition::None)
@@ -17,7 +17,7 @@ DoLoopBuilder::DoLoopBuilder(CodeGen& gen, AstDoLoopStmt& ast) noexcept
     build();
 }
 
-void DoLoopBuilder::build() noexcept {
+void DoLoopBuilder::build() {
     for (const auto& decl : m_ast.decls) {
         m_gen.visit(*decl);
     }
@@ -60,7 +60,7 @@ void DoLoopBuilder::build() noexcept {
     m_gen.switchBlock(m_exitBlock);
 }
 
-void DoLoopBuilder::makeCondition(bool isUntil) noexcept {
+void DoLoopBuilder::makeCondition(bool isUntil) {
     m_gen.switchBlock(m_condBlock);
     auto value = m_gen.visit(*m_ast.expr).get();
     if (isUntil) {

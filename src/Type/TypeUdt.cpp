@@ -11,14 +11,14 @@ namespace {
 std::vector<unique_ptr<TypeUDT>> udts; // NOLINT
 } // namespace
 
-TypeUDT::TypeUDT(Symbol& symbol, SymbolTable& symbolTable) noexcept
+TypeUDT::TypeUDT(Symbol& symbol, SymbolTable& symbolTable)
 : TypeRoot{ TypeFamily::UDT },
   m_symbol{ symbol },
   m_symbolTable{ symbolTable } {
     symbol.setType(this);
 }
 
-const TypeUDT* TypeUDT::get(Symbol& symbol, SymbolTable& symbolTable) noexcept {
+const TypeUDT* TypeUDT::get(Symbol& symbol, SymbolTable& symbolTable) {
     if (const auto* type = symbol.type()) {
         if (const auto* udt = dyn_cast<TypeUDT>(type)) {
             return udt;

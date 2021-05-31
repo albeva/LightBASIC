@@ -19,24 +19,24 @@ namespace Gen {
     class ValueHandler final : llvm::PointerUnion<value_handler_detail::ValuePtr, Symbol*> {
     public:
         /// Create temporary allocated variable - it is not inserted into symbol table
-        static ValueHandler createTemp(CodeGen& gen, AstExpr& expr, StringRef name = "") noexcept;
+        static ValueHandler createTemp(CodeGen& gen, AstExpr& expr, StringRef name = "");
 
         /// Create temporary variable if expression is not a constant
-        static ValueHandler createTempOrConstant(CodeGen& gen, AstExpr& expr, StringRef name = "") noexcept;
+        static ValueHandler createTempOrConstant(CodeGen& gen, AstExpr& expr, StringRef name = "");
 
         constexpr ValueHandler() noexcept = default;
-        ValueHandler(CodeGen* gen, Symbol* symbol) noexcept;
-        ValueHandler(CodeGen* gen, llvm::Value* value) noexcept;
+        ValueHandler(CodeGen* gen, Symbol* symbol);
+        ValueHandler(CodeGen* gen, llvm::Value* value);
 
-        [[nodiscard]] llvm::Value* get() noexcept;
-        void set(llvm::Value* val) noexcept;
+        [[nodiscard]] llvm::Value* get();
+        void set(llvm::Value* val);
 
         [[nodiscard]] constexpr inline bool isValid() const noexcept {
             return m_gen != nullptr && !isNull();
         }
 
     private:
-        ValueHandler(CodeGen* gen, value_handler_detail::ValuePtr ptr) noexcept;
+        ValueHandler(CodeGen* gen, value_handler_detail::ValuePtr ptr);
 
         CodeGen* m_gen = nullptr;
     };

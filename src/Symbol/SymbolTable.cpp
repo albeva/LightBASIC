@@ -5,11 +5,11 @@
 #include "Symbol.hpp"
 using namespace lbc;
 
-Symbol* SymbolTable::insert(StringRef name) noexcept {
+Symbol* SymbolTable::insert(StringRef name) {
     return m_symbols.insert({ name, make_unique<Symbol>(name) }).first->second.get();
 }
 
-void SymbolTable::addReference(Symbol* symbol) noexcept {
+void SymbolTable::addReference(Symbol* symbol) {
     m_references.insert({ symbol->name(), symbol });
 }
 

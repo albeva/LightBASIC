@@ -16,14 +16,14 @@ public:
     AST_VISITOR_DECLARE_CONTENT_FUNCS()
 
 private:
-    void writeHeader(AstRoot& ast) noexcept;
-    void writeLocation(AstRoot& ast) noexcept;
+    void writeHeader(AstRoot& ast);
+    void writeLocation(AstRoot& ast);
 
-    void writeAttributes(AstAttributeList* ast) noexcept;
-    void writeStmts(AstStmtList* ast) noexcept;
-    void writeExpr(AstExpr* ast, StringRef name = "expr") noexcept;
-    void writeIdent(AstIdentExpr* ast) noexcept;
-    void writeType(AstTypeExpr* ast) noexcept;
+    void writeAttributes(AstAttributeList* ast);
+    void writeStmts(AstStmtList* ast);
+    void writeExpr(AstExpr* ast, StringRef name = "expr");
+    void writeIdent(AstIdentExpr* ast);
+    void writeType(AstTypeExpr* ast);
 
     Context& m_context;
     llvm::json::OStream m_json;

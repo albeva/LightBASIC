@@ -105,7 +105,7 @@ void Context::addInputFile(const fs::path& path) {
     m_inputFiles.at(index).emplace_back(path);
 }
 
-const std::vector<fs::path>& Context::getInputFiles(FileType type) const {
+const std::vector<fs::path>& Context::getInputFiles(FileType type) const noexcept {
     return m_inputFiles.at(static_cast<size_t>(type));
 }
 
@@ -179,7 +179,7 @@ fs::path Context::resolveFilePath(const fs::path& path) const {
     return true;
 }
 
-bool Context::isMainFile(const fs::path& file) const { // NOLINT
+bool Context::isMainFile(const fs::path& file) const noexcept { // NOLINT
     if (!m_implicitMain) {
         return false;
     }
@@ -210,6 +210,6 @@ void Context::setCompilerPath(const fs::path& path) {
 #endif
 }
 
-StringRef Context::retainCopy(StringRef str) noexcept {
+StringRef Context::retainCopy(StringRef str) {
     return m_retainedStrings.insert(str).first->first();
 }

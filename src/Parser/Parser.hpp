@@ -17,10 +17,10 @@ class Parser final {
 public:
     NO_COPY_AND_MOVE(Parser)
 
-    Parser(Context& context, unsigned int fileId, bool isMain) noexcept;
-    ~Parser() noexcept;
+    Parser(Context& context, unsigned int fileId, bool isMain);
+    ~Parser();
 
-    [[nodiscard]] unique_ptr<AstModule> parse() noexcept;
+    [[nodiscard]] unique_ptr<AstModule> parse();
 
 private:
     enum class Scope {
@@ -35,49 +35,49 @@ private:
         LLVM_MARK_AS_BITMASK_ENUM(/* LargestValue = */ AssignAsEqual)
     };
 
-    [[nodiscard]] unique_ptr<AstStmtList> stmtList() noexcept;
-    [[nodiscard]] unique_ptr<AstStmt> statement() noexcept;
-    [[nodiscard]] unique_ptr<AstStmt> declaration() noexcept;
+    [[nodiscard]] unique_ptr<AstStmtList> stmtList();
+    [[nodiscard]] unique_ptr<AstStmt> statement();
+    [[nodiscard]] unique_ptr<AstStmt> declaration();
 
-    [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::Default) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> factor() noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> primary() noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> unary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> expr) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> binary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> lhs, unique_ptr<AstExpr> rhs) noexcept;
-    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence) noexcept;
-    [[nodiscard]] unique_ptr<AstIdentExpr> identifier() noexcept;
-    [[nodiscard]] unique_ptr<AstLiteralExpr> literal() noexcept;
-    [[nodiscard]] unique_ptr<AstCallExpr> callExpr() noexcept;
-    [[nodiscard]] unique_ptr<AstIfExpr> ifExpr() noexcept;
-    [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList() noexcept;
+    [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::Default);
+    [[nodiscard]] unique_ptr<AstExpr> factor();
+    [[nodiscard]] unique_ptr<AstExpr> primary();
+    [[nodiscard]] unique_ptr<AstExpr> unary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> expr);
+    [[nodiscard]] unique_ptr<AstExpr> binary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> lhs, unique_ptr<AstExpr> rhs);
+    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence);
+    [[nodiscard]] unique_ptr<AstIdentExpr> identifier();
+    [[nodiscard]] unique_ptr<AstLiteralExpr> literal();
+    [[nodiscard]] unique_ptr<AstCallExpr> callExpr();
+    [[nodiscard]] unique_ptr<AstIfExpr> ifExpr();
+    [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList();
 
-    [[nodiscard]] unique_ptr<AstAssignStmt> assignment() noexcept;
-    [[nodiscard]] unique_ptr<AstExprStmt> callStmt() noexcept;
-    [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstIfStmt> kwIf() noexcept;
-    [[nodiscard]] AstIfStmtBlock ifBlock() noexcept;
-    [[nodiscard]] AstIfStmtBlock thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr) noexcept;
-    [[nodiscard]] unique_ptr<AstForStmt> kwFor() noexcept;
-    [[nodiscard]] unique_ptr<AstDoLoopStmt> kwDo() noexcept;
-    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwContinue() noexcept;
-    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwExit() noexcept;
+    [[nodiscard]] unique_ptr<AstAssignStmt> assignment();
+    [[nodiscard]] unique_ptr<AstExprStmt> callStmt();
+    [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs);
+    [[nodiscard]] unique_ptr<AstIfStmt> kwIf();
+    [[nodiscard]] AstIfStmtBlock ifBlock();
+    [[nodiscard]] AstIfStmtBlock thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr);
+    [[nodiscard]] unique_ptr<AstForStmt> kwFor();
+    [[nodiscard]] unique_ptr<AstDoLoopStmt> kwDo();
+    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwContinue();
+    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwExit();
 
-    [[nodiscard]] unique_ptr<AstAttributeList> attributeList() noexcept;
-    [[nodiscard]] unique_ptr<AstAttribute> attribute() noexcept;
-    [[nodiscard]] std::vector<unique_ptr<AstLiteralExpr>> attributeArgList() noexcept;
+    [[nodiscard]] unique_ptr<AstAttributeList> attributeList();
+    [[nodiscard]] unique_ptr<AstAttribute> attribute();
+    [[nodiscard]] std::vector<unique_ptr<AstLiteralExpr>> attributeArgList();
 
-    [[nodiscard]] unique_ptr<AstTypeExpr> typeExpr() noexcept;
+    [[nodiscard]] unique_ptr<AstTypeExpr> typeExpr();
 
-    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs, bool hasImpl) noexcept;
-    [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParamList(bool& isVariadic) noexcept;
-    [[nodiscard]] unique_ptr<AstFuncParamDecl> funcParam() noexcept;
-    [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] unique_ptr<AstStmt> kwReturn() noexcept;
+    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs);
+    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs, bool hasImpl);
+    [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParamList(bool& isVariadic);
+    [[nodiscard]] unique_ptr<AstFuncParamDecl> funcParam();
+    [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs);
+    [[nodiscard]] unique_ptr<AstStmt> kwReturn();
 
-    [[nodiscard]] unique_ptr<AstTypeDecl> kwType(unique_ptr<AstAttributeList> attribs) noexcept;
-    [[nodiscard]] std::vector<unique_ptr<AstDecl>> typeDeclList() noexcept;
-    [[nodiscard]] unique_ptr<AstDecl> typeMember(unique_ptr<AstAttributeList> attribs) noexcept;
+    [[nodiscard]] unique_ptr<AstTypeDecl> kwType(unique_ptr<AstAttributeList> attribs);
+    [[nodiscard]] std::vector<unique_ptr<AstDecl>> typeDeclList();
+    [[nodiscard]] unique_ptr<AstDecl> typeMember(unique_ptr<AstAttributeList> attribs);
 
     // return true if has more content to parse
     [[nodiscard]] bool isValid() const noexcept;
@@ -86,21 +86,21 @@ private:
     [[nodiscard]] bool match(TokenKind kind) const noexcept;
 
     // replace token kind with another (e.g. Minus to Negate)
-    void replace(TokenKind what, TokenKind with) noexcept;
+    void replace(TokenKind what, TokenKind with);
 
     // expect token to match, move to next token and return current
     // return nullptr otherwise
-    [[nodiscard]] unique_ptr<Token> accept(TokenKind kind) noexcept;
+    [[nodiscard]] unique_ptr<Token> accept(TokenKind kind);
 
     // expect token to match, move to next token and return current
     // show error and terminate otherwise
-    unique_ptr<Token> expect(TokenKind kind) noexcept;
+    unique_ptr<Token> expect(TokenKind kind);
 
     // advance to the next token from the stream
-    unique_ptr<Token> move() noexcept;
+    unique_ptr<Token> move();
 
     // show error and terminate compilation
-    [[noreturn]] void error(const Twine& message) noexcept;
+    [[noreturn]] void error(const Twine& message);
 
     Context& m_context;
     unsigned m_fileId;
