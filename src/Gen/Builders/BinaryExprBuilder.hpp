@@ -6,18 +6,19 @@
 #include "Ast/Ast.hpp"
 #include "Builder.hpp"
 #include "Gen/CodeGen.hpp"
+#include "Gen/ValueHandler.hpp"
 
 namespace lbc::Gen {
 
 class BinaryExprBuilder final : Builder<AstBinaryExpr> {
 public:
     using Builder::Builder;
-    llvm::Value* build() noexcept;
+    ValueHandler build() noexcept;
 
 private:
-    llvm::Value* comparison() noexcept;
-    llvm::Value* arithmetic() noexcept;
-    llvm::Value* logical() noexcept;
+    ValueHandler comparison() noexcept;
+    ValueHandler arithmetic() noexcept;
+    ValueHandler logical() noexcept;
 };
 
 } // namespace lbc::Gen

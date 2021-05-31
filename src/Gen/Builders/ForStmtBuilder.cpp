@@ -36,7 +36,7 @@ void ForStmtBuilder::declareVars() noexcept {
     m_llvmType = m_type->getLlvmType(m_gen.getContext());
 
     m_iterator = ValueHandler{ &m_gen, m_ast.iterator->symbol };
-    m_limit = ValueHandler{ &m_gen, m_ast.limit.get(), "for.limit" };
+    m_limit = ValueHandler::createTempOrConstant(m_gen, *m_ast.limit, "for.limit");
 }
 
 void ForStmtBuilder::checkDirection() noexcept {
@@ -100,7 +100,7 @@ void ForStmtBuilder::configureStep() noexcept {
     }
 
     // Unknown value
-    m_step = ValueHandler{ &m_gen, m_ast.step.get(), "for.step" };
+    m_step = ValueHandler::createTemp(m_gen, *m_ast.step, "for.step");
     auto* stepValue = m_step.get();
 
     auto* isStepNeg = m_builder.CreateCmp(

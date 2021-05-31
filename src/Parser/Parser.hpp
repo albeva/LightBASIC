@@ -13,13 +13,6 @@ enum class TokenKind;
 struct AstIfStmtBlock;
 AST_FORWARD_DECLARE()
 
-enum class ExprFlags : unsigned {
-    CommaAsAnd = 1,
-    AssignAsEqual = 2,
-    Default = AssignAsEqual
-};
-ENABLE_BITMASK_OPERATORS(lbc::ExprFlags)
-
 class Parser final {
 public:
     NO_COPY_AND_MOVE(Parser)
@@ -33,6 +26,13 @@ private:
     enum class Scope {
         Root,
         Function
+    };
+
+    enum class ExprFlags : unsigned {
+        CommaAsAnd = 1,
+        AssignAsEqual = 2,
+        Default = AssignAsEqual,
+        LLVM_MARK_AS_BITMASK_ENUM(/* LargestValue = */ AssignAsEqual)
     };
 
     [[nodiscard]] unique_ptr<AstStmtList> stmtList() noexcept;

@@ -13,7 +13,8 @@ Checks: '*,
         -cppcoreguidelines-macro-usage,
         -cppcoreguidelines-pro-type-static-cast-downcast,
         -readability-convert-member-functions-to-static,
-        -bugprone-branch-clone'
+        -bugprone-branch-clone,
+        -llvmlibc-*'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 FormatStyle: none

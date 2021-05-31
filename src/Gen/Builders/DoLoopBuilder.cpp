@@ -62,7 +62,7 @@ void DoLoopBuilder::build() noexcept {
 
 void DoLoopBuilder::makeCondition(bool isUntil) noexcept {
     m_gen.switchBlock(m_condBlock);
-    auto* value = m_gen.visit(*m_ast.expr);
+    auto value = m_gen.visit(*m_ast.expr).get();
     if (isUntil) {
         m_builder.CreateCondBr(value, m_exitBlock, m_bodyBlock);
     } else {

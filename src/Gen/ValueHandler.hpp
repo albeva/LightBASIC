@@ -3,63 +3,43 @@
 //
 #pragma once
 #include "pch.hpp"
-#include "Ast/Ast.hpp"
-#include "CodeGen.hpp"
 #include "Symbol/Symbol.hpp"
-#include "Type/Type.hpp"
+#include <llvm/ADT/PointerUnion.h>
 
 namespace lbc {
+class CodeGen;
+class Symbol;
+struct AstExpr;
 
-class ValueHandler final {
-public:
-    constexpr ValueHandler() noexcept = default;
+namespace Gen {
+    namespace value_handler_detail {
+        using ValuePtr = llvm::PointerIntPair<llvm::Value*, 1, bool>;
+    } // namespace value_handler_detail
 
-    ValueHandler(CodeGen* gen_, AstExpr* ast, StringRef name = "") noexcept
-    : gen{ gen_ },
-      literal{ ast->kind == lbc::AstKind::LiteralExpr } {
-        auto* expr = gen->visit(*ast);
-        if (literal) {
-            value = expr;
-            return;
+    class ValueHandler final : llvm::PointerUnion<value_handler_detail::ValuePtr, Symbol*> {
+    public:
+        /// Create temporary allocated variable - it is not inserted into symbol table
+        static ValueHandler createTemp(CodeGen& gen, AstExpr& expr, StringRef name = "") noexcept;
+
+        /// Create temporary variable if expression is not a constant
+        static ValueHandler createTempOrConstant(CodeGen& gen, AstExpr& expr, StringRef name = "") noexcept;
+
+        constexpr ValueHandler() noexcept = default;
+        ValueHandler(CodeGen* gen, Symbol* symbol) noexcept;
+        ValueHandler(CodeGen* gen, llvm::Value* value) noexcept;
+
+        [[nodiscard]] llvm::Value* get() noexcept;
+        void set(llvm::Value* val) noexcept;
+
+        [[nodiscard]] constexpr inline bool isValid() const noexcept {
+            return m_gen != nullptr && !isNull();
         }
-        value = gen->getBuilder().CreateAlloca(
-            ast->type->getLlvmType(gen->getContext()),
-            nullptr,
-            name);
-        gen->getBuilder().CreateStore(expr, value);
-    }
 
-    constexpr ValueHandler(CodeGen* gen_, llvm::Constant* constant) noexcept
-    : gen{ gen_ },
-      literal{ true },
-      value{ constant } {}
+    private:
+        ValueHandler(CodeGen* gen, value_handler_detail::ValuePtr ptr) noexcept;
 
-    ValueHandler(CodeGen* gen_, Symbol* symbol) noexcept
-    : gen{ gen_ },
-      value{ symbol->getLlvmValue() } {}
+        CodeGen* m_gen = nullptr;
+    };
 
-    [[nodiscard]] llvm::Value* get() noexcept {
-        if (literal) {
-            return value;
-        }
-        return gen->getBuilder().CreateLoad(value, value->getName());
-    }
-
-    void set(llvm::Value* val) noexcept {
-        if (literal) {
-            if (!isa<llvm::Constant>(val)) {
-                fatalError("Setting non constant to constanrt");
-            }
-            value = val;
-            return;
-        }
-        gen->getBuilder().CreateStore(val, value);
-    }
-
-private:
-    CodeGen* gen = nullptr;
-    bool literal = false;
-    llvm::Value* value = nullptr;
-};
-
+} // namespace Gen
 } // namespace lbc

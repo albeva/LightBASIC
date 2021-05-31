@@ -3,7 +3,6 @@
 //
 #pragma once
 // do not include pch.h!
-#include "EnumFlags.hpp"
 
 #define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
 
@@ -18,6 +17,18 @@
 #define MAKE_UNIQUE(x) CONCATENATE(x, __COUNTER__)
 
 namespace lbc {
+// Enum Flags
+LLVM_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
+
+template<typename E, typename = std::enable_if_t<llvm::is_bitmask_enum<E>::value>>
+bool operator==(E lhs, std::underlying_type_t<E> rhs) {
+    return lhs == static_cast<E>(rhs);
+}
+
+template<typename E, typename = std::enable_if_t<llvm::is_bitmask_enum<E>::value>>
+bool operator!=(E lhs, std::underlying_type_t<E> rhs) {
+    return lhs != static_cast<E>(rhs);
+}
 
 // helper type for std::variant visitors
 template<typename... Base>

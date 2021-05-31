@@ -38,6 +38,7 @@ add_library(
     Gen/CodeGen.hpp
     Gen/Helpers.cpp
     Gen/Helpers.hpp
+    Gen/ValueHandler.cpp
     Gen/ValueHandler.hpp
     Lexer/Lexer.cpp
     Lexer/Lexer.hpp
@@ -48,8 +49,12 @@ add_library(
     Parser/Parser.hpp
     Sem/Passes/ConstantFoldingPass.cpp
     Sem/Passes/ConstantFoldingPass.hpp
+    Sem/Passes/ForStmtPass.cpp
+    Sem/Passes/ForStmtPass.hpp
     Sem/Passes/FuncDeclarerPass.cpp
     Sem/Passes/FuncDeclarerPass.hpp
+    Sem/Passes/TypeDeclPass.cpp
+    Sem/Passes/TypeDeclPass.hpp
     Sem/Passes/TypePass.cpp
     Sem/Passes/TypePass.hpp
     Sem/SemanticAnalyzer.cpp
@@ -60,11 +65,12 @@ add_library(
     Type/Type.cpp
     Type/Type.def.hpp
     Type/Type.hpp
-    Utils/EnumFlags.hpp
+    Type/TypeUdt.cpp
+    Type/TypeUdt.hpp
     Utils/Utils.cpp
     Utils/Utils.hpp
     Utils/Version.hpp
-    Sem/Passes/ForStmtPass.cpp Sem/Passes/ForStmtPass.hpp Sem/Passes/TypeDeclPass.cpp Sem/Passes/TypeDeclPass.hpp Type/TypeUdt.cpp Type/TypeUdt.hpp)
+)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

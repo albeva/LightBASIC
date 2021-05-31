@@ -5,11 +5,12 @@
 #include "pch.hpp"
 #include "Ast/AstVisitor.h"
 #include "Ast/ControlFlowStack.hpp"
+#include "ValueHandler.hpp"
 
 namespace lbc {
 class Context;
 
-class CodeGen final : public AstVisitor<CodeGen, llvm::Value*> {
+class CodeGen final : public AstVisitor<CodeGen, Gen::ValueHandler> {
 public:
     explicit CodeGen(Context& context) noexcept;
 
@@ -41,7 +42,7 @@ private:
     void declareGlobalVar(AstVarDecl& ast) noexcept;
     void declareLocalVar(AstVarDecl& ast) noexcept;
     static llvm::Value* getStoreValue(AstExpr& ast) noexcept;
-    llvm::Value* getStringConstant(StringRef str) noexcept;
+    llvm::Constant* getStringConstant(StringRef str) noexcept;
 
     Context& m_context;
     llvm::LLVMContext& m_llvmContext;

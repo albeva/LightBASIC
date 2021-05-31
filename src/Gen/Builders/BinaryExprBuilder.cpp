@@ -8,7 +8,7 @@
 using namespace lbc;
 using namespace Gen;
 
-llvm::Value* BinaryExprBuilder::build() noexcept {
+ValueHandler BinaryExprBuilder::build() noexcept {
     switch (Token::getOperatorType(m_ast.tokenKind)) {
     case OperatorType::Arithmetic:
         return arithmetic();
@@ -21,26 +21,26 @@ llvm::Value* BinaryExprBuilder::build() noexcept {
     }
 }
 
-llvm::Value* BinaryExprBuilder::comparison() noexcept {
-    auto* lhsValue = m_gen.visit(*m_ast.lhs);
-    auto* rhsValue = m_gen.visit(*m_ast.rhs);
+ValueHandler BinaryExprBuilder::comparison() noexcept {
+    auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
+    auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
 
     const auto* ty = m_ast.lhs->type;
     auto pred = Gen::getCmpPred(ty, m_ast.tokenKind);
-    return m_builder.CreateCmp(pred, lhsValue, rhsValue);
+    return { &m_gen, m_builder.CreateCmp(pred, lhsValue, rhsValue) };
 }
 
-llvm::Value* BinaryExprBuilder::arithmetic() noexcept {
-    auto* lhsValue = m_gen.visit(*m_ast.lhs);
-    auto* rhsValue = m_gen.visit(*m_ast.rhs);
+ValueHandler BinaryExprBuilder::arithmetic() noexcept {
+    auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
+    auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
 
     auto op = getBinOpPred(m_ast.lhs->type, m_ast.tokenKind);
-    return m_builder.CreateBinOp(op, lhsValue, rhsValue);
+    return { &m_gen, m_builder.CreateBinOp(op, lhsValue, rhsValue) };
 }
 
-llvm::Value* BinaryExprBuilder::logical() noexcept {
+ValueHandler BinaryExprBuilder::logical() noexcept {
     // lhs
-    auto* lhsValue = m_gen.visit(*m_ast.lhs);
+    auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
     auto* lhsBlock = m_builder.GetInsertBlock();
 
     auto* func = lhsBlock->getParent();
@@ -57,7 +57,7 @@ llvm::Value* BinaryExprBuilder::logical() noexcept {
 
     // rhs
     m_builder.SetInsertPoint(elseBlock);
-    auto* rhsValue = m_gen.visit(*m_ast.rhs);
+    auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
     auto* rhsBlock = m_builder.GetInsertBlock();
 
     // phi
@@ -70,5 +70,5 @@ llvm::Value* BinaryExprBuilder::logical() noexcept {
         phi->addIncoming(m_gen.getTrue(), lhsBlock);
     }
     phi->addIncoming(rhsValue, rhsBlock);
-    return phi;
+    return { &m_gen, phi };
 }

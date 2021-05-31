@@ -25,7 +25,7 @@ void IfStmtBuilder::build() noexcept {
         }
 
         if (block.expr) {
-            auto* condition = m_gen.visit(*block.expr);
+            auto* condition = m_gen.visit(*block.expr).get();
 
             auto* thenBlock = llvm::BasicBlock::Create(m_llvmContext, "if.then", func);
             if (idx == count - 1) {
