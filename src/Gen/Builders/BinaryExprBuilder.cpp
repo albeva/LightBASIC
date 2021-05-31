@@ -22,8 +22,8 @@ ValueHandler BinaryExprBuilder::build() {
 }
 
 ValueHandler BinaryExprBuilder::comparison() {
-    auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
-    auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
+    auto* lhsValue = m_gen.visit(*m_ast.lhs).getValue();
+    auto* rhsValue = m_gen.visit(*m_ast.rhs).getValue();
 
     const auto* ty = m_ast.lhs->type;
     auto pred = Gen::getCmpPred(ty, m_ast.tokenKind);
@@ -31,8 +31,8 @@ ValueHandler BinaryExprBuilder::comparison() {
 }
 
 ValueHandler BinaryExprBuilder::arithmetic() {
-    auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
-    auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
+    auto* lhsValue = m_gen.visit(*m_ast.lhs).getValue();
+    auto* rhsValue = m_gen.visit(*m_ast.rhs).getValue();
 
     auto op = getBinOpPred(m_ast.lhs->type, m_ast.tokenKind);
     return { &m_gen, m_builder.CreateBinOp(op, lhsValue, rhsValue) };
@@ -40,7 +40,7 @@ ValueHandler BinaryExprBuilder::arithmetic() {
 
 ValueHandler BinaryExprBuilder::logical() {
     // lhs
-    auto* lhsValue = m_gen.visit(*m_ast.lhs).get();
+    auto* lhsValue = m_gen.visit(*m_ast.lhs).getValue();
     auto* lhsBlock = m_builder.GetInsertBlock();
 
     auto* func = lhsBlock->getParent();
@@ -57,7 +57,7 @@ ValueHandler BinaryExprBuilder::logical() {
 
     // rhs
     m_builder.SetInsertPoint(elseBlock);
-    auto* rhsValue = m_gen.visit(*m_ast.rhs).get();
+    auto* rhsValue = m_gen.visit(*m_ast.rhs).getValue();
     auto* rhsBlock = m_builder.GetInsertBlock();
 
     // phi

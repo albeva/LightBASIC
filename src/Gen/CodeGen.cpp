@@ -152,16 +152,10 @@ void CodeGen::visit(AstStmtList& ast) {
 }
 
 void CodeGen::visit(AstAssignStmt& ast) {
-    auto* lvalue = getStoreValue(*ast.lhs);
-    auto rvalue = visit(*ast.rhs);
-    m_builder.CreateStore(rvalue.get(), lvalue);
-}
-
-llvm::Value* CodeGen::getStoreValue(AstExpr& ast) {
-    if (auto* id = dyn_cast<AstIdentExpr>(&ast)) {
-        return id->symbol->getLlvmValue();
-    }
-    fatalError("Unsupported assign target");
+    auto* lvalue = visit(*ast.lhs).getAddress(); // getStoreValue(*ast.lhs);
+    auto* rvalue = visit(*ast.rhs).getValue();
+    m_builder.CreateStore(rvalue, lvalue);
+    // lvalue.set(rvalue);
 }
 
 void CodeGen::visit(AstExprStmt& ast) {
@@ -188,7 +182,7 @@ void CodeGen::declareGlobalVar(AstVarDecl& ast) {
     if (ast.expr) {
         if (auto* litExpr = dyn_cast<AstLiteralExpr>(ast.expr.get())) {
             auto rvalue = visit(*litExpr);
-            constant = llvm::cast<llvm::Constant>(rvalue.get());
+            constant = llvm::cast<llvm::Constant>(rvalue.getValue());
         } else {
             generateStoreInCtror = true;
         }
@@ -209,7 +203,7 @@ void CodeGen::declareGlobalVar(AstVarDecl& ast) {
         auto* block = m_builder.GetInsertBlock();
         m_builder.SetInsertPoint(getGlobalCtorBlock());
         auto rvalue = visit(*ast.expr);
-        m_builder.CreateStore(rvalue.get(), lvalue);
+        m_builder.CreateStore(rvalue.getValue(), lvalue);
         m_builder.SetInsertPoint(block);
     }
 
@@ -228,7 +222,7 @@ void CodeGen::declareLocalVar(AstVarDecl& ast) {
     auto* lvalue = m_builder.CreateAlloca(exprType, nullptr, ast.symbol->identifier());
 
     if (rvalue.isValid()) {
-        m_builder.CreateStore(rvalue.get(), lvalue);
+        m_builder.CreateStore(rvalue.getValue(), lvalue);
     }
 
     ast.symbol->setLlvmValue(lvalue);
@@ -319,7 +313,7 @@ void CodeGen::visit(AstFuncStmt& ast) {
 void CodeGen::visit(AstReturnStmt& ast) {
     if (ast.expr) {
         auto value = visit(*ast.expr);
-        m_builder.CreateRet(value.get());
+        m_builder.CreateRet(value.getValue());
     } else {
         auto* func = m_builder.GetInsertBlock()->getParent();
         auto* retTy = func->getReturnType();
@@ -394,14 +388,7 @@ void CodeGen::visit(AstAttribute& /*ast*/) {
 }
 
 ValueHandler CodeGen::visit(AstIdentExpr& ast) {
-//    const auto* type = ast.type;
-//    if (type->isFunction()) {
-        return { this, ast.symbol };
-//    }
-//
-//    auto* sym = ast.symbol;
-//    auto* load = m_builder.CreateLoad(sym->getLlvmValue(), sym->identifier());
-//    return { this, load };
+    return { this, ast };
 }
 
 void CodeGen::visit(AstTypeExpr& /*ast*/) {
@@ -413,13 +400,13 @@ void CodeGen::visit(AstTypeExpr& /*ast*/) {
 //------------------------------------------------------------------
 
 ValueHandler CodeGen::visit(AstCallExpr& ast) {
-    auto* fn = llvm::cast<llvm::Function>(visit(*ast.identExpr).get());
+    auto* fn = llvm::cast<llvm::Function>(visit(*ast.identExpr).getValue());
 
     std::vector<llvm::Value*> args;
     args.reserve(ast.argExprs.size());
     for (const auto& arg : ast.argExprs) {
         auto value = visit(*arg);
-        args.emplace_back(value.get());
+        args.emplace_back(value.getValue());
     }
 
     auto* call = m_builder.CreateCall(llvm::FunctionCallee(fn), args, "");
@@ -465,7 +452,7 @@ llvm::Constant* CodeGen::getStringConstant(StringRef str) {
 ValueHandler CodeGen::visit(AstUnaryExpr& ast) {
     switch (ast.tokenKind) {
     case TokenKind::Negate: {
-        auto* value = visit(*ast.expr).get();
+        auto* value = visit(*ast.expr).getValue();
 
         if (value->getType()->isIntegerTy()) {
             return { this, m_builder.CreateNeg(value) };
@@ -479,7 +466,7 @@ ValueHandler CodeGen::visit(AstUnaryExpr& ast) {
     }
     case TokenKind::LogicalNot: {
         auto value = visit(*ast.expr);
-        return { this, m_builder.CreateNot(value.get(), "lnot") };
+        return { this, m_builder.CreateNot(value.getValue(), "lnot") };
     }
     default:
         llvm_unreachable("Unexpected unary operator");
@@ -488,7 +475,7 @@ ValueHandler CodeGen::visit(AstUnaryExpr& ast) {
 
 ValueHandler CodeGen::visit(AstDereference& ast) {
     auto value = visit(*ast.expr);
-    return { this, m_builder.CreateLoad(value.get()) };
+    return { this, m_builder.CreateLoad(value.getValue()) };
 }
 
 ValueHandler CodeGen::visit(AstAddressOf& ast) {
@@ -511,7 +498,7 @@ ValueHandler CodeGen::visit(AstBinaryExpr& ast) {
 //------------------------------------------------------------------
 
 ValueHandler CodeGen::visit(AstCastExpr& ast) {
-    auto* value = visit(*ast.expr).get();
+    auto* value = visit(*ast.expr).getValue();
 
     bool srcIsSigned = ast.expr->type->isSignedIntegral();
     bool dstIsSigned = ast.type->isSignedIntegral();
@@ -531,7 +518,7 @@ ValueHandler CodeGen::visit(AstIfExpr& ast) {
     auto trueValue = visit(*ast.trueExpr);
     auto falseValue = visit(*ast.falseExpr);
 
-    auto* value = m_builder.CreateSelect(condValue.get(), trueValue.get(), falseValue.get());
+    auto* value = m_builder.CreateSelect(condValue.getValue(), trueValue.getValue(), falseValue.getValue());
     return { this, value };
 }
 

@@ -2,20 +2,20 @@
 // Created by Albert Varaksin on 28/05/2021.
 //
 #pragma once
-#include "Symbol/Symbol.hpp"
 #include <llvm/ADT/PointerUnion.h>
 
 namespace lbc {
 class CodeGen;
 class Symbol;
 struct AstExpr;
+struct AstIdentExpr;
 
 namespace Gen {
     namespace value_handler_detail {
         using ValuePtr = llvm::PointerIntPair<llvm::Value*, 1, bool>;
     } // namespace value_handler_detail
 
-    class ValueHandler final : llvm::PointerUnion<value_handler_detail::ValuePtr, Symbol*> {
+    class ValueHandler final : llvm::PointerUnion<value_handler_detail::ValuePtr, Symbol*, AstIdentExpr*> {
     public:
         /// Create temporary allocated variable - it is not inserted into symbol table
         static ValueHandler createTemp(CodeGen& gen, AstExpr& expr, StringRef name = "") noexcept;
@@ -26,12 +26,14 @@ namespace Gen {
         constexpr ValueHandler() noexcept = default;
         ValueHandler(CodeGen* gen, Symbol* symbol) noexcept;
         ValueHandler(CodeGen* gen, llvm::Value* value) noexcept;
+        ValueHandler(CodeGen* gen, AstIdentExpr& ident) noexcept;
 
-        [[nodiscard]] llvm::Value* get() noexcept;
+        [[nodiscard]] llvm::Value* getValue() noexcept;
+        [[nodiscard]] llvm::Value* getAddress() noexcept;
         void set(llvm::Value* val) noexcept;
 
         [[nodiscard]] constexpr inline bool isValid() const noexcept {
-            return m_gen != nullptr && !isNull();
+            return m_gen != nullptr;
         }
 
     private:

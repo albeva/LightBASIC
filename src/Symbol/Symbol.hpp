@@ -17,6 +17,12 @@ public:
 
     ~Symbol() noexcept = default;
 
+    [[nodiscard]] Symbol* getParent() const noexcept { return m_parent; }
+    void setParent(Symbol* parent) noexcept { m_parent = parent; }
+
+    [[nodiscard]] int getIndex() const noexcept { return m_index; }
+    void setIndex(int index) noexcept { m_index = index; }
+
     [[nodiscard]] const TypeRoot* type() const noexcept { return m_type; }
     void setType(const TypeRoot* type) noexcept { m_type = type; }
 
@@ -52,6 +58,8 @@ private:
     StringRef m_alias;
     llvm::Value* m_llvmValue = nullptr;
     bool m_external = false;
+    Symbol* m_parent = nullptr;
+    int m_index = 0;
 };
 
 } // namespace lbc

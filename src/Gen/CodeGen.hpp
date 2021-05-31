@@ -40,7 +40,6 @@ private:
     void declareFunc(AstFuncDecl& ast);
     void declareGlobalVar(AstVarDecl& ast);
     void declareLocalVar(AstVarDecl& ast);
-    static llvm::Value* getStoreValue(AstExpr& ast);
     llvm::Constant* getStringConstant(StringRef str);
 
     Context& m_context;

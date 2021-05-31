@@ -10,6 +10,7 @@
 #include "Symbol/Symbol.hpp"
 #include "Symbol/SymbolTable.hpp"
 #include "Type/Type.hpp"
+#include "Type/TypeUdt.hpp"
 
 using namespace lbc;
 
@@ -249,8 +250,20 @@ void SemanticAnalyzer::visit(AstIdentExpr& ast) {
         fatalError("Identifier "_t + name + " has unresolved type");
     }
 
+    const auto* type = symbol->type();
+    if (ast.next) {
+        const auto* udt = dyn_cast<TypeUDT>(symbol->type());
+        if (udt == nullptr) {
+            fatalError("Accessing a member on non UDT type");
+        }
+        RESTORE_ON_EXIT(m_table);
+        m_table = &udt->getSymbolTable();
+        visit(*ast.next);
+        type = ast.next->symbol->type();
+    }
+
     ast.symbol = symbol;
-    ast.type = symbol->type();
+    ast.type = type;
 }
 
 void SemanticAnalyzer::visit(AstCallExpr& ast) {

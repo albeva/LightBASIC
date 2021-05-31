@@ -41,8 +41,8 @@ void ForStmtBuilder::declareVars() {
 
 void ForStmtBuilder::checkDirection() {
     if (m_direction == AstForStmt::Direction::Unknown) {
-        auto* limitValue = m_limit.get();
-        auto* iterValue = m_iterator.get();
+        auto* limitValue = m_limit.getValue();
+        auto* iterValue = m_iterator.getValue();
         m_isDecr = m_builder.CreateCmp(
             getCmpPred(m_type, TokenKind::LessThan),
             limitValue,
@@ -101,7 +101,7 @@ void ForStmtBuilder::configureStep() {
 
     // Unknown value
     m_step = ValueHandler::createTemp(m_gen, *m_ast.step, "for.step");
-    auto* stepValue = m_step.get();
+    auto* stepValue = m_step.getValue();
 
     auto* isStepNeg = m_builder.CreateCmp(
         getCmpPred(m_ast.step->type, TokenKind::LessThan),
@@ -206,8 +206,8 @@ void ForStmtBuilder::build() {
 
 void ForStmtBuilder::makeCondition(bool incr) {
     auto lessOrEqualPred = getCmpPred(m_type, TokenKind::LessOrEqual);
-    auto* iterValue = m_iterator.get();
-    auto* limitValue = m_limit.get();
+    auto* iterValue = m_iterator.getValue();
+    auto* limitValue = m_limit.getValue();
     auto* cmp = incr
         ? m_builder.CreateCmp(lessOrEqualPred, iterValue, limitValue, "for.incrCond")
         : m_builder.CreateCmp(lessOrEqualPred, limitValue, iterValue, "for.decrCond");
@@ -216,8 +216,8 @@ void ForStmtBuilder::makeCondition(bool incr) {
 }
 
 void ForStmtBuilder::makeIteration(bool incr, llvm::BasicBlock* branch) {
-    auto* stepValue = m_step.get();
-    auto* iterValue = m_iterator.get();
+    auto* stepValue = m_step.getValue();
+    auto* iterValue = m_iterator.getValue();
     auto* result = incr
         ? m_builder.CreateAdd(iterValue, stepValue)
         : m_builder.CreateSub(iterValue, stepValue);

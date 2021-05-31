@@ -7,6 +7,7 @@
 namespace lbc {
 class SemanticAnalyzer;
 struct AstTypeDecl;
+class Symbol;
 
 namespace Sem {
     class TypeDeclPass final {
@@ -18,6 +19,7 @@ namespace Sem {
 
         SemanticAnalyzer& m_sem;
         AstTypeDecl& m_ast;
+        Symbol* m_symbol;
     };
 } // namespace Sem
 } // namespace lbc

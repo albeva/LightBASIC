@@ -6,13 +6,14 @@
 #include "CodeGen.hpp"
 #include "Symbol/Symbol.hpp"
 #include "Type/Type.hpp"
+#include "Type/TypeUdt.hpp"
 #include <llvm/ADT/TypeSwitch.h>
 using namespace lbc;
 using namespace Gen;
 using namespace value_handler_detail;
 
 ValueHandler ValueHandler::createTemp(CodeGen& gen, AstExpr& expr, StringRef name) noexcept {
-    auto* value = gen.visit(expr).get();
+    auto* value = gen.visit(expr).getValue();
     auto* var = gen.getBuilder().CreateAlloca(
         expr.type->getLlvmType(gen.getContext()),
         nullptr,
@@ -22,7 +23,7 @@ ValueHandler ValueHandler::createTemp(CodeGen& gen, AstExpr& expr, StringRef nam
 }
 
 ValueHandler ValueHandler::createTempOrConstant(CodeGen& gen, AstExpr& expr, StringRef name) noexcept {
-    auto* value = gen.visit(expr).get();
+    auto* value = gen.visit(expr).getValue();
     if (isa<llvm::Constant>(value)) {
         return { &gen, { value, false } };
     }
@@ -44,7 +45,16 @@ ValueHandler::ValueHandler(CodeGen* gen, Symbol* symbol) noexcept
 ValueHandler::ValueHandler(CodeGen* gen, llvm::Value* value) noexcept
 : PointerUnion{ ValuePtr{ value, false } }, m_gen{ gen } {}
 
-llvm::Value* ValueHandler::get() noexcept {
+ValueHandler::ValueHandler(CodeGen* gen, AstIdentExpr& ident) noexcept
+: m_gen{ gen } {
+    if (ident.next) {
+        PointerUnion::operator=(&ident);
+    } else {
+        PointerUnion::operator=(ident.symbol);
+    }
+}
+
+llvm::Value* ValueHandler::getValue() noexcept {
     if (is<ValuePtr>()) {
         auto ptr = PointerUnion::get<ValuePtr>();
         if (ptr.getInt()) {
@@ -57,9 +67,43 @@ llvm::Value* ValueHandler::get() noexcept {
         if (symbol->type()->isFunction()) {
             return symbol->getLlvmValue();
         }
+
         return m_gen->getBuilder().CreateLoad(
             symbol->getLlvmValue(),
             symbol->name());
+    }
+
+    if (is<AstIdentExpr*>()) {
+        auto* addr = getAddress();
+        return m_gen->getBuilder().CreateLoad(
+            addr,
+            addr->getName());
+    }
+
+    llvm_unreachable("Unknown ValueHandler type");
+}
+
+llvm::Value* ValueHandler::getAddress() noexcept {
+    if (is<ValuePtr>()) {
+        auto ptr = PointerUnion::get<ValuePtr>();
+        return ptr.getPointer();
+    }
+
+    if (auto* symbol = this->dyn_cast<Symbol*>()) {
+        return symbol->getLlvmValue();
+    }
+
+    if (auto* ast = dyn_cast<AstIdentExpr*>()) {
+        auto& builder = m_gen->getBuilder();
+        auto* addr = ast->symbol->getLlvmValue();
+        while(ast->next) {
+            addr = builder.CreateStructGEP(
+                ast->symbol->type()->getLlvmType(m_gen->getContext()),
+                addr,
+                ast->next->symbol->getIndex());
+            ast = ast->next.get();
+        }
+        return addr;
     }
 
     llvm_unreachable("Unknown ValueHandler type");

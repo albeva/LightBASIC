@@ -95,11 +95,13 @@ unique_ptr<AstStmt> Parser::statement() {
     }
 
     switch (m_token->kind()) {
-    case TokenKind::Identifier:
-        if (m_next && m_next->kind() == TokenKind::Assign) {
-            return assignment();
+    case TokenKind::Identifier: {
+        auto ident = identifier();
+        if (match(TokenKind::Assign)) {
+            return assignment(std::move(ident));
         }
-        return callStmt();
+        return callStmt(std::move(ident));
+    }
     case TokenKind::Return:
         return kwReturn();
     case TokenKind::If:
@@ -440,15 +442,14 @@ unique_ptr<AstDecl> Parser::typeMember(unique_ptr<AstAttributeList> attribs) {
  * Assignment
  *   = identExpr '=' expression .
  */
-unique_ptr<AstAssignStmt> Parser::assignment() {
-    auto start = m_token->range().Start;
-    auto lhs = expression({});
+unique_ptr<AstAssignStmt> Parser::assignment(unique_ptr<AstIdentExpr> ident) {
+    auto start = ident->range.Start;
     expect(TokenKind::Assign);
     auto rhs = expression();
 
     return AstAssignStmt::create(
         llvm::SMRange{ start, m_endLoc },
-        std::move(lhs),
+        std::move(ident),
         std::move(rhs));
 }
 
@@ -463,9 +464,8 @@ unique_ptr<AstAssignStmt> Parser::assignment() {
  *          )
  *          .
  */
-unique_ptr<AstExprStmt> Parser::callStmt() {
-    auto start = m_token->range().Start;
-    auto id = identifier();
+unique_ptr<AstExprStmt> Parser::callStmt(unique_ptr<AstIdentExpr> ident) {
+    auto start = ident->range.Start;
     bool parens = accept(TokenKind::ParenOpen) != nullptr;
     auto args = expressionList();
     if (parens) {
@@ -474,7 +474,7 @@ unique_ptr<AstExprStmt> Parser::callStmt() {
 
     auto call = AstCallExpr::create(
         llvm::SMRange{ start, m_endLoc },
-        std::move(id),
+        std::move(ident),
         std::move(args));
 
     return AstExprStmt::create(call->range, std::move(call));
@@ -1010,15 +1010,23 @@ unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) 
 }
 
 /**
- * identExpr = identifier .
+ * IdentExpr
+ *   = id { "." id }
+ *   .
  */
 unique_ptr<AstIdentExpr> Parser::identifier() {
     auto start = m_token->range().Start;
     auto id = expect(TokenKind::Identifier);
+    unique_ptr<AstIdentExpr> next;
+
+    if (accept(TokenKind::Period)) {
+        next = identifier();
+    }
 
     return AstIdentExpr::create(
         llvm::SMRange{ start, m_endLoc },
-        std::get<StringRef>(id->getValue()));
+        std::get<StringRef>(id->getValue()),
+        std::move(next));
 }
 
 /**

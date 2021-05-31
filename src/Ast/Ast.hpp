@@ -402,12 +402,15 @@ struct AstExpr : AstRoot {
 struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
     AstIdentExpr(
         llvm::SMRange range_,
-        StringRef name_) noexcept
+        StringRef name_,
+        unique_ptr<AstIdentExpr> next_) noexcept
     : AstNode{ KIND, range_ },
-      name{ name_ } {};
+      name{ name_ },
+      next{std::move(next_)} {};
 
     const StringRef name;
     Symbol* symbol = nullptr;
+    unique_ptr<AstIdentExpr> next;
 };
 
 struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {

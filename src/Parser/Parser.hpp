@@ -50,8 +50,8 @@ private:
     [[nodiscard]] unique_ptr<AstIfExpr> ifExpr();
     [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList();
 
-    [[nodiscard]] unique_ptr<AstAssignStmt> assignment();
-    [[nodiscard]] unique_ptr<AstExprStmt> callStmt();
+    [[nodiscard]] unique_ptr<AstAssignStmt> assignment(unique_ptr<AstIdentExpr> ident);
+    [[nodiscard]] unique_ptr<AstExprStmt> callStmt(unique_ptr<AstIdentExpr> ident);
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs);
     [[nodiscard]] unique_ptr<AstIfStmt> kwIf();
     [[nodiscard]] AstIfStmtBlock ifBlock();
