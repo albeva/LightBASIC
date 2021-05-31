@@ -34,13 +34,13 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(function|sub|declare|end|return|dim|var|as|if|then|else|for|to|step|next|continue|exit|do|loop))\b</string>
+			<string>\b(?i:(type|function|sub|declare|end|return|dim|var|as|if|then|else|for|to|step|next|continue|exit|do|loop))\b</string>
 			<key>name</key>
 			<string>keyword.control.lbc</string>
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(ubyte|byte|ushort|short|uinteger|integer|ulong|long|ulongint|longint|single|double|ptr|bool|any))\b</string>
+			<string>\b(?i:(zstring|ubyte|byte|ushort|short|uinteger|integer|ulong|long|ulongint|longint|single|double|ptr|bool|any))\b</string>
 			<key>name</key>
 			<string>storage.typeExpr.lbc</string>
 		</dict>
