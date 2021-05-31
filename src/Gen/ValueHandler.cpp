@@ -54,7 +54,7 @@ llvm::Value* ValueHandler::get() noexcept {
     }
 
     if (auto* symbol = this->dyn_cast<Symbol*>()) {
-        if (symbol->type()->getKind() == TypeFamily::Function) {
+        if (symbol->type()->isFunction()) {
             return symbol->getLlvmValue();
         }
         return m_gen->getBuilder().CreateLoad(

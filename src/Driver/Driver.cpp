@@ -241,7 +241,7 @@ void Driver::emitExecutable() {
     }
 
     if (triple.isOSWindows()) {
-        auto sysLibPath = m_context.getToolchain().getBasePath() / "lib" / "win64";
+        auto sysLibPath = m_context.getToolchain().getBasePath() / "lib";
         linker
             .addArg("-m", "i386pep")
             .addPath("-o", output)

@@ -202,7 +202,7 @@ void Context::setCompilerPath(const fs::path& path) {
     m_compilerPath = path;
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     if (m_toolchain.getBasePath().empty()) {
-        auto toolchainPath = getCompilerDir() / "toolchain";
+        auto toolchainPath = getCompilerDir() / "toolchain" / "win64";
         if (fs::exists(toolchainPath)) {
             m_toolchain.setBasePath(toolchainPath);
         }

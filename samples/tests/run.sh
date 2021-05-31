@@ -4,7 +4,7 @@ reset='\033[0m'
 
 if grep -q microsoft <<< `uname -a`; then
     LBC=../../bin/lbc.exe
-    FILECHECK=../../bin/toolchain/bin/FileCheck.exe
+    FILECHECK=../../bin/toolchain/win64/bin/FileCheck.exe
     ECHO="echo -e"
 elif grep -q Darwin <<< `uname -a`; then
     LBC=../../bin/lbc

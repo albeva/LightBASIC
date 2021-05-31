@@ -21,7 +21,7 @@ playground.xcworkspace
 *.json
 
 # 
-bin/
+bin/*.*
 obj/
 *~
 *.d
@@ -47,7 +47,5 @@ CMakeSettings.json
 _deps
 
 # lbc
-*.exe
-*.obj
 /samples/[^\.]*
 /samples/*.dump.bas

@@ -394,14 +394,14 @@ void CodeGen::visit(AstAttribute& /*ast*/) {
 }
 
 ValueHandler CodeGen::visit(AstIdentExpr& ast) {
-    const auto* type = ast.type;
-    if (type->isFunction()) {
-        return { this, ast.symbol->getLlvmValue() };
-    }
-
-    auto* sym = ast.symbol;
-    auto* load = m_builder.CreateLoad(sym->getLlvmValue(), sym->identifier());
-    return { this, load };
+//    const auto* type = ast.type;
+//    if (type->isFunction()) {
+        return { this, ast.symbol };
+//    }
+//
+//    auto* sym = ast.symbol;
+//    auto* load = m_builder.CreateLoad(sym->getLlvmValue(), sym->identifier());
+//    return { this, load };
 }
 
 void CodeGen::visit(AstTypeExpr& /*ast*/) {
