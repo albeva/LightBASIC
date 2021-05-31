@@ -2,7 +2,6 @@
 // Created by Albert Varaksin on 03/07/2020.
 //
 #pragma once
-#include "pch.hpp"
 #include "Token.def.hpp"
 
 namespace lbc {

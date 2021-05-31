@@ -4,7 +4,7 @@
 #pragma once
 #include <utility>
 
-#include "pch.hpp"
+
 #include "Context.hpp"
 
 namespace lbc {

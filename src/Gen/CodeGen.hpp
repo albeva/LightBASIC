@@ -2,7 +2,6 @@
 // Created by Albert Varaksin on 05/07/2020.
 //
 #pragma once
-#include "pch.hpp"
 #include "Ast/AstVisitor.h"
 #include "Ast/ControlFlowStack.hpp"
 #include "ValueHandler.hpp"

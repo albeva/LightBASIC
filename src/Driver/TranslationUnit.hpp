@@ -2,7 +2,6 @@
 // Created by Albert Varaksin on 08/05/2021.
 //
 #pragma once
-#include "pch.hpp"
 #include "Ast/Ast.hpp"
 #include "Source.hpp"
 

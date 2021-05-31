@@ -4,7 +4,6 @@
 #pragma once
 #include <utility>
 
-#include "pch.hpp"
 
 namespace lbc {
 

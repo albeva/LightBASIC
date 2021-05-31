@@ -15,7 +15,10 @@ Checks: '*,
         -readability-convert-member-functions-to-static,
         -bugprone-branch-clone,
         -llvmlibc-*,
+        -llvm-header-guard,
+        -llvm-include-order,
         -misc-no-recursion'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 FormatStyle: none
+
