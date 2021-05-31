@@ -36,19 +36,23 @@ ValueHandler ValueHandler::createTempOrConstant(CodeGen& gen, AstExpr& expr, Str
 }
 
 ValueHandler::ValueHandler(CodeGen* gen, ValuePtr ptr) noexcept
-: m_gen{ gen },
-  PointerUnion{ ptr } {
-}
+: PointerUnion{ ptr }, m_gen{ gen } {}
 
 ValueHandler::ValueHandler(CodeGen* gen, Symbol* symbol) noexcept
-: m_gen{ gen },
-  PointerUnion{ symbol } {}
+: PointerUnion{ symbol }, m_gen{ gen } {}
 
 ValueHandler::ValueHandler(CodeGen* gen, llvm::Value* value) noexcept
-: m_gen{ gen },
-  PointerUnion{ ValuePtr{ value, false } } {}
+: PointerUnion{ ValuePtr{ value, false } }, m_gen{ gen } {}
 
 llvm::Value* ValueHandler::get() noexcept {
+    if (is<ValuePtr>()) {
+        auto ptr = PointerUnion::get<ValuePtr>();
+        if (ptr.getInt()) {
+            return m_gen->getBuilder().CreateLoad(ptr.getPointer());
+        }
+        return ptr.getPointer();
+    }
+
     if (auto* symbol = this->dyn_cast<Symbol*>()) {
         if (symbol->type()->getKind() == TypeFamily::Function) {
             return symbol->getLlvmValue();
@@ -58,15 +62,7 @@ llvm::Value* ValueHandler::get() noexcept {
             symbol->name());
     }
 
-    if (!is<ValuePtr>()) {
-        llvm_unreachable("Unknown ValueHandler type");
-    }
-
-    auto ptr = PointerUnion::get<ValuePtr>();
-    if (ptr.getInt()) {
-        return m_gen->getBuilder().CreateLoad(ptr.getPointer());
-    }
-    return ptr.getPointer();
+    llvm_unreachable("Unknown ValueHandler type");
 }
 
 void ValueHandler::set(llvm::Value* val) noexcept {
