@@ -4,6 +4,8 @@
 # Visual Studio (code)
 .vs/
 .vscode/
+*.pdb
+*.ilk
 
 # LLVM intermediate files
 *.ll
@@ -38,3 +40,4 @@ _deps
 /samples/[^\.]*
 /samples/*.dump.bas
 /bin/lbc
+/bin/lbc.exe
