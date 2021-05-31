@@ -21,12 +21,12 @@ namespace lbc {
 LLVM_ENABLE_BITMASK_ENUMS_IN_NAMESPACE();
 
 template<typename E, typename = std::enable_if_t<llvm::is_bitmask_enum<E>::value>>
-bool operator==(E lhs, std::underlying_type_t<E> rhs) {
+constexpr bool operator==(E lhs, std::underlying_type_t<E> rhs) noexcept {
     return lhs == static_cast<E>(rhs);
 }
 
 template<typename E, typename = std::enable_if_t<llvm::is_bitmask_enum<E>::value>>
-bool operator!=(E lhs, std::underlying_type_t<E> rhs) {
+constexpr bool operator!=(E lhs, std::underlying_type_t<E> rhs) noexcept {
     return lhs != static_cast<E>(rhs);
 }
 
@@ -40,7 +40,7 @@ Visitor(Base...) -> Visitor<Base...>;
 /**
  * Get Twine from "literal"_t
  */
-inline Twine operator"" _t(const char* s, size_t /*len*/) {
+inline Twine operator"" _t(const char* s, size_t /*len*/) noexcept {
     return { s };
 }
 
@@ -78,7 +78,7 @@ struct ValueRestorer final {
 
     constexpr explicit ValueRestorer(T& value) noexcept : m_target{ value }, m_value{ value } {}
 
-    ~ValueRestorer() {
+    ~ValueRestorer() noexcept {
         m_target = m_value;
     }
 

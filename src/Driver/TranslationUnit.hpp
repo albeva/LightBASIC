@@ -11,8 +11,8 @@ namespace lbc {
 struct TranslationUnit final {
     NO_COPY_AND_MOVE(TranslationUnit)
 
-    TranslationUnit(unique_ptr<llvm::Module>&& m, const Source* src, unique_ptr<AstModule> tree) noexcept
-    : llvmModule{ std::move(m) }, source{ src }, ast{ std::move(tree) } {}
+    TranslationUnit(unique_ptr<llvm::Module> module, const Source* src, unique_ptr<AstModule> tree) noexcept
+    : llvmModule{ std::move(module) }, source{ src }, ast{ std::move(tree) } {}
 
     ~TranslationUnit() noexcept = default;
 

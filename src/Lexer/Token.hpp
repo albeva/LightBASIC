@@ -26,10 +26,10 @@ public:
     using Value = std::variant<std::monostate, StringRef, uint64_t, double, bool>;
 
     // Describe given token kind
-    static StringRef description(TokenKind kind);
+    static StringRef description(TokenKind kind) noexcept;
 
     // find matching token for string or return TokenKind::Identifier
-    static TokenKind findKind(StringRef str);
+    static TokenKind findKind(StringRef str) noexcept;
 
     // constructors
 
@@ -38,26 +38,26 @@ public:
         return make_unique<Token>(std::forward<Args>(args)...);
     }
 
-    Token(TokenKind kind, const llvm::SMRange& range) noexcept
+    Token(TokenKind kind, const llvm::SMRange& range)
     : m_kind{ kind }, m_value{ std::monostate{} }, m_range{ range } {}
 
-    Token(TokenKind kind, StringRef value, const llvm::SMRange& range) noexcept
+    Token(TokenKind kind, StringRef value, const llvm::SMRange& range)
     : m_kind{ kind }, m_value{ value }, m_range{ range } {}
 
-    Token(uint64_t value, const llvm::SMRange& range) noexcept
+    Token(uint64_t value, const llvm::SMRange& range)
     : m_kind{ TokenKind::IntegerLiteral }, m_value{ value }, m_range{ range } {}
 
-    Token(double value, const llvm::SMRange& range) noexcept
+    Token(double value, const llvm::SMRange& range)
     : m_kind{ TokenKind::FloatingPointLiteral }, m_value{ value }, m_range{ range } {}
 
-    Token(bool value, const llvm::SMRange& range) noexcept
+    Token(bool value, const llvm::SMRange& range)
     : m_kind{ TokenKind::BooleanLiteral }, m_value{ value }, m_range{ range } {}
 
     ~Token() noexcept = default;
 
     // convert token kind
 
-    [[nodiscard]] unique_ptr<Token> convert(TokenKind kind) const noexcept {
+    [[nodiscard]] unique_ptr<Token> convert(TokenKind kind) const {
         return create(kind, m_range);
     }
 
@@ -65,7 +65,7 @@ public:
 
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
 
-    [[nodiscard]] string lexeme() const noexcept;
+    [[nodiscard]] string lexeme() const;
 
     [[nodiscard]] const Value& getValue() const noexcept {
         return m_value;
@@ -93,7 +93,7 @@ public:
     [[nodiscard]] bool isLeftToRight() const noexcept;
     [[nodiscard]] bool isRightToLeft() const noexcept;
 
-    static OperatorType getOperatorType(TokenKind kind);
+    static OperatorType getOperatorType(TokenKind kind) noexcept;
 
     // Query keyword types
 

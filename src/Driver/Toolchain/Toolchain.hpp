@@ -28,7 +28,7 @@ public:
     explicit Toolchain(Context& context) noexcept : m_context{ context } {}
     ~Toolchain() noexcept = default;
 
-    void setBasePath(fs::path path) { m_basePath = path; }
+    void setBasePath(fs::path path) noexcept { m_basePath = path; }
     [[nodiscard]] const fs::path& getBasePath() const noexcept { return m_basePath; }
 
     [[nodiscard]] fs::path getPath(ToolKind tool) const noexcept;

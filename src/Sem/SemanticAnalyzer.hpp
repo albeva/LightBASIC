@@ -19,7 +19,7 @@ class SemanticAnalyzer final : public AstVisitor<SemanticAnalyzer> {
 public:
     explicit SemanticAnalyzer(Context& context);
 
-    [[nodiscard]] Context& getContext() { return m_context; }
+    [[nodiscard]] Context& getContext() noexcept { return m_context; }
 
     /// declareMembers the expression, optionally coerce result to given type
     void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr);

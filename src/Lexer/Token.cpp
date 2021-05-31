@@ -29,12 +29,12 @@ constexpr std::array kindToDescription {
 
 } // namespace
 
-StringRef Token::description(TokenKind kind) {
+StringRef Token::description(TokenKind kind) noexcept {
     auto index = static_cast<size_t>(kind);
     return kindToDescription.at(index);
 }
 
-TokenKind Token::findKind(StringRef str) {
+TokenKind Token::findKind(StringRef str) noexcept {
     auto iter = keywordsToKind.find(str);
     if (iter != keywordsToKind.end()) {
         return iter->second;
@@ -42,7 +42,7 @@ TokenKind Token::findKind(StringRef str) {
     return TokenKind::Identifier;
 }
 
-string Token::lexeme() const noexcept {
+string Token::lexeme() const {
     constexpr auto visitor = lbc::Visitor{
         [](std::monostate /*value*/) {
             return "NULL"s;
@@ -194,7 +194,7 @@ bool Token::isRightToLeft() const noexcept {
     #undef CASE_OPERATOR
 }
 
-OperatorType Token::getOperatorType(TokenKind kind) {
+OperatorType Token::getOperatorType(TokenKind kind) noexcept {
     #define CASE_OPERATOR(ID, CH, PREC, BINARY, DIR, KIND, ...) \
         case TokenKind::ID:                                     \
             return OperatorType::KIND;

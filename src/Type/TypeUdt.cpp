@@ -28,11 +28,11 @@ const TypeUDT* TypeUDT::get(Symbol& symbol, SymbolTable& symbolTable) {
     return udts.emplace_back(new TypeUDT(symbol, symbolTable)).get(); // NOLINT
 }
 
-string TypeUDT::asString() const noexcept {
+string TypeUDT::asString() const {
     return m_symbol.name().str();
 }
 
-llvm::Type* TypeUDT::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeUDT::genLlvmType(Context& context) const {
     llvm::LLVMContext& llvmContext = context.getLlvmContext();
     std::vector<llvm::Type*> elems;
     for (const auto& symbol : m_symbolTable) {

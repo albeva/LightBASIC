@@ -57,8 +57,8 @@ public:
         return m_llvmType;
     }
     virtual ~TypeRoot() noexcept = default;
-    [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind);
-    [[nodiscard]] virtual string asString() const noexcept = 0;
+    [[nodiscard]] static const TypeRoot* fromTokenKind(TokenKind kind) noexcept;
+    [[nodiscard]] virtual string asString() const = 0;
 
     // Type queries
     [[nodiscard]] constexpr bool isVoid() const noexcept { return m_kind == TypeFamily::Void; }
@@ -89,7 +89,7 @@ public:
 protected:
     constexpr explicit TypeRoot(TypeFamily kind) noexcept : m_kind{ kind } {}
 
-    [[nodiscard]] virtual llvm::Type* genLlvmType(Context& context) const noexcept = 0;
+    [[nodiscard]] virtual llvm::Type* genLlvmType(Context& context) const = 0;
 
 private:
     mutable llvm::Type* m_llvmType = nullptr;
@@ -103,16 +103,16 @@ private:
 class TypeVoid final : public TypeRoot {
 public:
     constexpr TypeVoid() noexcept : TypeRoot{ TypeFamily::Void } {}
-    static const TypeVoid* get();
+    static const TypeVoid* get() noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Void;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -121,16 +121,16 @@ protected:
 class TypeAny final : public TypeRoot {
 public:
     constexpr TypeAny() noexcept : TypeRoot{ TypeFamily::Any } {}
-    [[nodiscard]] static const TypeAny* get();
+    [[nodiscard]] static const TypeAny* get() noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Any;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -141,18 +141,18 @@ public:
     constexpr explicit TypePointer(const TypeRoot* base) noexcept
     : TypeRoot{ TypeFamily::Pointer }, m_base{ base } {}
 
-    [[nodiscard]] static const TypePointer* get(const TypeRoot* base);
+    [[nodiscard]] static const TypePointer* get(const TypeRoot* base) noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Pointer;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
     [[nodiscard]] constexpr const TypeRoot* getBase() const noexcept { return m_base; }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 
 private:
     const TypeRoot* m_base;
@@ -165,16 +165,16 @@ class TypeBoolean final : public TypeRoot {
 public:
     constexpr TypeBoolean() noexcept : TypeRoot{ TypeFamily::Boolean } {}
 
-    [[nodiscard]] static const TypeBoolean* get();
+    [[nodiscard]] static const TypeBoolean* get() noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Boolean;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -183,7 +183,7 @@ protected:
  */
 class TypeNumeric : public TypeRoot {
 public:
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         auto kind = type->getKind();
         return kind == TypeFamily::Integral || kind == TypeFamily::FloatingPoint;
     }
@@ -206,9 +206,9 @@ public:
     constexpr TypeIntegral(unsigned bits, bool isSigned) noexcept
     : TypeNumeric{ TypeFamily::Integral, bits }, m_signed{ isSigned } {}
 
-    [[nodiscard]] static const TypeIntegral* get(unsigned bits, bool isSigned);
+    [[nodiscard]] static const TypeIntegral* get(unsigned bits, bool isSigned) noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Integral;
     }
 
@@ -217,10 +217,10 @@ public:
     [[nodiscard]] const TypeIntegral* getSigned() const noexcept;
     [[nodiscard]] const TypeIntegral* getUnsigned() const noexcept;
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 
 private:
     const bool m_signed;
@@ -234,16 +234,16 @@ public:
     constexpr explicit TypeFloatingPoint(unsigned bits) noexcept
     : TypeNumeric{ TypeFamily::FloatingPoint, bits } {}
 
-    [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits);
+    [[nodiscard]] static const TypeFloatingPoint* get(unsigned bits) noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::FloatingPoint;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 /**
@@ -259,21 +259,21 @@ public:
 
     [[nodiscard]] static const TypeFunction* get(
         const TypeRoot* retType,
-        std::vector<const TypeRoot*>&& paramTypes,
-        bool variadic);
+        std::vector<const TypeRoot*> paramTypes,
+        bool variadic) noexcept;
 
-    constexpr static bool classof(const TypeRoot* type) {
+    constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Function;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
     [[nodiscard]] const TypeRoot* getReturn() const noexcept { return m_retType; }
     [[nodiscard]] const std::vector<const TypeRoot*>& getParams() const noexcept { return m_paramTypes; }
     [[nodiscard]] bool isVariadic() const noexcept { return m_variadic; }
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 
 private:
     const TypeRoot* m_retType;
@@ -289,16 +289,16 @@ class TypeZString final : public TypeRoot {
 public:
     constexpr TypeZString() noexcept : TypeRoot{ TypeFamily::ZString } {}
 
-    [[nodiscard]] static const TypeZString* get();
+    [[nodiscard]] static const TypeZString* get() noexcept;
 
     constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::ZString;
     }
 
-    [[nodiscard]] string asString() const noexcept final;
+    [[nodiscard]] string asString() const final;
 
 protected:
-    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const noexcept final;
+    [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 };
 
 } // namespace lbc

@@ -51,10 +51,10 @@ public:
     void validate() const noexcept;
 
     [[nodiscard]] CompilationTarget getCompilationTarget() const noexcept { return m_compilationTarget; }
-    void setCompilationTarget(CompilationTarget target) { m_compilationTarget = target; }
+    void setCompilationTarget(CompilationTarget target) noexcept { m_compilationTarget = target; }
 
     [[nodiscard]] OutputType getOutputType() const noexcept { return m_outputType; }
-    void setOutputType(OutputType outputType) {
+    void setOutputType(OutputType outputType) noexcept {
         m_outputType = outputType;
         if (m_compilationTarget == CompilationTarget::Executable) {
             setCompilationTarget(CompilationTarget::Assembly);
@@ -62,22 +62,22 @@ public:
     }
 
     [[nodiscard]] bool getDumpAst() const noexcept { return m_astDump; }
-    void setDumpAst(bool dump) { m_astDump = dump; }
+    void setDumpAst(bool dump) noexcept { m_astDump = dump; }
 
     [[nodiscard]] bool getDumpCode() const noexcept { return m_codeDump; }
-    void setDumpCode(bool dump) { m_codeDump = dump; }
+    void setDumpCode(bool dump) noexcept { m_codeDump = dump; }
 
     [[nodiscard]] OptimizationLevel getOptimizationLevel() const noexcept { return m_optimizationLevel; }
-    void setOptimizationLevel(OptimizationLevel level) { m_optimizationLevel = level; }
+    void setOptimizationLevel(OptimizationLevel level) noexcept { m_optimizationLevel = level; }
 
     [[nodiscard]] bool isDebugBuild() const noexcept { return m_isDebug; }
-    void setDebugBuild(bool debug) { m_isDebug = debug; }
+    void setDebugBuild(bool debug) noexcept { m_isDebug = debug; }
 
-    void setVerbose(bool verbose) { m_verbose = verbose; }
     [[nodiscard]] bool isVerbose() const noexcept { return m_verbose; }
+    void setVerbose(bool verbose) noexcept { m_verbose = verbose; }
 
-    void setImplicitMain(bool implicitMain) { m_implicitMain = implicitMain; }
     [[nodiscard]] bool getImplicitMain() const noexcept { return m_implicitMain; }
+    void setImplicitMain(bool implicitMain) noexcept { m_implicitMain = implicitMain; }
 
     void setMainFile(const fs::path& file) {
         if (file.extension() != getFileExt(FileType::Source)) {
@@ -95,23 +95,23 @@ public:
     void addInputFile(const fs::path& path);
     [[nodiscard]] const std::vector<fs::path>& getInputFiles(FileType type) const noexcept;
 
-    void setWorkingDir(const fs::path& path);
     [[nodiscard]] const fs::path& getWorkingDir() const noexcept { return m_workingDir; }
+    void setWorkingDir(const fs::path& path);
 
-    void setCompilerPath(const fs::path& path);
     [[nodiscard]] const fs::path& getCompilerPath() const noexcept { return m_compilerPath; }
     [[nodiscard]] fs::path getCompilerDir() const noexcept { return m_compilerPath.parent_path(); }
+    void setCompilerPath(const fs::path& path);
 
-    void setOutputFilePath(const fs::path& path);
     [[nodiscard]] const fs::path& getOutputPath() const noexcept { return m_outputFilePath; }
+    void setOutputFilePath(const fs::path& path);
 
-    [[nodiscard]] Toolchain& getToolchain() { return m_toolchain; }
+    [[nodiscard]] Toolchain& getToolchain() noexcept { return m_toolchain; }
 
-    void setTriple(const llvm::Triple& triple) { m_triple = triple; }
-    [[nodiscard]] llvm::Triple& getTriple() { return m_triple; }
+    [[nodiscard]] llvm::Triple& getTriple() noexcept { return m_triple; }
+    void setTriple(const llvm::Triple& triple) noexcept { m_triple = triple; }
 
-    [[nodiscard]] llvm::SourceMgr& getSourceMrg() { return m_sourceMgr; }
-    [[nodiscard]] llvm::LLVMContext& getLlvmContext() { return m_llvmContext; }
+    [[nodiscard]] llvm::SourceMgr& getSourceMrg() noexcept { return m_sourceMgr; }
+    [[nodiscard]] llvm::LLVMContext& getLlvmContext() noexcept { return m_llvmContext; }
 
     [[nodiscard]] bool isTargetLinkable() const noexcept {
         return m_compilationTarget == CompilationTarget::Executable;

@@ -12,24 +12,24 @@ class Symbol final {
 public:
     NO_COPY_AND_MOVE(Symbol)
 
-    explicit Symbol(StringRef name, const TypeRoot* type = nullptr)
+    explicit Symbol(StringRef name, const TypeRoot* type = nullptr) noexcept
     : m_name{ name }, m_type{ type }, m_alias{ "" } {}
 
     ~Symbol() noexcept = default;
 
     [[nodiscard]] const TypeRoot* type() const noexcept { return m_type; }
-    void setType(const TypeRoot* type) { m_type = type; }
+    void setType(const TypeRoot* type) noexcept { m_type = type; }
 
     [[nodiscard]] bool isExternal() const noexcept { return m_external; }
-    void setExternal(bool external) { m_external = external; }
+    void setExternal(bool external) noexcept { m_external = external; }
 
     [[nodiscard]] StringRef name() const noexcept { return m_name; }
 
     [[nodiscard]] llvm::Value* getLlvmValue() const noexcept { return m_llvmValue; }
-    void setLlvmValue(llvm::Value* value) { m_llvmValue = value; }
+    void setLlvmValue(llvm::Value* value) noexcept { m_llvmValue = value; }
 
     [[nodiscard]] StringRef alias() const noexcept { return m_alias; }
-    void setAlias(StringRef alias) { m_alias = alias; }
+    void setAlias(StringRef alias) noexcept { m_alias = alias; }
 
     [[nodiscard]] StringRef identifier() const noexcept {
         if (m_alias.empty()) {

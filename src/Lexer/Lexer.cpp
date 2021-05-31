@@ -15,16 +15,16 @@ namespace {
 using llvm::isAlpha;
 using llvm::isDigit;
 
-inline bool isIdentifierChar(char ch) {
+inline bool isIdentifierChar(char ch) noexcept {
     return isAlpha(ch) || isDigit(ch) || ch == '_';
 }
 
-inline llvm::SMRange makeRange(const char* start, const char* end) {
+inline llvm::SMRange makeRange(const char* start, const char* end) noexcept {
     return { llvm::SMLoc::getFromPointer(start), llvm::SMLoc::getFromPointer(end) };
 }
 } // namespace
 
-Lexer::Lexer(Context& context, unsigned fileID)
+Lexer::Lexer(Context& context, unsigned fileID) noexcept
 : m_context{ context },
   m_buffer{ m_context.getSourceMrg().getMemoryBuffer(fileID) },
   m_input{ m_buffer->getBufferStart() },
@@ -138,7 +138,7 @@ unique_ptr<Token> Lexer::next() {
     // clang-format on
 }
 
-void Lexer::skipUntilLineEnd() {
+void Lexer::skipUntilLineEnd() noexcept {
     // assume m_input[0] != \r || \n
     while (true) {
         switch (*++m_input) {
@@ -152,7 +152,7 @@ void Lexer::skipUntilLineEnd() {
     }
 }
 
-void Lexer::skipToNextLine() {
+void Lexer::skipToNextLine() noexcept {
     // assume m_input != \r || \n
     skipUntilLineEnd();
     switch (*m_input) {
@@ -168,7 +168,7 @@ void Lexer::skipToNextLine() {
     }
 }
 
-void Lexer::skipMultilineComment() {
+void Lexer::skipMultilineComment() noexcept {
     // assume m_input[0] == '/' && m_input[1] == '\''
     m_input++;
     int level = 1;
@@ -208,7 +208,7 @@ unique_ptr<Token> Lexer::endOfStatement() {
     return Token::create(TokenKind::EndOfStmt, makeRange(m_eolPos, m_input));
 }
 
-unique_ptr<Token> Lexer::invalid(const char* loc) const noexcept {
+unique_ptr<Token> Lexer::invalid(const char* loc) const {
     return Token::create(TokenKind::Invalid, makeRange(loc, m_input));
 }
 
@@ -253,7 +253,7 @@ unique_ptr<Token> Lexer::stringLiteral() {
         makeRange(start, m_input));
 }
 
-char Lexer::escape() {
+char Lexer::escape() noexcept {
     // assume m_input[0] == '\\'
     switch (*++m_input) {
     case 'a':
@@ -332,7 +332,6 @@ unique_ptr<Token> Lexer::numberLiteral() {
     }
     return Token::create(value, makeRange(start, m_input));
 }
-
 
 unique_ptr<Token> Lexer::identifier() {
     // assume m_input[0] == '_' || char

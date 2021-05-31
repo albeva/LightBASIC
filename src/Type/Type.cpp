@@ -39,7 +39,7 @@ const TypePointer anyPtrTy{ &anyTy }; // void*
 
 } // namespace
 
-const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) {
+const TypeRoot* TypeRoot::fromTokenKind(TokenKind kind) noexcept {
     #define CASE_TYPE(ID, ...) case TokenKind::ID: return &ID##Ty;
     switch (kind) {
     PRIMITIVE_TYPES(CASE_TYPE)
@@ -142,34 +142,34 @@ TypeComparison TypeRoot::compare(const TypeRoot* other) const noexcept {
 
 // Void
 
-const TypeVoid* TypeVoid::get() {
+const TypeVoid* TypeVoid::get() noexcept {
     return &voidTy;
 }
 
-llvm::Type* TypeVoid::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeVoid::genLlvmType(Context& context) const {
     return llvm::Type::getVoidTy(context.getLlvmContext());
 }
 
-string TypeVoid::asString() const noexcept {
+string TypeVoid::asString() const {
     return "VOID";
 }
 
 // Any
-const TypeAny* TypeAny::get() {
+const TypeAny* TypeAny::get() noexcept {
     return &anyTy;
 }
 
-llvm::Type* TypeAny::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeAny::genLlvmType(Context& context) const {
     return llvm::Type::getInt8Ty(context.getLlvmContext());
 }
 
-string TypeAny::asString() const noexcept {
+string TypeAny::asString() const {
     return "ANY";
 }
 
 // Pointer
 
-const TypePointer* TypePointer::get(const TypeRoot* base) {
+const TypePointer* TypePointer::get(const TypeRoot* base) noexcept {
     if (base == &anyTy) {
         return &anyPtrTy;
     }
@@ -183,31 +183,31 @@ const TypePointer* TypePointer::get(const TypeRoot* base) {
     return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
 }
 
-llvm::Type* TypePointer::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypePointer::genLlvmType(Context& context) const {
     return llvm::PointerType::get(m_base->getLlvmType(context), 0);
 }
 
-string TypePointer::asString() const noexcept {
+string TypePointer::asString() const {
     return m_base->asString() + " PTR";
 }
 
 // Bool
 
-const TypeBoolean* TypeBoolean::get() {
+const TypeBoolean* TypeBoolean::get() noexcept {
     return &BoolTy;
 }
 
-llvm::Type* TypeBoolean::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeBoolean::genLlvmType(Context& context) const {
     return llvm::Type::getInt1Ty(context.getLlvmContext());
 }
 
-string TypeBoolean::asString() const noexcept {
+string TypeBoolean::asString() const {
     return "BOOL";
 }
 
 // Integer
 
-const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) {
+const TypeIntegral* TypeIntegral::get(unsigned bits, bool isSigned) noexcept {
 #define USE_TYPE(ID, STR, KIND, BITS, IS_SIGNED, ...) \
     if (bits == BITS && isSigned == IS_SIGNED)        \
         return &ID##Ty;
@@ -225,11 +225,11 @@ const TypeIntegral* TypeIntegral::getUnsigned() const noexcept {
     return TypeIntegral::get(getBits(), false);
 }
 
-llvm::Type* TypeIntegral::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeIntegral::genLlvmType(Context& context) const {
     return llvm::IntegerType::get(context.getLlvmContext(), getBits());
 }
 
-string TypeIntegral::asString() const noexcept {
+string TypeIntegral::asString() const {
 #define GET_TYPE(ID, STR, KIND, BITS, SIGNED, ...) \
     if (getBits() == BITS && isSigned() == SIGNED) \
         return STR;
@@ -241,7 +241,7 @@ string TypeIntegral::asString() const noexcept {
 
 // Floating Point
 
-const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
+const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) noexcept {
     switch (bits) {
 #define USE_TYPE(ID, STR, KIND, BITS, ...) \
     case BITS:                             \
@@ -253,7 +253,7 @@ const TypeFloatingPoint* TypeFloatingPoint::get(unsigned bits) {
     }
 }
 
-llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const {
     switch (getBits()) {
     case 32: // NOLINT
         return llvm::Type::getFloatTy(context.getLlvmContext());
@@ -264,7 +264,7 @@ llvm::Type* TypeFloatingPoint::genLlvmType(Context& context) const noexcept {
     }
 }
 
-string TypeFloatingPoint::asString() const noexcept {
+string TypeFloatingPoint::asString() const {
 #define GET_TYPE(ID, STR, kind, BITS, ...) \
     if (getBits() == BITS)                 \
         return STR;
@@ -276,7 +276,7 @@ string TypeFloatingPoint::asString() const noexcept {
 
 // Function
 
-const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*>&& paramTypes, bool variadic) {
+const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*> paramTypes, bool variadic) noexcept {
     for (const auto& ptr : declaredFunc) {
         if (ptr->getReturn() == retType && ptr->getParams() == paramTypes && ptr->isVariadic() == variadic) {
             return ptr.get();
@@ -287,7 +287,7 @@ const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const
     return declaredFunc.emplace_back(std::move(ty)).get();
 }
 
-llvm::Type* TypeFunction::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeFunction::genLlvmType(Context& context) const {
     auto* retTy = m_retType->getLlvmType(context);
 
     std::vector<llvm::Type*> params;
@@ -299,7 +299,7 @@ llvm::Type* TypeFunction::genLlvmType(Context& context) const noexcept {
     return llvm::FunctionType::get(retTy, params, m_variadic);
 }
 
-string TypeFunction::asString() const noexcept {
+string TypeFunction::asString() const {
     string out = m_retType != nullptr ? "FUNCTION(" : "SUB(";
     for (size_t i = 0; i < m_paramTypes.size(); i++) {
         if (i > 0) {
@@ -315,14 +315,14 @@ string TypeFunction::asString() const noexcept {
 }
 
 // ZString
-const TypeZString* TypeZString::get() {
+const TypeZString* TypeZString::get() noexcept {
     return &ZStringTy;
 }
 
-llvm::Type* TypeZString::genLlvmType(Context& context) const noexcept {
+llvm::Type* TypeZString::genLlvmType(Context& context) const {
     return llvm::Type::getInt8PtrTy(context.getLlvmContext());
 }
 
-string TypeZString::asString() const noexcept {
+string TypeZString::asString() const {
     return "ZSTRING";
 }

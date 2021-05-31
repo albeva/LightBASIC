@@ -32,7 +32,7 @@ struct Source final {
     /**
      * Derive new generated Source with the same origin
      */
-    [[nodiscard]] unique_ptr<Source> derive(Context::FileType ty, fs::path p) const noexcept {
+    [[nodiscard]] unique_ptr<Source> derive(Context::FileType ty, fs::path p) const {
         return create(ty, std::move(p), true, &origin);
     }
 };

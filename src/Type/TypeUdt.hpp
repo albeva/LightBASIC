@@ -22,10 +22,10 @@ public:
         return type->getKind() == TypeFamily::UDT;
     }
 
-    string asString() const noexcept final;
+    string asString() const final;
 
 protected:
-    llvm::Type* genLlvmType(Context& context) const noexcept override;
+    llvm::Type* genLlvmType(Context& context) const override;
 
 private:
     Symbol& m_symbol;
