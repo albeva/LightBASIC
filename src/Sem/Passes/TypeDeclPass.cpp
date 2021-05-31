@@ -24,7 +24,7 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
 }
 
 void TypeDeclPass::declareMembers() {
-    int idx = 0;
+    unsigned int idx = 0;
     for (const auto& decl : m_ast.decls) {
         m_sem.visit(*decl);
         decl->symbol->setIndex(idx++);

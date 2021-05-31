@@ -1,14 +1,7 @@
 # Global
 .DS_Store
 
-# Xcode User settings
-xcuserdata/
-
-# Xcode Playgrounds
-timeline.xctimeline
-playground.xcworkspace
-
-# Visual Studio
+# Visual Studio (code)
 .vs/
 .vscode/
 
@@ -21,16 +14,11 @@ playground.xcworkspace
 *.json
 
 # 
-bin/*.*
-obj/
-*~
-*.d
-*.gch
 DerivedData/
 build/
 
 # intellij/clion
-.idea
+.idea/
 
 # cmake
 CMakeLists.txt.user
@@ -49,3 +37,4 @@ _deps
 # lbc
 /samples/[^\.]*
 /samples/*.dump.bas
+/bin/lbc
