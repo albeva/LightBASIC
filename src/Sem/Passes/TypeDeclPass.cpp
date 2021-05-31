@@ -12,7 +12,7 @@ using namespace Sem;
 TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
 : m_sem(sem),
   m_ast(ast),
-  m_symbol{sem.createNewSymbol(ast)} {
+  m_symbol{ sem.createNewSymbol(ast) } {
     auto* current = m_sem.getSymbolTable();
 
     ast.symbolTable = make_unique<SymbolTable>(nullptr);

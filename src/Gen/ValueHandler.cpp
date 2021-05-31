@@ -96,7 +96,7 @@ llvm::Value* ValueHandler::getAddress() noexcept {
     if (auto* ast = dyn_cast<AstIdentExpr*>()) {
         auto& builder = m_gen->getBuilder();
         auto* addr = ast->symbol->getLlvmValue();
-        while(ast->next) {
+        while (ast->next) {
             addr = builder.CreateStructGEP(
                 ast->symbol->type()->getLlvmType(m_gen->getContext()),
                 addr,

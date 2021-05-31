@@ -406,7 +406,7 @@ struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
         unique_ptr<AstIdentExpr> next_) noexcept
     : AstNode{ KIND, range_ },
       name{ name_ },
-      next{std::move(next_)} {};
+      next{ std::move(next_) } {};
 
     const StringRef name;
     Symbol* symbol = nullptr;
