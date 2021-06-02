@@ -70,14 +70,16 @@ llvm::Value* ValueHandler::getValue() noexcept {
 
         return m_gen->getBuilder().CreateLoad(
             symbol->getLlvmValue(),
-            symbol->name());
+            symbol->identifier());
     }
 
-    if (is<AstIdentExpr*>()) {
+    if (auto* ast = dyn_cast<AstIdentExpr*>()) {
         auto* addr = getAddress();
+        while (ast->next) { ast = ast->next.get(); }
+
         return m_gen->getBuilder().CreateLoad(
             addr,
-            addr->getName());
+            ast->symbol->identifier());
     }
 
     llvm_unreachable("Unknown ValueHandler type");
@@ -97,10 +99,12 @@ llvm::Value* ValueHandler::getAddress() noexcept {
         auto& builder = m_gen->getBuilder();
         auto* addr = ast->symbol->getLlvmValue();
         while (ast->next) {
+            auto* symbol = ast->next->symbol;
             addr = builder.CreateStructGEP(
                 ast->symbol->type()->getLlvmType(m_gen->getContext()),
                 addr,
-                ast->next->symbol->getIndex());
+                symbol->getIndex(),
+                symbol->identifier() + ".addr");
             ast = ast->next.get();
         }
         return addr;

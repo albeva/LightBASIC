@@ -15,19 +15,18 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
   m_symbol{ sem.createNewSymbol(ast) } {
     auto* current = m_sem.getSymbolTable();
 
-    ast.symbolTable = make_unique<SymbolTable>(nullptr);
+    ast.symbolTable = make_unique<SymbolTable>(current);
     m_sem.setSymbolTable(ast.symbolTable.get());
     declareMembers();
+    ast.symbolTable->setParent(nullptr);
     TypeUDT::get(*m_symbol, *ast.symbolTable);
 
     m_sem.setSymbolTable(current);
 }
 
 void TypeDeclPass::declareMembers() {
-    unsigned int idx = 0;
     for (const auto& decl : m_ast.decls) {
         m_sem.visit(*decl);
-        decl->symbol->setIndex(idx++);
         decl->symbol->setParent(m_symbol);
     }
 }

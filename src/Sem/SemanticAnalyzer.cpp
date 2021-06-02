@@ -49,9 +49,6 @@ void SemanticAnalyzer::visit(AstExprStmt& ast) {
 }
 
 void SemanticAnalyzer::visit(AstVarDecl& ast) {
-    auto* symbol = createNewSymbol(ast);
-    symbol->setExternal(false);
-
     // m_type expr?
     const TypeRoot* type = nullptr;
     if (ast.typeExpr) {
@@ -66,6 +63,10 @@ void SemanticAnalyzer::visit(AstVarDecl& ast) {
             type = ast.expr->type;
         }
     }
+
+    // The Symbol
+    auto* symbol = createNewSymbol(ast);
+    symbol->setExternal(false);
 
     // create function symbol
     symbol->setType(type);
@@ -259,7 +260,7 @@ void SemanticAnalyzer::visit(AstIdentExpr& ast) {
         RESTORE_ON_EXIT(m_table);
         m_table = &udt->getSymbolTable();
         visit(*ast.next);
-        type = ast.next->symbol->type();
+        type = ast.next->type;
     }
 
     ast.symbol = symbol;

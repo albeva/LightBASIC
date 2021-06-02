@@ -27,7 +27,7 @@ public:
     [[nodiscard]] SymbolTable& getSymbolTable() const noexcept { return m_symbolTable; }
 
 protected:
-    llvm::Type* genLlvmType(Context& context) const override;
+    llvm::Type* genLlvmType(Context& context) const final;
 
 private:
     Symbol& m_symbol;

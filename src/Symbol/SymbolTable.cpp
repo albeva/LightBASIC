@@ -6,7 +6,9 @@
 using namespace lbc;
 
 Symbol* SymbolTable::insert(StringRef name) {
-    return m_symbols.insert({ name, make_unique<Symbol>(name) }).first->second.get();
+    auto symbol = make_unique<Symbol>(name);
+    symbol->setIndex(m_symbols.size());
+    return m_symbols.insert({ name, std::move(symbol) }).first->second.get();
 }
 
 void SymbolTable::addReference(Symbol* symbol) {
@@ -39,4 +41,19 @@ Symbol* SymbolTable::find(StringRef id, bool recursive) const noexcept {
     }
 
     return nullptr;
+}
+
+std::vector<Symbol*> SymbolTable::getSymbols() const {
+    std::vector<Symbol*> symbols;
+    symbols.reserve(size());
+
+    std::transform(begin(), end(), std::back_inserter(symbols), [](const auto& item) {
+        return item.second.get();
+    });
+
+    std::sort(symbols.begin(), symbols.end(), [](auto lhs, auto rhs) {
+        return lhs->getIndex() < rhs->getIndex();
+    });
+
+    return symbols;
 }

@@ -152,10 +152,9 @@ void CodeGen::visit(AstStmtList& ast) {
 }
 
 void CodeGen::visit(AstAssignStmt& ast) {
-    auto* lvalue = visit(*ast.lhs).getAddress(); // getStoreValue(*ast.lhs);
+    auto* lvalue = visit(*ast.lhs).getAddress();
     auto* rvalue = visit(*ast.rhs).getValue();
     m_builder.CreateStore(rvalue, lvalue);
-    // lvalue.set(rvalue);
 }
 
 void CodeGen::visit(AstExprStmt& ast) {

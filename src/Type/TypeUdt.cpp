@@ -33,11 +33,11 @@ string TypeUDT::asString() const {
 }
 
 llvm::Type* TypeUDT::genLlvmType(Context& context) const {
-    llvm::LLVMContext& llvmContext = context.getLlvmContext();
     std::vector<llvm::Type*> elems;
-    for (const auto& symbol : m_symbolTable) {
-        auto* ty = symbol.second->type()->getLlvmType(context);
+    elems.reserve(m_symbolTable.size());
+    for (auto* symbol : m_symbolTable.getSymbols()) {
+        auto* ty = symbol->type()->getLlvmType(context);
         elems.emplace_back(ty);
     }
-    return llvm::StructType::create(llvmContext, elems, m_symbol.identifier());
+    return llvm::StructType::create(context.getLlvmContext(), elems, m_symbol.identifier());
 }
