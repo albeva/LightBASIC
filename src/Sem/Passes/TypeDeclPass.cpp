@@ -15,11 +15,16 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
   m_symbol{ sem.createNewSymbol(ast) } {
     auto* current = m_sem.getSymbolTable();
 
+    bool packed = false;
+    if (ast.attributes) {
+        packed = ast.attributes->exists("PACKED");
+    }
+
     ast.symbolTable = make_unique<SymbolTable>(current);
     m_sem.setSymbolTable(ast.symbolTable.get());
     declareMembers();
     ast.symbolTable->setParent(nullptr);
-    TypeUDT::get(*m_symbol, *ast.symbolTable);
+    TypeUDT::get(*m_symbol, *ast.symbolTable, packed);
 
     m_sem.setSymbolTable(current);
 }

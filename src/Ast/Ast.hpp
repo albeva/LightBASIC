@@ -255,6 +255,7 @@ struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::Attr
     : AstNode{ KIND, range_ },
       attribs{ std::move(attribs_) } {};
 
+    [[nodiscard]] bool exists(StringRef name) const noexcept;
     [[nodiscard]] std::optional<StringRef> getStringLiteral(StringRef key) const noexcept;
 
     std::vector<unique_ptr<AstAttribute>> attribs;

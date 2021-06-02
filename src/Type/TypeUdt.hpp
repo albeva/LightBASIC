@@ -12,10 +12,10 @@ class SymbolTable;
  * User defined type
  */
 class TypeUDT final : public TypeRoot {
-    TypeUDT(Symbol& symbol, SymbolTable& symbolTable);
+    TypeUDT(Symbol& symbol, SymbolTable& symbolTable, bool packed);
 
 public:
-    static const TypeUDT* get(Symbol& symbol, SymbolTable& symbolTable);
+    static const TypeUDT* get(Symbol& symbol, SymbolTable& symbolTable, bool packed);
 
     constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::UDT;
@@ -32,6 +32,7 @@ protected:
 private:
     Symbol& m_symbol;
     SymbolTable& m_symbolTable;
+    bool m_packed;
 };
 
 } // namespace lbc

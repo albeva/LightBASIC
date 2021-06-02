@@ -11,21 +11,22 @@ namespace {
 std::vector<unique_ptr<TypeUDT>> udts; // NOLINT
 } // namespace
 
-TypeUDT::TypeUDT(Symbol& symbol, SymbolTable& symbolTable)
+TypeUDT::TypeUDT(Symbol& symbol, SymbolTable& symbolTable, bool packed)
 : TypeRoot{ TypeFamily::UDT },
   m_symbol{ symbol },
-  m_symbolTable{ symbolTable } {
+  m_symbolTable{ symbolTable },
+  m_packed(packed) {
     symbol.setType(this);
 }
 
-const TypeUDT* TypeUDT::get(Symbol& symbol, SymbolTable& symbolTable) {
+const TypeUDT* TypeUDT::get(Symbol& symbol, SymbolTable& symbolTable, bool packed) {
     if (const auto* type = symbol.type()) {
         if (const auto* udt = dyn_cast<TypeUDT>(type)) {
             return udt;
         }
         fatalError("Symbol should hold UDT type pointer!");
     }
-    return udts.emplace_back(new TypeUDT(symbol, symbolTable)).get(); // NOLINT
+    return udts.emplace_back(new TypeUDT(symbol, symbolTable, packed)).get(); // NOLINT
 }
 
 string TypeUDT::asString() const {
@@ -39,5 +40,9 @@ llvm::Type* TypeUDT::genLlvmType(Context& context) const {
         auto* ty = symbol->type()->getLlvmType(context);
         elems.emplace_back(ty);
     }
-    return llvm::StructType::create(context.getLlvmContext(), elems, m_symbol.identifier());
+    return llvm::StructType::create(
+        context.getLlvmContext(),
+        elems,
+        m_symbol.identifier(),
+        m_packed);
 }
