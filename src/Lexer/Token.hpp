@@ -100,11 +100,25 @@ public:
 
     // comparisons
 
-    [[nodiscard]] bool operator==(TokenKind rhs) const noexcept {
-        return m_kind == rhs;
+    [[nodiscard]] bool is(TokenKind kind) const noexcept {
+        return m_kind == kind;
     }
+
+    [[nodiscard]] bool isOneOf(TokenKind kind1, TokenKind kind2) const noexcept {
+        return is(kind1) || is(kind2);
+    }
+
+    template<typename... Ts>
+    [[nodiscard]] bool isOneOf(TokenKind k1, TokenKind k2, Ts... ks) const noexcept {
+        return is(k1) || isOneOf(k2, ks...);
+    }
+
+    [[nodiscard]] bool operator==(TokenKind rhs) const noexcept {
+        return is(rhs);
+    }
+    
     [[nodiscard]] bool operator!=(TokenKind rhs) const noexcept {
-        return m_kind != rhs;
+        return !is(rhs);
     }
 
 private:

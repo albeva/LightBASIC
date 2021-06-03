@@ -117,7 +117,7 @@ void CmdLineParser::showHelp() {
     // -I <dir>         Add directory to include search path
     // -L <dir>         Add directory to library search path
     // -g               Generate source-level debug information
-    std::cout << R"HELP(LightBASIC compiler
+    llvm::outs() << R"HELP(LightBASIC compiler
 
 USAGE: lbc [options] <inputs>
 
@@ -142,16 +142,16 @@ OPTIONS:
 }
 
 void CmdLineParser::showVersion() {
-    std::cout << "LightBASIC version " << LBC_VERSION_STRING
-              << " (Based on LLVM " << LLVM_VERSION_STRING << ")\n"
-              << "(c) Albert Varaksin 2021"
-              << '\n';
+    llvm::outs() << "LightBASIC version " << LBC_VERSION_STRING
+                 << " (Based on LLVM " << LLVM_VERSION_STRING << ")\n"
+                 << "(c) Albert Varaksin 2021"
+                 << '\n';
     std::exit(EXIT_SUCCESS);
 }
 
 void CmdLineParser::showError(const string& message) {
-    std::cerr << message
-              << " Use --help for more info"
-              << '\n';
+    llvm::errs() << message
+                 << " Use --help for more info"
+                 << '\n';
     std::exit(EXIT_FAILURE);
 }

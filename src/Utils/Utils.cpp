@@ -8,16 +8,16 @@ void lbc::fatalError(const Twine& message, bool prefix) {
     TempFileCache::removeTemporaryFiles();
 
     if (prefix) {
-        std::cerr << "lbc: error: ";
+        llvm::errs() << "lbc: error: ";
     }
-    std::cerr << message.str() << std::endl;
+    llvm::errs() << message << '\n';
 
     std::exit(EXIT_FAILURE);
 }
 
 void lbc::warning(const Twine& message, bool prefix) {
     if (prefix) {
-        std::cout << "lbc: warning: ";
+        llvm::outs() << "lbc: warning: ";
     }
-    std::cout << message.str() << std::endl;
+    llvm::outs() << message << '\n';
 }

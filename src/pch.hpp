@@ -5,27 +5,24 @@
 
 // STL
 #include <algorithm>
-#include <any>
 #include <array>
 #include <cassert>
 #include <filesystem>
 #include <functional>
-#include <iostream>
-#include <iterator>
-#include <limits>
 #include <memory>
 #include <numeric>
 #include <optional>
-#include <unordered_map>
-#include <unordered_set>
+#include <string>
 #include <variant>
 #include <vector>
 
+namespace lbc {
 using std::make_unique;
 using std::string;
 using std::unique_ptr;
 namespace fs = std::filesystem;
 using namespace std::literals::string_literals;
+} // namespace lbc
 
 // LLVM
 #if defined(__clang__)
@@ -65,10 +62,12 @@ using namespace std::literals::string_literals;
 #    pragma warning(pop)
 #endif
 
+namespace lbc {
 using llvm::dyn_cast;
 using llvm::isa;
 using llvm::StringRef;
 using llvm::Twine;
+} // namespace lbc
 
 // APP
 #include "Utils/Utils.hpp"

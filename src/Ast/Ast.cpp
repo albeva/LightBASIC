@@ -38,7 +38,7 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const
 }
 
 bool AstAttributeList::exists(StringRef name) const noexcept {
-    auto iter = std::find_if(attribs.begin(), attribs.end(), [&](const auto& attr){
+    auto iter = std::find_if(attribs.begin(), attribs.end(), [&](const auto& attr) {
         return attr->identExpr->name == name;
     });
     return iter != attribs.end();

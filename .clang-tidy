@@ -17,7 +17,9 @@ Checks: '*,
         -llvmlibc-*,
         -llvm-header-guard,
         -llvm-include-order,
-        -misc-no-recursion'
+        -misc-no-recursion,
+        -misc-unused-using-decls,
+        -misc-unused-alias-decls'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 FormatStyle: none

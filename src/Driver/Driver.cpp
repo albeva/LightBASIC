@@ -304,7 +304,7 @@ void Driver::emitExecutable() {
 
 void Driver::compileSources() {
     if (m_context.isVerbose()) {
-        std::cout << "Compile:\n";
+        llvm::outs() << "Compile:\n";
     }
 
     const auto& sources = getSources(Context::FileType::Source);
@@ -319,14 +319,14 @@ void Driver::compileSources() {
     }
 
     if (m_context.isVerbose()) {
-        std::cout << '\n';
+        llvm::outs() << '\n';
     }
 }
 
 void Driver::compileSource(const Source* source, unsigned int ID) {
     const auto& path = source->path;
     if (m_context.isVerbose()) {
-        std::cout << path.string() << '\n';
+        llvm::outs() << path.string() << '\n';
     }
 
     bool isMain = m_context.isMainFile(path);

@@ -57,21 +57,21 @@ int ToolTask::execute() const noexcept {
     if (m_context.isVerbose()) {
         switch (m_kind) {
         case ToolKind::Optimizer:
-            std::cout << "Optimize:\n";
+            llvm::outs() << "Optimize:\n";
             break;
         case ToolKind::Assembler:
-            std::cout << "Assemble:\n";
+            llvm::outs() << "Assemble:\n";
             break;
         case ToolKind::Linker:
-            std::cout << "Link:\n";
+            llvm::outs() << "Link:\n";
             break;
         }
-        std::cout << program;
+        llvm::outs() << program;
         for (const auto& arg : m_args) {
-            std::cout << " " << arg;
+            llvm::outs() << " " << arg;
         }
-        std::cout << '\n'
-                  << '\n';
+        llvm::outs() << '\n'
+                     << '\n';
     }
 
     return llvm::sys::ExecuteAndWait(program, args);

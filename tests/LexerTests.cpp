@@ -12,12 +12,13 @@
 
 #include "Driver/Context.hpp"
 #include "Lexer/Lexer.hpp"
+#include "Lexer/Token.hpp"
 #include <gtest/gtest.h>
 namespace {
 
 class LexerTests : public testing::Test {
 protected:
-    lbc::Lexer& load(StringRef source) {
+    lbc::Lexer& load(llvm::StringRef source) {
         auto& srcMgr = m_context.getSourceMrg();
         auto buffer = llvm::MemoryBuffer::getMemBuffer(source);
         auto fileId = srcMgr.AddNewSourceBuffer(std::move(buffer), {});
@@ -25,7 +26,7 @@ protected:
         return *m_lexer;
     }
 
-    void expect(lbc::TokenKind kind, const string& lexeme = "", unsigned line = 0, unsigned col = 0, unsigned len = 0) {
+    void expect(lbc::TokenKind kind, const std::string& lexeme = "", unsigned line = 0, unsigned col = 0, unsigned len = 0) {
         auto token = m_lexer->next();
         EXPECT_EQ(token->kind(), kind);
 
@@ -49,7 +50,7 @@ protected:
     }
 
 private:
-    unique_ptr<lbc::Lexer> m_lexer;
+    std::unique_ptr<lbc::Lexer> m_lexer;
     lbc::Context m_context{};
 };
 

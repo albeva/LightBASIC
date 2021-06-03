@@ -4,7 +4,7 @@
 #pragma once
 // do not include pch.h!
 
-#define LOG_VAR(VAR) std::cout << #VAR << " = " << VAR << '\n';
+#define LOG_VAR(VAR) llvm::outs() << #VAR << " = " << VAR << '\n';
 
 #define NO_COPY_AND_MOVE(Class)         \
     Class(Class&&) = delete;            \
