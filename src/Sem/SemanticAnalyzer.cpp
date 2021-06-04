@@ -248,19 +248,21 @@ void SemanticAnalyzer::visit(AstIdentExpr& ast) {
         if (symbol == nullptr) {
             fatalError("Unknown identifier "_t + part.name);
         }
-
         if (symbol->type() == nullptr) {
             fatalError("Identifier "_t + part.name + " has unresolved type");
         }
-
         part.symbol = symbol;
 
         if (index + 1 < ast.parts.size()) {
-            const auto* udt = dyn_cast<TypeUDT>(symbol->type());
-            if (udt == nullptr) {
-                fatalError("Accessing a member on non UDT type");
+            const auto* type = symbol->type();
+            if (const auto* ptr = dyn_cast<TypePointer>(type)) {
+                type = ptr->getBase();
             }
-            table = &udt->getSymbolTable();
+            if (const auto* udt = dyn_cast<TypeUDT>(type)) {
+                table = &udt->getSymbolTable();
+                continue;
+            }
+            fatalError("Accessing a member on non UDT type");
         }
     }
     ast.type = ast.parts.back().symbol->type();

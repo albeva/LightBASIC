@@ -66,13 +66,25 @@ llvm::Value* ValueHandler::getAddress() noexcept {
     if (auto* ast = dyn_cast<AstIdentExpr*>()) {
         auto& parts = ast->parts;
         auto& builder = m_gen->getBuilder();
-        auto* addr = ast->parts[0].symbol->getLlvmValue();
+        auto* symbol = ast->parts[0].symbol;
+
+        auto* addr = symbol->getLlvmValue();
+        if (symbol->type()->isPointer()) {
+            addr = builder.CreateLoad(addr);
+        }
 
         llvm::SmallVector<llvm::Value*, 4> idxs;
         idxs.reserve(ast->parts.size());
         idxs.push_back(builder.getInt64(0));
         for (size_t index = 1; index < parts.size(); index++) {
-            idxs.push_back(builder.getInt32(parts[index].symbol->getIndex()));
+            symbol = parts[index].symbol;
+            idxs.push_back(builder.getInt32(symbol->getIndex()));
+
+            if (index + 1 < parts.size() && symbol->type()->isPointer()) {
+                addr = builder.CreateGEP(addr, idxs);
+                addr = builder.CreateLoad(addr);
+                idxs.pop_back_n(idxs.size() - 1);
+            }
         }
 
         return builder.CreateGEP(addr, idxs);
