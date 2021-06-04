@@ -275,7 +275,7 @@ void AstPrinter::visit(AstTypeExpr& ast) {
 void AstPrinter::visit(AstIdentExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        m_json.attribute("id", ast.name);
+        m_json.attribute("id", ast.fullyQualifiedName());
     });
 }
 

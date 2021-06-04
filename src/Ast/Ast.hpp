@@ -400,18 +400,28 @@ struct AstExpr : AstRoot {
     const TypeRoot* type = nullptr;
 };
 
+struct AstIdentExprPart final {
+    const StringRef name;
+    Symbol* symbol = nullptr;
+};
+
 struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
     AstIdentExpr(
         llvm::SMRange range_,
-        StringRef name_,
-        unique_ptr<AstIdentExpr> next_) noexcept
+        std::vector<AstIdentExprPart> parts_) noexcept
     : AstNode{ KIND, range_ },
-      name{ name_ },
-      next{ std::move(next_) } {};
+      parts{ std::move(parts_) } {};
 
-    const StringRef name;
-    Symbol* symbol = nullptr;
-    unique_ptr<AstIdentExpr> next;
+    [[nodiscard]] string fullyQualifiedName() const {
+        string id(parts[0].name);
+        llvm::raw_string_ostream str(id);
+        for (size_t index = 1; index < parts.size(); index++) {
+            str << '.' << parts[index].name;
+        }
+        return id;
+    }
+
+    std::vector<AstIdentExprPart> parts;
 };
 
 struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {

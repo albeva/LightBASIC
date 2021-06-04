@@ -28,9 +28,12 @@ namespace Gen {
         ValueHandler(CodeGen* gen, llvm::Value* value) noexcept;
         ValueHandler(CodeGen* gen, AstIdentExpr& ident) noexcept;
 
-        [[nodiscard]] llvm::Value* getValue() noexcept;
+        [[nodiscard]] llvm::Value* load() noexcept;
         [[nodiscard]] llvm::Value* getAddress() noexcept;
-        void set(llvm::Value* val) noexcept;
+        void store(llvm::Value* val) noexcept;
+        void store(ValueHandler& val) noexcept {
+            store(val.load());
+        }
 
         [[nodiscard]] constexpr inline bool isValid() const noexcept {
             return m_gen != nullptr;

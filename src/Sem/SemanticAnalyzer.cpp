@@ -240,37 +240,37 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
 }
 
 void SemanticAnalyzer::visit(AstIdentExpr& ast) {
-    const auto& name = ast.name;
-    auto* symbol = m_table->find(name, true);
+    auto* table = m_table;
+    for (size_t index = 0; index < ast.parts.size(); index++) {
+        auto& part = ast.parts[index];
 
-    if (symbol == nullptr) {
-        fatalError("Unknown identifier "_t + name);
-    }
-
-    if (symbol->type() == nullptr) {
-        fatalError("Identifier "_t + name + " has unresolved type");
-    }
-
-    const auto* type = symbol->type();
-    if (ast.next) {
-        const auto* udt = dyn_cast<TypeUDT>(symbol->type());
-        if (udt == nullptr) {
-            fatalError("Accessing a member on non UDT type");
+        auto* symbol = table->find(part.name);
+        if (symbol == nullptr) {
+            fatalError("Unknown identifier "_t + part.name);
         }
-        RESTORE_ON_EXIT(m_table);
-        m_table = &udt->getSymbolTable();
-        visit(*ast.next);
-        type = ast.next->type;
-    }
 
-    ast.symbol = symbol;
-    ast.type = type;
+        if (symbol->type() == nullptr) {
+            fatalError("Identifier "_t + part.name + " has unresolved type");
+        }
+
+        part.symbol = symbol;
+
+        if (index + 1 < ast.parts.size()) {
+            const auto* udt = dyn_cast<TypeUDT>(symbol->type());
+            if (udt == nullptr) {
+                fatalError("Accessing a member on non UDT type");
+            }
+            table = &udt->getSymbolTable();
+        }
+    }
+    ast.type = ast.parts.back().symbol->type();
 }
 
 void SemanticAnalyzer::visit(AstCallExpr& ast) {
     visit(*ast.identExpr);
 
-    auto* symbol = ast.identExpr->symbol;
+    // TODO: Support nested names
+    auto* symbol = ast.identExpr->parts.front().symbol;
 
     const auto* type = dyn_cast<TypeFunction>(symbol->type());
     if (type == nullptr) {

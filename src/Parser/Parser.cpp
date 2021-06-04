@@ -1016,17 +1016,20 @@ unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) 
  */
 unique_ptr<AstIdentExpr> Parser::identifier() {
     auto start = m_token->range().Start;
-    auto id = expect(TokenKind::Identifier);
-    unique_ptr<AstIdentExpr> next;
+    std::vector<AstIdentExprPart> parts;
 
-    if (accept(TokenKind::Period)) {
-        next = identifier();
+    while (auto tkn = expect(TokenKind::Identifier)) {
+        auto id = std::get<StringRef>(tkn->getValue());
+        parts.emplace_back(AstIdentExprPart{ id, nullptr });
+
+        if (!accept(TokenKind::Period)) {
+            break;
+        }
     }
 
     return AstIdentExpr::create(
         llvm::SMRange{ start, m_endLoc },
-        std::get<StringRef>(id->getValue()),
-        std::move(next));
+        std::move(parts));
 }
 
 /**

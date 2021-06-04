@@ -16,9 +16,10 @@ void TypePass::visit(AstTypeExpr& ast) {
     const TypeRoot* type = nullptr;
     if (ast.tokenKind == TokenKind::Identifier) {
         auto* table = m_sem.getSymbolTable();
-        auto* sym = table->find(ast.ident->name);
+        // TODO: Support nested names
+        auto* sym = table->find(ast.ident->fullyQualifiedName());
         if (sym == nullptr) {
-            fatalError("Undefined type "_t + ast.ident->name);
+            fatalError("Undefined type "_t + ast.ident->fullyQualifiedName());
         }
         if (const auto* udt = dyn_cast<TypeUDT>(sym->type())) {
             type = udt;

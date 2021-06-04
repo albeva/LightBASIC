@@ -333,7 +333,7 @@ void CodePrinter::visit(AstControlFlowBranch& ast) {
 // Expressions
 
 void CodePrinter::visit(AstIdentExpr& ast) {
-    m_os << ast.name;
+    m_os << ast.fullyQualifiedName();
 }
 
 void CodePrinter::visit(AstCallExpr& ast) {

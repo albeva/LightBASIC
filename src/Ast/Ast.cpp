@@ -22,7 +22,7 @@ StringRef AstRoot::getClassName() const noexcept {
 
 std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const noexcept {
     for (const auto& attr : attribs) {
-        if (attr->identExpr->name == key) {
+        if (attr->identExpr->fullyQualifiedName() == key) {
             if (attr->argExprs.size() != 1) {
                 fatalError("Attribute "_t + key + " must have 1 value", false);
             }
@@ -39,7 +39,7 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const
 
 bool AstAttributeList::exists(StringRef name) const noexcept {
     auto iter = std::find_if(attribs.begin(), attribs.end(), [&](const auto& attr) {
-        return attr->identExpr->name == name;
+        return attr->identExpr->fullyQualifiedName() == name;
     });
     return iter != attribs.end();
 }
