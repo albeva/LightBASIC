@@ -74,12 +74,18 @@ llvm::Value* ValueHandler::getValue() noexcept {
     }
 
     if (auto* ast = dyn_cast<AstIdentExpr*>()) {
-        auto* addr = getAddress();
-        while (ast->next) { ast = ast->next.get(); }
+        auto* addr = ast->symbol->getLlvmValue();
+        addr = m_gen->getBuilder().CreateLoad(addr);
+        if (!ast->next) {
+            return addr;
+        }
 
-        return m_gen->getBuilder().CreateLoad(
-            addr,
-            ast->symbol->identifier());
+        std::vector<unsigned int> idxs;
+        while (ast->next) {
+            idxs.push_back(ast->next->symbol->getIndex());
+            ast = ast->next.get();
+        }
+        return m_gen->getBuilder().CreateExtractValue(addr, idxs);
     }
 
     llvm_unreachable("Unknown ValueHandler type");

@@ -116,7 +116,7 @@ public:
     [[nodiscard]] bool operator==(TokenKind rhs) const noexcept {
         return is(rhs);
     }
-    
+
     [[nodiscard]] bool operator!=(TokenKind rhs) const noexcept {
         return !is(rhs);
     }

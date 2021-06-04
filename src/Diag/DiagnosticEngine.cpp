@@ -7,5 +7,4 @@ using namespace lbc;
 
 DiagnosticEngine::DiagnosticEngine(Context& context) noexcept
 : m_context{ context },
-  m_sourceMgr{ context.getSourceMrg() }
-{}
+  m_sourceMgr{ context.getSourceMrg() } {}
