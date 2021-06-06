@@ -4,7 +4,7 @@
 #pragma once
 #include "Ast/AstVisitor.h"
 #include "Ast/ControlFlowStack.hpp"
-#include "Ast/ValueCategory.hpp"
+#include "Ast/ValueFlags.hpp"
 #include "Passes/ConstantFoldingPass.hpp"
 #include "Passes/TypePass.hpp"
 

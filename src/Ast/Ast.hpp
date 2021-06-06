@@ -6,7 +6,7 @@
 #include "ControlFlowStack.hpp"
 #include "Lexer/Token.hpp"
 #include "Symbol/SymbolTable.hpp"
-#include "ValueCategory.hpp"
+#include "ValueFlags.hpp"
 
 namespace lbc {
 class TypeRoot;
@@ -388,7 +388,7 @@ struct AstExpr : AstRoot {
     }
 
     const TypeRoot* type = nullptr;
-    ValueCategory category{ ValueCategory::None };
+    ValueFlags flags{};
 };
 
 struct AstAssignExpr final : AstNode<AstAssignExpr, AstExpr, AstKind::AssignExpr> {
