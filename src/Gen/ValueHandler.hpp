@@ -45,7 +45,7 @@ namespace Gen {
         ValueHandler(CodeGen* gen, value_handler_detail::ValuePtr ptr) noexcept;
 
         using IndexArray = llvm::SmallVectorImpl<llvm::Value*>;
-        [[nodiscard]] llvm::Value* getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool isRhs) noexcept;
+        [[nodiscard]] llvm::Value* getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool terminal) noexcept;
 
         CodeGen* m_gen = nullptr;
     };

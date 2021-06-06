@@ -56,7 +56,7 @@ llvm::Value* ValueHandler::getAddress() noexcept {
         return PointerUnion::get<ValuePtr>().getPointer();
     }
 
-    if (auto* symbol = this->dyn_cast<Symbol*>()) {
+    if (auto* symbol = dyn_cast<Symbol*>()) {
         return symbol->getLlvmValue();
     }
 
@@ -78,12 +78,12 @@ llvm::Value* ValueHandler::getAddress() noexcept {
     llvm_unreachable("Unknown ValueHandler type");
 }
 
-llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool isRhs) noexcept {
+llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool terminal) noexcept {
     // end of the member access chain
-    if (auto* symbol = this->dyn_cast<Symbol*>()) {
+    if (auto* symbol = dyn_cast<Symbol*>()) {
         auto& builder = m_gen->getBuilder();
         idxs.push_back(builder.getInt32(symbol->getIndex()));
-        if (!isRhs && symbol->type()->isPointer()) {
+        if (terminal && symbol->type()->isPointer()) {
             base = builder.CreateGEP(base, idxs);
             base = builder.CreateLoad(base);
             idxs.pop_back_n(idxs.size() - 1);
@@ -93,8 +93,8 @@ llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& id
 
     // middle of the chain
     if (auto* member = dyn_cast<AstMemberAccess*>()) {
-        auto* lhs = m_gen->visit(*member->lhs).getAggregateAddress(base, idxs, false);
-        return m_gen->visit(*member->rhs).getAggregateAddress(lhs, idxs, true);
+        base = m_gen->visit(*member->lhs).getAggregateAddress(base, idxs, false);
+        return m_gen->visit(*member->rhs).getAggregateAddress(base, idxs, true);
     }
 
     llvm_unreachable("Unknown aggregate member access type");
