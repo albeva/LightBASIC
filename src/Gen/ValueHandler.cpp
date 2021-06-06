@@ -49,7 +49,7 @@ ValueHandler::ValueHandler(CodeGen* gen, AstIdentExpr& ast) noexcept
 : PointerUnion{ ast.symbol }, m_gen{ gen } {}
 
 ValueHandler::ValueHandler(CodeGen* gen, AstMemberAccess& ast) noexcept
-: PointerUnion{&ast}, m_gen{ gen } {}
+: PointerUnion{ &ast }, m_gen{ gen } {}
 
 llvm::Value* ValueHandler::getAddress() noexcept {
     if (is<ValuePtr>()) {
@@ -117,4 +117,3 @@ void ValueHandler::store(llvm::Value* val) noexcept {
     auto* addr = getAddress();
     m_gen->getBuilder().CreateStore(val, addr);
 }
-

@@ -384,8 +384,17 @@ void SemanticAnalyzer::visit(AstAddressOf& ast) {
 
 void SemanticAnalyzer::visit(AstMemberAccess& ast) {
     visit(*ast.lhs);
+    const auto* type = ast.lhs->type;
 
-    const auto* udt = dyn_cast<TypeUDT>(ast.lhs->type);
+    const TypeUDT* udt = nullptr;
+    if (type->isUDT()) {
+        udt = static_cast<const TypeUDT*>(type);
+    } else if (const auto* ptr = dyn_cast<TypePointer>(type)) {
+        if (ptr->getBase()->isUDT()) {
+            udt = static_cast<const TypeUDT*>(ptr->getBase());
+        }
+    }
+
     if (udt == nullptr) {
         fatalError("Accessing member of non UDT type");
     }

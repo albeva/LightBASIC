@@ -4,9 +4,9 @@
 #pragma once
 #include "Ast/AstVisitor.h"
 #include "Ast/ControlFlowStack.hpp"
+#include "Ast/ValueCategory.hpp"
 #include "Passes/ConstantFoldingPass.hpp"
 #include "Passes/TypePass.hpp"
-#include "Ast/ValueCategory.hpp"
 
 namespace lbc {
 class Token;
