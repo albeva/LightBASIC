@@ -6,6 +6,7 @@
 #include "ControlFlowStack.hpp"
 #include "Lexer/Token.hpp"
 #include "Symbol/SymbolTable.hpp"
+#include "ValueCategory.hpp"
 
 namespace lbc {
 class TypeRoot;
@@ -103,18 +104,6 @@ struct AstExprStmt final : AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
       expr{ std::move(e) } {};
 
     unique_ptr<AstExpr> expr;
-};
-
-struct AstAssignStmt final : AstNode<AstAssignStmt, AstStmt, AstKind::AssignStmt> {
-    AstAssignStmt(
-        llvm::SMRange range_,
-        unique_ptr<AstExpr> lhs_,
-        unique_ptr<AstExpr> rhs_) noexcept
-    : AstNode{ KIND, range_ },
-      lhs{ std::move(lhs_) },
-      rhs{ std::move(rhs_) } {};
-
-    unique_ptr<AstExpr> lhs, rhs;
 };
 
 struct AstFuncStmt final : AstNode<AstFuncStmt, AstStmt, AstKind::FuncStmt> {
@@ -382,6 +371,7 @@ struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
       tokenKind{ tokenKind_ },
       dereference{ deref } {};
 
+    // TODO use AstExpr?
     unique_ptr<AstIdentExpr> ident;
     const TokenKind tokenKind;
     const int dereference;
@@ -398,43 +388,43 @@ struct AstExpr : AstRoot {
     }
 
     const TypeRoot* type = nullptr;
+    ValueCategory category{ ValueCategory::None };
 };
 
-struct AstIdentExprPart final {
-    const StringRef name;
-    Symbol* symbol = nullptr;
+struct AstAssignExpr final : AstNode<AstAssignExpr, AstExpr, AstKind::AssignExpr> {
+    AstAssignExpr(
+        llvm::SMRange range_,
+        unique_ptr<AstExpr> lhs_,
+        unique_ptr<AstExpr> rhs_) noexcept
+    : AstNode{ KIND, range_ },
+      lhs{ std::move(lhs_) },
+      rhs{ std::move(rhs_) } {};
+
+    unique_ptr<AstExpr> lhs, rhs;
 };
 
 struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
     AstIdentExpr(
         llvm::SMRange range_,
-        std::vector<AstIdentExprPart> parts_) noexcept
+        StringRef name_) noexcept
     : AstNode{ KIND, range_ },
-      parts{ std::move(parts_) } {};
+      name{ name_ } {};
 
-    [[nodiscard]] string fullyQualifiedName() const {
-        string id(parts[0].name);
-        llvm::raw_string_ostream str(id);
-        for (size_t index = 1; index < parts.size(); index++) {
-            str << '.' << parts[index].name;
-        }
-        return id;
-    }
-
-    std::vector<AstIdentExprPart> parts;
+    StringRef name;
+    Symbol* symbol;
 };
 
 struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {
     AstCallExpr(
         llvm::SMRange range_,
-        unique_ptr<AstIdentExpr> ident,
-        std::vector<unique_ptr<AstExpr>> args) noexcept
+        unique_ptr<AstExpr> callable_,
+        std::vector<unique_ptr<AstExpr>> args_) noexcept
     : AstNode{ KIND, range_ },
-      identExpr{ std::move(ident) },
-      argExprs{ std::move(args) } {};
+      callable{ std::move(callable_) },
+      args{ std::move(args_) } {};
 
-    unique_ptr<AstIdentExpr> identExpr;
-    std::vector<unique_ptr<AstExpr>> argExprs;
+    unique_ptr<AstExpr> callable;
+    std::vector<unique_ptr<AstExpr>> args;
 };
 
 struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralExpr> {
@@ -445,12 +435,6 @@ struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralE
         Value value_) noexcept
     : AstNode{ KIND, range_ },
       value{ value_ } {};
-
-    /**
-     * Return true when type is set, and contains signed integer or floatingpoint
-     * value which is less than 0
-     */
-    [[nodiscard]] bool isNegative() const noexcept;
 
     const Value value;
 };
@@ -486,6 +470,19 @@ struct AstAddressOf final : AstNode<AstAddressOf, AstExpr, AstKind::AddressOf> {
       expr{ std::move(expr_) } {};
 
     unique_ptr<AstExpr> expr;
+};
+
+struct AstMemberAccess final : AstNode<AstMemberAccess, AstExpr, AstKind::MemberAccess> {
+    AstMemberAccess(
+        llvm::SMRange range_,
+        unique_ptr<AstExpr> lhs_,
+        unique_ptr<AstExpr> rhs_) noexcept
+    : AstNode{ KIND, range_ },
+      lhs{ std::move(lhs_) },
+      rhs{ std::move(rhs_) } {};
+
+    unique_ptr<AstExpr> lhs;
+    unique_ptr<AstExpr> rhs;
 };
 
 struct AstBinaryExpr final : AstNode<AstBinaryExpr, AstExpr, AstKind::BinaryExpr> {
@@ -527,9 +524,7 @@ struct AstIfExpr final : AstNode<AstIfExpr, AstExpr, AstKind::IfExpr> {
         unique_ptr<AstExpr> trueExpr_,
         unique_ptr<AstExpr> falseExpr_) noexcept
     : AstNode{ KIND, range_ },
-      expr{ std::move(expr_) },
-      trueExpr{ std::move(trueExpr_) },
-      falseExpr{ std::move(falseExpr_) } {};
+      expr{ std::move(expr_) }, trueExpr{ std::move(trueExpr_) }, falseExpr{ std::move(falseExpr_) } {};
 
     unique_ptr<AstExpr> expr;
     unique_ptr<AstExpr> trueExpr;

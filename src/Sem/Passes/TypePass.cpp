@@ -17,9 +17,9 @@ void TypePass::visit(AstTypeExpr& ast) {
     if (ast.tokenKind == TokenKind::Identifier) {
         auto* table = m_sem.getSymbolTable();
         // TODO: Support nested names
-        auto* sym = table->find(ast.ident->fullyQualifiedName());
+        auto* sym = table->find(ast.ident->name);
         if (sym == nullptr) {
-            fatalError("Undefined type "_t + ast.ident->fullyQualifiedName());
+            fatalError("Undefined type "_t + ast.ident->name);
         }
         if (const auto* udt = dyn_cast<TypeUDT>(sym->type())) {
             type = udt;

@@ -75,14 +75,13 @@ unique_ptr<AstStmtList> Parser::stmtList() {
 /**
  * Statement
  *   = Declaration
- *   | Assignment
- *   | CallStmt
  *   | IfStmt
  *   | ForStmt
  *   | DoLoopStmt
  *   | RETURN
  *   | EXIT
  *   | CONTINUE
+ *   | Expression
  *   .
  */
 unique_ptr<AstStmt> Parser::statement() {
@@ -95,13 +94,6 @@ unique_ptr<AstStmt> Parser::statement() {
     }
 
     switch (m_token->kind()) {
-    case TokenKind::Identifier: {
-        auto ident = identifier();
-        if (match(TokenKind::Assign)) {
-            return assignment(std::move(ident));
-        }
-        return callStmt(std::move(ident));
-    }
     case TokenKind::Return:
         return kwReturn();
     case TokenKind::If:
@@ -115,8 +107,11 @@ unique_ptr<AstStmt> Parser::statement() {
     case TokenKind::Exit:
         return kwExit();
     default:
-        error("Expected statement");
+        break;
     }
+
+    auto expr = expression(ExprFlags::UseAssign | ExprFlags::CallWithoutParens);
+    return AstExprStmt::create(expr->range, std::move(expr));
 }
 
 /**
@@ -435,50 +430,8 @@ unique_ptr<AstDecl> Parser::typeMember(unique_ptr<AstAttributeList> attribs) {
 }
 
 //----------------------------------------
-// Assignment
-//----------------------------------------
-
-/**
- * Assignment
- *   = identExpr '=' expression .
- */
-unique_ptr<AstAssignStmt> Parser::assignment(unique_ptr<AstIdentExpr> ident) {
-    auto start = ident->range.Start;
-    expect(TokenKind::Assign);
-    auto rhs = expression();
-
-    return AstAssignStmt::create(
-        llvm::SMRange{ start, m_endLoc },
-        std::move(ident),
-        std::move(rhs));
-}
-
-//----------------------------------------
 // Call
 //----------------------------------------
-
-/**
- * CallStmt = id
- *          ( '(' ArgumentList ')'
- *          | ArgumentList
- *          )
- *          .
- */
-unique_ptr<AstExprStmt> Parser::callStmt(unique_ptr<AstIdentExpr> ident) {
-    auto start = ident->range.Start;
-    bool parens = accept(TokenKind::ParenOpen) != nullptr;
-    auto args = expressionList();
-    if (parens) {
-        expect(TokenKind::ParenClose);
-    }
-
-    auto call = AstCallExpr::create(
-        llvm::SMRange{ start, m_endLoc },
-        std::move(ident),
-        std::move(args));
-
-    return AstExprStmt::create(call->range, std::move(call));
-}
 
 /**
  *  FUNCTION = funcSignature <EoS>
@@ -589,7 +542,7 @@ AstIfStmtBlock Parser::ifBlock() {
         expect(TokenKind::Comma);
     }
 
-    auto expr = expression(ExprFlags::Default | ExprFlags::CommaAsAnd);
+    auto expr = expression(ExprFlags::CommaAsAnd);
     expect(TokenKind::Then);
     return thenBlock(std::move(decls), std::move(expr));
 }
@@ -728,19 +681,19 @@ AstIfStmtBlock Parser::ifBlock() {
         // [ Condition ]
         if (accept(TokenKind::Until)) {
             condition = AstDoLoopStmt::Condition::PostUntil;
-            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+            expr = expression(ExprFlags::CommaAsAnd);
         } else if (accept(TokenKind::While)) {
             condition = AstDoLoopStmt::Condition::PostWhile;
-            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+            expr = expression(ExprFlags::CommaAsAnd);
         }
     } else {
         // [ Condition ]
         if (accept(TokenKind::Until)) {
             condition = AstDoLoopStmt::Condition::PreUntil;
-            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+            expr = expression(ExprFlags::CommaAsAnd);
         } else if (accept(TokenKind::While)) {
             condition = AstDoLoopStmt::Condition::PreWhile;
-            expr = expression(ExprFlags::CommaAsAnd | ExprFlags::AssignAsEqual);
+            expr = expression(ExprFlags::CommaAsAnd);
         }
 
         // EoS StmtList "LOOP"
@@ -864,7 +817,8 @@ unique_ptr<AstTypeExpr> Parser::typeExpr() {
 //----------------------------------------
 
 /**
- * expression = factor { <Binary Op> expression } .
+ * expression = factor { <Binary Op> expression }
+ *            . [ ArgumentList ]
  */
 unique_ptr<AstExpr> Parser::expression(ExprFlags flags) {
     RESTORE_ON_EXIT(m_exprFlags);
@@ -872,14 +826,26 @@ unique_ptr<AstExpr> Parser::expression(ExprFlags flags) {
 
     auto expr = factor();
 
-    if ((flags & ExprFlags::AssignAsEqual) != 0) {
+    if ((flags & ExprFlags::UseAssign) == 0) {
         replace(TokenKind::Assign, TokenKind::Equal);
     }
     if ((flags & ExprFlags::CommaAsAnd) != 0) {
         replace(TokenKind::Comma, TokenKind::CommaAnd);
     }
     if (m_token->isOperator()) {
-        return expression(std::move(expr), 1);
+        expr = expression(std::move(expr), 1);
+    }
+
+    if ((m_exprFlags & ExprFlags::CallWithoutParens) != 0 && !match(TokenKind::EndOfStmt)) {
+        if (m_token->is(TokenKind::Identifier) || m_token->isLiteral() || m_token->isUnary()) {
+            auto start = expr->range.Start;
+            auto args = expressionList();
+
+            return AstCallExpr::create(
+                llvm::SMRange{ start, m_endLoc },
+                std::move(expr),
+                std::move(args));
+        }
     }
 
     return expr;
@@ -930,6 +896,7 @@ unique_ptr<AstExpr> Parser::primary() {
         return literal();
     }
 
+    // TODO callExpr should be resolved in the expression
     if (match(TokenKind::Identifier)) {
         if (m_next && *m_next == TokenKind::ParenOpen) {
             return callExpr();
@@ -954,7 +921,7 @@ unique_ptr<AstExpr> Parser::primary() {
         auto prec = m_token->getPrecedence();
         auto kind = move()->kind();
 
-        if ((m_exprFlags & ExprFlags::AssignAsEqual) != 0) {
+        if ((m_exprFlags & ExprFlags::UseAssign) == 0) {
             replace(TokenKind::Assign, TokenKind::Equal);
         }
         auto expr = expression(factor(), prec);
@@ -977,8 +944,16 @@ unique_ptr<AstExpr> Parser::unary(llvm::SMRange range, TokenKind op, unique_ptr<
 }
 
 unique_ptr<AstExpr> Parser::binary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> lhs, unique_ptr<AstExpr> rhs) {
-    auto kind = op == TokenKind::CommaAnd ? TokenKind::LogicalAnd : op;
-    return AstBinaryExpr::create(range, kind, std::move(lhs), std::move(rhs));
+    switch (op) {
+    case TokenKind::CommaAnd:
+        return AstBinaryExpr::create(range, TokenKind::LogicalAnd, std::move(lhs), std::move(rhs));
+    case TokenKind::Assign:
+        return AstAssignExpr::create(range, std::move(lhs), std::move(rhs));
+    case TokenKind::MemberAccess:
+        return AstMemberAccess::create(range, std::move(lhs), std::move(rhs));
+    default:
+        return AstBinaryExpr::create(range, op, std::move(lhs), std::move(rhs));
+    }
 }
 
 /**
@@ -992,7 +967,7 @@ unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) 
         move();
 
         auto rhs = factor();
-        if ((m_exprFlags & ExprFlags::AssignAsEqual) != 0) {
+        if ((m_exprFlags & ExprFlags::UseAssign) == 0) {
             replace(TokenKind::Assign, TokenKind::Equal);
         }
         if ((m_exprFlags & ExprFlags::CommaAsAnd) != 0) {
@@ -1016,20 +991,10 @@ unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) 
  */
 unique_ptr<AstIdentExpr> Parser::identifier() {
     auto start = m_token->range().Start;
-    std::vector<AstIdentExprPart> parts;
-
-    while (auto tkn = expect(TokenKind::Identifier)) {
-        auto id = std::get<StringRef>(tkn->getValue());
-        parts.emplace_back(AstIdentExprPart{ id, nullptr });
-
-        if (!accept(TokenKind::Period)) {
-            break;
-        }
-    }
-
+    auto name = std::get<StringRef>(expect(TokenKind::Identifier)->getValue());
     return AstIdentExpr::create(
         llvm::SMRange{ start, m_endLoc },
-        std::move(parts));
+        name);
 }
 
 /**
@@ -1056,7 +1021,7 @@ unique_ptr<AstIfExpr> Parser::ifExpr() {
     auto start = m_token->range().Start;
 
     expect(TokenKind::If);
-    auto expr = expression(ExprFlags::Default | ExprFlags::CommaAsAnd);
+    auto expr = expression(ExprFlags::CommaAsAnd);
     expect(TokenKind::Then);
     auto trueExpr = expression();
     expect(TokenKind::Else);

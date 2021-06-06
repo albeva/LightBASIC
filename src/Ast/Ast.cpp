@@ -22,7 +22,7 @@ StringRef AstRoot::getClassName() const noexcept {
 
 std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const noexcept {
     for (const auto& attr : attribs) {
-        if (attr->identExpr->fullyQualifiedName() == key) {
+        if (attr->identExpr->name == key) {
             if (attr->argExprs.size() != 1) {
                 fatalError("Attribute "_t + key + " must have 1 value", false);
             }
@@ -39,26 +39,7 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const
 
 bool AstAttributeList::exists(StringRef name) const noexcept {
     auto iter = std::find_if(attribs.begin(), attribs.end(), [&](const auto& attr) {
-        return attr->identExpr->fullyQualifiedName() == name;
+        return attr->identExpr->name == name;
     });
     return iter != attribs.end();
-}
-
-bool AstLiteralExpr::isNegative() const noexcept {
-    if (type == nullptr) {
-        return false;
-    }
-
-    if (const auto* integral = dyn_cast<TypeIntegral>(type)) {
-        if (!integral->isSigned()) {
-            return false;
-        }
-        return static_cast<int64_t>(std::get<uint64_t>(value)) < 0;
-    }
-
-    if (isa<TypeFloatingPoint>(type)) {
-        return std::get<double>(value) < 0.0;
-    }
-
-    return false;
 }

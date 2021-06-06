@@ -6,6 +6,7 @@
 #include "Ast/ControlFlowStack.hpp"
 #include "Passes/ConstantFoldingPass.hpp"
 #include "Passes/TypePass.hpp"
+#include "Ast/ValueCategory.hpp"
 
 namespace lbc {
 class Token;

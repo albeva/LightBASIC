@@ -16,7 +16,8 @@ enum class OperatorType {
     Arithmetic,
     Logical,
     Comparison,
-    Memory
+    Memory,
+    Assignment
 };
 
 class Token final {

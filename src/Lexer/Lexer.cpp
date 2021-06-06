@@ -86,7 +86,7 @@ unique_ptr<Token> Lexer::next() {
             if (isDigit(next)) {
                 return numberLiteral();
             }
-            return token(TokenKind::Period);
+            return token(TokenKind::MemberAccess);
         }
         case '(':
             return token(TokenKind::ParenOpen);

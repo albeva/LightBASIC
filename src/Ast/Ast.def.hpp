@@ -16,7 +16,6 @@
  */
 #define AST_STMT_NODES(_) \
     _( StmtList          ) \
-    _( AssignStmt        ) \
     _( ExprStmt          ) \
     _( FuncStmt          ) \
     _( ReturnStmt        ) \
@@ -60,17 +59,19 @@
  * Expressions
  */
 #define AST_EXPR_NODES(_) \
-    _( IdentExpr   ) \
-    _( CallExpr    ) \
-    _( LiteralExpr ) \
-    _( UnaryExpr   ) \
-    _( BinaryExpr  ) \
-    _( CastExpr    ) \
-    _( IfExpr      ) \
-    _( Dereference ) \
-    _( AddressOf   )
+    _( AssignExpr   ) \
+    _( IdentExpr    ) \
+    _( CallExpr     ) \
+    _( LiteralExpr  ) \
+    _( UnaryExpr    ) \
+    _( BinaryExpr   ) \
+    _( CastExpr     ) \
+    _( IfExpr       ) \
+    _( Dereference  ) \
+    _( AddressOf    ) \
+    _( MemberAccess )
 
-#define AST_EXPR_RANGE(_) _(IdentExpr, AddressOf)
+#define AST_EXPR_RANGE(_) _(AssignExpr, MemberAccess)
 
 /**
  * Combined

@@ -145,10 +145,12 @@ void CodeGen::visit(AstStmtList& ast) {
     }
 }
 
-void CodeGen::visit(AstAssignStmt& ast) {
+ValueHandler CodeGen::visit(AstAssignExpr& ast) {
     auto ptr = visit(*ast.lhs);
     auto value = visit(*ast.rhs);
     ptr.store(value);
+    // TODO should ptr be loaded or result of store?
+    return ptr;
 }
 
 void CodeGen::visit(AstExprStmt& ast) {
@@ -380,9 +382,9 @@ void CodeGen::visit(AstAttribute& /*ast*/) {
     llvm_unreachable("visitAttribute");
 }
 
-ValueHandler CodeGen::visit(AstIdentExpr& ast) {
-    return { this, ast };
-}
+//------------------------------------------------------------------
+// Type
+//------------------------------------------------------------------
 
 void CodeGen::visit(AstTypeExpr& /*ast*/) {
     // NOOP
@@ -392,12 +394,30 @@ void CodeGen::visit(AstTypeExpr& /*ast*/) {
 // Expressions
 //------------------------------------------------------------------
 
+ValueHandler CodeGen::visit(AstIdentExpr& ast) {
+    return { this, ast };
+}
+
+ValueHandler CodeGen::visit(AstMemberAccess& ast) {
+    return { this, ast };
+}
+
+ValueHandler CodeGen::visit(AstDereference& ast) {
+    auto value = visit(*ast.expr);
+    return { this, m_builder.CreateLoad(value.load()) };
+}
+
+ValueHandler CodeGen::visit(AstAddressOf& ast) {
+    auto value = visit(*ast.expr);
+    return { this, value.getAddress() };
+}
+
 ValueHandler CodeGen::visit(AstCallExpr& ast) {
-    auto* fn = llvm::cast<llvm::Function>(visit(*ast.identExpr).load());
+    auto* fn = llvm::cast<llvm::Function>(visit(*ast.callable).load());
 
     std::vector<llvm::Value*> args;
-    args.reserve(ast.argExprs.size());
-    for (const auto& arg : ast.argExprs) {
+    args.reserve(ast.args.size());
+    for (const auto& arg : ast.args) {
         auto value = visit(*arg);
         args.emplace_back(value.load());
     }
@@ -464,19 +484,6 @@ ValueHandler CodeGen::visit(AstUnaryExpr& ast) {
     default:
         llvm_unreachable("Unexpected unary operator");
     }
-}
-
-ValueHandler CodeGen::visit(AstDereference& ast) {
-    auto value = visit(*ast.expr);
-    return { this, m_builder.CreateLoad(value.load()) };
-}
-
-ValueHandler CodeGen::visit(AstAddressOf& ast) {
-    if (auto* ident = dyn_cast<AstIdentExpr>(ast.expr.get())) {
-        // TODO: support aggregate types
-        return { this, ident->parts.front().symbol->getLlvmValue() };
-    }
-    fatalError("Taking address of non id expression");
 }
 
 //------------------------------------------------------------------

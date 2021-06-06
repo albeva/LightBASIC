@@ -21,41 +21,44 @@
 
 #define TOKEN_SYMBOLS(_) \
     _( Comma,           ","   ) \
-    _( Period,          "."   ) \
     _( ParenOpen,       "("   ) \
     _( ParenClose,      ")"   ) \
     _( BracketOpen,     "["   ) \
     _( BracketClose,    "]"   ) \
-    _( Ellipsis,        "..." ) \
-    _( Assign,          "="   )
+    _( Ellipsis,        "..." )
 
 #define TOKEN_OPERATORS(_) \
     /* ID               Str     Prec    Type    Assoc   Kind       */ \
-    _( AddressOf,       "@",    10,     Unary,  Left,   Memory      ) \
-    _( Dereference,     "*",    10,     Unary,  Left,   Memory      ) \
+    _( MemberAccess,    ".",    12,     Binary, Left,   Memory      ) \
                                                                       \
-    _( Negate,          "-",    9,      Unary,  Left,   Arithmetic  ) \
-    _( LogicalNot,      "NOT",  9,      Unary,  Left,   Logical     ) \
+    _( AddressOf,       "@",    11,     Unary,  Left,   Memory      ) \
+    _( Dereference,     "*",    11,     Unary,  Left,   Memory      ) \
                                                                       \
-    _( Multiply,        "*",    8,      Binary, Left,   Arithmetic  ) \
-    _( Divide,          "/",    8,      Binary, Left,   Arithmetic  ) \
+    _( Negate,          "-",    10,     Unary,  Left,   Arithmetic  ) \
+    _( LogicalNot,      "NOT",  10,     Unary,  Left,   Logical     ) \
                                                                       \
-    _( Modulus,         "MOD",  7,      Binary, Left,   Arithmetic  ) \
+    _( Multiply,        "*",    9,      Binary, Left,   Arithmetic  ) \
+    _( Divide,          "/",    9,      Binary, Left,   Arithmetic  ) \
                                                                       \
-    _( Plus,            "+",    6,      Binary, Left,   Arithmetic  ) \
-    _( Minus,           "-",    6,      Binary, Left,   Arithmetic  ) \
+    _( Modulus,         "MOD",  8,      Binary, Left,   Arithmetic  ) \
                                                                       \
-    _( Equal,           "=",    5,      Binary, Left,   Comparison  ) \
-    _( NotEqual,        "<>",   5,      Binary, Left,   Comparison  ) \
+    _( Plus,            "+",    7,      Binary, Left,   Arithmetic  ) \
+    _( Minus,           "-",    7,      Binary, Left,   Arithmetic  ) \
                                                                       \
-    _( LessThan,        "<",    4,      Binary, Left,   Comparison  ) \
-    _( LessOrEqual,     "<=",   4,      Binary, Left,   Comparison  ) \
-    _( GreaterThan,     ">",    4,      Binary, Left,   Comparison  ) \
-    _( GreaterOrEqual,  ">=",   4,      Binary, Left,   Comparison  ) \
+    _( Equal,           "=",    6,      Binary, Left,   Comparison  ) \
+    _( NotEqual,        "<>",   6,      Binary, Left,   Comparison  ) \
                                                                       \
-    _( LogicalAnd,      "AND",  3,      Binary, Left,   Logical     ) \
+    _( LessThan,        "<",    5,      Binary, Left,   Comparison  ) \
+    _( LessOrEqual,     "<=",   5,      Binary, Left,   Comparison  ) \
+    _( GreaterThan,     ">",    5,      Binary, Left,   Comparison  ) \
+    _( GreaterOrEqual,  ">=",   5,      Binary, Left,   Comparison  ) \
                                                                       \
-    _( LogicalOr,       "OR",   2,      Binary, Left,   Logical     ) \
+    _( LogicalAnd,      "AND",  4,      Binary, Left,   Logical     ) \
+                                                                      \
+    _( LogicalOr,       "OR",   3,      Binary, Left,   Logical     ) \
+                                                                      \
+    _( Assign,          "=",    2,      Binary, Left,   Assignment  ) \
+                                                                      \
     _( CommaAnd,        ",",    1,      Binary, Left,   Logical     )
 
 #define TOKEN_KEYWORDS(_) \

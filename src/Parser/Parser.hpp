@@ -28,17 +28,18 @@ private:
     };
 
     enum class ExprFlags : unsigned {
+        None = 0,
         CommaAsAnd = 1,
-        AssignAsEqual = 2,
-        Default = AssignAsEqual,
-        LLVM_MARK_AS_BITMASK_ENUM(/* LargestValue = */ AssignAsEqual)
+        UseAssign = 2,
+        CallWithoutParens = 4,
+        LLVM_MARK_AS_BITMASK_ENUM(/* LargestValue = */ CallWithoutParens)
     };
 
     [[nodiscard]] unique_ptr<AstStmtList> stmtList();
     [[nodiscard]] unique_ptr<AstStmt> statement();
     [[nodiscard]] unique_ptr<AstStmt> declaration();
 
-    [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::Default);
+    [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::None);
     [[nodiscard]] unique_ptr<AstExpr> factor();
     [[nodiscard]] unique_ptr<AstExpr> primary();
     [[nodiscard]] unique_ptr<AstExpr> unary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> expr);
@@ -50,8 +51,6 @@ private:
     [[nodiscard]] unique_ptr<AstIfExpr> ifExpr();
     [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList();
 
-    [[nodiscard]] unique_ptr<AstAssignStmt> assignment(unique_ptr<AstIdentExpr> ident);
-    [[nodiscard]] unique_ptr<AstExprStmt> callStmt(unique_ptr<AstIdentExpr> ident);
     [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs);
     [[nodiscard]] unique_ptr<AstIfStmt> kwIf();
     [[nodiscard]] AstIfStmtBlock ifBlock();

@@ -27,7 +27,7 @@ void AstPrinter::visit(AstStmtList& ast) {
     });
 }
 
-void AstPrinter::visit(AstAssignStmt& ast) {
+void AstPrinter::visit(AstAssignExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.lhs.get(), "lhs");
@@ -275,17 +275,17 @@ void AstPrinter::visit(AstTypeExpr& ast) {
 void AstPrinter::visit(AstIdentExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        m_json.attribute("id", ast.fullyQualifiedName());
+        m_json.attribute("id", ast.name);
     });
 }
 
 void AstPrinter::visit(AstCallExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeIdent(ast.identExpr.get());
-        if (!ast.argExprs.empty()) {
+        writeExpr(ast.callable.get(), "callable");
+        if (!ast.args.empty()) {
             m_json.attributeArray("args", [&] {
-                for (const auto& arg : ast.argExprs) {
+                for (const auto& arg : ast.args) {
                     visit(*arg);
                 }
             });
@@ -347,6 +347,14 @@ void AstPrinter::visit(AstAddressOf& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.expr.get());
+    });
+}
+
+void AstPrinter::visit(AstMemberAccess& ast) {
+    m_json.object([&] {
+        writeHeader(ast);
+        writeExpr(ast.lhs.get(), "lhs");
+        writeExpr(ast.rhs.get(), "rhs");
     });
 }
 

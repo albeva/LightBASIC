@@ -45,14 +45,11 @@ ValueHandler::ValueHandler(CodeGen* gen, Symbol* symbol) noexcept
 ValueHandler::ValueHandler(CodeGen* gen, llvm::Value* value) noexcept
 : PointerUnion{ ValuePtr{ value, false } }, m_gen{ gen } {}
 
-ValueHandler::ValueHandler(CodeGen* gen, AstIdentExpr& ident) noexcept
-: m_gen{ gen } {
-    if (ident.parts.size() == 1) {
-        PointerUnion::operator=(ident.parts[0].symbol);
-    } else {
-        PointerUnion::operator=(&ident);
-    }
-}
+ValueHandler::ValueHandler(CodeGen* gen, AstIdentExpr& ast) noexcept
+: PointerUnion{ ast.symbol }, m_gen{ gen } {}
+
+ValueHandler::ValueHandler(CodeGen* gen, AstMemberAccess& ast) noexcept
+: PointerUnion{&ast}, m_gen{ gen } {}
 
 llvm::Value* ValueHandler::getAddress() noexcept {
     if (is<ValuePtr>()) {
@@ -63,34 +60,44 @@ llvm::Value* ValueHandler::getAddress() noexcept {
         return symbol->getLlvmValue();
     }
 
-    if (auto* ast = dyn_cast<AstIdentExpr*>()) {
-        auto& parts = ast->parts;
+    // a.b.c.d = { lhs a, { lhs b, { lhs c, rhs d }}}
+    if (auto* member = dyn_cast<AstMemberAccess*>()) {
         auto& builder = m_gen->getBuilder();
-        auto* symbol = ast->parts[0].symbol;
 
-        auto* addr = symbol->getLlvmValue();
-        if (symbol->type()->isPointer()) {
-            addr = builder.CreateLoad(addr);
+        auto* lhs = m_gen->visit(*member->lhs).getAddress();
+        if (member->lhs->type->isPointer()) {
+            lhs = builder.CreateLoad(lhs);
         }
 
         llvm::SmallVector<llvm::Value*, 4> idxs;
-        idxs.reserve(ast->parts.size());
         idxs.push_back(builder.getInt64(0));
-        for (size_t index = 1; index < parts.size(); index++) {
-            symbol = parts[index].symbol;
-            idxs.push_back(builder.getInt32(symbol->getIndex()));
-
-            if (index + 1 < parts.size() && symbol->type()->isPointer()) {
-                addr = builder.CreateGEP(addr, idxs);
-                addr = builder.CreateLoad(addr);
-                idxs.pop_back_n(idxs.size() - 1);
-            }
-        }
-
+        auto* addr = m_gen->visit(*member->rhs).getAggregateAddress(lhs, idxs, true);
         return builder.CreateGEP(addr, idxs);
     }
 
     llvm_unreachable("Unknown ValueHandler type");
+}
+
+llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool isRhs) noexcept {
+    // end of the member access chain
+    if (auto* symbol = this->dyn_cast<Symbol*>()) {
+        auto& builder = m_gen->getBuilder();
+        idxs.push_back(builder.getInt32(symbol->getIndex()));
+        if (!isRhs && symbol->type()->isPointer()) {
+            base = builder.CreateGEP(base, idxs);
+            base = builder.CreateLoad(base);
+            idxs.pop_back_n(idxs.size() - 1);
+        }
+        return base;
+    }
+
+    // middle of the chain
+    if (auto* member = dyn_cast<AstMemberAccess*>()) {
+        auto* lhs = m_gen->visit(*member->lhs).getAggregateAddress(base, idxs, false);
+        return m_gen->visit(*member->rhs).getAggregateAddress(lhs, idxs, true);
+    }
+
+    llvm_unreachable("Unknown aggregate member access type");
 }
 
 llvm::Value* ValueHandler::load() noexcept {
@@ -110,3 +117,4 @@ void ValueHandler::store(llvm::Value* val) noexcept {
     auto* addr = getAddress();
     m_gen->getBuilder().CreateStore(val, addr);
 }
+

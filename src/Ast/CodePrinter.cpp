@@ -20,7 +20,7 @@ void CodePrinter::visit(AstStmtList& ast) {
     }
 }
 
-void CodePrinter::visit(AstAssignStmt& ast) {
+void CodePrinter::visit(AstAssignExpr& ast) {
     m_os << indent();
     visit(*ast.lhs);
     m_os << " = ";
@@ -333,14 +333,14 @@ void CodePrinter::visit(AstControlFlowBranch& ast) {
 // Expressions
 
 void CodePrinter::visit(AstIdentExpr& ast) {
-    m_os << ast.fullyQualifiedName();
+    m_os << ast.name;
 }
 
 void CodePrinter::visit(AstCallExpr& ast) {
-    visit(*ast.identExpr);
+    visit(*ast.callable);
     m_os << "(";
     bool isFirst = true;
-    for (const auto& arg : ast.argExprs) {
+    for (const auto& arg : ast.args) {
         if (isFirst) {
             isFirst = false;
         } else {
@@ -404,6 +404,12 @@ void CodePrinter::visit(AstAddressOf& ast) {
     m_os << "@(";
     visit(*ast.expr);
     m_os << ")";
+}
+
+void CodePrinter::visit(AstMemberAccess& ast) {
+    visit(*ast.lhs);
+    m_os << '.';
+    visit(*ast.rhs);
 }
 
 void CodePrinter::visit(AstBinaryExpr& ast) {

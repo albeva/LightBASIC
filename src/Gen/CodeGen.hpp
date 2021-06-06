@@ -55,6 +55,7 @@ private:
     llvm::ConstantInt* m_constantTrue;
     llvm::ConstantInt* m_constantFalse;
 
+
     bool m_declareAsGlobals = true;
 
     struct ControlEntry final {

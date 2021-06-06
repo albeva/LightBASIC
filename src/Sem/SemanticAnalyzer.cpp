@@ -36,14 +36,6 @@ void SemanticAnalyzer::visit(AstStmtList& ast) {
     }
 }
 
-void SemanticAnalyzer::visit(AstAssignStmt& ast) {
-    visit(*ast.lhs);
-    if (ast.lhs->kind != AstKind::IdentExpr) {
-        fatalError("Unsupported assignment target");
-    }
-    expression(ast.rhs, ast.lhs->type);
-}
-
 void SemanticAnalyzer::visit(AstExprStmt& ast) {
     expression(ast.expr);
 }
@@ -239,48 +231,48 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
     }
 }
 
+void SemanticAnalyzer::visit(AstAssignExpr& ast) {
+    visit(*ast.lhs);
+    if (!ast.lhs->category.canAssign()) {
+        fatalError("Cannot assign");
+    }
+    expression(ast.rhs, ast.lhs->type);
+}
+
 void SemanticAnalyzer::visit(AstIdentExpr& ast) {
-    auto* table = m_table;
-    for (size_t index = 0; index < ast.parts.size(); index++) {
-        auto& part = ast.parts[index];
+    auto* symbol = m_table->find(ast.name);
+    if (symbol == nullptr) {
+        fatalError("Unknown identifier "_t + ast.name);
+    }
 
-        auto* symbol = table->find(part.name);
-        if (symbol == nullptr) {
-            fatalError("Unknown identifier "_t + part.name);
-        }
-        if (symbol->type() == nullptr) {
-            fatalError("Identifier "_t + part.name + " has unresolved type");
-        }
-        part.symbol = symbol;
+    const auto* type = symbol->type();
+    if (symbol->type() == nullptr) {
+        fatalError("Identifier "_t + ast.name + " has unresolved type");
+    }
 
-        if (index + 1 < ast.parts.size()) {
-            const auto* type = symbol->type();
-            if (const auto* ptr = dyn_cast<TypePointer>(type)) {
-                type = ptr->getBase();
-            }
-            if (const auto* udt = dyn_cast<TypeUDT>(type)) {
-                table = &udt->getSymbolTable();
-                continue;
-            }
-            fatalError("Accessing a member on non UDT type");
+    ast.type = symbol->type();
+    ast.symbol = symbol;
+
+    if (type->isFunction()) {
+        ast.category.set(ValueCategory::Callable);
+    } else {
+        ast.category.set(ValueCategory::Assignable | ValueCategory::Addressable);
+        if (type->isPointer()) {
+            ast.category.set(ValueCategory::Dereferencable);
         }
     }
-    ast.type = ast.parts.back().symbol->type();
 }
 
 void SemanticAnalyzer::visit(AstCallExpr& ast) {
-    visit(*ast.identExpr);
+    visit(*ast.callable);
 
-    // TODO: Support nested names
-    auto* symbol = ast.identExpr->parts.front().symbol;
-
-    const auto* type = dyn_cast<TypeFunction>(symbol->type());
+    const auto* type = dyn_cast<TypeFunction>(ast.callable->type);
     if (type == nullptr) {
-        fatalError("Identifier "_t + symbol->name() + " is not a callable m_type");
+        fatalError("Trying to call a non callable");
     }
 
     const auto& paramTypes = type->getParams();
-    auto& args = ast.argExprs;
+    auto& args = ast.args;
 
     if (type->isVariadic()) {
         if (paramTypes.size() > args.size()) {
@@ -357,11 +349,18 @@ void SemanticAnalyzer::visit(AstUnaryExpr& ast) {
 //------------------------------------------------------------------
 
 void SemanticAnalyzer::visit(AstDereference& ast) {
+    // TODO deref needs to return a reference to value, NOT value itself
+
     visit(*ast.expr);
     if (const auto* type = dyn_cast<TypePointer>(ast.expr->type)) {
         ast.type = type->getBase();
     } else {
         fatalError("dereferencing a non pointer");
+    }
+
+    ast.category = ast.expr->category;
+    if (!ast.type->isPointer()) {
+        ast.category.unset(ValueCategory::Dereferencable);
     }
 }
 
@@ -371,10 +370,31 @@ void SemanticAnalyzer::visit(AstDereference& ast) {
 
 void SemanticAnalyzer::visit(AstAddressOf& ast) {
     visit(*ast.expr);
-    if (ast.expr->kind != AstKind::IdentExpr) {
-        fatalError("Taking address of non identifier");
+    if (!ast.expr->category.canAddress()) {
+        fatalError("Cannot take address");
     }
     ast.type = TypePointer::get(ast.expr->type);
+    ast.category = ast.expr->category;
+    ast.category.set(ValueCategory::Dereferencable);
+}
+
+//------------------------------------------------------------------
+// Member Access
+//------------------------------------------------------------------
+
+void SemanticAnalyzer::visit(AstMemberAccess& ast) {
+    visit(*ast.lhs);
+
+    const auto* udt = dyn_cast<TypeUDT>(ast.lhs->type);
+    if (udt == nullptr) {
+        fatalError("Accessing member of non UDT type");
+    }
+
+    RESTORE_ON_EXIT(m_table);
+    m_table = &udt->getSymbolTable();
+    visit(*ast.rhs);
+    ast.type = ast.rhs->type;
+    ast.category = ast.rhs->category;
 }
 
 //------------------------------------------------------------------
@@ -485,6 +505,8 @@ void SemanticAnalyzer::visit(AstCastExpr& ast) {
     if (ast.expr->type->compare(ast.type) == TypeComparison::Incompatible) {
         fatalError("Incompatible cast");
     }
+
+    ast.category = ast.expr->category;
 }
 
 void SemanticAnalyzer::convert(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
@@ -514,12 +536,14 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
 }
 
 void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
+    auto category = ast->category;
     auto cast = AstCastExpr::create(
         ast->range,
         std::move(ast),
         nullptr,
         true);
     cast->type = type;
+    cast->category = category;
     ast = std::move(cast); // NOLINT
 }
 

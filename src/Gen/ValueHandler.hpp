@@ -9,13 +9,14 @@ class CodeGen;
 class Symbol;
 struct AstExpr;
 struct AstIdentExpr;
+struct AstMemberAccess;
 
 namespace Gen {
     namespace value_handler_detail {
         using ValuePtr = llvm::PointerIntPair<llvm::Value*, 1, bool>;
     } // namespace value_handler_detail
 
-    class ValueHandler final : llvm::PointerUnion<value_handler_detail::ValuePtr, Symbol*, AstIdentExpr*> {
+    class ValueHandler final : llvm::PointerUnion<value_handler_detail::ValuePtr, Symbol*, AstIdentExpr*, AstMemberAccess*> {
     public:
         /// Create temporary allocated variable - it is not inserted into symbol table
         static ValueHandler createTemp(CodeGen& gen, AstExpr& expr, StringRef name = "") noexcept;
@@ -26,7 +27,8 @@ namespace Gen {
         constexpr ValueHandler() noexcept = default;
         ValueHandler(CodeGen* gen, Symbol* symbol) noexcept;
         ValueHandler(CodeGen* gen, llvm::Value* value) noexcept;
-        ValueHandler(CodeGen* gen, AstIdentExpr& ident) noexcept;
+        ValueHandler(CodeGen* gen, AstIdentExpr& ast) noexcept;
+        ValueHandler(CodeGen* gen, AstMemberAccess& ast) noexcept;
 
         [[nodiscard]] llvm::Value* load() noexcept;
         [[nodiscard]] llvm::Value* getAddress() noexcept;
@@ -41,6 +43,9 @@ namespace Gen {
 
     private:
         ValueHandler(CodeGen* gen, value_handler_detail::ValuePtr ptr) noexcept;
+
+        using IndexArray = llvm::SmallVectorImpl<llvm::Value*>;
+        [[nodiscard]] llvm::Value* getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool isRhs) noexcept;
 
         CodeGen* m_gen = nullptr;
     };
