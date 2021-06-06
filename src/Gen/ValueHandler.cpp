@@ -51,7 +51,7 @@ ValueHandler::ValueHandler(CodeGen* gen, AstIdentExpr& ast) noexcept
 ValueHandler::ValueHandler(CodeGen* gen, AstMemberAccess& ast) noexcept
 : PointerUnion{ &ast }, m_gen{ gen } {}
 
-llvm::Value* ValueHandler::getAddress() noexcept {
+llvm::Value* ValueHandler::getAddress() const noexcept {
     if (is<ValuePtr>()) {
         return PointerUnion::get<ValuePtr>().getPointer();
     }
@@ -78,7 +78,7 @@ llvm::Value* ValueHandler::getAddress() noexcept {
     llvm_unreachable("Unknown ValueHandler type");
 }
 
-llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool terminal) noexcept {
+llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& idxs, bool terminal) const noexcept {
     // end of the member access chain
     if (auto* symbol = dyn_cast<Symbol*>()) {
         auto& builder = m_gen->getBuilder();
@@ -100,7 +100,7 @@ llvm::Value* ValueHandler::getAggregateAddress(llvm::Value* base, IndexArray& id
     llvm_unreachable("Unknown aggregate member access type");
 }
 
-llvm::Value* ValueHandler::load() noexcept {
+llvm::Value* ValueHandler::load() const noexcept {
     auto* addr = getAddress();
     if (isa<llvm::Function>(addr)) {
         return addr;
@@ -113,7 +113,7 @@ llvm::Value* ValueHandler::load() noexcept {
     return m_gen->getBuilder().CreateLoad(addr);
 }
 
-void ValueHandler::store(llvm::Value* val) noexcept {
+void ValueHandler::store(llvm::Value* val) const noexcept {
     auto* addr = getAddress();
     m_gen->getBuilder().CreateStore(val, addr);
 }
