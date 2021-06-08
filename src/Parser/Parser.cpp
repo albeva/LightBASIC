@@ -127,7 +127,7 @@ unique_ptr<AstStmtList> Parser::kwImport() {
     // "IMPORT" id
     expect(TokenKind::Import);
     auto token = expect(TokenKind::Identifier);
-    auto id = std::get<StringRef>(token->getValue());
+    auto id = token->lexeme();
 
     // Imported file
     auto source = m_context.getCompilerDir() / "lib" / (id + ".bas").str();
@@ -1204,4 +1204,3 @@ unique_ptr<Token> Parser::move() {
 
     fatalError(output, false);
 }
-

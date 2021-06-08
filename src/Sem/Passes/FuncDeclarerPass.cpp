@@ -16,7 +16,7 @@ void FuncDeclarerPass::visit(AstModule& ast) {
 }
 
 void FuncDeclarerPass::visit(AstStmtList& ast) {
-    for (const auto& stmt: ast.stmts) {
+    for (const auto& stmt : ast.stmts) {
         switch (stmt->kind) {
         case AstKind::FuncDecl:
             visitFuncDecl(static_cast<AstFuncDecl&>(*stmt), true);

@@ -62,25 +62,14 @@ public:
     }
 
     // Getters
-
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
-
-    [[nodiscard]] string lexeme() const;
-
-    [[nodiscard]] const Value& getValue() const noexcept {
-        return m_value;
-    }
-
-    [[nodiscard]] const llvm::SMRange& range() const noexcept {
-        return m_range;
-    };
-
-    [[nodiscard]] StringRef description() const noexcept {
-        return description(m_kind);
-    }
+    [[nodiscard]] StringRef lexeme() const noexcept;
+    [[nodiscard]] string asString() const;
+    [[nodiscard]] const Value& getValue() const noexcept { return m_value; }
+    [[nodiscard]] const llvm::SMRange& range() const noexcept { return m_range; };
+    [[nodiscard]] StringRef description() const noexcept { return description(m_kind); }
 
     // Info about operators
-
     [[nodiscard]] bool isGeneral() const noexcept;
     [[nodiscard]] bool isLiteral() const noexcept;
     [[nodiscard]] bool isSymbol() const noexcept;

@@ -31,7 +31,7 @@ protected:
         EXPECT_EQ(token->kind(), kind);
 
         if (!lexeme.empty()) {
-            EXPECT_EQ(token->lexeme(), lexeme);
+            EXPECT_EQ(token->asString(), lexeme);
         }
 
         auto start = m_context.getSourceMrg().getLineAndColumn(token->range().Start);

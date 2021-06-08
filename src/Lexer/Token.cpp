@@ -42,7 +42,13 @@ TokenKind Token::findKind(StringRef str) noexcept {
     return TokenKind::Identifier;
 }
 
-string Token::lexeme() const {
+StringRef Token::lexeme() const noexcept {
+    const auto* start = m_range.Start.getPointer();
+    const auto* end = m_range.End.getPointer();
+    return { start, static_cast<size_t>(std::distance(start, end)) };
+}
+
+string Token::asString() const {
     constexpr auto visitor = lbc::Visitor{
         [](std::monostate /*value*/) {
             return "NULL"s;
