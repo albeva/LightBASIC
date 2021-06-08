@@ -37,6 +37,7 @@ private:
 
     [[nodiscard]] unique_ptr<AstStmtList> stmtList();
     [[nodiscard]] unique_ptr<AstStmt> statement();
+    [[nodiscard]] unique_ptr<AstStmtList> kwImport();
     [[nodiscard]] unique_ptr<AstStmt> declaration();
 
     [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::None);
@@ -100,7 +101,23 @@ private:
     // show error and terminate compilation
     [[noreturn]] void error(const Twine& message);
 
+    struct State final {
+        unsigned fileId;
+        bool isMain;
+        Scope scope;
+        unique_ptr<Lexer> lexer;
+        unique_ptr<Token> token;
+        unique_ptr<Token> next;
+        llvm::SMLoc endLoc;
+        ExprFlags exprFlags;
+    };
+
+    void setupLexer();
+    void pushState();
+    void popState();
+
     Context& m_context;
+
     unsigned m_fileId;
     bool m_isMain;
     Scope m_scope;
@@ -109,6 +126,9 @@ private:
     unique_ptr<Token> m_next;
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
+
+    std::vector<State> m_stateStack{};
+    std::vector<fs::path> m_imports{};
 };
 
 } // namespace lbc

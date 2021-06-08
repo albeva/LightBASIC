@@ -8,8 +8,7 @@
 ''
 '' CHECK: Hello, World!
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 sub main
     say "Hello"

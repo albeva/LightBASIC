@@ -23,10 +23,10 @@ void SemanticAnalyzer::visit(AstModule& ast) {
     m_astRootModule = &ast;
     m_fileId = ast.fileId;
     ast.symbolTable = make_unique<SymbolTable>(nullptr);
+    m_rootTable = m_table = ast.symbolTable.get();
 
     Sem::FuncDeclarerPass(m_context, m_typePass).visit(ast);
 
-    m_rootTable = m_table = ast.symbolTable.get();
     visit(*ast.stmtList);
 }
 

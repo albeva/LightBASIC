@@ -11,8 +11,7 @@
 '' CHECK-NEXT: 1, 2, 3, 4
 '' CHECK-NEXT: 2, 4, 6, 8, 10
 ''------------------------------------------------------------------------------
-[Alias = "printf"] _
-Declare Function printf(fmt As ZString, ...) As Integer
+import cstd
 
 '' post until
 do var i = 1

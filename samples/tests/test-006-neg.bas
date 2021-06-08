@@ -5,8 +5,7 @@
 ''
 '' CHECK: -3.141590, -5, 5
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 var a = 3.14159
 var b = -a

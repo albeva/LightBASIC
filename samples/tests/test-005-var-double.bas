@@ -5,8 +5,7 @@
 ''
 '' CHECK: 3.141590
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 var pi = 3.14159
 printf "%lf", pi

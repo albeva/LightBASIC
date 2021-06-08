@@ -8,8 +8,7 @@
 '' CHECK: 6, 3, 0
 '' CHECK: 1, 4, 7
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(fmt as zstring, ...) as integer
+import cstd
 
 ' with scoped var
 for var first = true, i = 1 to 5

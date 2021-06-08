@@ -36,7 +36,7 @@ private:
 
     llvm::BasicBlock* getGlobalCtorBlock();
 
-    void declareFuncs();
+    void declareFuncs(AstStmtList& ast);
     void declareFunc(AstFuncDecl& ast);
     void declareGlobalVar(AstVarDecl& ast);
     void declareLocalVar(AstVarDecl& ast);

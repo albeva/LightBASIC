@@ -34,7 +34,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(?i:(type|function|sub|declare|end|return|dim|var|as|if|then|else|for|to|step|next|continue|exit|do|loop))\b</string>
+			<string>\b(?i:(import|type|function|sub|declare|end|return|dim|var|as|if|then|else|for|to|step|next|continue|exit|do|loop))\b</string>
 			<key>name</key>
 			<string>keyword.control.lbc</string>
 		</dict>

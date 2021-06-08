@@ -5,8 +5,7 @@
 ''
 '' CHECK: true, 0, -1, 3.14
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(fmt as zstring, ...) as integer
+import cstd
 
 var b = true
 var s = if b then "true" else "false"

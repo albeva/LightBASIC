@@ -5,8 +5,7 @@
 ''
 '' CHECK: 10
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(fmt as zstring, ...) as integer
+import cstd
 
 var i = 10
 var ip = @i

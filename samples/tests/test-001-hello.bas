@@ -6,7 +6,6 @@
 ''
 '' CHECK: Hello World!
 ''------------------------------------------------------------------------------
-[alias="puts"] _
-declare function print(str as zstring) as integer
+import cstd
 
-print "Hello World!"
+puts "Hello World!"

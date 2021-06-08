@@ -5,8 +5,7 @@
 ''
 '' CHECK: true, true
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(fmt as zstring, ...) as integer
+import cstd
 
 var ip as integer ptr = null
 

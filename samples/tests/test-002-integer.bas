@@ -5,7 +5,6 @@
 ''
 '' CHECK: 42
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 printf "%d", 42

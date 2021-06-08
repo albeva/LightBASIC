@@ -12,7 +12,11 @@ using namespace Sem;
 
 void FuncDeclarerPass::visit(AstModule& ast) {
     m_table = ast.symbolTable.get();
-    for (const auto& stmt : ast.stmtList->stmts) {
+    visit(*ast.stmtList);
+}
+
+void FuncDeclarerPass::visit(AstStmtList& ast) {
+    for (const auto& stmt: ast.stmts) {
         switch (stmt->kind) {
         case AstKind::FuncDecl:
             visitFuncDecl(static_cast<AstFuncDecl&>(*stmt), true);
@@ -20,6 +24,8 @@ void FuncDeclarerPass::visit(AstModule& ast) {
         case AstKind::FuncStmt:
             visitFuncDecl(*static_cast<AstFuncStmt&>(*stmt).decl, false);
             break;
+        case AstKind::StmtList:
+            visit(static_cast<AstStmtList&>(*stmt));
         default:
             break;
         }

@@ -5,8 +5,7 @@
 ''
 '' CHECK: 0 1 2 i = 5
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(fmt as zstring, ...) as integer
+import cstd
 
 test(0)
 test(1)

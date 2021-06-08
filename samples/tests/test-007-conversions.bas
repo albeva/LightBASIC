@@ -5,8 +5,7 @@
 ''
 '' CHECK: 3.140000, 3
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 var d as double = 3.14
 var s as single = d

@@ -15,10 +15,7 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain)
   m_fileId{ fileId },
   m_isMain{ isMain },
   m_scope{ Scope::Root } {
-    m_lexer = make_unique<Lexer>(m_context, fileId);
-    m_token = m_lexer->next();
-    m_next = m_lexer->next();
-    m_endLoc = m_token->range().End; // NOLINT
+    setupLexer();
 }
 
 Parser::~Parser() noexcept = default;
@@ -89,8 +86,13 @@ unique_ptr<AstStmt> Parser::statement() {
         return decl;
     }
 
-    if (!m_isMain && m_scope == Scope::Root) {
-        error("expressions are not allowed at the top level");
+    if (m_scope == Scope::Root) {
+        if (match(TokenKind::Import)) {
+            return kwImport();
+        }
+        if (!m_isMain) {
+            error("expressions are not allowed at the top level");
+        }
     }
 
     switch (m_token->kind()) {
@@ -112,6 +114,54 @@ unique_ptr<AstStmt> Parser::statement() {
 
     auto expr = expression(ExprFlags::UseAssign | ExprFlags::CallWithoutParens);
     return AstExprStmt::create(expr->range, std::move(expr));
+}
+
+/**
+ * IMPORT
+ *   = "IMPORT" id
+ *   .
+ */
+unique_ptr<AstStmtList> Parser::kwImport() {
+    auto start = m_token->range().Start;
+
+    // "IMPORT" id
+    expect(TokenKind::Import);
+    auto token = expect(TokenKind::Identifier);
+    auto id = std::get<StringRef>(token->getValue());
+
+    // Imported file
+    auto source = m_context.getCompilerDir() / "lib" / (id + ".bas").str();
+    auto iter = std::find(m_imports.begin(), m_imports.end(), source);
+    if (iter != m_imports.end()) {
+        return AstStmtList::create(
+            llvm::SMRange{ start, m_endLoc },
+            std::vector<unique_ptr<AstStmt>>{});
+    }
+    if (!fs::exists(source)) {
+        error("Module '"_t + id + "' not found");
+    }
+    m_imports.emplace_back(source);
+
+    // Load import into Source Mgr
+    string included;
+    auto ID = m_context.getSourceMrg().AddIncludeFile(
+        source.string(),
+        token->range().Start,
+        included);
+    if (ID == ~0U) {
+        fatalError("Failed to load '"_t + source.string() + "'");
+    }
+
+    // push state, parse the import
+    pushState();
+    m_fileId = ID;
+    m_isMain = false;
+    setupLexer();
+    auto stmts = stmtList();
+    popState();
+
+    // done
+    return stmts;
 }
 
 /**
@@ -1069,6 +1119,38 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
 // Helpers
 //----------------------------------------
 
+void Parser::setupLexer() {
+    m_lexer = make_unique<Lexer>(m_context, m_fileId);
+    m_token = m_lexer->next();
+    m_next = m_lexer->next();
+    m_endLoc = m_token->range().End;
+}
+
+void Parser::pushState() {
+    m_stateStack.emplace_back(State{
+        m_fileId,
+        m_isMain,
+        m_scope,
+        std::move(m_lexer),
+        std::move(m_token),
+        std::move(m_next),
+        m_endLoc,
+        m_exprFlags });
+}
+
+void Parser::popState() {
+    auto& state = m_stateStack.back();
+    m_fileId = state.fileId;
+    m_isMain = state.isMain;
+    m_scope = state.scope;
+    m_lexer = std::move(state.lexer);
+    m_token = std::move(state.token);
+    m_next = std::move(state.next);
+    m_endLoc = state.endLoc;
+    m_exprFlags = state.exprFlags;
+    m_stateStack.pop_back();
+}
+
 bool Parser::isValid() const noexcept {
     return *m_token != TokenKind::EndOfFile;
 }
@@ -1122,3 +1204,4 @@ unique_ptr<Token> Parser::move() {
 
     fatalError(output, false);
 }
+

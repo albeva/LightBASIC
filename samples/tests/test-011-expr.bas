@@ -8,8 +8,7 @@
 '' CHECK: 7.000000, 4.000000, 1.000000
 '' CHECK: true, true, true, false, true
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(fmt as zstring, ...) as integer
+import cstd
 
 var iseven = 1 + 2 * 3
 var ifour = iseven - 6 / 2

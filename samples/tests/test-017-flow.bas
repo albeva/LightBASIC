@@ -5,8 +5,7 @@
 ''
 '' CHECK: 1, 3
 ''------------------------------------------------------------------------------
-[Alias = "printf"] _
-Declare Function printf(fmt As ZString, ...) As Integer
+import cstd
 
 for i = 1 to 10
     if i mod 2 = 0 then continue

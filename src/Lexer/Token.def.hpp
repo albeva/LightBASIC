@@ -74,6 +74,7 @@
     _( For,      "FOR"      ) \
     _( Function, "FUNCTION" ) \
     _( If,       "IF"       ) \
+    _( Import,   "IMPORT"   ) \
     _( Loop,     "LOOP"     ) \
     _( Next,     "NEXT"     ) \
     _( Null,     "NULL"     ) \

@@ -62,7 +62,7 @@ void CodeGen::visit(AstModule& ast) {
     m_module = make_unique<llvm::Module>(file, m_llvmContext);
     m_module->setTargetTriple(m_context.getTriple().str());
 
-    declareFuncs();
+    declareFuncs(*ast.stmtList);
 
     if (m_context.getTriple().isOSWindows()) {
         auto* chkstk = llvm::Function::Create(
@@ -229,8 +229,8 @@ void CodeGen::visit(AstFuncDecl& /*ast*/) {
     // NOOP
 }
 
-void CodeGen::declareFuncs() {
-    for (const auto& stmt : m_astRootModule->stmtList->stmts) {
+void CodeGen::declareFuncs(AstStmtList& ast) {
+    for (const auto& stmt : ast.stmts) {
         switch (stmt->kind) {
         case AstKind::FuncDecl:
             declareFunc(static_cast<AstFuncDecl&>(*stmt));
@@ -238,6 +238,8 @@ void CodeGen::declareFuncs() {
         case AstKind::FuncStmt:
             declareFunc(*static_cast<AstFuncStmt&>(*stmt).decl);
             break;
+        case AstKind::StmtList:
+            declareFuncs(static_cast<AstStmtList&>(*stmt));
         default:
             break;
         }

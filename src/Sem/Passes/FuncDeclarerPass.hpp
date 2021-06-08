@@ -4,6 +4,7 @@
 #pragma once
 
 
+#include <Ast/Ast.hpp>
 namespace lbc {
 class SymbolTable;
 class Symbol;
@@ -34,6 +35,7 @@ namespace Sem {
         void visit(AstModule& ast);
 
     private:
+        void visit(lbc::AstStmtList& ast);
         void visitFuncDecl(AstFuncDecl& ast, bool external);
         void visitFuncParamDecl(AstFuncParamDecl& ast);
         [[nodiscard]] Symbol* createParamSymbol(AstFuncParamDecl& ast);

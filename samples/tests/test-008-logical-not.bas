@@ -5,8 +5,7 @@
 ''
 '' CHECK: 0, 1, 0, 1
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 var f = not true
 var t = not f

@@ -5,8 +5,7 @@
 ''
 '' CHECK: 1, 2, 4
 ''------------------------------------------------------------------------------
-[Alias = "printf"] _
-Declare Function printf(fmt As ZString, ...) As Integer
+import cstd
 
 for i = 1 to 3
     if i <> 1 then printf ", "

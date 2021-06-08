@@ -7,8 +7,7 @@
 ''
 '' CHECK: Hello, World!
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-declare function printf(str as zstring, ...) as integer
+import cstd
 
 var a = "Hello"
 var b = "World"

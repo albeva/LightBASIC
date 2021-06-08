@@ -1,18 +1,4 @@
-'' printf
-[Alias = "printf"] _
-Declare Function printf(fmt As ZString, ...) As Integer
-'' scanf
-[Alias = "scanf"] _
-Declare Function scanf(fmt As ZString, ...) As Integer
-'' srand
-[Alias = "srand"] _
-Declare Sub srand(seed As UInteger)
-'' rand
-[Alias = "rand"] _
-Declare Function rand As Integer
-'' time
-[Alias = "time"] _
-Declare Function time(time_t As Any Ptr) As ULong
+import cstd
 
 '' initialize a random seed
 srand time(null)

@@ -7,8 +7,7 @@
 '' CHECK-NEXT:  Player2.name = Mario
 '' CHECK-NEXT:  Player2.age = 58
 ''------------------------------------------------------------------------------
-[alias="printf"] _
-Declare Function printf(fmt As ZString, ...) As Integer
+import cstd
 
 Type Player
     name As ZString
