@@ -11,7 +11,7 @@ add_library(
     Ast/CodePrinter.cpp
     Ast/CodePrinter.hpp
     Ast/ControlFlowStack.hpp
-    Ast/ValueCategory.hpp
+    Ast/ValueFlags.hpp
     Diag/DiagnosticEngine.cpp
     Diag/DiagnosticEngine.hpp
     Driver/CmdLineParser.cpp

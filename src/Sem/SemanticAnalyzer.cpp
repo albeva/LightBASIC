@@ -63,6 +63,13 @@ void SemanticAnalyzer::visit(AstVarDecl& ast) {
     // create function symbol
     symbol->setType(type);
     ast.symbol = symbol;
+    auto flags = ast.symbol->getFlags();
+    flags.addressable = true;
+    flags.assignable = true;
+    if (type->isPointer()) {
+        flags.dereferencable = true;
+    }
+    ast.symbol->setFlags(flags);
 
     // alias?
     if (ast.attributes) {
@@ -233,7 +240,7 @@ void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type
 
 void SemanticAnalyzer::visit(AstAssignExpr& ast) {
     visit(*ast.lhs);
-    if (!ast.lhs->category.canAssign()) {
+    if (!ast.lhs->flags.assignable) {
         fatalError("Cannot assign");
     }
     expression(ast.rhs, ast.lhs->type);
@@ -246,21 +253,13 @@ void SemanticAnalyzer::visit(AstIdentExpr& ast) {
     }
 
     const auto* type = symbol->type();
-    if (symbol->type() == nullptr) {
+    if (type == nullptr) {
         fatalError("Identifier "_t + ast.name + " has unresolved type");
     }
 
-    ast.type = symbol->type();
+    ast.type = type;
     ast.symbol = symbol;
-
-    if (type->isFunction()) {
-        ast.category.set(ValueCategory::Callable);
-    } else {
-        ast.category.set(ValueCategory::Assignable | ValueCategory::Addressable);
-        if (type->isPointer()) {
-            ast.category.set(ValueCategory::Dereferencable);
-        }
-    }
+    ast.flags = symbol->getFlags();
 }
 
 void SemanticAnalyzer::visit(AstCallExpr& ast) {
@@ -358,9 +357,9 @@ void SemanticAnalyzer::visit(AstDereference& ast) {
         fatalError("dereferencing a non pointer");
     }
 
-    ast.category = ast.expr->category;
+    ast.flags = ast.expr->flags;
     if (!ast.type->isPointer()) {
-        ast.category.unset(ValueCategory::Dereferencable);
+        ast.flags.dereferencable = false;
     }
 }
 
@@ -370,12 +369,12 @@ void SemanticAnalyzer::visit(AstDereference& ast) {
 
 void SemanticAnalyzer::visit(AstAddressOf& ast) {
     visit(*ast.expr);
-    if (!ast.expr->category.canAddress()) {
+    if (!ast.expr->flags.addressable) {
         fatalError("Cannot take address");
     }
     ast.type = TypePointer::get(ast.expr->type);
-    ast.category = ast.expr->category;
-    ast.category.set(ValueCategory::Dereferencable);
+    ast.flags = ast.expr->flags;
+    ast.flags.dereferencable = true;
 }
 
 //------------------------------------------------------------------
@@ -403,7 +402,7 @@ void SemanticAnalyzer::visit(AstMemberAccess& ast) {
     m_table = &udt->getSymbolTable();
     visit(*ast.rhs);
     ast.type = ast.rhs->type;
-    ast.category = ast.rhs->category;
+    ast.flags = ast.rhs->flags;
 }
 
 //------------------------------------------------------------------
@@ -515,7 +514,7 @@ void SemanticAnalyzer::visit(AstCastExpr& ast) {
         fatalError("Incompatible cast");
     }
 
-    ast.category = ast.expr->category;
+    ast.flags = ast.expr->flags;
 }
 
 void SemanticAnalyzer::convert(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
@@ -545,14 +544,14 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
 }
 
 void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
-    auto category = ast->category;
+    auto category = ast->flags;
     auto cast = AstCastExpr::create(
         ast->range,
         std::move(ast),
         nullptr,
         true);
     cast->type = type;
-    cast->category = category;
+    cast->flags = category;
     ast = std::move(cast); // NOLINT
 }
 

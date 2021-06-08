@@ -26,6 +26,11 @@ void ForStmtPass::ceclare() {
         m_sem.visit(*var);
     }
     m_sem.visit(*m_ast.iterator);
+    auto flags = m_ast.iterator->symbol->getFlags();
+    flags.dereferencable = false;
+    flags.addressable = false;
+    flags.assignable = false;
+    m_ast.iterator->symbol->setFlags(flags);
 }
 
 void ForStmtPass::analyze() {

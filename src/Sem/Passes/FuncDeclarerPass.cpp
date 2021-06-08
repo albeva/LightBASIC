@@ -38,6 +38,10 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
         fatalError("Redefinition of "_t + name);
     }
     auto* symbol = m_table->insert(name);
+    auto flags = symbol->getFlags();
+    flags.callable = true;
+    flags.addressable = true;
+    symbol->setFlags(flags);
 
     // alias?
     if (ast.attributes) {

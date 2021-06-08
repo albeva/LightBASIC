@@ -2,7 +2,7 @@
 // Created by Albert Varaksin on 06/07/2020.
 //
 #pragma once
-
+#include "Ast/ValueFlags.hpp"
 
 namespace lbc {
 
@@ -16,6 +16,9 @@ public:
     : m_name{ name }, m_type{ type }, m_alias{ "" } {}
 
     ~Symbol() noexcept = default;
+
+    [[nodiscard]] ValueFlags getFlags() const noexcept { return m_flags; }
+    void setFlags(ValueFlags flags) noexcept { m_flags = flags; }
 
     [[nodiscard]] Symbol* getParent() const noexcept { return m_parent; }
     void setParent(Symbol* parent) noexcept { m_parent = parent; }
@@ -60,6 +63,7 @@ private:
     bool m_external = false;
     Symbol* m_parent = nullptr;
     unsigned int m_index = 0;
+    ValueFlags m_flags{};
 };
 
 } // namespace lbc
