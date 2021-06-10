@@ -140,7 +140,7 @@ unique_ptr<AstStmtList> Parser::kwImport() {
             std::vector<unique_ptr<AstStmt>>{});
     }
     if (!fs::exists(source)) {
-        error("Module '"_t + id + "' not found");
+        error("Import '"_t + id + "' not found");
     }
 
     // Load import into Source Mgr
