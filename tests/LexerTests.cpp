@@ -27,15 +27,16 @@ protected:
     }
 
     void expect(lbc::TokenKind kind, const std::string& lexeme = "", unsigned line = 0, unsigned col = 0, unsigned len = 0) {
-        auto token = m_lexer->next();
-        EXPECT_EQ(token->kind(), kind);
+        lbc::Token token;
+        m_lexer->next(token);
+        EXPECT_EQ(token.kind(), kind);
 
         if (!lexeme.empty()) {
-            EXPECT_EQ(token->asString(), lexeme);
+            EXPECT_EQ(token.asString(), lexeme);
         }
 
-        auto start = m_context.getSourceMrg().getLineAndColumn(token->range().Start);
-        auto end = m_context.getSourceMrg().getLineAndColumn(token->range().End);
+        auto start = m_context.getSourceMrg().getLineAndColumn(token.range().Start);
+        auto end = m_context.getSourceMrg().getLineAndColumn(token.range().End);
 
         if (line > 0) {
             EXPECT_EQ(start.first, line);
@@ -62,8 +63,13 @@ private:
 
 TEST_F(LexerTests, NoInput) {
     auto& lexer = load("");
-    EXPECT_TRUE(lexer.next()->kind() == lbc::TokenKind::EndOfFile);
-    EXPECT_TRUE(lexer.next()->kind() == lbc::TokenKind::EndOfFile);
+    lbc::Token token;
+
+    lexer.next(token);
+    EXPECT_TRUE(token == lbc::TokenKind::EndOfFile);
+
+    lexer.next(token);
+    EXPECT_TRUE(token == lbc::TokenKind::EndOfFile);
 }
 
 TEST_F(LexerTests, EmptyInputs) {

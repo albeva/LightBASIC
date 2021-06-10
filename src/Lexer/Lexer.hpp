@@ -3,7 +3,6 @@
 //
 #pragma once
 
-
 namespace lbc {
 class Token;
 class Context;
@@ -16,21 +15,22 @@ public:
     Lexer(Context& context, unsigned fileID) noexcept;
     ~Lexer() noexcept = default;
 
-    [[nodiscard]] unique_ptr<Token> next();
+    void next(Token& result);
+    void peek(Token& result);
 
 private:
     void skipUntilLineEnd() noexcept;
     void skipToNextLine() noexcept;
     void skipMultilineComment() noexcept;
 
-    [[nodiscard]] unique_ptr<Token> endOfFile();
-    [[nodiscard]] unique_ptr<Token> endOfStatement();
-    [[nodiscard]] unique_ptr<Token> invalid(const char* loc) const;
-    [[nodiscard]] unique_ptr<Token> stringLiteral();
+    void endOfFile(Token& result) noexcept;
+    void endOfStatement(Token& result) noexcept;
+    void invalid(Token& result, const char* loc) const noexcept;
+    void stringLiteral(Token& result);
     [[nodiscard]] char escape() noexcept;
-    [[nodiscard]] unique_ptr<Token> token(TokenKind kind, int len = 1);
-    [[nodiscard]] unique_ptr<Token> numberLiteral();
-    [[nodiscard]] unique_ptr<Token> identifier();
+    void token(Token& result, TokenKind kind, int len = 1) noexcept;
+    void numberLiteral(Token& result);
+    void identifier(Token& result);
 
     Context& m_context;
     const llvm::MemoryBuffer* m_buffer;

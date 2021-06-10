@@ -3,12 +3,11 @@
 //
 #pragma once
 #include "Ast/Ast.def.hpp"
+#include "Lexer/Token.hpp"
 
 namespace lbc {
 class Context;
 class Lexer;
-class Token;
-enum class TokenKind;
 struct AstIfStmtBlock;
 AST_FORWARD_DECLARE()
 
@@ -78,25 +77,27 @@ private:
     [[nodiscard]] std::vector<unique_ptr<AstDecl>> typeDeclList();
     [[nodiscard]] unique_ptr<AstDecl> typeMember(unique_ptr<AstAttributeList> attribs);
 
+    // replace token kind with another (e.g. Minus to Negate)
+    void replace(TokenKind what, TokenKind with) noexcept;
+
     // return true if has more content to parse
-    [[nodiscard]] bool isValid() const noexcept;
+    [[nodiscard]] bool isValid() const noexcept {
+        return !match(TokenKind::EndOfFile);
+    }
 
     // match current token against kind
-    [[nodiscard]] bool match(TokenKind kind) const noexcept;
+    [[nodiscard]] bool match(TokenKind kind) const noexcept {
+        return m_token.is(kind);
+    }
 
-    // replace token kind with another (e.g. Minus to Negate)
-    void replace(TokenKind what, TokenKind with);
+    // expect token to match and if true, advances
+    [[nodiscard]] bool accept(TokenKind kind);
 
-    // expect token to match, move to next token and return current
-    // return nullptr otherwise
-    [[nodiscard]] unique_ptr<Token> accept(TokenKind kind);
-
-    // expect token to match, move to next token and return current
-    // show error and terminate otherwise
-    unique_ptr<Token> expect(TokenKind kind);
+    // Expects a match, raises error when fails
+    bool expect(TokenKind kind) noexcept;
 
     // advance to the next token from the stream
-    unique_ptr<Token> move();
+    void advance();
 
     // show error and terminate compilation
     [[noreturn]] void error(const Twine& message);
@@ -106,8 +107,7 @@ private:
         bool isMain;
         Scope scope;
         unique_ptr<Lexer> lexer;
-        unique_ptr<Token> token;
-        unique_ptr<Token> next;
+        Token token;
         llvm::SMLoc endLoc;
         ExprFlags exprFlags;
     };
@@ -122,8 +122,9 @@ private:
     bool m_isMain;
     Scope m_scope;
     unique_ptr<Lexer> m_lexer;
-    unique_ptr<Token> m_token;
-    unique_ptr<Token> m_next;
+    // unique_ptr<Token> m_token;
+    // unique_ptr<Token> m_next;
+    Token m_token{};
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
 

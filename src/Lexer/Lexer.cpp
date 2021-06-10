@@ -31,12 +31,12 @@ Lexer::Lexer(Context& context, unsigned fileID) noexcept
   m_eolPos{ m_input },
   m_hasStmt{ false } {}
 
-unique_ptr<Token> Lexer::next() {
+void Lexer::next(Token& result) {
     // clang-format off
     while (true) {
         switch (*m_input) {
         case 0:
-            return endOfFile();
+            return endOfFile(result);
         case '\r':
             m_eolPos = m_input;
             m_input++;
@@ -44,14 +44,14 @@ unique_ptr<Token> Lexer::next() {
                 m_input++;
             }
             if (m_hasStmt) {
-                return endOfStatement();
+                return endOfStatement(result);
             }
             continue;
         case '\n':
             m_eolPos = m_input;
             m_input++;
             if (m_hasStmt) {
-                return endOfStatement();
+                return endOfStatement(result);
             }
             continue;
         case '\t': case '\v': case '\f': case ' ':
@@ -65,63 +65,63 @@ unique_ptr<Token> Lexer::next() {
                 skipMultilineComment();
                 continue;
             }
-            return token(TokenKind::Divide);
+            return token(result, TokenKind::Divide);
         case '_':
             if (isIdentifierChar(m_input[1])) {
-                return identifier();
+                return identifier(result);
             }
             skipToNextLine();
             continue;
         case '"':
-            return stringLiteral();
+            return stringLiteral(result);
         case '=':
-            return token(TokenKind::Assign);
+            return token(result, TokenKind::Assign);
         case ',':
-            return token(TokenKind::Comma);
+            return token(result, TokenKind::Comma);
         case '.': {
             auto next = m_input[1];
             if (next == '.' && m_input[2] == '.') {
-                return token(TokenKind::Ellipsis, 3);
+                return token(result, TokenKind::Ellipsis, 3);
             }
             if (isDigit(next)) {
-                return numberLiteral();
+                return numberLiteral(result);
             }
-            return token(TokenKind::MemberAccess);
+            return token(result, TokenKind::MemberAccess);
         }
         case '(':
-            return token(TokenKind::ParenOpen);
+            return token(result, TokenKind::ParenOpen);
         case ')':
-            return token(TokenKind::ParenClose);
+            return token(result, TokenKind::ParenClose);
         case '[':
-            return token(TokenKind::BracketOpen);
+            return token(result, TokenKind::BracketOpen);
         case ']':
-            return token(TokenKind::BracketClose);
+            return token(result, TokenKind::BracketClose);
         case '+':
-            return token(TokenKind::Plus);
+            return token(result, TokenKind::Plus);
         case '-':
-            return token(TokenKind::Minus);
+            return token(result, TokenKind::Minus);
         case '*':
-            return token(TokenKind::Multiply);
+            return token(result, TokenKind::Multiply);
         case '<': {
             auto la = m_input[1];
             if (la == '>') {
-                return token(TokenKind::NotEqual, 2);
+                return token(result, TokenKind::NotEqual, 2);
             }
             if (la == '=') {
-                return token(TokenKind::LessOrEqual, 2);
+                return token(result, TokenKind::LessOrEqual, 2);
             }
-            return token(TokenKind::LessThan);
+            return token(result, TokenKind::LessThan);
         }
         case '>':
             if (m_input[1] == '=') {
-                return token(TokenKind::GreaterOrEqual, 2);
+                return token(result, TokenKind::GreaterOrEqual, 2);
             }
-            return token(TokenKind::GreaterThan);
+            return token(result, TokenKind::GreaterThan);
         case '@':
-            return token(TokenKind::AddressOf);
+            return token(result, TokenKind::AddressOf);
         case '0': case '1': case '2': case '3': case '4':
         case '5': case '6': case '7': case '8': case '9':
-            return numberLiteral();
+            return numberLiteral(result);
         case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G':
         case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N':
         case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U':
@@ -130,12 +130,24 @@ unique_ptr<Token> Lexer::next() {
         case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n':
         case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u':
         case 'v': case 'w': case 'x': case 'y': case 'z':
-            return identifier();
+            return identifier(result);
         }
 
-        return invalid(m_input);
+        return invalid(result, m_input);
     }
     // clang-format on
+}
+
+void Lexer::peek(Token& result) {
+    const auto* input = m_input;
+    const char* eolPos = m_eolPos;
+    bool hasStmt = m_hasStmt;
+
+    next(result);
+
+    m_input = input;
+    m_eolPos = eolPos;
+    m_hasStmt = hasStmt;
 }
 
 void Lexer::skipUntilLineEnd() noexcept {
@@ -195,24 +207,24 @@ void Lexer::skipMultilineComment() noexcept {
     }
 }
 
-unique_ptr<Token> Lexer::endOfFile() {
+void Lexer::endOfFile(Token& result) noexcept {
     if (m_hasStmt) {
         m_eolPos = m_input;
-        return endOfStatement();
+        return endOfStatement(result);
     }
-    return Token::create(TokenKind::EndOfFile, makeRange(m_input, m_input));
+    result.set(TokenKind::EndOfFile, makeRange(m_input, m_input));
 }
 
-unique_ptr<Token> Lexer::endOfStatement() {
+void Lexer::endOfStatement(Token& result) noexcept {
     m_hasStmt = false;
-    return Token::create(TokenKind::EndOfStmt, makeRange(m_eolPos, m_input));
+    result.set(TokenKind::EndOfStmt, makeRange(m_eolPos, m_input));
 }
 
-unique_ptr<Token> Lexer::invalid(const char* loc) const {
-    return Token::create(TokenKind::Invalid, makeRange(loc, m_input));
+void Lexer::invalid(Token& result, const char* loc) const noexcept {
+    return result.set(TokenKind::Invalid, makeRange(loc, m_input));
 }
 
-unique_ptr<Token> Lexer::stringLiteral() {
+void Lexer::stringLiteral(Token& result) {
     // assume m_input[0] == '"'
     m_hasStmt = true;
     const auto* start = m_input;
@@ -240,17 +252,17 @@ unique_ptr<Token> Lexer::stringLiteral() {
         default:
             constexpr char visibleFrom = 32;
             if (ch < visibleFrom) {
-                return invalid(start);
+                return invalid(result, start);
             }
             continue;
         }
         break;
     }
 
-    return Token::create(
+    result.set(
         TokenKind::StringLiteral,
-        m_context.retainCopy(literal),
-        makeRange(start, m_input));
+        makeRange(start, m_input),
+        m_context.retainCopy(literal));
 }
 
 char Lexer::escape() noexcept {
@@ -282,15 +294,15 @@ char Lexer::escape() noexcept {
     }
 }
 
-unique_ptr<Token> Lexer::token(TokenKind kind, int len) {
+void Lexer::token(Token& result, TokenKind kind, int len) noexcept {
     // assume m_input[0] == op[0], m_input[len] == next ch
     m_hasStmt = true;
     const auto* start = m_input;
     m_input += len;
-    return Token::create(kind, makeRange(start, m_input));
+    result.set(kind, makeRange(start, m_input));
 }
 
-unique_ptr<Token> Lexer::numberLiteral() {
+void Lexer::numberLiteral(Token& result) {
     // assume m_input[0] == '.' digit || digit
     m_hasStmt = true;
     const auto* start = m_input;
@@ -304,7 +316,7 @@ unique_ptr<Token> Lexer::numberLiteral() {
         auto ch = *++m_input;
         if (ch == '.') {
             if (isFloatingPoint) {
-                return invalid(m_input);
+                return invalid(result, m_input);
             }
             isFloatingPoint = true;
             continue;
@@ -320,20 +332,21 @@ unique_ptr<Token> Lexer::numberLiteral() {
         std::size_t size{};
         double value = std::stod(number, &size);
         if (size == 0) {
-            return invalid(start);
+            return invalid(result, start);
         }
-        return Token::create(value, makeRange(start, m_input));
+        result.set(TokenKind::FloatingPointLiteral, makeRange(start, m_input), value);
+        return;
     }
 
     uint64_t value{};
     constexpr int base10 = 10;
     if (std::from_chars(start, m_input, value, base10).ec != std::errc()) {
-        return invalid(start);
+        return invalid(result, start);
     }
-    return Token::create(value, makeRange(start, m_input));
+    result.set(TokenKind::IntegerLiteral, makeRange(start, m_input), value);
 }
 
-unique_ptr<Token> Lexer::identifier() {
+void Lexer::identifier(Token& result) {
     // assume m_input[0] == '_' || char
     m_hasStmt = true;
     const auto* start = m_input;
@@ -349,14 +362,14 @@ unique_ptr<Token> Lexer::identifier() {
     auto kind = Token::findKind(uppercased);
     switch (kind) {
     case TokenKind::True:
-        return Token::create(true, range);
+        return result.set(TokenKind::BooleanLiteral, range, true);
     case TokenKind::False:
-        return Token::create(false, range);
+        return result.set(TokenKind::BooleanLiteral, range, false);
     case TokenKind::Null:
-        return Token::create(TokenKind::NullLiteral, range);
+        return result.set(TokenKind::NullLiteral, range);
     case TokenKind::Identifier:
-        return Token::create(kind, m_context.retainCopy(uppercased), range);
+        return result.set(kind, range, m_context.retainCopy(uppercased));
     default:
-        return Token::create(kind, range);
+        return result.set(kind, range);
     }
 }

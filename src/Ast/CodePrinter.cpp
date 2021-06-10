@@ -383,12 +383,13 @@ void CodePrinter::visit(AstLiteralExpr& ast) {
 
 void CodePrinter::visit(AstUnaryExpr& ast) {
     m_os << "(";
-    auto tkn = Token::create(ast.tokenKind, ast.range);
-    if (tkn->isRightToLeft()) {
+    Token token;
+    token.set(ast.tokenKind, ast.range);
+    if (token.isRightToLeft()) {
         visit(*ast.expr);
-        m_os << " " << tkn->description();
+        m_os << " " << token.description();
     } else {
-        m_os << tkn->description() << " ";
+        m_os << token.description() << " ";
         visit(*ast.expr);
     }
     m_os << ")";
@@ -416,8 +417,9 @@ void CodePrinter::visit(AstBinaryExpr& ast) {
     m_os << "(";
     visit(*ast.lhs);
 
-    auto tkn = Token::create(ast.tokenKind, ast.range);
-    m_os << " " << tkn->description() << " ";
+    Token token;
+    token.set(ast.tokenKind, ast.range);
+    m_os << " " << token.description() << " ";
 
     visit(*ast.rhs);
     m_os << ")";

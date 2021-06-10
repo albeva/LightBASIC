@@ -22,7 +22,6 @@ enum class OperatorType {
 
 class Token final {
 public:
-    NO_COPY_AND_MOVE(Token)
     using Value = std::variant<std::monostate, StringRef, uint64_t, double, bool>;
 
     // Describe given token kind
@@ -32,40 +31,50 @@ public:
     static TokenKind findKind(StringRef str) noexcept;
 
     // constructors
+    // Token() noexcept = default;
 
-    template<typename... Args>
-    static unique_ptr<Token> create(Args&&... args) {
-        return make_unique<Token>(std::forward<Args>(args)...);
+//    template<typename... Args>
+//    static unique_ptr<Token> create(Args&&... args) {
+//        return make_unique<Token>(std::forward<Args>(args)...);
+//    }
+//
+//    Token(TokenKind kind, const llvm::SMRange& range)
+//    : m_kind{ kind }, m_value{ std::monostate{} }, m_range{ range } {}
+//
+//    Token(TokenKind kind, StringRef value, const llvm::SMRange& range)
+//    : m_kind{ kind }, m_value{ value }, m_range{ range } {}
+//
+//    Token(uint64_t value, const llvm::SMRange& range)
+//    : m_kind{ TokenKind::IntegerLiteral }, m_value{ value }, m_range{ range } {}
+//
+//    Token(double value, const llvm::SMRange& range)
+//    : m_kind{ TokenKind::FloatingPointLiteral }, m_value{ value }, m_range{ range } {}
+//
+//    Token(bool value, const llvm::SMRange& range)
+//    : m_kind{ TokenKind::BooleanLiteral }, m_value{ value }, m_range{ range } {}
+
+    void set(TokenKind kind, const llvm::SMRange& range, Value value = std::monostate{}) noexcept {
+        m_kind = kind;
+        m_range = range;
+        m_value = value;
     }
 
-    Token(TokenKind kind, const llvm::SMRange& range)
-    : m_kind{ kind }, m_value{ std::monostate{} }, m_range{ range } {}
-
-    Token(TokenKind kind, StringRef value, const llvm::SMRange& range)
-    : m_kind{ kind }, m_value{ value }, m_range{ range } {}
-
-    Token(uint64_t value, const llvm::SMRange& range)
-    : m_kind{ TokenKind::IntegerLiteral }, m_value{ value }, m_range{ range } {}
-
-    Token(double value, const llvm::SMRange& range)
-    : m_kind{ TokenKind::FloatingPointLiteral }, m_value{ value }, m_range{ range } {}
-
-    Token(bool value, const llvm::SMRange& range)
-    : m_kind{ TokenKind::BooleanLiteral }, m_value{ value }, m_range{ range } {}
-
-    ~Token() noexcept = default;
+    // ~Token() noexcept = default;
 
     // convert token kind
 
-    [[nodiscard]] unique_ptr<Token> convert(TokenKind kind) const {
-        return create(kind, m_range);
-    }
+//    [[nodiscard]] unique_ptr<Token> convert(TokenKind kind) const {
+//        return create(kind, m_range);
+//    }
 
     // Getters
     [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
+    void setKind(TokenKind kind) noexcept { m_kind = kind; }
+
     [[nodiscard]] StringRef lexeme() const noexcept;
     [[nodiscard]] string asString() const;
     [[nodiscard]] const Value& getValue() const noexcept { return m_value; }
+    [[nodiscard]] StringRef getStringValue() const { return std::get<StringRef>(m_value); }
     [[nodiscard]] const llvm::SMRange& range() const noexcept { return m_range; };
     [[nodiscard]] StringRef description() const noexcept { return description(m_kind); }
 
@@ -112,9 +121,9 @@ public:
     }
 
 private:
-    const TokenKind m_kind;
-    const Value m_value;
-    const llvm::SMRange m_range;
+    TokenKind m_kind = TokenKind::Invalid;
+    Value m_value = std::monostate{};
+    llvm::SMRange m_range{};
 };
 
 } // namespace lbc
