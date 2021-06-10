@@ -122,14 +122,12 @@ private:
     bool m_isMain;
     Scope m_scope;
     unique_ptr<Lexer> m_lexer;
-    // unique_ptr<Token> m_token;
-    // unique_ptr<Token> m_next;
     Token m_token{};
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
 
     std::vector<State> m_stateStack{};
-    std::vector<fs::path> m_imports{};
+    llvm::StringSet<> m_imports{};
 };
 
 } // namespace lbc

@@ -125,8 +125,6 @@ unique_ptr<AstStmt> Parser::statement() {
  */
 unique_ptr<AstStmtList> Parser::kwImport() {
     // assume m_token == Import
-
-    // "IMPORT" id
     advance();
 
     expect(TokenKind::Identifier);
@@ -136,8 +134,7 @@ unique_ptr<AstStmtList> Parser::kwImport() {
 
     // Imported file
     auto source = m_context.getCompilerDir() / "lib" / (id + ".bas").str();
-    auto iter = std::find(m_imports.begin(), m_imports.end(), source);
-    if (iter != m_imports.end()) {
+    if (!m_imports.insert(source.string()).second) {
         return AstStmtList::create(
             llvm::SMRange{ start, m_endLoc },
             std::vector<unique_ptr<AstStmt>>{});
@@ -145,7 +142,6 @@ unique_ptr<AstStmtList> Parser::kwImport() {
     if (!fs::exists(source)) {
         error("Module '"_t + id + "' not found");
     }
-    m_imports.emplace_back(source);
 
     // Load import into Source Mgr
     string included;
