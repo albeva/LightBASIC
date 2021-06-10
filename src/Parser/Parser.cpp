@@ -182,10 +182,7 @@ unique_ptr<AstStmtList> Parser::kwImport() {
  *   .
  */
 unique_ptr<AstStmt> Parser::declaration() {
-    unique_ptr<AstAttributeList> attribs;
-    if (m_token.kind() == TokenKind::BracketOpen) {
-        attribs = attributeList();
-    }
+    auto attribs = attributeList();
 
     switch (m_token.kind()) {
     case TokenKind::Var:
@@ -214,10 +211,13 @@ unique_ptr<AstStmt> Parser::declaration() {
 //----------------------------------------
 
 /**
- *  AttributeList = '[' Attribute { ','  Attribute } ']' .
+ *  AttributeList = [ '[' Attribute { ','  Attribute } ']' ].
  */
 unique_ptr<AstAttributeList> Parser::attributeList() {
-    // assume m_token == '['
+    if (!match(TokenKind::BracketOpen)) {
+        return nullptr;
+    }
+
     auto start = m_token.range().Start;
     advance();
 
@@ -478,19 +478,12 @@ std::vector<unique_ptr<AstDecl>> Parser::typeDeclList() {
     std::vector<unique_ptr<AstDecl>> decls;
 
     while (true) {
-        unique_ptr<AstAttributeList> attribs;
-        switch (m_token.kind()) {
-        case TokenKind::BracketOpen:
-            attribs = attributeList();
-            expect(TokenKind::Identifier);
-            [[fallthrough]];
-        case TokenKind::Identifier:
+        auto attribs = attributeList();
+        if (attribs && expect(TokenKind::Identifier) || match(TokenKind::Identifier)) {
             decls.emplace_back(typeMember(std::move(attribs)));
             expect(TokenKind::EndOfStmt);
             advance();
             continue;
-        default:
-            break;
         }
         break;
     }
@@ -1293,7 +1286,7 @@ void Parser::advance() {
     m_lexer->next(m_token);
 }
 
-[[noreturn]] void Parser::error(const Twine& message) {
+void Parser::error(const Twine& message) {
     string output;
     llvm::raw_string_ostream stream{ output };
 
