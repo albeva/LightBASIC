@@ -288,7 +288,7 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgList() {
  */
 unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) {
     // assume m_token == VAR
-    auto start = attribs == nullptr ? m_token.range().Start : attribs->range.Start;
+    auto start = attribs ? attribs->range.Start : m_token.range().Start;
     advance();
 
     expect(TokenKind::Identifier);
@@ -332,7 +332,7 @@ unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) 
     if (m_scope != Scope::Root) {
         error("Nested declarations not allowed");
     }
-    auto start = attribs == nullptr ? m_token.range().Start : attribs->range.Start;
+    auto start = attribs ? attribs->range.Start : m_token.range().Start;
     advance();
 
     return funcSignature(start, std::move(attribs), false);
@@ -475,13 +475,15 @@ std::vector<unique_ptr<AstDecl>> Parser::typeDeclList() {
 
     while (true) {
         auto attribs = attributeList();
-        if (attribs && expect(TokenKind::Identifier) || match(TokenKind::Identifier)) {
-            decls.emplace_back(typeMember(std::move(attribs)));
-            expect(TokenKind::EndOfStmt);
-            advance();
-            continue;
+        if (attribs) {
+            expect(TokenKind::Identifier);
+        } else if (!match(TokenKind::Identifier)) {
+            break;
         }
-        break;
+
+        decls.emplace_back(typeMember(std::move(attribs)));
+        expect(TokenKind::EndOfStmt);
+        advance();
     }
 
     return decls;
@@ -525,7 +527,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
         error("Nested SUBs/FUNCTIONs not allowed");
     }
 
-    auto start = attribs == nullptr ? m_token.range().Start : attribs->range.Start;
+    auto start = attribs ? attribs->range.Start : m_token.range().Start;
     auto decl = funcSignature(start, std::move(attribs), true);
     expect(TokenKind::EndOfStmt);
     advance();

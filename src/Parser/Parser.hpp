@@ -4,6 +4,7 @@
 #pragma once
 #include "Ast/Ast.def.hpp"
 #include "Lexer/Token.hpp"
+#include "Lexer/Lexer.hpp"
 
 namespace lbc {
 class Context;
