@@ -16,8 +16,7 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain)
   m_isMain{ isMain },
   m_scope{ Scope::Root } {
     m_lexer = make_unique<Lexer>(m_context, m_fileId);
-    m_lexer->next(m_token);
-    m_endLoc = m_token.range().End;
+    advance();
 }
 
 Parser::~Parser() noexcept = default;
@@ -29,7 +28,6 @@ Parser::~Parser() noexcept = default;
  */
 unique_ptr<AstModule> Parser::parse() {
     auto stmts = stmtList();
-
     return AstModule::create(
         m_fileId,
         stmts->range,
@@ -47,21 +45,23 @@ unique_ptr<AstModule> Parser::parse() {
  *   .
  */
 unique_ptr<AstStmtList> Parser::stmtList() {
-    constexpr auto isTerminator = [](const Token& token) {
+    constexpr auto isNonTerminator = [](const Token& token) {
         switch (token.kind()) {
         case TokenKind::End:
         case TokenKind::Else:
         case TokenKind::Next:
         case TokenKind::Loop:
-            return true;
-        default:
+        case TokenKind::EndOfFile:
             return false;
+        default:
+            return true;
         }
     };
 
     auto start = m_token.range().Start;
     std::vector<unique_ptr<AstStmt>> stms;
-    while (isValid() && !isTerminator(m_token)) {
+
+    while (isNonTerminator(m_token)) {
         stms.emplace_back(statement());
         expect(TokenKind::EndOfStmt);
         advance();
@@ -191,7 +191,7 @@ unique_ptr<AstStmt> Parser::declaration() {
     }
 
     if (attribs) {
-        error("Expected SUB, FUNCTION, DECLARE or VAR got '"_t
+        error("Expected SUB, FUNCTION, DECLARE, VAR or TYPE got '"_t
             + m_token.description()
             + "'");
     }
