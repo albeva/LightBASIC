@@ -15,7 +15,9 @@ Parser::Parser(Context& context, unsigned int fileId, bool isMain)
   m_fileId{ fileId },
   m_isMain{ isMain },
   m_scope{ Scope::Root } {
-    setupLexer();
+    m_lexer = make_unique<Lexer>(m_context, m_fileId);
+    m_lexer->next(m_token);
+    m_endLoc = m_token.range().End;
 }
 
 Parser::~Parser() noexcept = default;
@@ -153,16 +155,9 @@ unique_ptr<AstStmtList> Parser::kwImport() {
         fatalError("Failed to load '"_t + source.string() + "'");
     }
 
-    // push state, parse the import
-    pushState();
-    m_fileId = ID;
-    m_isMain = false;
-    setupLexer();
-    auto stmts = stmtList();
-    popState();
-
-    // done
-    return stmts;
+    // parse the module
+    auto module = Parser(m_context, ID, false).parse();
+    return std::move(module->stmtList);
 }
 
 /**
@@ -1223,35 +1218,6 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
 //----------------------------------------
 // Helpers
 //----------------------------------------
-
-void Parser::setupLexer() {
-    m_lexer = make_unique<Lexer>(m_context, m_fileId);
-    m_lexer->next(m_token);
-    m_endLoc = m_token.range().End;
-}
-
-void Parser::pushState() {
-    m_stateStack.emplace_back(State{
-        m_fileId,
-        m_isMain,
-        m_scope,
-        std::move(m_lexer),
-        m_token,
-        m_endLoc,
-        m_exprFlags });
-}
-
-void Parser::popState() {
-    auto& state = m_stateStack.back();
-    m_fileId = state.fileId;
-    m_isMain = state.isMain;
-    m_scope = state.scope;
-    m_lexer = std::move(state.lexer);
-    m_token = state.token;
-    m_endLoc = state.endLoc;
-    m_exprFlags = state.exprFlags;
-    m_stateStack.pop_back();
-}
 
 void Parser::replace(TokenKind what, TokenKind with) noexcept {
     if (match(what)) {

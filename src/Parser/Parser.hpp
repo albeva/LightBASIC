@@ -4,7 +4,6 @@
 #pragma once
 #include "Ast/Ast.def.hpp"
 #include "Lexer/Token.hpp"
-#include "Lexer/Lexer.hpp"
 
 namespace lbc {
 class Context;
@@ -103,31 +102,15 @@ private:
     // show error and terminate compilation
     [[noreturn]] void error(const Twine& message);
 
-    struct State final {
-        unsigned fileId;
-        bool isMain;
-        Scope scope;
-        unique_ptr<Lexer> lexer;
-        Token token;
-        llvm::SMLoc endLoc;
-        ExprFlags exprFlags;
-    };
-
-    void setupLexer();
-    void pushState();
-    void popState();
-
     Context& m_context;
-
-    unsigned m_fileId;
-    bool m_isMain;
+    const unsigned m_fileId;
+    const bool m_isMain;
     Scope m_scope;
     unique_ptr<Lexer> m_lexer;
     Token m_token{};
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
 
-    std::vector<State> m_stateStack{};
     llvm::StringSet<> m_imports{};
 };
 
