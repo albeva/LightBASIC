@@ -150,6 +150,13 @@ public:
      */
     [[nodiscard]] StringRef retainCopy(StringRef str);
 
+    /**
+     * Store imported modules
+     * @param module
+     * @return true if module is newly added, false otherwise
+     */
+    [[nodiscard]] bool import(StringRef module);
+
 private:
     [[nodiscard]] static bool validateFile(const fs::path& path);
 
@@ -175,6 +182,7 @@ private:
     llvm::LLVMContext m_llvmContext{};
 
     llvm::StringSet<> m_retainedStrings{};
+    llvm::StringSet<> m_imports;
 };
 
 } // namespace lbc

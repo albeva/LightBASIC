@@ -110,8 +110,6 @@ private:
     Token m_token{};
     llvm::SMLoc m_endLoc{};
     ExprFlags m_exprFlags{};
-
-    llvm::StringSet<> m_imports{};
 };
 
 } // namespace lbc

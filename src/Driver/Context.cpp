@@ -213,3 +213,7 @@ void Context::setCompilerPath(const fs::path& path) {
 StringRef Context::retainCopy(StringRef str) {
     return m_retainedStrings.insert(str).first->first();
 }
+
+bool Context::import(StringRef module) {
+    return m_imports.insert(module).second;
+}

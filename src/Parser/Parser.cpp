@@ -136,7 +136,7 @@ unique_ptr<AstStmtList> Parser::kwImport() {
 
     // Imported file
     auto source = m_context.getCompilerDir() / "lib" / (id + ".bas").str();
-    if (!m_imports.insert(source.string()).second) {
+    if (!m_context.import(source.string())) {
         return AstStmtList::create(
             llvm::SMRange{ start, m_endLoc },
             std::vector<unique_ptr<AstStmt>>{});
@@ -784,7 +784,6 @@ AstIfStmtBlock Parser::ifBlock() {
     while (match(TokenKind::Var) || (acceptComma && accept(TokenKind::Comma))) {
         acceptComma = true;
         decls.emplace_back(kwVar(nullptr));
-
     }
 
     // ( EoS StmtList "LOOP" [ Condition ]
