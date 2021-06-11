@@ -96,6 +96,19 @@ struct AstStmtList final : AstNode<AstStmtList, AstStmt, AstKind::StmtList> {
     std::vector<unique_ptr<AstStmt>> stmts;
 };
 
+struct AstImport final : AstNode<AstImport, AstStmt, AstKind::Import> {
+    AstImport(
+        llvm::SMRange range_,
+        StringRef import_,
+        unique_ptr<AstModule> module_ = {}) noexcept
+        : AstNode{ KIND, range_ },
+          import{ import_ },
+          module{ std::move(module_) } {}
+
+    const StringRef import;
+    unique_ptr<AstModule> module;
+};
+
 struct AstExprStmt final : AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
     AstExprStmt(
         llvm::SMRange range_,

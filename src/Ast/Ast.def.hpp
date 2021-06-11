@@ -15,6 +15,7 @@
  * Statements
  */
 #define AST_STMT_NODES(_) \
+    _( Import            ) \
     _( StmtList          ) \
     _( ExprStmt          ) \
     _( FuncStmt          ) \
@@ -25,7 +26,7 @@
     _( ControlFlowBranch )
 
 // include declarations
-#define AST_STMT_RANGE(_) _(StmtList, DoLoopStmt)
+#define AST_STMT_RANGE(_) _(Import, DoLoopStmt)
 
 /**
  * Declarations

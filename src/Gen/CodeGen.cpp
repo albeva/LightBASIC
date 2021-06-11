@@ -42,8 +42,6 @@ void CodeGen::terminateBlock(llvm::BasicBlock* dest) {
 }
 
 void CodeGen::switchBlock(llvm::BasicBlock* block) {
-    assert(block != nullptr);
-
     terminateBlock(block);
     if (block->getParent() != nullptr) {
         block->moveAfter(m_builder.GetInsertBlock());
@@ -145,6 +143,15 @@ void CodeGen::visit(AstStmtList& ast) {
     }
 }
 
+void CodeGen::visit(AstImport& ast) {
+    if (!ast.module) {
+        return;
+    }
+    RESTORE_ON_EXIT(m_fileId);
+    m_fileId = ast.module->fileId;
+    visit(*ast.module->stmtList);
+}
+
 ValueHandler CodeGen::visit(AstAssignExpr& ast) {
     auto ptr = visit(*ast.lhs);
     auto value = visit(*ast.rhs);
@@ -238,8 +245,13 @@ void CodeGen::declareFuncs(AstStmtList& ast) {
         case AstKind::FuncStmt:
             declareFunc(*static_cast<AstFuncStmt&>(*stmt).decl);
             break;
-        case AstKind::StmtList:
-            declareFuncs(static_cast<AstStmtList&>(*stmt));
+        case AstKind::Import: {
+            auto& import = static_cast<AstImport&>(*stmt);
+            if (import.module) {
+                declareFuncs(*import.module->stmtList);
+            }
+            break;
+        }
         default:
             break;
         }

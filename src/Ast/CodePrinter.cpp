@@ -20,6 +20,10 @@ void CodePrinter::visit(AstStmtList& ast) {
     }
 }
 
+void CodePrinter::visit(AstImport& ast) {
+    m_os << indent() << "IMPORT " << ast.import;
+}
+
 void CodePrinter::visit(AstAssignExpr& ast) {
     m_os << indent();
     visit(*ast.lhs);

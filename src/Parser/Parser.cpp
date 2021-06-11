@@ -125,24 +125,22 @@ unique_ptr<AstStmt> Parser::statement() {
  *   = "IMPORT" id
  *   .
  */
-unique_ptr<AstStmtList> Parser::kwImport() {
+unique_ptr<AstImport> Parser::kwImport() {
     // assume m_token == Import
     advance();
 
     expect(TokenKind::Identifier);
-    auto id = m_token.lexeme();
+    auto import = m_token.lexeme();
     auto start = m_token.range().Start;
     advance();
 
     // Imported file
-    auto source = m_context.getCompilerDir() / "lib" / (id + ".bas").str();
+    auto source = m_context.getCompilerDir() / "lib" / (import + ".bas").str();
     if (!m_context.import(source.string())) {
-        return AstStmtList::create(
-            llvm::SMRange{ start, m_endLoc },
-            std::vector<unique_ptr<AstStmt>>{});
+        return AstImport::create(llvm::SMRange{ start, m_endLoc }, import);
     }
     if (!fs::exists(source)) {
-        error("Import '"_t + id + "' not found");
+        error("Import '"_t + import + "' not found");
     }
 
     // Load import into Source Mgr
@@ -157,7 +155,10 @@ unique_ptr<AstStmtList> Parser::kwImport() {
 
     // parse the module
     auto module = Parser(m_context, ID, false).parse();
-    return std::move(module->stmtList);
+    return AstImport::create(
+        llvm::SMRange{ start, m_endLoc },
+        import,
+        std::move(module));
 }
 
 /**

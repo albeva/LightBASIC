@@ -24,8 +24,13 @@ void FuncDeclarerPass::visit(AstStmtList& ast) {
         case AstKind::FuncStmt:
             visitFuncDecl(*static_cast<AstFuncStmt&>(*stmt).decl, false);
             break;
-        case AstKind::StmtList:
-            visit(static_cast<AstStmtList&>(*stmt));
+        case AstKind::Import: {
+            auto& import = static_cast<AstImport&>(*stmt);
+            if (import.module) {
+                visit(*import.module->stmtList);
+            }
+            break;
+        }
         default:
             break;
         }

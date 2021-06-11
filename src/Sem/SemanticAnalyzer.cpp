@@ -36,6 +36,16 @@ void SemanticAnalyzer::visit(AstStmtList& ast) {
     }
 }
 
+void SemanticAnalyzer::visit(AstImport& ast) {
+    if (!ast.module) {
+        return;
+    }
+
+    RESTORE_ON_EXIT(m_fileId);
+    m_fileId = ast.module->fileId;
+    visit(*ast.module->stmtList);
+}
+
 void SemanticAnalyzer::visit(AstExprStmt& ast) {
     expression(ast.expr);
 }
@@ -51,9 +61,10 @@ void SemanticAnalyzer::visit(AstVarDecl& ast) {
     // expression?
     if (ast.expr) {
         expression(ast.expr, type);
-        if (type == nullptr) {
-            type = ast.expr->type;
-        }
+    }
+
+    if (type == nullptr) {
+        type = ast.expr->type;
     }
 
     // The Symbol
@@ -348,7 +359,7 @@ void SemanticAnalyzer::visit(AstUnaryExpr& ast) {
 //------------------------------------------------------------------
 
 void SemanticAnalyzer::visit(AstDereference& ast) {
-    // TODO deref needs to return a reference to value, NOT value itself
+    // TODO dereference needs to return a reference to value, NOT value itself
 
     visit(*ast.expr);
     if (const auto* type = dyn_cast<TypePointer>(ast.expr->type)) {

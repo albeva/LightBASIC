@@ -36,7 +36,7 @@ private:
 
     [[nodiscard]] unique_ptr<AstStmtList> stmtList();
     [[nodiscard]] unique_ptr<AstStmt> statement();
-    [[nodiscard]] unique_ptr<AstStmtList> kwImport();
+    [[nodiscard]] unique_ptr<AstImport> kwImport();
     [[nodiscard]] unique_ptr<AstStmt> declaration();
 
     [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::None);
