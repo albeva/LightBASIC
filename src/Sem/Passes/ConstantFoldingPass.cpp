@@ -22,12 +22,12 @@ constexpr inline BASE castLiteral(const AstLiteralExpr& ast) {
 }
 } // namespace
 
-void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) {
+void ConstantFoldingPass::fold(AstExpr*& ast) {
     //    if (m_context.getOptimizationLevel() == Context::OptimizationLevel::O0) {
     //        return;
     //    }
 
-    unique_ptr<AstExpr> replace;
+    AstExpr* replace = nullptr;
     switch (ast->kind) {
     case AstKind::UnaryExpr:
         replace = visitUnaryExpr(static_cast<AstUnaryExpr&>(*ast));
@@ -45,18 +45,18 @@ void ConstantFoldingPass::fold(unique_ptr<AstExpr>& ast) {
         return;
     }
     if (replace != nullptr) {
-        ast.swap(replace);
+        ast = replace;
     }
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast) {
-    auto* literal = dyn_cast<AstLiteralExpr>(ast.expr.get());
+AstExpr* ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast) {
+    auto* literal = dyn_cast<AstLiteralExpr>(ast.expr);
     if (literal == nullptr) {
         return nullptr;
     }
 
     auto value = unary(ast.tokenKind, *literal);
-    auto repl = AstLiteralExpr::create(ast.range, value);
+    auto* repl = new AstLiteralExpr(ast.range, value);
     repl->type = ast.type;
     return repl;
 }
@@ -94,23 +94,23 @@ AstLiteralExpr::Value ConstantFoldingPass::unary(TokenKind op, const AstLiteralE
 }
 
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitIfExpr(AstIfExpr& ast) {
-    if (auto* expr = dyn_cast<AstLiteralExpr>(ast.expr.get())) {
+AstExpr* ConstantFoldingPass::visitIfExpr(AstIfExpr& ast) {
+    if (auto* expr = dyn_cast<AstLiteralExpr>(ast.expr)) {
         if (std::get<bool>(expr->value)) {
-            return std::move(ast.trueExpr);
+            return ast.trueExpr;
         }
-        return std::move(ast.falseExpr);
+        return ast.falseExpr;
     }
 
-    if (auto repl = optimizeIifToCast(ast)) {
+    if (auto* repl = optimizeIifToCast(ast)) {
         return repl;
     }
 
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
-    auto* lhs = dyn_cast<AstLiteralExpr>(ast.trueExpr.get());
+AstExpr* ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
+    auto* lhs = dyn_cast<AstLiteralExpr>(ast.trueExpr);
     if (lhs == nullptr) {
         return nullptr;
     }
@@ -119,7 +119,7 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
         return nullptr;
     }
 
-    auto* rhs = dyn_cast<AstLiteralExpr>(ast.falseExpr.get());
+    auto* rhs = dyn_cast<AstLiteralExpr>(ast.falseExpr);
     if (rhs == nullptr) {
         return nullptr;
     }
@@ -129,9 +129,9 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
     }
 
     if (*lval == 1 && *rval == 0) {
-        auto cast = AstCastExpr::create(
+        auto* cast = new AstCastExpr(
             ast.range,
-            std::move(ast.expr),
+            ast.expr,
             nullptr,
             true);
         cast->type = ast.type;
@@ -139,14 +139,14 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
     }
 
     if (*lval == 0 && *rval == 1) {
-        auto unary = AstUnaryExpr::create(
+        auto* unary = new AstUnaryExpr(
             ast.range,
             TokenKind::LogicalNot,
-            std::move(ast.expr));
+            ast.expr);
 
-        auto cast = AstCastExpr::create(
+        auto* cast = new AstCastExpr(
             ast.range,
-            std::move(unary),
+            unary,
             nullptr,
             true);
         cast->type = ast.type;
@@ -156,19 +156,19 @@ unique_ptr<AstExpr> ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr& /*ast*/) {
+AstExpr* ConstantFoldingPass::visitBinaryExpr(AstBinaryExpr& /*ast*/) {
     // TODO
     return nullptr;
 }
 
-unique_ptr<AstExpr> ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) {
-    auto* literal = dyn_cast<AstLiteralExpr>(ast.expr.get());
+AstExpr* ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) {
+    auto* literal = dyn_cast<AstLiteralExpr>(ast.expr);
     if (literal == nullptr) {
         return nullptr;
     }
 
     auto value = cast(ast.type, *literal);
-    auto repl = AstLiteralExpr::create(ast.range, value);
+    auto* repl = new AstLiteralExpr(ast.range, value);
     repl->type = ast.type;
     return repl;
 }

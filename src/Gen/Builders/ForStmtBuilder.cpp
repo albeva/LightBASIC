@@ -74,7 +74,7 @@ void ForStmtBuilder::configureStep() {
     }
 
     // Literal value
-    if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step.get())) {
+    if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step)) {
         const auto* stepTy = literal->type;
         llvm::Constant* stepVal = nullptr;
         if (const auto* integral = dyn_cast<TypeIntegral>(stepTy)) {

@@ -182,7 +182,7 @@ void CodeGen::declareGlobalVar(AstVarDecl& ast) {
 
     // has an init expr?
     if (ast.expr) {
-        if (auto* litExpr = dyn_cast<AstLiteralExpr>(ast.expr.get())) {
+        if (auto* litExpr = dyn_cast<AstLiteralExpr>(ast.expr)) {
             auto rvalue = visit(*litExpr);
             constant = llvm::cast<llvm::Constant>(rvalue.load());
         } else {

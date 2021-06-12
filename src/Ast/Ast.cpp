@@ -26,7 +26,7 @@ std::optional<StringRef> AstAttributeList::getStringLiteral(StringRef key) const
             if (attr->argExprs.size() != 1) {
                 fatalError("Attribute "_t + key + " must have 1 value", false);
             }
-            if (auto* literal = dyn_cast<AstLiteralExpr>(attr->argExprs[0].get())) {
+            if (auto* literal = dyn_cast<AstLiteralExpr>(attr->argExprs[0])) {
                 if (const auto* str = std::get_if<StringRef>(&literal->value)) {
                     return *str;
                 }

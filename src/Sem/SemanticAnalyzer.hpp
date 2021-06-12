@@ -22,16 +22,16 @@ public:
     [[nodiscard]] Context& getContext() noexcept { return m_context; }
 
     /// declareMembers the expression, optionally coerce result to given type
-    void expression(unique_ptr<AstExpr>& ast, const TypeRoot* type = nullptr);
+    void expression(AstExpr*& ast, const TypeRoot* type = nullptr);
 
     /// Checks types and if they are convertible, create CAST expression
-    static void coerce(unique_ptr<AstExpr>& expr, const TypeRoot* type);
+    static void coerce(AstExpr*& expr, const TypeRoot* type);
 
     /// Cast expression and fold the value
-    void convert(unique_ptr<AstExpr>& ast, const TypeRoot* type);
+    void convert(AstExpr*& ast, const TypeRoot* type);
 
     /// Creates a CAST expression, without folding
-    static void cast(unique_ptr<AstExpr>& ast, const TypeRoot* type);
+    static void cast(AstExpr*& ast, const TypeRoot* type);
 
     [[nodiscard]] Symbol* createNewSymbol(AstDecl& ast);
 

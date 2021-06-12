@@ -76,7 +76,7 @@ void ForStmtPass::analyze() {
             if (iterTy != nullptr && !iterTy->isSigned()) {
                 if (const auto* stepIntTy = dyn_cast<TypeIntegral>(m_ast.step->type)) {
                     if (stepIntTy->isSigned()) {
-                        if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step.get())) {
+                        if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step)) {
                             if (static_cast<int64_t>(std::get<uint64_t>(literal->value)) < 0) {
                                 dstTy = iterTy->getSigned();
                             }
@@ -85,7 +85,7 @@ void ForStmtPass::analyze() {
                         }
                     }
                 } else if (isa<TypeFloatingPoint>(m_ast.step->type)) {
-                    if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step.get())) {
+                    if (auto* literal = dyn_cast<AstLiteralExpr>(m_ast.step)) {
                         if (std::get<double>(literal->value) < 0.0) {
                             dstTy = iterTy->getSigned();
                         }
@@ -114,8 +114,8 @@ void ForStmtPass::analyze() {
 }
 
 void ForStmtPass::determineForDirection() {
-    auto* from = dyn_cast<AstLiteralExpr>(m_ast.iterator->expr.get());
-    auto* to = dyn_cast<AstLiteralExpr>(m_ast.limit.get());
+    auto* from = dyn_cast<AstLiteralExpr>(m_ast.iterator->expr);
+    auto* to = dyn_cast<AstLiteralExpr>(m_ast.limit);
     const auto* type = m_ast.iterator->symbol->type();
     bool equal = false;
 
@@ -159,7 +159,7 @@ void ForStmtPass::determineForDirection() {
         return;
     }
 
-    auto* step = dyn_cast<AstLiteralExpr>(m_ast.step.get());
+    auto* step = dyn_cast<AstLiteralExpr>(m_ast.step);
     if (step == nullptr) {
         return;
     }

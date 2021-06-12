@@ -15,7 +15,7 @@ AstPrinter::AstPrinter(Context& context, llvm::raw_ostream& os) noexcept
 void AstPrinter::visit(AstModule& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeStmts(ast.stmtList.get());
+        writeStmts(ast.stmtList);
     });
 }
 
@@ -37,25 +37,25 @@ void AstPrinter::visit(AstImport& ast) {
 void AstPrinter::visit(AstAssignExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.lhs.get(), "lhs");
-        writeExpr(ast.rhs.get(), "rhs");
+        writeExpr(ast.lhs, "lhs");
+        writeExpr(ast.rhs, "rhs");
     });
 }
 
 void AstPrinter::visit(AstExprStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.expr.get());
+        writeExpr(ast.expr);
     });
 }
 
 void AstPrinter::visit(AstVarDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeAttributes(ast.attributes.get());
+        writeAttributes(ast.attributes);
         m_json.attribute("id", ast.name);
-        writeType(ast.typeExpr.get());
-        writeExpr(ast.expr.get());
+        writeType(ast.typeExpr);
+        writeExpr(ast.expr);
     });
 }
 
@@ -63,7 +63,7 @@ void AstPrinter::visit(AstFuncDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("id", ast.name);
-        writeAttributes(ast.attributes.get());
+        writeAttributes(ast.attributes);
 
         if (!ast.paramDecls.empty()) {
             m_json.attributeArray("params", [&] {
@@ -73,16 +73,16 @@ void AstPrinter::visit(AstFuncDecl& ast) {
             });
         }
 
-        writeType(ast.retTypeExpr.get());
+        writeType(ast.retTypeExpr);
     });
 }
 
 void AstPrinter::visit(AstFuncParamDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeAttributes(ast.attributes.get());
+        writeAttributes(ast.attributes);
         m_json.attribute("id", ast.name);
-        writeType(ast.typeExpr.get());
+        writeType(ast.typeExpr);
     });
 }
 
@@ -94,14 +94,14 @@ void AstPrinter::visit(AstFuncStmt& ast) {
         visit(*ast.decl);
         m_json.attributeEnd();
 
-        writeStmts(ast.stmtList.get());
+        writeStmts(ast.stmtList);
     });
 }
 
 void AstPrinter::visit(AstReturnStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.expr.get());
+        writeExpr(ast.expr);
     });
 }
 
@@ -112,7 +112,7 @@ void AstPrinter::visit(AstReturnStmt& ast) {
 void AstPrinter::visit(AstTypeDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeAttributes(ast.attributes.get());
+        writeAttributes(ast.attributes);
         m_json.attribute("id", ast.name);
         m_json.attributeArray("members", [&] {
             for (const auto& decl : ast.decls) {
@@ -140,9 +140,9 @@ void AstPrinter::visit(AstIfStmt& ast) {
                         });
                     }
 
-                    writeExpr(block.expr.get());
+                    writeExpr(block.expr);
 
-                    if (auto* list = dyn_cast<AstStmtList>(block.stmt.get())) {
+                    if (auto* list = dyn_cast<AstStmtList>(block.stmt)) {
                         writeStmts(list);
                     } else {
                         m_json.attributeBegin("stmt");
@@ -169,10 +169,10 @@ void AstPrinter::visit(AstForStmt& ast) {
         m_json.attributeBegin("iter");
         visit(*ast.iterator);
         m_json.attributeEnd();
-        writeExpr(ast.limit.get(), "limit");
-        writeExpr(ast.step.get(), "step");
+        writeExpr(ast.limit, "limit");
+        writeExpr(ast.step, "step");
 
-        if (auto* list = dyn_cast<AstStmtList>(ast.stmt.get())) {
+        if (auto* list = dyn_cast<AstStmtList>(ast.stmt)) {
             writeStmts(list);
         } else {
             m_json.attributeBegin("stmt");
@@ -206,9 +206,9 @@ void AstPrinter::visit(AstDoLoopStmt& ast) {
             m_json.attribute("makeCondition", "PostUntil");
             break;
         }
-        writeExpr(ast.expr.get());
+        writeExpr(ast.expr);
 
-        if (auto* list = dyn_cast<AstStmtList>(ast.stmt.get())) {
+        if (auto* list = dyn_cast<AstStmtList>(ast.stmt)) {
             writeStmts(list);
         } else {
             m_json.attributeBegin("stmt");
@@ -261,7 +261,7 @@ void AstPrinter::visit(AstAttributeList& ast) {
 void AstPrinter::visit(AstAttribute& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeIdent(ast.identExpr.get());
+        writeIdent(ast.identExpr);
         if (!ast.argExprs.empty()) {
             m_json.attributeArray("args", [&] {
                 for (const auto& arg : ast.argExprs) {
@@ -289,7 +289,7 @@ void AstPrinter::visit(AstIdentExpr& ast) {
 void AstPrinter::visit(AstCallExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.callable.get(), "callable");
+        writeExpr(ast.callable, "callable");
         if (!ast.args.empty()) {
             m_json.attributeArray("args", [&] {
                 for (const auto& arg : ast.args) {
@@ -339,7 +339,7 @@ void AstPrinter::visit(AstUnaryExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("op", Token::description(ast.tokenKind));
-        writeExpr(ast.expr.get());
+        writeExpr(ast.expr);
     });
 }
 
@@ -353,15 +353,15 @@ void AstPrinter::visit(AstDereference& ast) {
 void AstPrinter::visit(AstAddressOf& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.expr.get());
+        writeExpr(ast.expr);
     });
 }
 
 void AstPrinter::visit(AstMemberAccess& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.lhs.get(), "lhs");
-        writeExpr(ast.rhs.get(), "rhs");
+        writeExpr(ast.lhs, "lhs");
+        writeExpr(ast.rhs, "rhs");
     });
 }
 
@@ -369,8 +369,8 @@ void AstPrinter::visit(AstBinaryExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("op", Token::description(ast.tokenKind));
-        writeExpr(ast.lhs.get(), "lhs");
-        writeExpr(ast.rhs.get(), "rhs");
+        writeExpr(ast.lhs, "lhs");
+        writeExpr(ast.rhs, "rhs");
     });
 }
 
@@ -378,17 +378,17 @@ void AstPrinter::visit(AstCastExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("implicit", ast.implicit);
-        writeType(ast.typeExpr.get());
-        writeExpr(ast.expr.get());
+        writeType(ast.typeExpr);
+        writeExpr(ast.expr);
     });
 }
 
 void AstPrinter::visit(AstIfExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        writeExpr(ast.expr.get(), "expr");
-        writeExpr(ast.trueExpr.get(), "true");
-        writeExpr(ast.falseExpr.get(), "false");
+        writeExpr(ast.expr, "expr");
+        writeExpr(ast.trueExpr, "true");
+        writeExpr(ast.falseExpr, "false");
     });
 }
 

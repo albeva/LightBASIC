@@ -349,7 +349,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) {
         m_modules.emplace_back(std::make_unique<TranslationUnit>(
             nullptr,
             source,
-            std::move(ast)));
+            ast));
         return;
     }
 
@@ -366,7 +366,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) {
     m_modules.emplace_back(std::make_unique<TranslationUnit>(
         gen.getModule(),
         source,
-        std::move(ast)));
+        ast));
 }
 
 void Driver::dumpAst() {

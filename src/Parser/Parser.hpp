@@ -18,7 +18,7 @@ public:
     Parser(Context& context, unsigned int fileId, bool isMain);
     ~Parser() noexcept;
 
-    [[nodiscard]] unique_ptr<AstModule> parse();
+    [[nodiscard]] AstModule* parse();
 
 private:
     enum class Scope {
@@ -34,48 +34,48 @@ private:
         LLVM_MARK_AS_BITMASK_ENUM(/* LargestValue = */ CallWithoutParens)
     };
 
-    [[nodiscard]] unique_ptr<AstStmtList> stmtList();
-    [[nodiscard]] unique_ptr<AstStmt> statement();
-    [[nodiscard]] unique_ptr<AstImport> kwImport();
-    [[nodiscard]] unique_ptr<AstStmt> declaration();
+    [[nodiscard]] AstStmtList* stmtList();
+    [[nodiscard]] AstStmt* statement();
+    [[nodiscard]] AstImport* kwImport();
+    [[nodiscard]] AstStmt* declaration();
 
-    [[nodiscard]] unique_ptr<AstExpr> expression(ExprFlags flags = ExprFlags::None);
-    [[nodiscard]] unique_ptr<AstExpr> factor();
-    [[nodiscard]] unique_ptr<AstExpr> primary();
-    [[nodiscard]] unique_ptr<AstExpr> unary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> expr);
-    [[nodiscard]] unique_ptr<AstExpr> binary(llvm::SMRange range, TokenKind op, unique_ptr<AstExpr> lhs, unique_ptr<AstExpr> rhs);
-    [[nodiscard]] unique_ptr<AstExpr> expression(unique_ptr<AstExpr> lhs, int precedence);
-    [[nodiscard]] unique_ptr<AstIdentExpr> identifier();
-    [[nodiscard]] unique_ptr<AstLiteralExpr> literal();
-    [[nodiscard]] unique_ptr<AstCallExpr> callExpr();
-    [[nodiscard]] unique_ptr<AstIfExpr> ifExpr();
-    [[nodiscard]] std::vector<unique_ptr<AstExpr>> expressionList();
+    [[nodiscard]] AstExpr* expression(ExprFlags flags = ExprFlags::None);
+    [[nodiscard]] AstExpr* factor();
+    [[nodiscard]] AstExpr* primary();
+    [[nodiscard]] AstExpr* unary(llvm::SMRange range, TokenKind op, AstExpr* expr);
+    [[nodiscard]] AstExpr* binary(llvm::SMRange range, TokenKind op, AstExpr* lhs, AstExpr* rhs);
+    [[nodiscard]] AstExpr* expression(AstExpr* lhs, int precedence);
+    [[nodiscard]] AstIdentExpr* identifier();
+    [[nodiscard]] AstLiteralExpr* literal();
+    [[nodiscard]] AstCallExpr* callExpr();
+    [[nodiscard]] AstIfExpr* ifExpr();
+    [[nodiscard]] std::vector<AstExpr*> expressionList();
 
-    [[nodiscard]] unique_ptr<AstVarDecl> kwVar(unique_ptr<AstAttributeList> attribs);
-    [[nodiscard]] unique_ptr<AstIfStmt> kwIf();
+    [[nodiscard]] AstVarDecl* kwVar(AstAttributeList* attribs);
+    [[nodiscard]] AstIfStmt* kwIf();
     [[nodiscard]] AstIfStmtBlock ifBlock();
-    [[nodiscard]] AstIfStmtBlock thenBlock(std::vector<unique_ptr<AstVarDecl>> decls, unique_ptr<AstExpr> expr);
-    [[nodiscard]] unique_ptr<AstForStmt> kwFor();
-    [[nodiscard]] unique_ptr<AstDoLoopStmt> kwDo();
-    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwContinue();
-    [[nodiscard]] unique_ptr<AstControlFlowBranch> kwExit();
+    [[nodiscard]] AstIfStmtBlock thenBlock(std::vector<AstVarDecl*> decls, AstExpr* expr);
+    [[nodiscard]] AstForStmt* kwFor();
+    [[nodiscard]] AstDoLoopStmt* kwDo();
+    [[nodiscard]] AstControlFlowBranch* kwContinue();
+    [[nodiscard]] AstControlFlowBranch* kwExit();
 
-    [[nodiscard]] unique_ptr<AstAttributeList> attributeList();
-    [[nodiscard]] unique_ptr<AstAttribute> attribute();
-    [[nodiscard]] std::vector<unique_ptr<AstLiteralExpr>> attributeArgList();
+    [[nodiscard]] AstAttributeList* attributeList();
+    [[nodiscard]] AstAttribute* attribute();
+    [[nodiscard]] std::vector<AstLiteralExpr*> attributeArgList();
 
-    [[nodiscard]] unique_ptr<AstTypeExpr> typeExpr();
+    [[nodiscard]] AstTypeExpr* typeExpr();
 
-    [[nodiscard]] unique_ptr<AstFuncDecl> kwDeclare(unique_ptr<AstAttributeList> attribs);
-    [[nodiscard]] unique_ptr<AstFuncDecl> funcSignature(llvm::SMLoc start, unique_ptr<AstAttributeList> attribs, bool hasImpl);
-    [[nodiscard]] std::vector<unique_ptr<AstFuncParamDecl>> funcParamList(bool& isVariadic);
-    [[nodiscard]] unique_ptr<AstFuncParamDecl> funcParam();
-    [[nodiscard]] unique_ptr<AstFuncStmt> kwFunction(unique_ptr<AstAttributeList> attribs);
-    [[nodiscard]] unique_ptr<AstStmt> kwReturn();
+    [[nodiscard]] AstFuncDecl* kwDeclare(AstAttributeList* attribs);
+    [[nodiscard]] AstFuncDecl* funcSignature(llvm::SMLoc start, AstAttributeList* attribs, bool hasImpl);
+    [[nodiscard]] std::vector<AstFuncParamDecl*> funcParamList(bool& isVariadic);
+    [[nodiscard]] AstFuncParamDecl* funcParam();
+    [[nodiscard]] AstFuncStmt* kwFunction(AstAttributeList* attribs);
+    [[nodiscard]] AstStmt* kwReturn();
 
-    [[nodiscard]] unique_ptr<AstTypeDecl> kwType(unique_ptr<AstAttributeList> attribs);
-    [[nodiscard]] std::vector<unique_ptr<AstDecl>> typeDeclList();
-    [[nodiscard]] unique_ptr<AstDecl> typeMember(unique_ptr<AstAttributeList> attribs);
+    [[nodiscard]] AstTypeDecl* kwType(AstAttributeList* attribs);
+    [[nodiscard]] std::vector<AstDecl*> typeDeclList();
+    [[nodiscard]] AstDecl* typeMember(AstAttributeList* attribs);
 
     // replace token kind with another (e.g. Minus to Negate)
     void replace(TokenKind what, TokenKind with) noexcept;

@@ -108,7 +108,7 @@ void SemanticAnalyzer::visit(AstFuncParamDecl& /*ast*/) {
 void SemanticAnalyzer::visit(AstFuncStmt& ast) {
     RESTORE_ON_EXIT(m_table);
     RESTORE_ON_EXIT(m_function);
-    m_function = ast.decl.get();
+    m_function = ast.decl;
     m_table = ast.decl->symbolTable.get();
     visit(*ast.stmtList);
 }
@@ -240,7 +240,7 @@ void SemanticAnalyzer::visit(AstTypeExpr& ast) {
 // Expressions
 //----------------------------------------
 
-void SemanticAnalyzer::expression(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
+void SemanticAnalyzer::expression(AstExpr*& ast, const TypeRoot* type) {
     visit(*ast);
     m_constantFolder.fold(ast);
     if (type != nullptr) {
@@ -444,7 +444,7 @@ void SemanticAnalyzer::arithmetic(AstBinaryExpr& ast) {
         fatalError("Applying artithmetic operation to non numeric type");
     }
 
-    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) {
+    const auto convert = [&](AstExpr*& expr, const TypeRoot* ty) {
         cast(expr, ty);
         m_constantFolder.fold(expr);
         ast.type = ty;
@@ -481,7 +481,7 @@ void SemanticAnalyzer::comparison(AstBinaryExpr& ast) {
         fatalError("Cannot apply operationg to types");
     }
 
-    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) {
+    const auto convert = [&](AstExpr*& expr, const TypeRoot* ty) {
         cast(expr, ty);
         m_constantFolder.fold(expr);
         ast.type = TypeBoolean::get();
@@ -528,12 +528,12 @@ void SemanticAnalyzer::visit(AstCastExpr& ast) {
     ast.flags = ast.expr->flags;
 }
 
-void SemanticAnalyzer::convert(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
+void SemanticAnalyzer::convert(AstExpr*& ast, const TypeRoot* type) {
     cast(ast, type);
     m_constantFolder.fold(ast);
 }
 
-void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
+void SemanticAnalyzer::coerce(AstExpr*& ast, const TypeRoot* type) {
     if (ast->type == type) {
         return;
     }
@@ -554,16 +554,16 @@ void SemanticAnalyzer::coerce(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
     }
 }
 
-void SemanticAnalyzer::cast(unique_ptr<AstExpr>& ast, const TypeRoot* type) {
+void SemanticAnalyzer::cast(AstExpr*& ast, const TypeRoot* type) {
     auto category = ast->flags;
-    auto cast = AstCastExpr::create(
+    auto* cast = new AstCastExpr(
         ast->range,
-        std::move(ast),
+        ast,
         nullptr,
         true);
     cast->type = type;
     cast->flags = category;
-    ast = std::move(cast); // NOLINT
+    ast = cast; // NOLINT
 }
 
 //------------------------------------------------------------------
@@ -575,7 +575,7 @@ void SemanticAnalyzer::visit(AstIfExpr& ast) {
     expression(ast.trueExpr);
     expression(ast.falseExpr);
 
-    const auto convert = [&](unique_ptr<AstExpr>& expr, const TypeRoot* ty) {
+    const auto convert = [&](AstExpr*& expr, const TypeRoot* ty) {
         cast(expr, ty);
         m_constantFolder.fold(expr);
         ast.type = ty;
