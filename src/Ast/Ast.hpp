@@ -42,32 +42,26 @@ struct AstRoot {
     }
 };
 
-template<typename This, typename Base, AstKind kind>
-struct AstNode : Base {
-    using Base::Base;
-    constexpr static AstKind KIND = kind;
-
-    constexpr static bool classof(const AstRoot* ast) noexcept {
-        return ast->kind == kind;
-    }
-};
-
 #define IS_AST_CLASSOF(FIRST, LAST) ast->kind >= AstKind::FIRST && ast->kind <= AstKind::LAST;
 
 //----------------------------------------
 // Module
 //----------------------------------------
 
-struct AstModule final : AstNode<AstModule, AstRoot, AstKind::Module> {
+struct AstModule final : AstRoot {
     AstModule(
         unsigned int file,
         llvm::SMRange range_,
         bool implicitMain,
         AstStmtList* stms) noexcept
-    : AstNode{ KIND, range_ },
+    : AstRoot{ AstKind::Module, range_ },
       fileId{ file },
       hasImplicitMain{ implicitMain },
       stmtList{ stms } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::Module;
+    }
 
     const unsigned int fileId;
     const bool hasImplicitMain;
@@ -87,58 +81,78 @@ struct AstStmt : AstRoot {
     }
 };
 
-struct AstStmtList final : AstNode<AstStmtList, AstStmt, AstKind::StmtList> {
+struct AstStmtList final : AstStmt {
     AstStmtList(
         llvm::SMRange range_,
         std::vector<AstStmt*> stmts_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::StmtList, range_ },
       stmts{ std::move(stmts_) } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::StmtList;
+    }
 
     std::vector<AstStmt*> stmts;
 };
 
-struct AstImport final : AstNode<AstImport, AstStmt, AstKind::Import> {
+struct AstImport final : AstStmt {
     AstImport(
         llvm::SMRange range_,
         StringRef import_,
         AstModule* module_ = nullptr) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::Import, range_ },
       import{ import_ },
       module{ module_ } {}
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::Import;
+    }
 
     const StringRef import;
     AstModule* module;
 };
 
-struct AstExprStmt final : AstNode<AstExprStmt, AstStmt, AstKind::ExprStmt> {
+struct AstExprStmt final : AstStmt {
     AstExprStmt(
         llvm::SMRange range_,
         AstExpr* expr_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::ExprStmt, range_ },
       expr{ expr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::ExprStmt;
+    }
 
     AstExpr* expr;
 };
 
-struct AstFuncStmt final : AstNode<AstFuncStmt, AstStmt, AstKind::FuncStmt> {
+struct AstFuncStmt final : AstStmt {
     AstFuncStmt(
         llvm::SMRange range_,
         AstFuncDecl* decl_,
         AstStmtList* stmtList_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::FuncStmt, range_ },
       decl{ decl_ },
       stmtList{ stmtList_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::FuncStmt;
+    }
 
     AstFuncDecl* decl;
     AstStmtList* stmtList;
 };
 
-struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt> {
+struct AstReturnStmt final : AstStmt {
     AstReturnStmt(
         llvm::SMRange range_,
         AstExpr* expr_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::ReturnStmt, range_ },
       expr{ expr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::ReturnStmt;
+    }
 
     AstExpr* expr;
 };
@@ -150,17 +164,21 @@ struct AstIfStmtBlock final {
     AstStmt* stmt;
 };
 
-struct AstIfStmt final : AstNode<AstIfStmt, AstStmt, AstKind::IfStmt> {
+struct AstIfStmt final : AstStmt {
     AstIfStmt(
         llvm::SMRange range_,
         std::vector<AstIfStmtBlock> blocks_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::IfStmt, range_ },
       blocks{ std::move(blocks_) } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::IfStmt;
+    }
 
     std::vector<AstIfStmtBlock> blocks;
 };
 
-struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
+struct AstForStmt final : AstStmt {
     enum class Direction {
         Unknown,
         Skip,
@@ -175,13 +193,17 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
         AstExpr* step_,
         AstStmt* stmt_,
         StringRef next_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::ForStmt, range_ },
       decls{ std::move(decls_) },
       iterator{ iter_ },
       limit{ limit_ },
       step{ step_ },
       stmt{ stmt_ },
       next{ next_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::ForStmt;
+    }
 
     std::vector<AstVarDecl*> decls;
     AstVarDecl* iterator;
@@ -194,7 +216,7 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     SymbolTable* symbolTable;
 };
 
-struct AstDoLoopStmt final : AstNode<AstDoLoopStmt, AstStmt, AstKind::DoLoopStmt> {
+struct AstDoLoopStmt final : AstStmt {
     enum class Condition {
         None,
         PreWhile,
@@ -209,11 +231,15 @@ struct AstDoLoopStmt final : AstNode<AstDoLoopStmt, AstStmt, AstKind::DoLoopStmt
         Condition condition_,
         AstExpr* expr_,
         AstStmt* stmt_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::DoLoopStmt, range_ },
       decls{ std::move(decls_) },
       condition{ condition_ },
       expr{ expr_ },
       stmt{ stmt_ } {}
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::DoLoopStmt;
+    }
 
     std::vector<AstVarDecl*> decls;
     const Condition condition;
@@ -222,7 +248,7 @@ struct AstDoLoopStmt final : AstNode<AstDoLoopStmt, AstStmt, AstKind::DoLoopStmt
     SymbolTable* symbolTable;
 };
 
-struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKind::ControlFlowBranch> {
+struct AstControlFlowBranch final : AstStmt {
     enum class Action {
         Continue,
         Exit
@@ -232,9 +258,13 @@ struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKi
         llvm::SMRange range_,
         Action action_,
         std::vector<ControlFlowStatement> destination_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstStmt{ AstKind::ControlFlowBranch, range_ },
       action{ action_ },
       destination{ std::move(destination_) } {}
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::ControlFlowBranch;
+    }
 
     Action action;
     std::vector<ControlFlowStatement> destination;
@@ -243,20 +273,17 @@ struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKi
 //----------------------------------------
 // Attributes
 //----------------------------------------
-struct AstAttr : AstRoot {
-    using AstRoot::AstRoot;
 
-    static constexpr bool classof(const AstRoot* ast) noexcept {
-        return AST_ATTR_RANGE(IS_AST_CLASSOF)
-    }
-};
-
-struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::AttributeList> {
+struct AstAttributeList final : AstRoot {
     AstAttributeList(
         llvm::SMRange range_,
         std::vector<AstAttribute*> attribs_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstRoot{ AstKind::AttributeList, range_ },
       attribs{ std::move(attribs_) } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::AttributeList;
+    }
 
     [[nodiscard]] bool exists(StringRef name) const noexcept;
     [[nodiscard]] std::optional<StringRef> getStringLiteral(StringRef key) const noexcept;
@@ -264,14 +291,18 @@ struct AstAttributeList final : AstNode<AstAttributeList, AstAttr, AstKind::Attr
     std::vector<AstAttribute*> attribs;
 };
 
-struct AstAttribute final : AstNode<AstAttribute, AstAttr, AstKind::Attribute> {
+struct AstAttribute final : AstRoot {
     AstAttribute(
         llvm::SMRange range_,
         AstIdentExpr* ident,
         std::vector<AstLiteralExpr*> args) noexcept
-    : AstNode{ KIND, range_ },
+    : AstRoot{ AstKind::Attribute, range_ },
       identExpr{ ident },
       argExprs{ std::move(args) } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::Attribute;
+    }
 
     AstIdentExpr* identExpr;
     std::vector<AstLiteralExpr*> argExprs;
@@ -299,22 +330,26 @@ struct AstDecl : AstStmt {
     Symbol* symbol = nullptr;
 };
 
-struct AstVarDecl final : AstNode<AstVarDecl, AstDecl, AstKind::VarDecl> {
+struct AstVarDecl final : AstDecl {
     AstVarDecl(
         llvm::SMRange range_,
         StringRef name_,
         AstAttributeList* attrs_,
         AstTypeExpr* type_,
         AstExpr* expr_) noexcept
-    : AstNode{ KIND, range_, name_, attrs_ },
+    : AstDecl{ AstKind::VarDecl, range_, name_, attrs_ },
       typeExpr{ type_ },
       expr{ expr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::VarDecl;
+    }
 
     AstTypeExpr* typeExpr;
     AstExpr* expr;
 };
 
-struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
+struct AstFuncDecl final : AstDecl {
     AstFuncDecl(
         llvm::SMRange range_,
         StringRef name_,
@@ -323,11 +358,15 @@ struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
         bool variadic_,
         AstTypeExpr* retType_,
         bool hasImpl_) noexcept
-    : AstNode{ KIND, range_, name_, attrs_ },
+    : AstDecl{ AstKind::FuncDecl, range_, name_, attrs_ },
       paramDecls{ std::move(params_) },
       variadic{ variadic_ },
       retTypeExpr{ retType_ },
       hasImpl{ hasImpl_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::FuncDecl;
+    }
 
     std::vector<AstFuncParamDecl*> paramDecls;
     const bool variadic;
@@ -336,26 +375,34 @@ struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
     SymbolTable* symbolTable;
 };
 
-struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::FuncParamDecl> {
+struct AstFuncParamDecl final : AstDecl {
     AstFuncParamDecl(
         llvm::SMRange range_,
         StringRef name_,
         AstAttributeList* attrs,
         AstTypeExpr* type) noexcept
-    : AstNode{ KIND, range_, name_, attrs },
+    : AstDecl{ AstKind::FuncParamDecl, range_, name_, attrs },
       typeExpr{ type } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::FuncParamDecl;
+    }
 
     AstTypeExpr* typeExpr;
 };
 
-struct AstTypeDecl final : AstNode<AstTypeDecl, AstDecl, AstKind::TypeDecl> {
+struct AstTypeDecl final : AstDecl {
     AstTypeDecl(
         llvm::SMRange range_,
         StringRef name_,
         AstAttributeList* attrs,
         std::vector<AstDecl*> decls_) noexcept
-    : AstNode{ KIND, range_, name_, attrs },
+    : AstDecl{ AstKind::TypeDecl, range_, name_, attrs },
       decls{ std::move(decls_) } {}
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::TypeDecl;
+    }
 
     std::vector<AstDecl*> decls;
     SymbolTable* symbolTable;
@@ -364,31 +411,26 @@ struct AstTypeDecl final : AstNode<AstTypeDecl, AstDecl, AstKind::TypeDecl> {
 //----------------------------------------
 // Types
 //----------------------------------------
-struct AstType : AstRoot {
-    using AstRoot::AstRoot;
-
-    static constexpr bool classof(const AstRoot* ast) noexcept {
-        return AST_TYPE_RANGE(IS_AST_CLASSOF)
-    }
-
-    const TypeRoot* type = nullptr;
-};
-
-struct AstTypeExpr final : AstNode<AstTypeExpr, AstType, AstKind::TypeExpr> {
+struct AstTypeExpr final : AstRoot {
     AstTypeExpr(
         llvm::SMRange range_,
         AstIdentExpr* ident_,
         TokenKind tokenKind_,
         int deref) noexcept
-    : AstNode{ KIND, range_ },
+    : AstRoot{ AstKind::TypeExpr, range_ },
       ident{ ident_ },
       tokenKind{ tokenKind_ },
       dereference{ deref } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::TypeExpr;
+    }
 
     // TODO use AstExpr?
     AstIdentExpr* ident;
     const TokenKind tokenKind;
     const int dereference;
+    const TypeRoot* type = nullptr;
 };
 
 //----------------------------------------
@@ -405,143 +447,187 @@ struct AstExpr : AstRoot {
     ValueFlags flags{};
 };
 
-struct AstAssignExpr final : AstNode<AstAssignExpr, AstExpr, AstKind::AssignExpr> {
+struct AstAssignExpr final : AstExpr {
     AstAssignExpr(
         llvm::SMRange range_,
         AstExpr* lhs_,
         AstExpr* rhs_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::AssignExpr, range_ },
       lhs{ lhs_ },
       rhs{ rhs_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::AssignExpr;
+    }
 
     AstExpr* lhs;
     AstExpr* rhs;
 };
 
-struct AstIdentExpr final : AstNode<AstIdentExpr, AstExpr, AstKind::IdentExpr> {
+struct AstIdentExpr final : AstExpr {
     AstIdentExpr(
         llvm::SMRange range_,
         StringRef name_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::IdentExpr, range_ },
       name{ name_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::IdentExpr;
+    }
 
     StringRef name;
     Symbol* symbol = nullptr;
 };
 
-struct AstCallExpr final : AstNode<AstCallExpr, AstExpr, AstKind::CallExpr> {
+struct AstCallExpr final : AstExpr {
     AstCallExpr(
         llvm::SMRange range_,
         AstExpr* callable_,
         std::vector<AstExpr*> args_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::CallExpr, range_ },
       callable{ callable_ },
       args{ std::move(args_) } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::CallExpr;
+    }
 
     AstExpr* callable;
     std::vector<AstExpr*> args;
 };
 
-struct AstLiteralExpr final : AstNode<AstLiteralExpr, AstExpr, AstKind::LiteralExpr> {
+struct AstLiteralExpr final : AstExpr {
     using Value = Token::Value;
 
     AstLiteralExpr(
         llvm::SMRange range_,
         Value value_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::LiteralExpr, range_ },
       value{ value_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::LiteralExpr;
+    }
 
     const Value value;
 };
 
-struct AstUnaryExpr final : AstNode<AstUnaryExpr, AstExpr, AstKind::UnaryExpr> {
+struct AstUnaryExpr final : AstExpr {
     AstUnaryExpr(
         llvm::SMRange range_,
         TokenKind tokenKind_,
         AstExpr* expr_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::UnaryExpr, range_ },
       tokenKind{ tokenKind_ },
       expr{ expr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::UnaryExpr;
+    }
 
     const TokenKind tokenKind;
     AstExpr* expr;
 };
 
-struct AstDereference final : AstNode<AstDereference, AstExpr, AstKind::Dereference> {
+struct AstDereference final : AstExpr {
     AstDereference(
         llvm::SMRange range_,
         AstExpr* expr_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::Dereference, range_ },
       expr{ expr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::Dereference;
+    }
 
     AstExpr* expr;
 };
 
-struct AstAddressOf final : AstNode<AstAddressOf, AstExpr, AstKind::AddressOf> {
+struct AstAddressOf final : AstExpr {
     AstAddressOf(
         llvm::SMRange range_,
         AstExpr* expr_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::AddressOf, range_ },
       expr{ expr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::AddressOf;
+    }
 
     AstExpr* expr;
 };
 
-struct AstMemberAccess final : AstNode<AstMemberAccess, AstExpr, AstKind::MemberAccess> {
+struct AstMemberAccess final : AstExpr {
     AstMemberAccess(
         llvm::SMRange range_,
         AstExpr* lhs_,
         AstExpr* rhs_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::MemberAccess, range_ },
       lhs{ lhs_ },
       rhs{ rhs_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::MemberAccess;
+    }
 
     AstExpr* lhs;
     AstExpr* rhs;
 };
 
-struct AstBinaryExpr final : AstNode<AstBinaryExpr, AstExpr, AstKind::BinaryExpr> {
+struct AstBinaryExpr final : AstExpr {
     AstBinaryExpr(
         llvm::SMRange range_,
         TokenKind tokenKind_,
         AstExpr* lhs_,
         AstExpr* rhs_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::BinaryExpr, range_ },
       tokenKind{ tokenKind_ },
       lhs{ lhs_ },
       rhs{ rhs_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::BinaryExpr;
+    }
 
     const TokenKind tokenKind;
     AstExpr* lhs;
     AstExpr* rhs;
 };
 
-struct AstCastExpr final : AstNode<AstCastExpr, AstExpr, AstKind::CastExpr> {
+struct AstCastExpr final : AstExpr {
     AstCastExpr(
         llvm::SMRange range_,
         AstExpr* expr_,
         AstTypeExpr* typeExpr_,
         bool implicit_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::CastExpr, range_ },
       expr{ expr_ },
       typeExpr{ typeExpr_ },
       implicit{ implicit_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::CastExpr;
+    }
 
     AstExpr* expr;
     AstTypeExpr* typeExpr;
     const bool implicit;
 };
 
-struct AstIfExpr final : AstNode<AstIfExpr, AstExpr, AstKind::IfExpr> {
+struct AstIfExpr final : AstExpr {
     AstIfExpr(
         llvm::SMRange range_,
         AstExpr* expr_,
         AstExpr* trueExpr_,
         AstExpr* falseExpr_) noexcept
-    : AstNode{ KIND, range_ },
+    : AstExpr{ AstKind::IfExpr, range_ },
       expr{ expr_ },
       trueExpr{ trueExpr_ },
       falseExpr{ falseExpr_ } {};
+
+    constexpr static bool classof(const AstRoot* ast) noexcept {
+        return ast->kind == AstKind::IfExpr;
+    }
 
     AstExpr* expr;
     AstExpr* trueExpr;

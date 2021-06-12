@@ -32,22 +32,6 @@ public:
         }
     }
 
-    void visit(AstAttr& ast) {
-        switch (ast.kind) {
-            AST_ATTRIB_NODES(VISIT_CASE)
-        default:
-            llvm_unreachable(("visit: Unmatched Attr: "_t + ast.getClassName()).str().c_str());
-        }
-    }
-
-    void visit(AstType& ast) {
-        switch (ast.kind) {
-            AST_TYPE_NODES(VISIT_CASE)
-        default:
-            llvm_unreachable(("visit: Unmatched Attr: "_t + ast.getClassName()).str().c_str());
-        }
-    }
-
     ExprRetTy visit(AstExpr& ast) {
         switch (ast.kind) {
             AST_EXPR_NODES(VISIT_CASE)
