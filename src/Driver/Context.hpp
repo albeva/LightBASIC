@@ -58,9 +58,6 @@ public:
         return res;
     }
 
-    /**
-     * Declared function types
-     */
     llvm::SmallVector<TypeFunction*> funcTypes;
     llvm::SmallVector<TypePointer*> ptrTypes;
 
