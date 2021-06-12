@@ -29,7 +29,7 @@ protected:
     void expect(lbc::TokenKind kind, const std::string& lexeme = "", unsigned line = 0, unsigned col = 0, unsigned len = 0) {
         lbc::Token token;
         m_lexer->next(token);
-        EXPECT_EQ(token.kind(), kind);
+        EXPECT_EQ(token.getKind(), kind);
 
         if (!lexeme.empty()) {
             EXPECT_EQ(token.asString(), lexeme);

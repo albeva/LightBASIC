@@ -3,11 +3,11 @@
 //
 #include "Parser.hpp"
 #include "Ast/Ast.hpp"
+#include "Driver/CompileOptions.hpp"
 #include "Driver/Context.hpp"
 #include "Lexer/Lexer.hpp"
 #include "Lexer/Token.hpp"
 #include "Type/Type.hpp"
-#include <limits>
 using namespace lbc;
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain)
@@ -46,7 +46,7 @@ unique_ptr<AstModule> Parser::parse() {
  */
 unique_ptr<AstStmtList> Parser::stmtList() {
     constexpr auto isNonTerminator = [](const Token& token) {
-        switch (token.kind()) {
+        switch (token.getKind()) {
         case TokenKind::End:
         case TokenKind::Else:
         case TokenKind::Next:
@@ -91,7 +91,7 @@ unique_ptr<AstStmt> Parser::statement() {
     }
 
     if (m_scope == Scope::Root) {
-        if (match(TokenKind::Import)) {
+        if (m_token.is(TokenKind::Import)) {
             return kwImport();
         }
         if (!m_isMain) {
@@ -99,7 +99,7 @@ unique_ptr<AstStmt> Parser::statement() {
         }
     }
 
-    switch (m_token.kind()) {
+    switch (m_token.getKind()) {
     case TokenKind::Return:
         return kwReturn();
     case TokenKind::If:
@@ -127,6 +127,7 @@ unique_ptr<AstStmt> Parser::statement() {
  */
 unique_ptr<AstImport> Parser::kwImport() {
     // assume m_token == Import
+    assert(m_token.is(TokenKind::Import));
     advance();
 
     expect(TokenKind::Identifier);
@@ -135,7 +136,7 @@ unique_ptr<AstImport> Parser::kwImport() {
     advance();
 
     // Imported file
-    auto source = m_context.getCompilerDir() / "lib" / (import + ".bas").str();
+    auto source = m_context.getOptions().getCompilerDir() / "lib" / (import + ".bas").str();
     if (!m_context.import(source.string())) {
         return AstImport::create(llvm::SMRange{ start, m_endLoc }, import);
     }
@@ -176,7 +177,7 @@ unique_ptr<AstImport> Parser::kwImport() {
 unique_ptr<AstStmt> Parser::declaration() {
     auto attribs = attributeList();
 
-    switch (m_token.kind()) {
+    switch (m_token.getKind()) {
     case TokenKind::Var:
         return kwVar(std::move(attribs));
     case TokenKind::Declare:
@@ -206,7 +207,7 @@ unique_ptr<AstStmt> Parser::declaration() {
  *  AttributeList = [ '[' Attribute { ','  Attribute } ']' ].
  */
 unique_ptr<AstAttributeList> Parser::attributeList() {
-    if (!match(TokenKind::BracketOpen)) {
+    if (m_token.isNot(TokenKind::BracketOpen)) {
         return nullptr;
     }
 
@@ -258,7 +259,7 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgList() {
     if (accept(TokenKind::Assign)) {
         args.emplace_back(literal());
     } else if (accept(TokenKind::ParenOpen)) {
-        while (isValid() && m_token != TokenKind::ParenClose) {
+        while (!m_token.isOneOf(TokenKind::EndOfFile, TokenKind::ParenClose)) {
             args.emplace_back(literal());
             if (!accept(TokenKind::Comma)) {
                 break;
@@ -284,6 +285,7 @@ std::vector<unique_ptr<AstLiteralExpr>> Parser::attributeArgList() {
  */
 unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) {
     // assume m_token == VAR
+    assert(m_token.is(TokenKind::Var));
     auto start = attribs ? attribs->range.Start : m_token.range().Start;
     advance();
 
@@ -325,6 +327,7 @@ unique_ptr<AstVarDecl> Parser::kwVar(unique_ptr<AstAttributeList> attribs) {
  */
 unique_ptr<AstFuncDecl> Parser::kwDeclare(unique_ptr<AstAttributeList> attribs) {
     // assume m_token == DECLARE
+    assert(m_token.is(TokenKind::Declare));
     if (m_scope != Scope::Root) {
         error("Nested declarations not allowed");
     }
@@ -384,10 +387,10 @@ unique_ptr<AstFuncDecl> Parser::funcSignature(llvm::SMLoc start, unique_ptr<AstA
  */
 std::vector<unique_ptr<AstFuncParamDecl>> Parser::funcParamList(bool& isVariadic) {
     std::vector<unique_ptr<AstFuncParamDecl>> params;
-    while (isValid() && m_token != TokenKind::ParenClose) {
+    while (!m_token.isOneOf(TokenKind::EndOfFile, TokenKind::ParenClose)) {
         if (accept(TokenKind::Ellipsis)) {
             isVariadic = true;
-            if (match(TokenKind::Comma)) {
+            if (m_token.is(TokenKind::Comma)) {
                 error("Variadic parameter must be last in function declaration");
             }
             break;
@@ -436,6 +439,7 @@ unique_ptr<AstFuncParamDecl> Parser::funcParam() {
  */
 unique_ptr<AstTypeDecl> Parser::kwType(unique_ptr<AstAttributeList> attribs) {
     // assume m_token == TYPE
+    assert(m_token.is(TokenKind::Type));
     auto start = m_token.range().Start;
     advance();
 
@@ -473,7 +477,7 @@ std::vector<unique_ptr<AstDecl>> Parser::typeDeclList() {
         auto attribs = attributeList();
         if (attribs) {
             expect(TokenKind::Identifier);
-        } else if (!match(TokenKind::Identifier)) {
+        } else if (m_token.isNot(TokenKind::Identifier)) {
             break;
         }
 
@@ -492,6 +496,7 @@ std::vector<unique_ptr<AstDecl>> Parser::typeDeclList() {
  */
 unique_ptr<AstDecl> Parser::typeMember(unique_ptr<AstAttributeList> attribs) {
     // assume m_token == Identifier
+    assert(m_token.is(TokenKind::Identifier));
     auto start = m_token.range().Start;
     auto id = m_token.getStringValue();
     advance();
@@ -555,6 +560,7 @@ unique_ptr<AstFuncStmt> Parser::kwFunction(unique_ptr<AstAttributeList> attribs)
  */
 unique_ptr<AstStmt> Parser::kwReturn() {
     // assume m_token == RETURN
+    assert(m_token.is(TokenKind::Return));
     if (m_scope == Scope::Root && !m_isMain) {
         error("Unexpected RETURN outside SUB / FUNCTION body");
     }
@@ -562,7 +568,7 @@ unique_ptr<AstStmt> Parser::kwReturn() {
     advance();
 
     unique_ptr<AstExpr> expr;
-    if (!match(TokenKind::EndOfStmt)) {
+    if (m_token.isNot(TokenKind::EndOfStmt)) {
         expr = expression();
     }
 
@@ -585,16 +591,17 @@ unique_ptr<AstStmt> Parser::kwReturn() {
  */
 unique_ptr<AstIfStmt> Parser::kwIf() {
     // assume m_token == IF
+    assert(m_token.is(TokenKind::If));
     auto start = m_token.range().Start;
     advance();
 
     std::vector<AstIfStmtBlock> m_blocks;
     m_blocks.emplace_back(ifBlock());
 
-    if (match(TokenKind::EndOfStmt)) {
+    if (m_token.is(TokenKind::EndOfStmt)) {
         Token next;
         m_lexer->peek(next);
-        if (next.kind() == TokenKind::Else) {
+        if (next.getKind() == TokenKind::Else) {
             advance();
         }
     }
@@ -606,10 +613,10 @@ unique_ptr<AstIfStmt> Parser::kwIf() {
             m_blocks.emplace_back(thenBlock({}, nullptr));
         }
 
-        if (match(TokenKind::EndOfStmt)) {
+        if (m_token.is(TokenKind::EndOfStmt)) {
             Token next;
             m_lexer->peek(next);
-            if (next.kind() == TokenKind::Else) {
+            if (next.getKind() == TokenKind::Else) {
                 advance();
             }
         }
@@ -635,7 +642,7 @@ unique_ptr<AstIfStmt> Parser::kwIf() {
  */
 AstIfStmtBlock Parser::ifBlock() {
     std::vector<unique_ptr<AstVarDecl>> decls;
-    while (match(TokenKind::Var)) {
+    while (m_token.is(TokenKind::Var)) {
         decls.emplace_back(kwVar(nullptr));
         expect(TokenKind::Comma);
         advance();
@@ -682,13 +689,14 @@ AstIfStmtBlock Parser::ifBlock() {
  */
 [[nodiscard]] unique_ptr<AstForStmt> Parser::kwFor() {
     // assume m_token == FOR
+    assert(m_token.is(TokenKind::For));
     auto start = m_token.range().Start;
     advance();
 
     std::vector<unique_ptr<AstVarDecl>> decls;
 
     // [ VAR { "," VAR } "," ]
-    while (match(TokenKind::Var)) {
+    while (m_token.is(TokenKind::Var)) {
         decls.emplace_back(kwVar(nullptr));
         expect(TokenKind::Comma);
         advance();
@@ -740,7 +748,7 @@ AstIfStmtBlock Parser::ifBlock() {
         expect(TokenKind::Next);
         advance();
 
-        if (match(TokenKind::Identifier)) {
+        if (m_token.is(TokenKind::Identifier)) {
             next = m_token.getStringValue();
             advance();
         }
@@ -772,6 +780,7 @@ AstIfStmtBlock Parser::ifBlock() {
  */
 [[nodiscard]] unique_ptr<AstDoLoopStmt> Parser::kwDo() {
     // assume m_token == DO
+    assert(m_token.is(TokenKind::Do));
     auto start = m_token.range().Start;
     advance();
 
@@ -782,7 +791,7 @@ AstIfStmtBlock Parser::ifBlock() {
 
     // [ VAR { "," VAR } ]
     auto acceptComma = false;
-    while (match(TokenKind::Var) || (acceptComma && accept(TokenKind::Comma))) {
+    while (m_token.is(TokenKind::Var) || (acceptComma && accept(TokenKind::Comma))) {
         acceptComma = true;
         decls.emplace_back(kwVar(nullptr));
     }
@@ -847,13 +856,14 @@ AstIfStmtBlock Parser::ifBlock() {
  */
 unique_ptr<AstControlFlowBranch> Parser::kwContinue() {
     // assume m_token == CONTINUE
+    assert(m_token.is(TokenKind::Continue));
     auto start = m_token.range().Start;
     advance();
 
     std::vector<ControlFlowStatement> returnControl;
 
     while (true) {
-        switch (m_token.kind()) {
+        switch (m_token.getKind()) {
         case TokenKind::For:
             advance();
             returnControl.emplace_back(ControlFlowStatement::For);
@@ -881,13 +891,14 @@ unique_ptr<AstControlFlowBranch> Parser::kwContinue() {
  */
 unique_ptr<AstControlFlowBranch> Parser::kwExit() {
     // assume m_token == EXIT
+    assert(m_token.is(TokenKind::Exit));
     auto start = m_token.range().Start;
     advance();
 
     std::vector<ControlFlowStatement> returnControl;
 
     while (true) {
-        switch (m_token.kind()) {
+        switch (m_token.getKind()) {
         case TokenKind::For:
             advance();
             returnControl.emplace_back(ControlFlowStatement::For);
@@ -917,10 +928,10 @@ unique_ptr<AstControlFlowBranch> Parser::kwExit() {
  */
 unique_ptr<AstTypeExpr> Parser::typeExpr() {
     auto start = m_token.range().Start;
-    auto kind = m_token.kind();
+    auto kind = m_token.getKind();
 
     unique_ptr<AstIdentExpr> ident;
-    if (match(TokenKind::Any) || m_token.isTypeKeyword()) {
+    if (m_token.is(TokenKind::Any) || m_token.isTypeKeyword()) {
         advance();
     } else {
         ident = identifier();
@@ -962,7 +973,7 @@ unique_ptr<AstExpr> Parser::expression(ExprFlags flags) {
         expr = expression(std::move(expr), 1);
     }
 
-    if ((m_exprFlags & ExprFlags::CallWithoutParens) != 0 && !match(TokenKind::EndOfStmt)) {
+    if ((m_exprFlags & ExprFlags::CallWithoutParens) != 0 && m_token.isNot(TokenKind::EndOfStmt)) {
         if (m_token.is(TokenKind::Identifier) || m_token.isLiteral() || m_token.isUnary()) {
             auto start = expr->range.Start;
             auto args = expressionList();
@@ -987,7 +998,7 @@ unique_ptr<AstExpr> Parser::factor() {
     while (true) {
         // <Right Unary Op>
         if (m_token.isUnary() && m_token.isRightToLeft()) {
-            auto kind = m_token.kind();
+            auto kind = m_token.getKind();
             advance();
 
             expr = unary({ start, m_endLoc }, kind, std::move(expr));
@@ -1025,10 +1036,10 @@ unique_ptr<AstExpr> Parser::primary() {
     }
 
     // TODO callExpr should be resolved in the expression
-    if (match(TokenKind::Identifier)) {
+    if (m_token.is(TokenKind::Identifier)) {
         Token next;
         m_lexer->peek(next);
-        if (next == TokenKind::ParenOpen) {
+        if (next.is(TokenKind::ParenOpen)) {
             return callExpr();
         }
         return identifier();
@@ -1041,7 +1052,7 @@ unique_ptr<AstExpr> Parser::primary() {
         return expr;
     }
 
-    if (match(TokenKind::If)) {
+    if (m_token.is(TokenKind::If)) {
         return ifExpr();
     }
 
@@ -1050,7 +1061,7 @@ unique_ptr<AstExpr> Parser::primary() {
     if (m_token.isUnary() && m_token.isLeftToRight()) {
         auto start = m_token.range().Start;
         auto prec = m_token.getPrecedence();
-        auto kind = m_token.kind();
+        auto kind = m_token.getKind();
         advance();
 
         if ((m_exprFlags & ExprFlags::UseAssign) == 0) {
@@ -1095,7 +1106,7 @@ unique_ptr<AstExpr> Parser::binary(llvm::SMRange range, TokenKind op, unique_ptr
 unique_ptr<AstExpr> Parser::expression(unique_ptr<AstExpr> lhs, int precedence) {
     while (m_token.getPrecedence() >= precedence) {
         auto current = m_token.getPrecedence();
-        auto kind = m_token.kind();
+        auto kind = m_token.getKind();
         advance();
 
         auto rhs = factor();
@@ -1159,6 +1170,7 @@ unique_ptr<AstCallExpr> Parser::callExpr() {
  */
 unique_ptr<AstIfExpr> Parser::ifExpr() {
     // assume m_token == IF
+    assert(m_token.is(TokenKind::If));
     auto start = m_token.range().Start;
     advance();
 
@@ -1205,7 +1217,7 @@ unique_ptr<AstLiteralExpr> Parser::literal() {
 std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
     std::vector<unique_ptr<AstExpr>> exprs;
 
-    while (isValid() && !match(TokenKind::ParenClose) && !match(TokenKind::EndOfStmt)) {
+    while (!m_token.isOneOf(TokenKind::EndOfFile, TokenKind::ParenClose, TokenKind::EndOfStmt)) {
         exprs.emplace_back(expression());
         if (!accept(TokenKind::Comma)) {
             break;
@@ -1220,13 +1232,13 @@ std::vector<unique_ptr<AstExpr>> Parser::expressionList() {
 //----------------------------------------
 
 void Parser::replace(TokenKind what, TokenKind with) noexcept {
-    if (match(what)) {
+    if (m_token.is(what)) {
         m_token.setKind(with);
     }
 }
 
 bool Parser::accept(TokenKind kind) {
-    if (!match(kind)) {
+    if (m_token.isNot(kind)) {
         return false;
     }
     advance();
@@ -1234,7 +1246,7 @@ bool Parser::accept(TokenKind kind) {
 }
 
 bool Parser::expect(TokenKind kind) noexcept {
-    if (match(kind)) {
+    if (m_token.is(kind)) {
         return true;
     }
 

@@ -30,45 +30,15 @@ public:
     // find matching token for string or return TokenKind::Identifier
     static TokenKind findKind(StringRef str) noexcept;
 
-    // constructors
-    // Token() noexcept = default;
-
-//    template<typename... Args>
-//    static unique_ptr<Token> create(Args&&... args) {
-//        return make_unique<Token>(std::forward<Args>(args)...);
-//    }
-//
-//    Token(TokenKind kind, const llvm::SMRange& range)
-//    : m_kind{ kind }, m_value{ std::monostate{} }, m_range{ range } {}
-//
-//    Token(TokenKind kind, StringRef value, const llvm::SMRange& range)
-//    : m_kind{ kind }, m_value{ value }, m_range{ range } {}
-//
-//    Token(uint64_t value, const llvm::SMRange& range)
-//    : m_kind{ TokenKind::IntegerLiteral }, m_value{ value }, m_range{ range } {}
-//
-//    Token(double value, const llvm::SMRange& range)
-//    : m_kind{ TokenKind::FloatingPointLiteral }, m_value{ value }, m_range{ range } {}
-//
-//    Token(bool value, const llvm::SMRange& range)
-//    : m_kind{ TokenKind::BooleanLiteral }, m_value{ value }, m_range{ range } {}
-
+    // set token values
     void set(TokenKind kind, const llvm::SMRange& range, Value value = std::monostate{}) noexcept {
         m_kind = kind;
         m_range = range;
         m_value = value;
     }
 
-    // ~Token() noexcept = default;
-
-    // convert token kind
-
-//    [[nodiscard]] unique_ptr<Token> convert(TokenKind kind) const {
-//        return create(kind, m_range);
-//    }
-
     // Getters
-    [[nodiscard]] TokenKind kind() const noexcept { return m_kind; }
+    [[nodiscard]] TokenKind getKind() const noexcept { return m_kind; }
     void setKind(TokenKind kind) noexcept { m_kind = kind; }
 
     [[nodiscard]] StringRef lexeme() const noexcept;
@@ -99,25 +69,21 @@ public:
 
     // comparisons
 
-    [[nodiscard]] bool is(TokenKind kind) const noexcept {
+    [[nodiscard]] inline bool is(TokenKind kind) const noexcept {
         return m_kind == kind;
     }
 
-    [[nodiscard]] bool isOneOf(TokenKind kind1, TokenKind kind2) const noexcept {
-        return is(kind1) || is(kind2);
+    [[nodiscard]] inline bool isNot(TokenKind kind) const noexcept {
+        return m_kind != kind;
+    }
+
+    [[nodiscard]] inline bool isOneOf(TokenKind k1, TokenKind k2) const noexcept {
+        return is(k1) || is(k2);
     }
 
     template<typename... Ts>
-    [[nodiscard]] bool isOneOf(TokenKind k1, TokenKind k2, Ts... ks) const noexcept {
+    [[nodiscard]] inline bool isOneOf(TokenKind k1, TokenKind k2, Ts... ks) const noexcept {
         return is(k1) || isOneOf(k2, ks...);
-    }
-
-    [[nodiscard]] bool operator==(TokenKind rhs) const noexcept {
-        return is(rhs);
-    }
-
-    [[nodiscard]] bool operator!=(TokenKind rhs) const noexcept {
-        return !is(rhs);
     }
 
 private:

@@ -2,7 +2,7 @@
 // Created by Albert Varaksin on 17/04/2021.
 //
 #include "CmdLineParser.hpp"
-#include "Context.hpp"
+#include "CompileOptions.hpp"
 #include <llvm/Support/FileSystem.h>
 using namespace lbc;
 
@@ -15,7 +15,10 @@ void CmdLineParser::parse(const Args& args) {
     fs::path executable = llvm::sys::fs::getMainExecutable(
         args[0],
         reinterpret_cast<void*>(showHelp)); // NOLINT
-    m_context.setCompilerPath(executable);
+    m_options.setCompilerPath(executable);
+
+    // working directory
+    m_options.setWorkingDir(fs::current_path());
 
     // lbc ( option | <file> )+
     size_t index = 1;
@@ -23,7 +26,7 @@ void CmdLineParser::parse(const Args& args) {
         if (*args[index] == '-') {
             processOption(args, index);
         } else {
-            m_context.addInputFile(args[index]);
+            m_options.addInputFile(args[index]);
         }
     }
 }
@@ -31,85 +34,83 @@ void CmdLineParser::parse(const Args& args) {
 void CmdLineParser::processOption(const Args& args, size_t& index) {
     const StringRef arg{ args[index] };
     if (arg == "-v") {
-        m_context.setVerbose(true);
+        m_options.setVerbose(true);
     } else if (arg == "-o") {
         index++;
         if (index >= args.size()) {
             showError("output file path missing.");
         }
-        m_context.setOutputFilePath(args[index]);
+        m_options.setOutputPath(args[index]);
     } else if (arg == "-m32") {
-        auto triple = m_context.getTriple();
-        m_context.setTriple(triple.get32BitArchVariant());
+        m_options.set32Bit();
     } else if (arg == "-m64") {
-        auto triple = m_context.getTriple();
-        m_context.setTriple(triple.get64BitArchVariant());
+        m_options.set64Bit();
     } else if (arg == "--help") {
         showHelp();
     } else if (arg == "--version") {
         showVersion();
     } else if (arg == "-O0") {
-        m_context.setOptimizationLevel(Context::OptimizationLevel::O0);
+        m_options.setOptimizationLevel(CompileOptions::OptimizationLevel::O0);
     } else if (arg == "-OS") {
-        m_context.setOptimizationLevel(Context::OptimizationLevel::OS);
+        m_options.setOptimizationLevel(CompileOptions::OptimizationLevel::OS);
     } else if (arg == "-O1") {
-        m_context.setOptimizationLevel(Context::OptimizationLevel::O1);
+        m_options.setOptimizationLevel(CompileOptions::OptimizationLevel::O1);
     } else if (arg == "-O2") {
-        m_context.setOptimizationLevel(Context::OptimizationLevel::O2);
+        m_options.setOptimizationLevel(CompileOptions::OptimizationLevel::O2);
     } else if (arg == "-O3") {
-        m_context.setOptimizationLevel(Context::OptimizationLevel::O3);
+        m_options.setOptimizationLevel(CompileOptions::OptimizationLevel::O3);
     } else if (arg == "-c") {
-        m_context.setCompilationTarget(Context::CompilationTarget::Object);
+        m_options.setCompilationTarget(CompileOptions::CompilationTarget::Object);
     } else if (arg == "-S") {
-        m_context.setCompilationTarget(Context::CompilationTarget::Assembly);
+        m_options.setCompilationTarget(CompileOptions::CompilationTarget::Assembly);
     } else if (arg == "-emit-llvm") {
-        m_context.setOutputType(Context::OutputType::LLVM);
+        m_options.setOutputType(CompileOptions::OutputType::LLVM);
     } else if (arg == "-ast-dump") {
-        m_context.setDumpAst(true);
+        m_options.setDumpAst(true);
     } else if (arg == "-code-dump") {
-        m_context.setDumpCode(true);
+        m_options.setDumpCode(true);
     } else if (arg == "-g") {
-        m_context.setDebugBuild(true);
+        m_options.setDebugBuild(true);
     } else if (arg == "--toolchain") {
         index++;
         if (index > args.size()) {
             showError("Toolchain path is missing");
         }
-        processToolchainPath(args[index]);
+        m_options.setToolchainDir(args[index]);
     } else if (arg == "-main") {
         index++;
         if (index >= args.size()) {
             showError("file path missing.");
         }
-        m_context.setMainFile(args[index]);
+        m_options.setMainFile(args[index]);
     } else if (arg == "-no-main") {
-        m_context.setImplicitMain(false);
+        m_options.setImplicitMain(false);
     } else {
         showError("Unrecognized option "s + string(arg) + ".");
     }
 }
 
-void CmdLineParser::processToolchainPath(const fs::path& path) {
-    if (path.is_absolute()) {
-        if (fs::exists(path)) {
-            m_context.getToolchain().setBasePath(path);
-            return;
-        }
-        showError("Toolchain path not found");
-    }
-
-    if (auto rel = fs::absolute(m_context.getCompilerDir() / path); fs::exists(rel)) {
-        m_context.getToolchain().setBasePath(rel);
-        return;
-    }
-
-    if (auto rel = fs::absolute(m_context.getWorkingDir() / path); fs::exists(rel)) {
-        m_context.getToolchain().setBasePath(rel);
-        return;
-    }
-
-    fatalError("Toolchain path not found");
-}
+//void CmdLineParser::processToolchainPath(const fs::path& path) {
+//    if (path.is_absolute()) {
+//        if (fs::exists(path)) {
+//            m_context.getToolchain().setBasePath(path);
+//            return;
+//        }
+//        showError("Toolchain path not found");
+//    }
+//
+//    if (auto rel = fs::absolute(m_context.getCompilerDir() / path); fs::exists(rel)) {
+//        m_context.getToolchain().setBasePath(rel);
+//        return;
+//    }
+//
+//    if (auto rel = fs::absolute(m_context.getWorkingDir() / path); fs::exists(rel)) {
+//        m_context.getToolchain().setBasePath(rel);
+//        return;
+//    }
+//
+//    fatalError("Toolchain path not found");
+//}
 
 
 void CmdLineParser::showHelp() {

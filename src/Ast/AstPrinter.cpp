@@ -28,7 +28,7 @@ void AstPrinter::visit(AstStmtList& ast) {
 }
 
 void AstPrinter::visit(AstImport& ast) {
-    m_json.object([&]{
+    m_json.object([&] {
         writeHeader(ast);
         m_json.attribute("import", ast.import);
     });

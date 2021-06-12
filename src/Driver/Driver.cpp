@@ -4,6 +4,7 @@
 #include "Driver.hpp"
 #include "Ast/AstPrinter.hpp"
 #include "Ast/CodePrinter.hpp"
+#include "Context.hpp"
 #include "Driver/Toolchain/Toolchain.hpp"
 #include "Gen/CodeGen.hpp"
 #include "Parser/Parser.hpp"
@@ -15,48 +16,52 @@
 
 using namespace lbc;
 
+Driver::Driver(Context& context) noexcept
+: m_context{ context },
+  m_options{ context.getOptions() } {}
+
 void Driver::drive() {
     processInputs();
     compileSources();
 
-    if (m_context.getDumpAst()) {
+    if (m_options.getDumpAst()) {
         dumpAst();
         return;
     }
 
-    if (m_context.getDumpCode()) {
+    if (m_options.getDumpCode()) {
         dumpCode();
         return;
     }
 
-    switch (m_context.getCompilationTarget()) {
-    case Context::CompilationTarget::Executable:
+    switch (m_options.getCompilationTarget()) {
+    case CompileOptions::CompilationTarget::Executable:
         emitBitCode(true);
         optimize();
         emitObjects(true);
         emitExecutable();
         break;
-    case Context::CompilationTarget::Object:
-        switch (m_context.getOutputType()) {
-        case Context::OutputType::Native:
+    case CompileOptions::CompilationTarget::Object:
+        switch (m_options.getOutputType()) {
+        case CompileOptions::OutputType::Native:
             emitBitCode(true);
             optimize();
             emitObjects(false);
             break;
-        case Context::OutputType::LLVM:
+        case CompileOptions::OutputType::LLVM:
             emitBitCode(false);
             optimize();
             break;
         }
         break;
-    case Context::CompilationTarget::Assembly:
-        switch (m_context.getOutputType()) {
-        case Context::OutputType::Native:
+    case CompileOptions::CompilationTarget::Assembly:
+        switch (m_options.getOutputType()) {
+        case CompileOptions::OutputType::Native:
             emitBitCode(true);
             optimize();
             emitAssembly(false);
             break;
-        case Context::OutputType::LLVM:
+        case CompileOptions::OutputType::LLVM:
             emitLLVMIr(false);
             optimize();
             break;
@@ -71,38 +76,38 @@ void Driver::drive() {
  * ansure they exost and store in driver paths structure
  */
 void Driver::processInputs() {
-    for (size_t index = 0; index < Context::fileTypeCount; index++) {
-        auto type = static_cast<Context::FileType>(index);
+    for (size_t index = 0; index < CompileOptions::FILETYPE_COUNT; index++) {
+        auto type = static_cast<CompileOptions::FileType>(index);
         auto& dst = getSources(type);
-        for (const auto& path : m_context.getInputFiles(type)) {
-            dst.emplace_back(Source::create(type, m_context.resolveFilePath(path), false));
+        for (const auto& path : m_options.getInputFiles(type)) {
+            dst.emplace_back(Source::create(type, m_options.resolveFilePath(path), false));
         }
     }
 }
 
-std::unique_ptr<Source> Driver::deriveSource(const Source& source, Context::FileType type, bool temporary) const noexcept {
+std::unique_ptr<Source> Driver::deriveSource(const Source& source, CompileOptions::FileType type, bool temporary) const noexcept {
     const auto& original = source.origin.path;
-    const auto ext = Context::getFileExt(type);
+    const auto ext = CompileOptions::getFileExt(type);
     const auto path = temporary
         ? TempFileCache::createUniquePath(original, ext)
-        : m_context.resolveOutputPath(original, ext);
+        : m_options.resolveOutputPath(original, ext);
     return source.derive(type, path);
 }
 
 void Driver::emitLLVMIr(bool temporary) {
-    emitLlvm(Context::FileType::LLVMIr, temporary, [](auto& stream, auto& module) {
+    emitLlvm(CompileOptions::FileType::LLVMIr, temporary, [](auto& stream, auto& module) {
         auto* printer = llvm::createPrintModulePass(stream);
         printer->runOnModule(module);
     });
 }
 
 void Driver::emitBitCode(bool temporary) {
-    emitLlvm(Context::FileType::BitCode, temporary, [](auto& stream, auto& module) {
+    emitLlvm(CompileOptions::FileType::BitCode, temporary, [](auto& stream, auto& module) {
         llvm::WriteBitcodeToFile(module, stream);
     });
 }
 
-void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(llvm::raw_fd_ostream&, llvm::Module&)) {
+void Driver::emitLlvm(CompileOptions::FileType type, bool temporary, void (*generator)(llvm::raw_fd_ostream&, llvm::Module&)) {
     auto& dstFiles = getSources(type);
     dstFiles.reserve(dstFiles.size() + m_modules.size());
 
@@ -127,18 +132,18 @@ void Driver::emitLlvm(Context::FileType type, bool temporary, void (*generator)(
 }
 
 void Driver::emitAssembly(bool temporary) {
-    emitNative(Context::FileType::Assembly, temporary);
+    emitNative(CompileOptions::FileType::Assembly, temporary);
 }
 
 void Driver::emitObjects(bool temporary) {
-    emitNative(Context::FileType::Object, temporary);
+    emitNative(CompileOptions::FileType::Object, temporary);
 }
 
-void Driver::emitNative(Context::FileType type, bool temporary) {
-    const auto& bcFiles = getSources(Context::FileType::BitCode);
+void Driver::emitNative(CompileOptions::FileType type, bool temporary) {
+    const auto& bcFiles = getSources(CompileOptions::FileType::BitCode);
     auto& dstFiles = getSources(type);
     string filetype;
-    if (type == Context::FileType::Object) {
+    if (type == CompileOptions::FileType::Object) {
         filetype = "obj";
     } else {
         filetype = "asm";
@@ -151,7 +156,7 @@ void Driver::emitNative(Context::FileType type, bool temporary) {
 
         assembler.reset();
         assembler.addArg("-filetype="s + filetype);
-        if (type == Context::FileType::Assembly && m_context.getTriple().isX86()) {
+        if (type == CompileOptions::FileType::Assembly && m_context.getTriple().isX86()) {
             assembler.addArg("--x86-asm-syntax=intel");
         }
         assembler.addPath("-o", output->path);
@@ -166,12 +171,12 @@ void Driver::emitNative(Context::FileType type, bool temporary) {
 }
 
 void Driver::optimize() {
-    auto level = m_context.getOptimizationLevel();
-    if (level == Context::OptimizationLevel::O0) {
+    auto level = m_options.getOptimizationLevel();
+    if (level == CompileOptions::OptimizationLevel::O0) {
         return;
     }
-    bool llvmIr = m_context.isOutputLLVMIr();
-    const auto& files = getSources(llvmIr ? Context::FileType::LLVMIr : Context::FileType::BitCode);
+    bool llvmIr = m_options.isOutputLLVMIr();
+    const auto& files = getSources(llvmIr ? CompileOptions::FileType::LLVMIr : CompileOptions::FileType::BitCode);
 
     auto optimizer = m_context.getToolchain().createTask(ToolKind::Optimizer);
     for (const auto& file : files) {
@@ -181,16 +186,16 @@ void Driver::optimize() {
         }
 
         switch (level) {
-        case Context::OptimizationLevel::OS:
+        case CompileOptions::OptimizationLevel::OS:
             optimizer.addArg("-OS");
             break;
-        case Context::OptimizationLevel::O1:
+        case CompileOptions::OptimizationLevel::O1:
             optimizer.addArg("-O1");
             break;
-        case Context::OptimizationLevel::O2:
+        case CompileOptions::OptimizationLevel::O2:
             optimizer.addArg("-O2");
             break;
-        case Context::OptimizationLevel::O3:
+        case CompileOptions::OptimizationLevel::O3:
             optimizer.addArg("-O3");
             break;
         default:
@@ -208,7 +213,7 @@ void Driver::optimize() {
 
 void Driver::emitExecutable() {
     auto linker = m_context.getToolchain().createTask(ToolKind::Linker);
-    const auto& objFiles = getSources(Context::FileType::Object);
+    const auto& objFiles = getSources(CompileOptions::FileType::Object);
     const auto& triple = m_context.getTriple();
 
     if (objFiles.empty()) {
@@ -223,17 +228,17 @@ void Driver::emitExecutable() {
         fatalError("32bit is not implemented yet");
     }
 
-    auto output = m_context.getOutputPath();
+    auto output = m_options.getOutputPath();
     if (output.empty()) {
-        output = m_context.getWorkingDir() / objFiles[0]->origin.path.stem();
+        output = m_options.getWorkingDir() / objFiles[0]->origin.path.stem();
         if (triple.isOSWindows()) {
             output += ".exe";
         }
     } else if (output.is_relative()) {
-        output = fs::absolute(m_context.getWorkingDir() / output);
+        output = fs::absolute(m_options.getWorkingDir() / output);
     }
 
-    if (m_context.getOptimizationLevel() != Context::OptimizationLevel::O0) {
+    if (m_options.getOptimizationLevel() != CompileOptions::OptimizationLevel::O0) {
         if (!triple.isMacOSX()) {
             linker.addArg("-O");
             linker.addArg("-s");
@@ -303,11 +308,11 @@ void Driver::emitExecutable() {
 // Compile
 
 void Driver::compileSources() {
-    if (m_context.isVerbose()) {
+    if (m_options.isVerbose()) {
         llvm::outs() << "Compile:\n";
     }
 
-    const auto& sources = getSources(Context::FileType::Source);
+    const auto& sources = getSources(CompileOptions::FileType::Source);
     m_modules.reserve(m_modules.size() + sources.size());
     for (const auto& source : sources) {
         string included;
@@ -318,18 +323,18 @@ void Driver::compileSources() {
         compileSource(source.get(), ID);
     }
 
-    if (m_context.isVerbose()) {
+    if (m_options.isVerbose()) {
         llvm::outs() << '\n';
     }
 }
 
 void Driver::compileSource(const Source* source, unsigned int ID) {
     const auto& path = source->path;
-    if (m_context.isVerbose()) {
+    if (m_options.isVerbose()) {
         llvm::outs() << path.string() << '\n';
     }
 
-    bool isMain = m_context.isMainFile(path);
+    bool isMain = m_options.isMainFile(path);
     Parser parser{ m_context, ID, isMain };
     auto ast = parser.parse();
     if (!ast) {
@@ -340,7 +345,7 @@ void Driver::compileSource(const Source* source, unsigned int ID) {
     SemanticAnalyzer sem{ m_context };
     sem.visit(*ast);
 
-    if (m_context.getDumpAst() || m_context.getDumpCode()) {
+    if (m_options.getDumpAst() || m_options.getDumpCode()) {
         m_modules.emplace_back(std::make_unique<TranslationUnit>(
             nullptr,
             source,
@@ -372,12 +377,12 @@ void Driver::dumpAst() {
         }
     };
 
-    auto output = m_context.getOutputPath();
+    auto output = m_options.getOutputPath();
     if (output.empty()) {
         print(llvm::outs());
     } else {
         if (output.is_relative()) {
-            output = fs::absolute(m_context.getWorkingDir() / output);
+            output = fs::absolute(m_options.getWorkingDir() / output);
         }
 
         std::error_code errors{};
@@ -402,12 +407,12 @@ void Driver::dumpCode() {
         }
     };
 
-    auto output = m_context.getOutputPath();
+    auto output = m_options.getOutputPath();
     if (output.empty()) {
         print(llvm::outs());
     } else {
         if (output.is_relative()) {
-            output = fs::absolute(m_context.getWorkingDir() / output);
+            output = fs::absolute(m_options.getWorkingDir() / output);
         }
 
         std::error_code errors{};

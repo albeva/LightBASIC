@@ -101,9 +101,9 @@ struct AstImport final : AstNode<AstImport, AstStmt, AstKind::Import> {
         llvm::SMRange range_,
         StringRef import_,
         unique_ptr<AstModule> module_ = {}) noexcept
-        : AstNode{ KIND, range_ },
-          import{ import_ },
-          module{ std::move(module_) } {}
+    : AstNode{ KIND, range_ },
+      import{ import_ },
+      module{ std::move(module_) } {}
 
     const StringRef import;
     unique_ptr<AstModule> module;

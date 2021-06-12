@@ -2,6 +2,7 @@
 // Created by Albert Varaksin on 07/02/2021.
 //
 #include "ToolTask.hpp"
+#include "Driver/CompileOptions.hpp"
 #include "Driver/Context.hpp"
 
 #include <utility>
@@ -54,7 +55,7 @@ int ToolTask::execute() const noexcept {
         args.emplace_back(arg);
     }
 
-    if (m_context.isVerbose()) {
+    if (m_context.getOptions().isVerbose()) {
         switch (m_kind) {
         case ToolKind::Optimizer:
             llvm::outs() << "Optimize:\n";

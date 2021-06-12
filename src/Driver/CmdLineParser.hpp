@@ -3,9 +3,8 @@
 //
 #pragma once
 
-
 namespace lbc {
-class Context;
+class CompileOptions;
 
 /**
  * Parse given commandline arguments
@@ -17,20 +16,19 @@ public:
 
     using Args = llvm::ArrayRef<const char*>;
 
-    explicit CmdLineParser(Context& context) noexcept : m_context{ context } {}
+    explicit CmdLineParser(CompileOptions& options) noexcept : m_options{ options } {}
     ~CmdLineParser() noexcept = default;
 
     void parse(const Args& args);
 
 private:
     void processOption(const Args& args, size_t& index);
-    void processToolchainPath(const fs::path& path);
 
     [[noreturn]] static void showError(const string& message);
     [[noreturn]] static void showHelp();
     [[noreturn]] static void showVersion();
 
-    Context& m_context;
+    CompileOptions& m_options;
 };
 
 } // namespace lbc

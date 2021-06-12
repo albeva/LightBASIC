@@ -80,16 +80,6 @@ private:
     // replace token kind with another (e.g. Minus to Negate)
     void replace(TokenKind what, TokenKind with) noexcept;
 
-    // return true if has more content to parse
-    [[nodiscard]] bool isValid() const noexcept {
-        return !match(TokenKind::EndOfFile);
-    }
-
-    // match current token against kind
-    [[nodiscard]] bool match(TokenKind kind) const noexcept {
-        return m_token.is(kind);
-    }
-
     // expect token to match and if true, advances
     [[nodiscard]] bool accept(TokenKind kind);
 
