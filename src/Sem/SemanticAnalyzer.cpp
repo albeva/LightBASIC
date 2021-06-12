@@ -605,10 +605,10 @@ Symbol* SemanticAnalyzer::createNewSymbol(AstDecl& ast) {
     if (m_table->find(ast.name, false) != nullptr) {
         fatalError("Redefinition of "_t + ast.name);
     }
-    auto* symbol = m_table->insert(ast.name);
+    auto* symbol = m_table->insert(m_context, ast.name);
 
     // alias?
-    if (ast.attributes) {
+    if (ast.attributes != nullptr) {
         if (auto alias = ast.attributes->getStringLiteral("ALIAS")) {
             symbol->setAlias(*alias);
         }

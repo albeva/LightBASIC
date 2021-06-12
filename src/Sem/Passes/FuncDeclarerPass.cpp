@@ -3,10 +3,10 @@
 //
 #include "FuncDeclarerPass.hpp"
 #include "Ast/Ast.hpp"
+#include "Driver/Context.hpp"
 #include "Symbol/SymbolTable.hpp"
 #include "Type/Type.hpp"
 #include "TypePass.hpp"
-#include "Driver/Context.hpp"
 
 using namespace lbc;
 using namespace Sem;
@@ -43,7 +43,7 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
     if (m_table->exists(name)) {
         fatalError("Redefinition of "_t + name);
     }
-    auto* symbol = m_table->insert(name);
+    auto* symbol = m_table->insert(m_context, name);
     auto flags = symbol->getFlags();
     flags.callable = true;
     flags.addressable = true;
@@ -105,7 +105,7 @@ Symbol* FuncDeclarerPass::createParamSymbol(AstFuncParamDecl& ast) {
     if (m_table->find(name, false) != nullptr) {
         fatalError("Redefinition of "_t + name);
     }
-    auto* symbol = m_table->insert(name);
+    auto* symbol = m_table->insert(m_context, name);
 
     // alias?
     if (ast.attributes) {

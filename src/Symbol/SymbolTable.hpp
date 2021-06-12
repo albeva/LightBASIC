@@ -5,9 +5,10 @@
 #include "Symbol.hpp"
 
 namespace lbc {
+class Context;
 
 class SymbolTable final {
-    using Container = llvm::StringMap<unique_ptr<Symbol>>;
+    using Container = llvm::StringMap<Symbol*>;
 
 public:
     NO_COPY_AND_MOVE(SymbolTable)
@@ -17,7 +18,7 @@ public:
     [[nodiscard]] SymbolTable* getParent() const noexcept { return m_parent; }
     void setParent(SymbolTable* parent) noexcept { m_parent = parent; }
 
-    Symbol* insert(StringRef name);
+    Symbol* insert(Context& context, StringRef name);
     void addReference(Symbol*);
 
     [[nodiscard]] bool exists(StringRef name, bool recursive = false) const noexcept;

@@ -5,7 +5,6 @@
 #include "Ast/ValueFlags.hpp"
 
 namespace lbc {
-
 class TypeRoot;
 
 class Symbol final {

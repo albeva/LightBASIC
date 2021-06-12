@@ -2,13 +2,14 @@
 // Created by Albert Varaksin on 06/07/2020.
 //
 #include "SymbolTable.hpp"
+#include "Driver/Context.hpp"
 #include "Symbol.hpp"
 using namespace lbc;
 
-Symbol* SymbolTable::insert(StringRef name) {
-    auto symbol = make_unique<Symbol>(name);
+Symbol* SymbolTable::insert(Context& context, StringRef name) {
+    auto* symbol = context.create<Symbol>(name);
     symbol->setIndex(m_symbols.size());
-    return m_symbols.insert({ name, std::move(symbol) }).first->second.get();
+    return m_symbols.insert({ name, symbol }).first->second;
 }
 
 void SymbolTable::addReference(Symbol* symbol) {
@@ -29,7 +30,7 @@ bool SymbolTable::exists(StringRef name, bool recursive) const noexcept {
 
 Symbol* SymbolTable::find(StringRef id, bool recursive) const noexcept {
     if (auto iter = m_symbols.find(id); iter != m_symbols.end()) {
-        return iter->second.get();
+        return iter->second;
     }
 
     if (auto iter = m_references.find(id); iter != m_references.end()) {
@@ -48,7 +49,7 @@ std::vector<Symbol*> SymbolTable::getSymbols() const {
     symbols.reserve(size());
 
     std::transform(begin(), end(), std::back_inserter(symbols), [](const auto& item) {
-        return item.second.get();
+        return item.second;
     });
 
     std::sort(symbols.begin(), symbols.end(), [](auto lhs, auto rhs) {

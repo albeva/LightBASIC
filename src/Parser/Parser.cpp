@@ -462,7 +462,7 @@ AstTypeDecl* Parser::kwType(AstAttributeList* attribs) {
         llvm::SMRange{ start, m_endLoc },
         id,
         attribs,
-        decls);
+        std::move(decls));
 }
 
 /**
