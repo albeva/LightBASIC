@@ -56,7 +56,7 @@ AstExpr* ConstantFoldingPass::visitUnaryExpr(const AstUnaryExpr& ast) {
     }
 
     auto value = unary(ast.tokenKind, *literal);
-    auto* repl = new AstLiteralExpr(ast.range, value);
+    auto* repl = m_context.create<AstLiteralExpr>(ast.range, value);
     repl->type = ast.type;
     return repl;
 }
@@ -129,7 +129,7 @@ AstExpr* ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
     }
 
     if (*lval == 1 && *rval == 0) {
-        auto* cast = new AstCastExpr(
+        auto* cast = m_context.create<AstCastExpr>(
             ast.range,
             ast.expr,
             nullptr,
@@ -139,12 +139,12 @@ AstExpr* ConstantFoldingPass::optimizeIifToCast(AstIfExpr& ast) {
     }
 
     if (*lval == 0 && *rval == 1) {
-        auto* unary = new AstUnaryExpr(
+        auto* unary = m_context.create<AstUnaryExpr>(
             ast.range,
             TokenKind::LogicalNot,
             ast.expr);
 
-        auto* cast = new AstCastExpr(
+        auto* cast = m_context.create<AstCastExpr>(
             ast.range,
             unary,
             nullptr,
@@ -168,7 +168,7 @@ AstExpr* ConstantFoldingPass::visitCastExpr(const AstCastExpr& ast) {
     }
 
     auto value = cast(ast.type, *literal);
-    auto* repl = new AstLiteralExpr(ast.range, value);
+    auto* repl = m_context.create<AstLiteralExpr>(ast.range, value);
     repl->type = ast.type;
     return repl;
 }

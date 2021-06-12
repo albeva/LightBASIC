@@ -3,6 +3,7 @@
 //
 #include "TypeDeclPass.hpp"
 #include "Ast/Ast.hpp"
+#include "Driver/Context.hpp"
 #include "Sem/SemanticAnalyzer.hpp"
 #include "Type/Type.hpp"
 #include "Type/TypeUdt.hpp"
@@ -20,8 +21,8 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
         packed = ast.attributes->exists("PACKED");
     }
 
-    ast.symbolTable = make_unique<SymbolTable>(current);
-    m_sem.setSymbolTable(ast.symbolTable.get());
+    ast.symbolTable = m_sem.getContext().create<SymbolTable>(current);
+    m_sem.setSymbolTable(ast.symbolTable);
     declareMembers();
     ast.symbolTable->setParent(nullptr);
     TypeUDT::get(*m_symbol, *ast.symbolTable, packed);

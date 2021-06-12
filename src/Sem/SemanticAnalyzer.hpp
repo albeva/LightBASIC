@@ -25,13 +25,13 @@ public:
     void expression(AstExpr*& ast, const TypeRoot* type = nullptr);
 
     /// Checks types and if they are convertible, create CAST expression
-    static void coerce(AstExpr*& expr, const TypeRoot* type);
+    void coerce(AstExpr*& expr, const TypeRoot* type);
 
     /// Cast expression and fold the value
     void convert(AstExpr*& ast, const TypeRoot* type);
 
     /// Creates a CAST expression, without folding
-    static void cast(AstExpr*& ast, const TypeRoot* type);
+    void cast(AstExpr*& ast, const TypeRoot* type);
 
     [[nodiscard]] Symbol* createNewSymbol(AstDecl& ast);
 

@@ -6,12 +6,13 @@
 #include "Symbol/SymbolTable.hpp"
 #include "Type/Type.hpp"
 #include "TypePass.hpp"
+#include "Driver/Context.hpp"
 
 using namespace lbc;
 using namespace Sem;
 
 void FuncDeclarerPass::visit(AstModule& ast) {
-    m_table = ast.symbolTable.get();
+    m_table = ast.symbolTable;
     visit(*ast.stmtList);
 }
 
@@ -67,8 +68,8 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
     paramTypes.reserve(ast.paramDecls.size());
     {
         RESTORE_ON_EXIT(m_table);
-        ast.symbolTable = make_unique<SymbolTable>(m_table);
-        m_table = ast.symbolTable.get();
+        ast.symbolTable = m_context.create<SymbolTable>(m_table);
+        m_table = ast.symbolTable;
         for (auto& param : ast.paramDecls) {
             visitFuncParamDecl(*param);
             paramTypes.emplace_back(param->symbol->type());

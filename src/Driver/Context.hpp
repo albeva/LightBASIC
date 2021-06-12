@@ -50,9 +50,10 @@ public:
      * @tparam Args arguments to pass to T constructor
      */
     template<typename T, typename... Args>
-    T* create(Args&&... args) {
-        T* mem = allocate(sizeof(T), alignof(T));
-        return new (mem) T(std::forward<Args>(args)...);
+    T* create(Args&&... args) noexcept {
+        T* res = (T*)allocate(sizeof(T), alignof(T));
+        new (res) T(std::forward<Args>(args)...);
+        return res;
     }
 
 private:

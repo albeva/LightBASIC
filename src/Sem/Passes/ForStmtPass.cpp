@@ -4,6 +4,7 @@
 #include "ForStmtPass.hpp"
 #include "Ast/Ast.hpp"
 #include "Sem/SemanticAnalyzer.hpp"
+#include "Driver/Context.hpp"
 #include "Type/Type.hpp"
 using namespace lbc;
 using namespace Sem;
@@ -11,8 +12,8 @@ using namespace Sem;
 ForStmtPass::ForStmtPass(SemanticAnalyzer& sem, AstForStmt& ast)
 : m_sem{ sem }, m_ast{ ast } {
     auto* current = sem.getSymbolTable();
-    m_ast.symbolTable = make_unique<SymbolTable>(current);
-    sem.setSymbolTable(m_ast.symbolTable.get());
+    m_ast.symbolTable = sem.getContext().create<SymbolTable>(current);
+    sem.setSymbolTable(m_ast.symbolTable);
 
     ceclare();
     analyze();

@@ -3,6 +3,7 @@
 //
 #include "SemanticAnalyzer.hpp"
 #include "Ast/Ast.hpp"
+#include "Driver/Context.hpp"
 #include "Lexer/Token.hpp"
 #include "Passes/ForStmtPass.hpp"
 #include "Passes/FuncDeclarerPass.hpp"
@@ -22,8 +23,8 @@ SemanticAnalyzer::SemanticAnalyzer(Context& context)
 void SemanticAnalyzer::visit(AstModule& ast) {
     m_astRootModule = &ast;
     m_fileId = ast.fileId;
-    ast.symbolTable = make_unique<SymbolTable>(nullptr);
-    m_rootTable = m_table = ast.symbolTable.get();
+    ast.symbolTable = m_context.create<SymbolTable>(nullptr);
+    m_rootTable = m_table = ast.symbolTable;
 
     Sem::FuncDeclarerPass(m_context, m_typePass).visit(ast);
 
@@ -109,7 +110,7 @@ void SemanticAnalyzer::visit(AstFuncStmt& ast) {
     RESTORE_ON_EXIT(m_table);
     RESTORE_ON_EXIT(m_function);
     m_function = ast.decl;
-    m_table = ast.decl->symbolTable.get();
+    m_table = ast.decl->symbolTable;
     visit(*ast.stmtList);
 }
 
@@ -150,13 +151,13 @@ void SemanticAnalyzer::visit(AstReturnStmt& ast) {
 void SemanticAnalyzer::visit(AstIfStmt& ast) {
     RESTORE_ON_EXIT(m_table);
     for (auto& block : ast.blocks) {
-        block.symbolTable = make_unique<SymbolTable>(m_table);
+        block.symbolTable = m_context.create<SymbolTable>(m_table);
     }
 
     for (size_t idx = 0; idx < ast.blocks.size(); idx++) {
         auto& block = ast.blocks[idx];
 
-        m_table = block.symbolTable.get();
+        m_table = block.symbolTable;
         for (auto& var : block.decls) {
             visit(*var);
             for (size_t next = idx + 1; next < ast.blocks.size(); next++) {
@@ -181,8 +182,8 @@ void SemanticAnalyzer::visit(AstForStmt& ast) {
 
 void SemanticAnalyzer::visit(AstDoLoopStmt& ast) {
     RESTORE_ON_EXIT(m_table);
-    ast.symbolTable = make_unique<SymbolTable>(m_table);
-    m_table = ast.symbolTable.get();
+    ast.symbolTable = m_context.create<SymbolTable>(m_table);
+    m_table = ast.symbolTable;
 
     for (auto& var : ast.decls) {
         visit(*var);
@@ -556,7 +557,7 @@ void SemanticAnalyzer::coerce(AstExpr*& ast, const TypeRoot* type) {
 
 void SemanticAnalyzer::cast(AstExpr*& ast, const TypeRoot* type) {
     auto category = ast->flags;
-    auto* cast = new AstCastExpr(
+    auto* cast = m_context.create<AstCastExpr>(
         ast->range,
         ast,
         nullptr,

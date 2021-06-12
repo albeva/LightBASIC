@@ -23,17 +23,25 @@ enum class AstKind {
  * and should never be used as type for ast node directly
  */
 struct AstRoot {
-    NO_COPY_AND_MOVE(AstRoot)
-
     constexpr AstRoot(AstKind kind_, llvm::SMRange range_) noexcept
     : kind{ kind_ }, range{ range_ } {}
 
-    virtual ~AstRoot() noexcept = default;
+    // virtual ~AstRoot() noexcept = default;
 
     [[nodiscard]] StringRef getClassName() const noexcept;
 
     const AstKind kind;
     const llvm::SMRange range;
+
+    // Make vanilla new/delete illegal.
+    void* operator new(size_t) = delete;
+    void operator delete(void*) = delete;
+
+    // Allow placement new
+    void* operator new(size_t, void* ptr) {
+        assert(ptr);
+        return ptr;
+    }
 };
 
 template<typename This, typename Base, AstKind kind>
@@ -66,7 +74,7 @@ struct AstModule final : AstNode<AstModule, AstRoot, AstKind::Module> {
     const unsigned int fileId;
     const bool hasImplicitMain;
     AstStmtList* stmtList;
-    unique_ptr<SymbolTable> symbolTable;
+    SymbolTable* symbolTable;
 };
 
 //----------------------------------------
@@ -139,7 +147,7 @@ struct AstReturnStmt final : AstNode<AstReturnStmt, AstStmt, AstKind::ReturnStmt
 
 struct AstIfStmtBlock final {
     std::vector<AstVarDecl*> decls;
-    unique_ptr<SymbolTable> symbolTable;
+    SymbolTable* symbolTable;
     AstExpr* expr;
     AstStmt* stmt;
 };
@@ -185,7 +193,7 @@ struct AstForStmt final : AstNode<AstForStmt, AstStmt, AstKind::ForStmt> {
     const StringRef next;
 
     Direction direction = Direction::Unknown;
-    unique_ptr<SymbolTable> symbolTable;
+    SymbolTable* symbolTable;
 };
 
 struct AstDoLoopStmt final : AstNode<AstDoLoopStmt, AstStmt, AstKind::DoLoopStmt> {
@@ -213,7 +221,7 @@ struct AstDoLoopStmt final : AstNode<AstDoLoopStmt, AstStmt, AstKind::DoLoopStmt
     const Condition condition;
     AstExpr* expr;
     AstStmt* stmt;
-    unique_ptr<SymbolTable> symbolTable;
+    SymbolTable* symbolTable;
 };
 
 struct AstControlFlowBranch final : AstNode<AstControlFlowBranch, AstStmt, AstKind::ControlFlowBranch> {
@@ -327,7 +335,7 @@ struct AstFuncDecl final : AstNode<AstFuncDecl, AstDecl, AstKind::FuncDecl> {
     const bool variadic;
     AstTypeExpr* retTypeExpr;
     const bool hasImpl;
-    unique_ptr<SymbolTable> symbolTable;
+    SymbolTable* symbolTable;
 };
 
 struct AstFuncParamDecl final : AstNode<AstFuncParamDecl, AstDecl, AstKind::FuncParamDecl> {
@@ -352,7 +360,7 @@ struct AstTypeDecl final : AstNode<AstTypeDecl, AstDecl, AstKind::TypeDecl> {
       decls{ std::move(decls_) } {}
 
     std::vector<AstDecl*> decls;
-    std::unique_ptr<SymbolTable> symbolTable;
+    SymbolTable* symbolTable;
 };
 
 //----------------------------------------
