@@ -44,7 +44,9 @@ public:
     /**
      * Allocate memory, this memory is not expected to be deallocated
      */
-    void* allocate(size_t bytes, unsigned alignment);
+    void* allocate(size_t bytes, unsigned alignment) noexcept {
+        return m_allocator.Allocate(bytes, alignment);
+    }
 
     /**
      * Allocate object in the context and construct it.
