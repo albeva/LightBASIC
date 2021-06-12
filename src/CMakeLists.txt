@@ -16,6 +16,8 @@ add_library(
     Diag/DiagnosticEngine.hpp
     Driver/CmdLineParser.cpp
     Driver/CmdLineParser.hpp
+    Driver/CompileOptions.cpp
+    Driver/CompileOptions.hpp
     Driver/Context.cpp
     Driver/Context.hpp
     Driver/Driver.cpp
@@ -73,7 +75,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.hpp
     Utils/Version.hpp
-    Driver/CompileOptions.cpp Driver/CompileOptions.hpp)
+)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)
