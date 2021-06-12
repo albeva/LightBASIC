@@ -384,7 +384,7 @@ void SemanticAnalyzer::visit(AstAddressOf& ast) {
     if (!ast.expr->flags.addressable) {
         fatalError("Cannot take address");
     }
-    ast.type = TypePointer::get(ast.expr->type);
+    ast.type = TypePointer::get(m_context, ast.expr->type);
     ast.flags = ast.expr->flags;
     ast.flags.dereferencable = true;
 }

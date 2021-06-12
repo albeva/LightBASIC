@@ -7,6 +7,8 @@
 
 namespace lbc {
 class CompileOptions;
+class TypeFunction;
+class TypePointer;
 
 /**
  * Context holds various data and memory allocations required for the compilation process.
@@ -45,7 +47,7 @@ public:
     void* allocate(size_t bytes, unsigned alignment);
 
     /**
-     * Allocate & construct object from the context
+     * Allocate object in the context and construct it.
      * @tparam T object to create
      * @tparam Args arguments to pass to T constructor
      */
@@ -55,6 +57,12 @@ public:
         new (res) T(std::forward<Args>(args)...);
         return res;
     }
+
+    /**
+     * Declared function types
+     */
+    llvm::SmallVector<TypeFunction*> funcTypes;
+    llvm::SmallVector<TypePointer*> ptrTypes;
 
 private:
     const CompileOptions& m_options;

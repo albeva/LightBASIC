@@ -33,6 +33,16 @@ public:
     [[nodiscard]] auto begin() const noexcept { return m_symbols.begin(); }
     [[nodiscard]] auto end() const noexcept { return m_symbols.end(); }
 
+    // Make vanilla new/delete illegal.
+    void* operator new(size_t) = delete;
+    void operator delete(void*) = delete;
+
+    // Allow placement new
+    void* operator new(size_t /*size*/, void* ptr) {
+        assert(ptr);
+        return ptr;
+    }
+
 private:
     SymbolTable* m_parent;
     Container m_symbols;

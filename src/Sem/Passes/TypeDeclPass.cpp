@@ -25,7 +25,7 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
     m_sem.setSymbolTable(ast.symbolTable);
     declareMembers();
     ast.symbolTable->setParent(nullptr);
-    TypeUDT::get(*m_symbol, *ast.symbolTable, packed);
+    TypeUDT::get(m_sem.getContext(), *m_symbol, *ast.symbolTable, packed);
 
     m_sem.setSymbolTable(current);
 }

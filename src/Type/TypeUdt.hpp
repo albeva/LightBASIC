@@ -7,15 +7,17 @@
 namespace lbc {
 class Symbol;
 class SymbolTable;
+class Context;
 
 /**
  * User defined type
  */
 class TypeUDT final : public TypeRoot {
     TypeUDT(Symbol& symbol, SymbolTable& symbolTable, bool packed);
+    friend class Context;
 
 public:
-    static const TypeUDT* get(Symbol& symbol, SymbolTable& symbolTable, bool packed);
+    static const TypeUDT* get(Context& context, Symbol& symbol, SymbolTable& symbolTable, bool packed);
 
     constexpr static bool classof(const TypeRoot* type) {
         return type->getKind() == TypeFamily::UDT;

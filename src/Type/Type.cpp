@@ -7,11 +7,6 @@
 using namespace lbc;
 
 namespace {
-
-// Declared declaredTypes.
-static std::vector<unique_ptr<TypeFunction>> declaredFunc; // NOLINT
-static std::vector<unique_ptr<TypePointer>> declaredPtrs;  // NOLINT
-
 // Commonly used types
 const TypeVoid voidTy{};              // VOID
 const TypeAny anyTy{};                // Any typeExpr
@@ -169,18 +164,20 @@ string TypeAny::asString() const {
 
 // Pointer
 
-const TypePointer* TypePointer::get(const TypeRoot* base) noexcept {
+const TypePointer* TypePointer::get(Context& context, const TypeRoot* base) noexcept {
     if (base == &anyTy) {
         return &anyPtrTy;
     }
 
-    for (const auto& ptr : declaredPtrs) {
+    for (const auto& ptr : context.ptrTypes) {
         if (ptr->m_base == base) {
-            return ptr.get();
+            return ptr;
         }
     }
 
-    return declaredPtrs.emplace_back(make_unique<TypePointer>(base)).get();
+    auto* ty = context.create<TypePointer>(base);
+    context.ptrTypes.push_back(ty);
+    return ty;
 }
 
 llvm::Type* TypePointer::genLlvmType(Context& context) const {
@@ -276,15 +273,20 @@ string TypeFloatingPoint::asString() const {
 
 // Function
 
-const TypeFunction* TypeFunction::get(const TypeRoot* retType, std::vector<const TypeRoot*> paramTypes, bool variadic) noexcept {
-    for (const auto& ptr : declaredFunc) {
+const TypeFunction* TypeFunction::get(
+    Context& context,
+    const TypeRoot* retType,
+    std::vector<const TypeRoot*> paramTypes,
+    bool variadic) noexcept {
+    for (const auto& ptr : context.funcTypes) {
         if (ptr->getReturn() == retType && ptr->getParams() == paramTypes && ptr->isVariadic() == variadic) {
-            return ptr.get();
+            return ptr;
         }
     }
 
-    auto ty = make_unique<TypeFunction>(retType, std::move(paramTypes), variadic);
-    return declaredFunc.emplace_back(std::move(ty)).get();
+    auto ty = context.create<TypeFunction>(retType, std::move(paramTypes), variadic);
+    context.funcTypes.push_back(ty);
+    return ty;
 }
 
 llvm::Type* TypeFunction::genLlvmType(Context& context) const {

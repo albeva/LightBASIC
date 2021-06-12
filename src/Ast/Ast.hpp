@@ -26,8 +26,6 @@ struct AstRoot {
     constexpr AstRoot(AstKind kind_, llvm::SMRange range_) noexcept
     : kind{ kind_ }, range{ range_ } {}
 
-    // virtual ~AstRoot() noexcept = default;
-
     [[nodiscard]] StringRef getClassName() const noexcept;
 
     const AstKind kind;
@@ -38,7 +36,7 @@ struct AstRoot {
     void operator delete(void*) = delete;
 
     // Allow placement new
-    void* operator new(size_t, void* ptr) {
+    void* operator new(size_t /*size*/, void* ptr) {
         assert(ptr);
         return ptr;
     }

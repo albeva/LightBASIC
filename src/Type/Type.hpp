@@ -140,7 +140,7 @@ public:
     constexpr explicit TypePointer(const TypeRoot* base) noexcept
     : TypeRoot{ TypeFamily::Pointer }, m_base{ base } {}
 
-    [[nodiscard]] static const TypePointer* get(const TypeRoot* base) noexcept;
+    [[nodiscard]] static const TypePointer* get(Context& context, const TypeRoot* base) noexcept;
 
     constexpr static bool classof(const TypeRoot* type) noexcept {
         return type->getKind() == TypeFamily::Pointer;
@@ -257,6 +257,7 @@ public:
       m_variadic{ variadic } {}
 
     [[nodiscard]] static const TypeFunction* get(
+        Context& context,
         const TypeRoot* retType,
         std::vector<const TypeRoot*> paramTypes,
         bool variadic) noexcept;
@@ -275,6 +276,7 @@ protected:
     [[nodiscard]] llvm::Type* genLlvmType(Context& context) const final;
 
 private:
+    friend class Context;
     const TypeRoot* m_retType;
     const std::vector<const TypeRoot*> m_paramTypes;
     const bool m_variadic;

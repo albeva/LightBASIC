@@ -53,6 +53,16 @@ public:
         return llvm::GlobalValue::LinkageTypes::InternalLinkage;
     }
 
+    // Make vanilla new/delete illegal.
+    void* operator new(size_t) = delete;
+    void operator delete(void*) = delete;
+
+    // Allow placement new
+    void* operator new(size_t /*size*/, void* ptr) {
+        assert(ptr);
+        return ptr;
+    }
+
 private:
     const StringRef m_name;
     const TypeRoot* m_type;

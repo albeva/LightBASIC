@@ -30,7 +30,7 @@ void TypePass::visit(AstTypeExpr& ast) {
         type = TypeRoot::fromTokenKind(ast.tokenKind);
     }
     for (auto deref = 0; deref < ast.dereference; deref++) {
-        type = TypePointer::get(type);
+        type = TypePointer::get(m_sem.getContext(), type);
     }
     ast.type = type;
 }

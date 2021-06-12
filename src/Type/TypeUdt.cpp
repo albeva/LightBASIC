@@ -7,10 +7,6 @@
 #include "Symbol/SymbolTable.hpp"
 using namespace lbc;
 
-namespace {
-std::vector<unique_ptr<TypeUDT>> udts; // NOLINT
-} // namespace
-
 TypeUDT::TypeUDT(Symbol& symbol, SymbolTable& symbolTable, bool packed)
 : TypeRoot{ TypeFamily::UDT },
   m_symbol{ symbol },
@@ -19,14 +15,15 @@ TypeUDT::TypeUDT(Symbol& symbol, SymbolTable& symbolTable, bool packed)
     symbol.setType(this);
 }
 
-const TypeUDT* TypeUDT::get(Symbol& symbol, SymbolTable& symbolTable, bool packed) {
+const TypeUDT* TypeUDT::get(Context& context, Symbol& symbol, SymbolTable& symbolTable, bool packed) {
     if (const auto* type = symbol.type()) {
         if (const auto* udt = dyn_cast<TypeUDT>(type)) {
             return udt;
         }
         fatalError("Symbol should hold UDT type pointer!");
     }
-    return udts.emplace_back(new TypeUDT(symbol, symbolTable, packed)).get(); // NOLINT
+
+    return context.create<TypeUDT>(symbol, symbolTable, packed);
 }
 
 string TypeUDT::asString() const {
