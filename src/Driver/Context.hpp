@@ -3,6 +3,7 @@
 //
 #pragma once
 #include "Driver/Toolchain/Toolchain.hpp"
+#include "llvm/Support/Allocator.h"
 
 namespace lbc {
 class CompileOptions;
@@ -38,6 +39,22 @@ public:
      */
     [[nodiscard]] bool import(StringRef module);
 
+    /**
+     * Allocate memory, this memory is not expected to be deallocated
+     */
+    void* allocate(size_t bytes, unsigned alignment);
+
+    /**
+     * Allocate & construct object from the context
+     * @tparam T object to create
+     * @tparam Args arguments to pass to T constructor
+     */
+    template<typename T, typename... Args>
+    T* create(Args&&... args) {
+        T* mem = allocate(sizeof(T), alignof(T));
+        return new(mem) T(std::forward<Args>(args)...);
+    }
+
 private:
     const CompileOptions& m_options;
     Toolchain m_toolchain{ *this };
@@ -48,6 +65,9 @@ private:
 
     llvm::StringSet<> m_retainedStrings{};
     llvm::StringSet<> m_imports;
+
+    // Allocations
+    llvm::BumpPtrAllocator m_allocator;
 };
 
 } // namespace lbc

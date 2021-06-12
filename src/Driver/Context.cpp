@@ -27,3 +27,11 @@ StringRef Context::retainCopy(StringRef str) {
 bool Context::import(StringRef module) {
     return m_imports.insert(module).second;
 }
+
+void* Context::allocate(size_t bytes, unsigned int alignment) {
+    if (bytes == 0) {
+        return nullptr;
+    }
+
+    return m_allocator.Allocate(bytes, alignment);
+}
