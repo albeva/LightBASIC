@@ -37,7 +37,7 @@ public:
     [[nodiscard]] static string getFileExt(FileType type);
 
 public:
-    NO_COPY_AND_MOVE(CompileOptions);
+    NO_COPY_AND_MOVE(CompileOptions)
     CompileOptions() = default;
     ~CompileOptions() = default;
 
