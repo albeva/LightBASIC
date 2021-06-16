@@ -1,6 +1,7 @@
 //
 // Created by Albert Varaksin on 03/07/2020.
 //
+#include "Diag/DiagnosticEngine.hpp"
 #include "Driver/CmdLineParser.hpp"
 #include "Driver/CompileOptions.hpp"
 #include "Driver/Context.hpp"
@@ -18,5 +19,6 @@ int main(int argc, const char* argv[]) {
 
     Context context{ options };
     Driver{ context }.drive();
+
     return EXIT_SUCCESS;
 }

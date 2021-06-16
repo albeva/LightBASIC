@@ -75,7 +75,7 @@ add_library(
     Utils/Utils.cpp
     Utils/Utils.hpp
     Utils/Version.hpp
-)
+    Diag/Diagnostics.def.hpp)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

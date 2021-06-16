@@ -2,6 +2,7 @@
 // Created by Albert Varaksin on 18/04/2021.
 //
 #pragma once
+#include "Diag/DiagnosticEngine.hpp"
 #include "Driver/Toolchain/Toolchain.hpp"
 #include "llvm/Support/Allocator.h"
 
@@ -22,7 +23,8 @@ public:
     explicit Context(const CompileOptions& options);
     ~Context() noexcept = default;
 
-    [[nodiscard]] const CompileOptions& getOptions() noexcept { return m_options; }
+    [[nodiscard]] const CompileOptions& getOptions() const noexcept { return m_options; }
+    [[nodiscard]] DiagnosticEngine& getDiag() noexcept { return m_diag; }
     [[nodiscard]] Toolchain& getToolchain() noexcept { return m_toolchain; }
     [[nodiscard]] llvm::Triple& getTriple() noexcept { return m_triple; }
     [[nodiscard]] llvm::SourceMgr& getSourceMrg() noexcept { return m_sourceMgr; }
@@ -65,6 +67,8 @@ public:
 
 private:
     const CompileOptions& m_options;
+
+    DiagnosticEngine m_diag{ *this };
     Toolchain m_toolchain{ *this };
 
     llvm::Triple m_triple;

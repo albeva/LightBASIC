@@ -3,6 +3,7 @@
 //
 #include "Parser.hpp"
 #include "Ast/Ast.hpp"
+#include "Diag/DiagnosticEngine.hpp"
 #include "Driver/CompileOptions.hpp"
 #include "Driver/Context.hpp"
 #include "Lexer/Lexer.hpp"
@@ -1250,11 +1251,13 @@ bool Parser::expect(TokenKind kind) noexcept {
         return true;
     }
 
-    error("Expected '"_t
-        + Token::description(kind)
-        + "' got '"
-        + m_token.description()
-        + "'");
+    m_context.getDiag().report(
+        Diag::unexpectedToken,
+        m_token.range(),
+        Token::description(kind),
+        m_token.description());
+
+    std::exit(EXIT_FAILURE);
 }
 
 void Parser::advance() {
