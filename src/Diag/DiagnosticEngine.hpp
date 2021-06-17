@@ -25,13 +25,7 @@ public:
         auto formatted = llvm::formatv(
             getDiagnosticText(diag),
             std::forward<Args>(args)...);
-
-        auto kind = getDiagKind(diag);
-        if (kind == llvm::SourceMgr::DK_Error) {
-            m_errorCounter++;
-        }
-
-        m_sourceMgr.PrintMessage(range.Start, kind, formatted.str(), range);
+        print(diag, range.Start, formatted.str(), range);
     }
 
     template<typename... Args>
@@ -39,14 +33,10 @@ public:
         auto formatted = llvm::formatv(
             getDiagnosticText(diag),
             std::forward<Args>(args)...);
-
-        auto kind = getDiagKind(diag);
-        if (kind == llvm::SourceMgr::DK_Error) {
-            m_errorCounter++;
-        }
-
-        m_sourceMgr.PrintMessage(loc, kind, formatted.str());
+        print(diag, loc, formatted.str());
     }
+
+    void print(Diag diag, llvm::SMLoc loc, const string& str, llvm::ArrayRef<llvm::SMRange> Ranges = {}) noexcept;
 
 private:
     static const char* getDiagnosticText(Diag diag) noexcept;

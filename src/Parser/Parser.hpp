@@ -80,8 +80,23 @@ private:
     // replace token kind with another (e.g. Minus to Negate)
     void replace(TokenKind what, TokenKind with) noexcept;
 
-    // expect token to match and if true, advances
-    [[nodiscard]] bool accept(TokenKind kind);
+    // If token matches then advance and return true
+    [[nodiscard]] bool accept(TokenKind kind) {
+        if (m_token.is(kind)) {
+            advance();
+            return true;
+        }
+        return false;
+    }
+
+    // expects given token and advances.
+    bool consume(TokenKind kind) noexcept {
+        if (expect(kind)) {
+            advance();
+            return true;
+        }
+        return false;
+    }
 
     // Expects a match, raises error when fails
     bool expect(TokenKind kind) noexcept;

@@ -64,8 +64,7 @@ AstStmtList* Parser::stmtList() {
 
     while (isNonTerminator(m_token)) {
         stms.emplace_back(statement());
-        expect(TokenKind::EndOfStmt);
-        advance();
+        consume(TokenKind::EndOfStmt);
     }
 
     return m_context.create<AstStmtList>(
@@ -221,8 +220,7 @@ AstAttributeList* Parser::attributeList() {
         attribs.emplace_back(attribute());
     } while (accept(TokenKind::Comma));
 
-    expect(TokenKind::BracketClose);
-    advance();
+    consume(TokenKind::BracketClose);
 
     return m_context.create<AstAttributeList>(
         llvm::SMRange{ start, m_endLoc },
@@ -266,8 +264,7 @@ std::vector<AstLiteralExpr*> Parser::attributeArgList() {
                 break;
             }
         }
-        expect(TokenKind::ParenClose);
-        advance();
+        consume(TokenKind::ParenClose);
     }
     return args;
 }
@@ -303,8 +300,7 @@ AstVarDecl* Parser::kwVar(AstAttributeList* attribs) {
             expr = expression();
         }
     } else {
-        expect(TokenKind::Assign);
-        advance();
+        consume(TokenKind::Assign);
 
         expr = expression();
     }
@@ -347,8 +343,7 @@ AstFuncDecl* Parser::kwDeclare(AstAttributeList* attribs) {
 AstFuncDecl* Parser::funcSignature(llvm::SMLoc start, AstAttributeList* attribs, bool hasImpl) {
     bool isFunc = accept(TokenKind::Function);
     if (!isFunc) {
-        expect(TokenKind::Sub);
-        advance();
+        consume(TokenKind::Sub);
     }
 
     expect(TokenKind::Identifier);
@@ -359,14 +354,12 @@ AstFuncDecl* Parser::funcSignature(llvm::SMLoc start, AstAttributeList* attribs,
     std::vector<AstFuncParamDecl*> params;
     if (accept(TokenKind::ParenOpen)) {
         params = funcParamList(isVariadic);
-        expect(TokenKind::ParenClose);
-        advance();
+        consume(TokenKind::ParenClose);
     }
 
     AstTypeExpr* ret = nullptr;
     if (isFunc) {
-        expect(TokenKind::As);
-        advance();
+        consume(TokenKind::As);
         ret = typeExpr();
     }
 
@@ -416,8 +409,7 @@ AstFuncParamDecl* Parser::funcParam() {
     auto id = m_token.getStringValue();
     advance();
 
-    expect(TokenKind::As);
-    advance();
+    consume(TokenKind::As);
     auto* type = typeExpr();
 
     return m_context.create<AstFuncParamDecl>(
@@ -448,16 +440,12 @@ AstTypeDecl* Parser::kwType(AstAttributeList* attribs) {
     auto id = m_token.getStringValue();
     advance();
 
-    expect(TokenKind::EndOfStmt);
-    advance();
+    consume(TokenKind::EndOfStmt);
 
     auto decls = typeDeclList();
 
-    expect(TokenKind::End);
-    advance();
-
-    expect(TokenKind::Type);
-    advance();
+    consume(TokenKind::End);
+    consume(TokenKind::Type);
 
     return m_context.create<AstTypeDecl>(
         llvm::SMRange{ start, m_endLoc },
@@ -483,8 +471,7 @@ std::vector<AstDecl*> Parser::typeDeclList() {
         }
 
         decls.emplace_back(typeMember(attribs));
-        expect(TokenKind::EndOfStmt);
-        advance();
+        consume(TokenKind::EndOfStmt);
     }
 
     return decls;
@@ -502,8 +489,7 @@ AstDecl* Parser::typeMember(AstAttributeList* attribs) {
     auto id = m_token.getStringValue();
     advance();
 
-    expect(TokenKind::As);
-    advance();
+    consume(TokenKind::As);
 
     auto* type = typeExpr();
 
@@ -531,23 +517,19 @@ AstFuncStmt* Parser::kwFunction(AstAttributeList* attribs) {
 
     auto start = attribs != nullptr ? attribs->range.Start : m_token.range().Start;
     auto* decl = funcSignature(start, attribs, true);
-    expect(TokenKind::EndOfStmt);
-    advance();
+    consume(TokenKind::EndOfStmt);
 
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
 
     auto* stmts = stmtList();
 
-    expect(TokenKind::End);
-    advance();
+    consume(TokenKind::End);
 
     if (decl->retTypeExpr != nullptr) {
-        expect(TokenKind::Function);
-        advance();
+        consume(TokenKind::Function);
     } else {
-        expect(TokenKind::Sub);
-        advance();
+        consume(TokenKind::Sub);
     }
 
     return m_context.create<AstFuncStmt>(
@@ -624,11 +606,8 @@ AstIfStmt* Parser::kwIf() {
     }
 
     if (blocks.back().stmt->kind == AstKind::StmtList) {
-        expect(TokenKind::End);
-        advance();
-
-        expect(TokenKind::If);
-        advance();
+        consume(TokenKind::End);
+        consume(TokenKind::If);
     }
 
     return m_context.create<AstIfStmt>(
@@ -645,13 +624,11 @@ AstIfStmtBlock Parser::ifBlock() {
     std::vector<AstVarDecl*> decls;
     while (m_token.is(TokenKind::Var)) {
         decls.emplace_back(kwVar(nullptr));
-        expect(TokenKind::Comma);
-        advance();
+        consume(TokenKind::Comma);
     }
 
     auto* expr = expression(ExprFlags::CommaAsAnd);
-    expect(TokenKind::Then);
-    advance();
+    consume(TokenKind::Then);
 
     return thenBlock(std::move(decls), expr);
 }
@@ -699,8 +676,7 @@ AstIfStmtBlock Parser::ifBlock() {
     // [ VAR { "," VAR } "," ]
     while (m_token.is(TokenKind::Var)) {
         decls.emplace_back(kwVar(nullptr));
-        expect(TokenKind::Comma);
-        advance();
+        consume(TokenKind::Comma);
     }
 
     // id [ "AS" TypeExpr ] "=" Expression
@@ -714,8 +690,7 @@ AstIfStmtBlock Parser::ifBlock() {
         type = typeExpr();
     }
 
-    expect(TokenKind::Assign);
-    advance();
+    consume(TokenKind::Assign);
 
     auto* expr = expression();
     auto* iterator = m_context.create<AstVarDecl>(
@@ -726,8 +701,7 @@ AstIfStmtBlock Parser::ifBlock() {
         expr);
 
     // "TO" Expression [ "STEP" expression ]
-    expect(TokenKind::To);
-    advance();
+    consume(TokenKind::To);
 
     auto* limit = expression();
     AstExpr* step = nullptr;
@@ -741,13 +715,11 @@ AstIfStmtBlock Parser::ifBlock() {
     if (accept(TokenKind::Do)) {
         stmt = statement();
     } else {
-        expect(TokenKind::EndOfStmt);
-        advance();
+        consume(TokenKind::EndOfStmt);
 
         stmt = stmtList();
 
-        expect(TokenKind::Next);
-        advance();
+        consume(TokenKind::Next);
 
         if (m_token.is(TokenKind::Identifier)) {
             next = m_token.getStringValue();
@@ -801,8 +773,7 @@ AstIfStmtBlock Parser::ifBlock() {
     if (accept(TokenKind::EndOfStmt)) {
         stmt = stmtList();
 
-        expect(TokenKind::Loop);
-        advance();
+        consume(TokenKind::Loop);
 
         // [ Condition ]
         if (accept(TokenKind::Until)) {
@@ -826,13 +797,11 @@ AstIfStmtBlock Parser::ifBlock() {
         if (accept(TokenKind::EndOfStmt)) {
             stmt = stmtList();
 
-            expect(TokenKind::Loop);
-            advance();
+            consume(TokenKind::Loop);
         }
         // "DO" Statement
         else {
-            expect(TokenKind::Do);
-            advance();
+            consume(TokenKind::Do);
 
             stmt = statement();
         }
@@ -1048,8 +1017,7 @@ AstExpr* Parser::primary() {
 
     if (accept(TokenKind::ParenOpen)) {
         auto* expr = expression();
-        expect(TokenKind::ParenClose);
-        advance();
+        consume(TokenKind::ParenClose);
         return expr;
     }
 
@@ -1152,13 +1120,11 @@ AstCallExpr* Parser::callExpr() {
 
     auto* id = identifier();
 
-    expect(TokenKind::ParenOpen);
-    advance();
+    consume(TokenKind::ParenOpen);
 
     auto args = expressionList();
 
-    expect(TokenKind::ParenClose);
-    advance();
+    consume(TokenKind::ParenClose);
 
     return m_context.create<AstCallExpr>(
         llvm::SMRange{ start, m_endLoc },
@@ -1177,13 +1143,11 @@ AstIfExpr* Parser::ifExpr() {
 
     auto* expr = expression(ExprFlags::CommaAsAnd);
 
-    expect(TokenKind::Then);
-    advance();
+    consume(TokenKind::Then);
 
     auto* trueExpr = expression();
 
-    expect(TokenKind::Else);
-    advance();
+    consume(TokenKind::Else);
 
     auto* falseExpr = expression();
 
@@ -1236,14 +1200,6 @@ void Parser::replace(TokenKind what, TokenKind with) noexcept {
     if (m_token.is(what)) {
         m_token.setKind(with);
     }
-}
-
-bool Parser::accept(TokenKind kind) {
-    if (m_token.isNot(kind)) {
-        return false;
-    }
-    advance();
-    return true;
 }
 
 bool Parser::expect(TokenKind kind) noexcept {

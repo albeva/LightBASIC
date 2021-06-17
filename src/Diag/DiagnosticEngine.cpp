@@ -28,3 +28,11 @@ const char* DiagnosticEngine::getDiagnosticText(Diag diag) noexcept {
 llvm::SourceMgr::DiagKind DiagnosticEngine::getDiagKind(Diag diag) noexcept {
     return diagKind[static_cast<size_t>(diag)];
 }
+
+void DiagnosticEngine::print(Diag diag, llvm::SMLoc loc, const string& str, llvm::ArrayRef<llvm::SMRange> ranges) noexcept {
+    auto kind = getDiagKind(diag);
+    if (kind == llvm::SourceMgr::DK_Error) {
+        m_errorCounter++;
+    }
+    m_sourceMgr.PrintMessage(loc, kind, str, ranges);
+}
