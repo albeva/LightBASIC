@@ -2,14 +2,14 @@
 // Created by Albert Varaksin on 18/04/2021.
 //
 #pragma once
-#include "Diag/DiagnosticEngine.hpp"
-#include "Driver/Toolchain/Toolchain.hpp"
 #include "llvm/Support/Allocator.h"
 
 namespace lbc {
 class CompileOptions;
 class TypeFunction;
 class TypePointer;
+class DiagnosticEngine;
+class Toolchain;
 
 /**
  * Context holds various data and memory allocations required for the compilation process.
@@ -21,7 +21,7 @@ public:
     NO_COPY_AND_MOVE(Context)
 
     explicit Context(const CompileOptions& options);
-    ~Context() noexcept = default;
+    ~Context() noexcept;
 
     [[nodiscard]] const CompileOptions& getOptions() const noexcept { return m_options; }
     [[nodiscard]] DiagnosticEngine& getDiag() noexcept { return m_diag; }
@@ -66,10 +66,12 @@ public:
     llvm::SmallVector<TypePointer*> ptrTypes;
 
 private:
+    struct Pimpl;
+    unique_ptr<Pimpl> m_pimpl;
     const CompileOptions& m_options;
 
-    DiagnosticEngine m_diag{ *this };
-    Toolchain m_toolchain{ *this };
+    DiagnosticEngine& m_diag;
+    Toolchain& m_toolchain;
 
     llvm::Triple m_triple;
     llvm::SourceMgr m_sourceMgr{};

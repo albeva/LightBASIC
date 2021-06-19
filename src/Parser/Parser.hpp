@@ -8,7 +8,9 @@
 namespace lbc {
 class Context;
 class Lexer;
+class DiagnosticEngine;
 struct AstIfStmtBlock;
+enum class Diag;
 AST_FORWARD_DECLARE()
 
 class Parser final {
@@ -104,10 +106,8 @@ private:
     // advance to the next token from the stream
     void advance();
 
-    // show error and terminate compilation
-    [[noreturn]] void error(const Twine& message);
-
     Context& m_context;
+    DiagnosticEngine& m_diag;
     const unsigned m_fileId;
     const bool m_isMain;
     Scope m_scope;

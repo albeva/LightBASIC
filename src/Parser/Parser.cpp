@@ -13,6 +13,7 @@ using namespace lbc;
 
 Parser::Parser(Context& context, unsigned int fileId, bool isMain)
 : m_context{ context },
+  m_diag{ context.getDiag() },
   m_fileId{ fileId },
   m_isMain{ isMain },
   m_scope{ Scope::Root } {
@@ -95,7 +96,8 @@ AstStmt* Parser::statement() {
             return kwImport();
         }
         if (!m_isMain) {
-            error("Only declarations are allowed at root level. Got "_t + m_token.description());
+            m_diag.report(Diag::notAllowedTopLevelStatement, m_token.range());
+            std::exit(EXIT_FAILURE);
         }
     }
 
@@ -132,32 +134,34 @@ AstImport* Parser::kwImport() {
 
     expect(TokenKind::Identifier);
     auto import = m_token.lexeme();
-    auto start = m_token.range().Start;
+    auto range = m_token.range();
     advance();
 
     // Imported file
     auto source = m_context.getOptions().getCompilerDir() / "lib" / (import + ".bas").str();
     if (!m_context.import(source.string())) {
-        return m_context.create<AstImport>(llvm::SMRange{ start, m_endLoc }, import);
+        return m_context.create<AstImport>(llvm::SMRange{ range.Start, m_endLoc }, import);
     }
     if (!fs::exists(source)) {
-        error("Import '"_t + import + "' not found");
+        m_diag.report(Diag::moduleNotFound, range, import);
+        std::exit(EXIT_FAILURE);
     }
 
     // Load import into Source Mgr
     string included;
     auto ID = m_context.getSourceMrg().AddIncludeFile(
         source.string(),
-        start,
+        range.Start,
         included);
     if (ID == ~0U) {
-        fatalError("Failed to load '"_t + source.string() + "'");
+        m_diag.report(Diag::failedToLoadModule, range, source.string());
+        std::exit(EXIT_FAILURE);
     }
 
     // parse the module
     auto* module = Parser(m_context, ID, false).parse();
     return m_context.create<AstImport>(
-        llvm::SMRange{ start, m_endLoc },
+        llvm::SMRange{ range.Start, m_endLoc },
         import,
         module);
 }
@@ -192,9 +196,8 @@ AstStmt* Parser::declaration() {
     }
 
     if (attribs != nullptr) {
-        error("Expected SUB, FUNCTION, DECLARE, VAR or TYPE got '"_t
-            + m_token.description()
-            + "'");
+        m_diag.report(Diag::expectedDeclarationAfterAttribute, m_token.range(), m_token.description());
+        std::exit(EXIT_FAILURE);
     }
     return nullptr;
 }
@@ -326,7 +329,8 @@ AstFuncDecl* Parser::kwDeclare(AstAttributeList* attribs) {
     // assume m_token == DECLARE
     assert(m_token.is(TokenKind::Declare));
     if (m_scope != Scope::Root) {
-        error("Nested declarations not allowed");
+        m_diag.report(Diag::unexpectedNestedDeclaration, m_token.range(), m_token.description());
+        std::exit(EXIT_FAILURE);
     }
     auto start = attribs != nullptr ? attribs->range.Start : m_token.range().Start;
     advance();
@@ -385,7 +389,8 @@ std::vector<AstFuncParamDecl*> Parser::funcParamList(bool& isVariadic) {
         if (accept(TokenKind::Ellipsis)) {
             isVariadic = true;
             if (m_token.is(TokenKind::Comma)) {
-                error("Variadic parameter must be last in function declaration");
+                m_diag.report(Diag::variadicArgumentNotLast, m_token.range());
+                std::exit(EXIT_FAILURE);
             }
             break;
         }
@@ -512,7 +517,8 @@ AstDecl* Parser::typeMember(AstAttributeList* attribs) {
  */
 AstFuncStmt* Parser::kwFunction(AstAttributeList* attribs) {
     if (m_scope != Scope::Root) {
-        error("Nested SUBs/FUNCTIONs not allowed");
+        m_diag.report(Diag::unexpectedNestedDeclaration, m_token.range(), m_token.description());
+        std::exit(EXIT_FAILURE);
     }
 
     auto start = attribs != nullptr ? attribs->range.Start : m_token.range().Start;
@@ -545,7 +551,8 @@ AstStmt* Parser::kwReturn() {
     // assume m_token == RETURN
     assert(m_token.is(TokenKind::Return));
     if (m_scope == Scope::Root && !m_isMain) {
-        error("Unexpected RETURN outside SUB / FUNCTION body");
+        m_diag.report(Diag::unexpectedReturn, m_token.range());
+        std::exit(EXIT_FAILURE);
     }
     auto start = m_token.range().Start;
     advance();
@@ -1041,7 +1048,8 @@ AstExpr* Parser::primary() {
         return unary({ start, m_endLoc }, kind, expr);
     }
 
-    error("expected primary");
+    m_diag.report(Diag::expectedExpression, m_token.range(), m_token.description());
+    std::exit(EXIT_FAILURE);
 }
 
 AstExpr* Parser::unary(llvm::SMRange range, TokenKind op, AstExpr* expr) {
@@ -1117,13 +1125,10 @@ AstIdentExpr* Parser::identifier() {
  */
 AstCallExpr* Parser::callExpr() {
     auto start = m_token.range().Start;
-
     auto* id = identifier();
 
     consume(TokenKind::ParenOpen);
-
     auto args = expressionList();
-
     consume(TokenKind::ParenClose);
 
     return m_context.create<AstCallExpr>(
@@ -1144,11 +1149,9 @@ AstIfExpr* Parser::ifExpr() {
     auto* expr = expression(ExprFlags::CommaAsAnd);
 
     consume(TokenKind::Then);
-
     auto* trueExpr = expression();
 
     consume(TokenKind::Else);
-
     auto* falseExpr = expression();
 
     return m_context.create<AstIfExpr>(
@@ -1219,18 +1222,4 @@ bool Parser::expect(TokenKind kind) noexcept {
 void Parser::advance() {
     m_endLoc = m_token.range().End;
     m_lexer->next(m_token);
-}
-
-void Parser::error(const Twine& message) {
-    string output;
-    llvm::raw_string_ostream stream{ output };
-
-    m_context.getSourceMrg().PrintMessage(
-        stream,
-        m_token.range().Start,
-        llvm::SourceMgr::DK_Error,
-        message,
-        m_token.range());
-
-    fatalError(output, false);
 }

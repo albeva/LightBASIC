@@ -4,6 +4,7 @@
 #include "ToolTask.hpp"
 #include "Driver/CompileOptions.hpp"
 #include "Driver/Context.hpp"
+#include "Toolchain.hpp"
 
 #include <utility>
 
