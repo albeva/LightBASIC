@@ -321,13 +321,13 @@ void CodePrinter::visit(AstDoLoopStmt& ast) {
     }
 }
 
-void CodePrinter::visit(AstControlFlowBranch& ast) {
+void CodePrinter::visit(AstContinuationStmt& ast) {
     m_os << indent();
     switch (ast.action) {
-    case AstControlFlowBranch::Action::Continue:
+    case AstContinuationStmt::Action::Continue:
         m_os << "CONTINUE";
         break;
-    case AstControlFlowBranch::Action::Exit:
+    case AstContinuationStmt::Action::Exit:
         m_os << "EXIT";
         break;
     }

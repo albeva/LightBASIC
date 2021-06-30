@@ -831,7 +831,7 @@ AstIfStmtBlock Parser::ifBlock() {
  *   = "CONTINUE" { "FOR" }
  *   .
  */
-AstControlFlowBranch* Parser::kwContinue() {
+AstContinuationStmt* Parser::kwContinue() {
     // assume m_token == CONTINUE
     assert(m_token.is(TokenKind::Continue));
     auto start = m_token.range().Start;
@@ -855,9 +855,9 @@ AstControlFlowBranch* Parser::kwContinue() {
         break;
     }
 
-    return m_context.create<AstControlFlowBranch>(
+    return m_context.create<AstContinuationStmt>(
         llvm::SMRange{ start, m_endLoc },
-        AstControlFlowBranch::Action::Continue,
+        AstContinuationStmt::Action::Continue,
         std::move(returnControl));
 }
 
@@ -866,7 +866,7 @@ AstControlFlowBranch* Parser::kwContinue() {
  *   = "EXIT" { "FOR" }
  *   .
  */
-AstControlFlowBranch* Parser::kwExit() {
+AstContinuationStmt* Parser::kwExit() {
     // assume m_token == EXIT
     assert(m_token.is(TokenKind::Exit));
     auto start = m_token.range().Start;
@@ -890,9 +890,9 @@ AstControlFlowBranch* Parser::kwExit() {
         break;
     }
 
-    return m_context.create<AstControlFlowBranch>(
+    return m_context.create<AstContinuationStmt>(
         llvm::SMRange{ start, m_endLoc },
-        AstControlFlowBranch::Action::Exit,
+        AstContinuationStmt::Action::Exit,
         std::move(returnControl));
 }
 

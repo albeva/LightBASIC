@@ -207,7 +207,7 @@ void SemanticAnalyzer::visit(AstDoLoopStmt& ast) {
     m_controlStack.pop();
 }
 
-void SemanticAnalyzer::visit(AstControlFlowBranch& ast) {
+void SemanticAnalyzer::visit(AstContinuationStmt& ast) {
     if (m_controlStack.find(ast.destination) == m_controlStack.cend()) {
         fatalError("control statement not found");
     }

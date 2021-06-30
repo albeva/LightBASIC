@@ -27,17 +27,17 @@
 // Statements nodes extending AstStmt
 //----------------------------------------
 #define AST_STMT_NODES(_) \
-    _( Import            ) \
-    _( StmtList          ) \
-    _( ExprStmt          ) \
-    _( FuncStmt          ) \
-    _( ReturnStmt        ) \
-    _( IfStmt            ) \
-    _( ForStmt           ) \
-    _( DoLoopStmt        ) \
-    _( ControlFlowBranch )
+    _( Import           ) \
+    _( StmtList         ) \
+    _( ExprStmt         ) \
+    _( FuncStmt         ) \
+    _( ReturnStmt       ) \
+    _( IfStmt           ) \
+    _( ForStmt          ) \
+    _( DoLoopStmt       ) \
+    _( ContinuationStmt )
 
-#define AST_STMT_RANGE(_) _(Import, DoLoopStmt)
+#define AST_STMT_RANGE(_) _(Import, ContinuationStmt)
 
 //----------------------------------------
 // Declaration nodes extending AstDecl

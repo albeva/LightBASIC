@@ -57,8 +57,8 @@ private:
     [[nodiscard]] AstIfStmtBlock thenBlock(std::vector<AstVarDecl*> decls, AstExpr* expr);
     [[nodiscard]] AstForStmt* kwFor();
     [[nodiscard]] AstDoLoopStmt* kwDo();
-    [[nodiscard]] AstControlFlowBranch* kwContinue();
-    [[nodiscard]] AstControlFlowBranch* kwExit();
+    [[nodiscard]] AstContinuationStmt* kwContinue();
+    [[nodiscard]] AstContinuationStmt* kwExit();
     [[nodiscard]] AstAttributeList* attributeList();
     [[nodiscard]] AstAttribute* attribute();
     [[nodiscard]] std::vector<AstLiteralExpr*> attributeArgList();

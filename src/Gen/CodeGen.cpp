@@ -370,17 +370,17 @@ void CodeGen::visit(AstDoLoopStmt& ast) {
     Gen::DoLoopBuilder(*this, ast);
 }
 
-void CodeGen::visit(AstControlFlowBranch& ast) {
+void CodeGen::visit(AstContinuationStmt& ast) {
     auto target = m_controlStack.find(ast.destination);
     if (target == m_controlStack.cend()) {
         fatalError("control statement not found");
     }
 
     switch (ast.action) {
-    case AstControlFlowBranch::Action::Continue:
+    case AstContinuationStmt::Action::Continue:
         m_builder.CreateBr(target->second.continueBlock);
         break;
-    case AstControlFlowBranch::Action::Exit:
+    case AstContinuationStmt::Action::Exit:
         m_builder.CreateBr(target->second.exitBlock);
         break;
     }

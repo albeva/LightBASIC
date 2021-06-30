@@ -229,16 +229,16 @@ void AstPrinter::visit(AstDoLoopStmt& ast) {
     });
 }
 
-void AstPrinter::visit(AstControlFlowBranch& ast) {
+void AstPrinter::visit(AstContinuationStmt& ast) {
     m_json.object([&] {
         writeHeader(ast);
 
         m_json.attributeBegin("op");
         switch (ast.action) {
-        case AstControlFlowBranch::Action::Exit:
+        case AstContinuationStmt::Action::Exit:
             m_json.value("EXIT");
             break;
-        case AstControlFlowBranch::Action::Continue:
+        case AstContinuationStmt::Action::Continue:
             m_json.value("CONTINUE");
             break;
         }

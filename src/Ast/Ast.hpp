@@ -249,22 +249,22 @@ struct AstDoLoopStmt final : AstStmt {
     SymbolTable* symbolTable = nullptr;
 };
 
-struct AstControlFlowBranch final : AstStmt {
+struct AstContinuationStmt final : AstStmt {
     enum class Action {
         Continue,
         Exit
     };
 
-    explicit AstControlFlowBranch(
+    explicit AstContinuationStmt(
         llvm::SMRange range_,
         Action action_,
         std::vector<ControlFlowStatement> destination_) noexcept
-    : AstStmt{ AstKind::ControlFlowBranch, range_ },
+    : AstStmt{ AstKind::ContinuationStmt, range_ },
       action{ action_ },
       destination{ std::move(destination_) } {}
 
     constexpr static bool classof(const AstRoot* ast) noexcept {
-        return ast->kind == AstKind::ControlFlowBranch;
+        return ast->kind == AstKind::ContinuationStmt;
     }
 
     Action action;
