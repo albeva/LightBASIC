@@ -5,15 +5,25 @@
 
 // clang-format off
 
+//----------------------------------------
+// Root nodes serving as parents for others
+//----------------------------------------
 #define AST_ROOT_NODES(_) \
     _( Root ) \
     _( Stmt ) \
     _( Expr ) \
     _( Decl )
 
-/**
- * Statements
- */
+//----------------------------------------
+// Misc. nodes extending AstRoot
+//----------------------------------------
+#define AST_BASIC_NODES(_) \
+    _( Module   ) \
+    _( ExprList )
+
+//----------------------------------------
+// Statements nodes extending AstStmt
+//----------------------------------------
 #define AST_STMT_NODES(_) \
     _( Import            ) \
     _( StmtList          ) \
@@ -25,12 +35,11 @@
     _( DoLoopStmt        ) \
     _( ControlFlowBranch )
 
-// include declarations
 #define AST_STMT_RANGE(_) _(Import, DoLoopStmt)
 
-/**
- * Declarations
- */
+//----------------------------------------
+// Declaration nodes extending AstDecl
+//----------------------------------------
 #define AST_DECL_NODES(_) \
     _( VarDecl       ) \
     _( FuncDecl      ) \
@@ -39,26 +48,26 @@
 
 #define AST_DECL_RANGE(_) _(VarDecl, TypeDecl)
 
-/**
- * Attributes
- */
+//----------------------------------------
+// Attributes nodes extending AstRoot
+//----------------------------------------
 #define AST_ATTRIB_NODES(_) \
     _( AttributeList ) \
     _( Attribute     )
 
 #define AST_ATTR_RANGE(_) _(AttributeList, Attribute)
 
-/**
- * Types
- */
+//----------------------------------------
+// Type nodes extending AstRoot
+//----------------------------------------
 #define AST_TYPE_NODES(_) \
     _( TypeExpr )
 
 #define AST_TYPE_RANGE(_) _(TypeExpr, TypeExpr)
 
-/**
- * Expressions
- */
+//----------------------------------------
+// Expression nodes extending AstExpr
+//----------------------------------------
 #define AST_EXPR_NODES(_) \
     _( AssignExpr   ) \
     _( IdentExpr    ) \
@@ -74,20 +83,20 @@
 
 #define AST_EXPR_RANGE(_) _(AssignExpr, MemberAccess)
 
-/**
- * Combined
- */
+//----------------------------------------
+// All content nodes
+//----------------------------------------
 #define AST_CONTENT_NODES(_) \
-    _(Module)           \
+    AST_BASIC_NODES(_)  \
     AST_STMT_NODES(_)   \
     AST_DECL_NODES(_)   \
     AST_ATTRIB_NODES(_) \
     AST_TYPE_NODES(_)   \
     AST_EXPR_NODES(_)
 
-/**
- * Handy macro to forward declare all ast classes
- */
+//----------------------------------------
+// Forward declare nodes
+//----------------------------------------
 #define AST_FORWARD_DECLARE_IMPL(C) struct Ast##C;
 #define AST_FORWARD_DECLARE()                \
     AST_ROOT_NODES(AST_FORWARD_DECLARE_IMPL) \

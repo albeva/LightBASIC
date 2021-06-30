@@ -66,7 +66,7 @@ struct AstModule final : AstRoot {
     const unsigned int fileId;
     const bool hasImplicitMain;
     AstStmtList* stmtList;
-    SymbolTable* symbolTable;
+    SymbolTable* symbolTable = nullptr;
 };
 
 //----------------------------------------
@@ -185,6 +185,7 @@ struct AstForStmt final : AstStmt {
         Increment,
         Decrement
     };
+
     AstForStmt(
         llvm::SMRange range_,
         std::vector<AstVarDecl*> decls_,
@@ -213,7 +214,7 @@ struct AstForStmt final : AstStmt {
     const StringRef next;
 
     Direction direction = Direction::Unknown;
-    SymbolTable* symbolTable;
+    SymbolTable* symbolTable = nullptr;
 };
 
 struct AstDoLoopStmt final : AstStmt {
@@ -245,7 +246,7 @@ struct AstDoLoopStmt final : AstStmt {
     const Condition condition;
     AstExpr* expr;
     AstStmt* stmt;
-    SymbolTable* symbolTable;
+    SymbolTable* symbolTable = nullptr;
 };
 
 struct AstControlFlowBranch final : AstStmt {
@@ -372,7 +373,7 @@ struct AstFuncDecl final : AstDecl {
     const bool variadic;
     AstTypeExpr* retTypeExpr;
     const bool hasImpl;
-    SymbolTable* symbolTable;
+    SymbolTable* symbolTable = nullptr;
 };
 
 struct AstFuncParamDecl final : AstDecl {
@@ -405,7 +406,7 @@ struct AstTypeDecl final : AstDecl {
     }
 
     std::vector<AstDecl*> decls;
-    SymbolTable* symbolTable;
+    SymbolTable* symbolTable = nullptr;
 };
 
 //----------------------------------------
@@ -447,6 +448,16 @@ struct AstExpr : AstRoot {
     ValueFlags flags{};
 };
 
+struct AstExprList : AstRoot {
+    AstExprList(
+        llvm::SMRange range_,
+        std::vector<AstExpr*> exprs_) noexcept
+    : AstRoot{ AstKind::ExprList, range_ },
+      exprs{ std::move(exprs_) } {}
+
+    std::vector<AstExpr*> exprs;
+};
+
 struct AstAssignExpr final : AstExpr {
     AstAssignExpr(
         llvm::SMRange range_,
@@ -483,17 +494,17 @@ struct AstCallExpr final : AstExpr {
     AstCallExpr(
         llvm::SMRange range_,
         AstExpr* callable_,
-        std::vector<AstExpr*> args_) noexcept
+        AstExprList* args_) noexcept
     : AstExpr{ AstKind::CallExpr, range_ },
       callable{ callable_ },
-      args{ std::move(args_) } {};
+      args{ args_ } {};
 
     constexpr static bool classof(const AstRoot* ast) noexcept {
         return ast->kind == AstKind::CallExpr;
     }
 
     AstExpr* callable;
-    std::vector<AstExpr*> args;
+    AstExprList* args;
 };
 
 struct AstLiteralExpr final : AstExpr {

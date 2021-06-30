@@ -40,7 +40,6 @@ private:
     [[nodiscard]] AstStmt* statement();
     [[nodiscard]] AstImport* kwImport();
     [[nodiscard]] AstStmt* declaration();
-
     [[nodiscard]] AstExpr* expression(ExprFlags flags = ExprFlags::None);
     [[nodiscard]] AstExpr* factor();
     [[nodiscard]] AstExpr* primary();
@@ -51,8 +50,7 @@ private:
     [[nodiscard]] AstLiteralExpr* literal();
     [[nodiscard]] AstCallExpr* callExpr();
     [[nodiscard]] AstIfExpr* ifExpr();
-    [[nodiscard]] std::vector<AstExpr*> expressionList();
-
+    [[nodiscard]] AstExprList* expressionList();
     [[nodiscard]] AstVarDecl* kwVar(AstAttributeList* attribs);
     [[nodiscard]] AstIfStmt* kwIf();
     [[nodiscard]] AstIfStmtBlock ifBlock();
@@ -61,20 +59,16 @@ private:
     [[nodiscard]] AstDoLoopStmt* kwDo();
     [[nodiscard]] AstControlFlowBranch* kwContinue();
     [[nodiscard]] AstControlFlowBranch* kwExit();
-
     [[nodiscard]] AstAttributeList* attributeList();
     [[nodiscard]] AstAttribute* attribute();
     [[nodiscard]] std::vector<AstLiteralExpr*> attributeArgList();
-
     [[nodiscard]] AstTypeExpr* typeExpr();
-
     [[nodiscard]] AstFuncDecl* kwDeclare(AstAttributeList* attribs);
     [[nodiscard]] AstFuncDecl* funcSignature(llvm::SMLoc start, AstAttributeList* attribs, bool hasImpl);
     [[nodiscard]] std::vector<AstFuncParamDecl*> funcParamList(bool& isVariadic);
     [[nodiscard]] AstFuncParamDecl* funcParam();
     [[nodiscard]] AstFuncStmt* kwFunction(AstAttributeList* attribs);
     [[nodiscard]] AstStmt* kwReturn();
-
     [[nodiscard]] AstTypeDecl* kwType(AstAttributeList* attribs);
     [[nodiscard]] std::vector<AstDecl*> typeDeclList();
     [[nodiscard]] AstDecl* typeMember(AstAttributeList* attribs);

@@ -47,6 +47,10 @@ void SemanticAnalyzer::visit(AstImport& ast) {
     visit(*ast.module->stmtList);
 }
 
+void SemanticAnalyzer::visit(AstExprList& ast) {
+    llvm_unreachable("Unhandled AstExprList&");
+}
+
 void SemanticAnalyzer::visit(AstExprStmt& ast) {
     expression(ast.expr);
 }
@@ -283,7 +287,7 @@ void SemanticAnalyzer::visit(AstCallExpr& ast) {
     }
 
     const auto& paramTypes = type->getParams();
-    auto& args = ast.args;
+    auto& args = ast.args->exprs;
 
     if (type->isVariadic()) {
         if (paramTypes.size() > args.size()) {

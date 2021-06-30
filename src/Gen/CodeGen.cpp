@@ -144,12 +144,16 @@ void CodeGen::visit(AstStmtList& ast) {
 }
 
 void CodeGen::visit(AstImport& ast) {
-    if (!ast.module) {
+    if (ast.module == nullptr) {
         return;
     }
     RESTORE_ON_EXIT(m_fileId);
     m_fileId = ast.module->fileId;
     visit(*ast.module->stmtList);
+}
+
+void CodeGen::visit(AstExprList& ast) {
+    llvm_unreachable("Unhandled AstExprList&");
 }
 
 ValueHandler CodeGen::visit(AstAssignExpr& ast) {
@@ -181,7 +185,7 @@ void CodeGen::declareGlobalVar(AstVarDecl& ast) {
     bool generateStoreInCtror = false;
 
     // has an init expr?
-    if (ast.expr) {
+    if (ast.expr != nullptr) {
         if (auto* litExpr = dyn_cast<AstLiteralExpr>(ast.expr)) {
             auto rvalue = visit(*litExpr);
             constant = llvm::cast<llvm::Constant>(rvalue.load());
@@ -217,7 +221,7 @@ void CodeGen::declareLocalVar(AstVarDecl& ast) {
     llvm::Type* exprType = ast.symbol->type()->getLlvmType(m_context);
 
     // has an init expr?
-    if (ast.expr) {
+    if (ast.expr != nullptr) {
         rvalue = visit(*ast.expr);
     }
 
@@ -247,7 +251,7 @@ void CodeGen::declareFuncs(AstStmtList& ast) {
             break;
         case AstKind::Import: {
             auto& import = static_cast<AstImport&>(*stmt);
-            if (import.module) {
+            if (import.module != nullptr) {
                 declareFuncs(*import.module->stmtList);
             }
             break;
@@ -320,7 +324,7 @@ void CodeGen::visit(AstFuncStmt& ast) {
 }
 
 void CodeGen::visit(AstReturnStmt& ast) {
-    if (ast.expr) {
+    if (ast.expr != nullptr) {
         auto value = visit(*ast.expr);
         m_builder.CreateRet(value.load());
     } else {
@@ -429,14 +433,15 @@ ValueHandler CodeGen::visit(AstAddressOf& ast) {
 ValueHandler CodeGen::visit(AstCallExpr& ast) {
     auto* fn = llvm::cast<llvm::Function>(visit(*ast.callable).load());
 
-    std::vector<llvm::Value*> args;
-    args.reserve(ast.args.size());
-    for (const auto& arg : ast.args) {
+    const auto& args = ast.args->exprs;
+    std::vector<llvm::Value*> values;
+    values.reserve(args.size());
+    for (const auto& arg : args) {
         auto value = visit(*arg);
-        args.emplace_back(value.load());
+        values.emplace_back(value.load());
     }
 
-    auto* call = m_builder.CreateCall(llvm::FunctionCallee(fn), args, "");
+    auto* call = m_builder.CreateCall(llvm::FunctionCallee(fn), values, "");
     call->setTailCall(false);
     return { this, call };
 }

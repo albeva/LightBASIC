@@ -34,6 +34,17 @@ void AstPrinter::visit(AstImport& ast) {
     });
 }
 
+void AstPrinter::visit(AstExprList& ast) {
+    m_json.object([&] {
+        writeHeader(ast);
+        m_json.attributeArray("exprs", [&] {
+            for (const auto& expr : ast.exprs) {
+                visit(*expr);
+            }
+        });
+    });
+}
+
 void AstPrinter::visit(AstAssignExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
@@ -290,13 +301,10 @@ void AstPrinter::visit(AstCallExpr& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeExpr(ast.callable, "callable");
-        if (!ast.args.empty()) {
-            m_json.attributeArray("args", [&] {
-                for (const auto& arg : ast.args) {
-                    visit(*arg);
-                }
-            });
-        }
+
+        m_json.attributeBegin("args");
+        visit(*ast.args);
+        m_json.attributeEnd();
     });
 }
 

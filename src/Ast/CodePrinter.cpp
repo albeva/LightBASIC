@@ -24,6 +24,18 @@ void CodePrinter::visit(AstImport& ast) {
     m_os << indent() << "IMPORT " << ast.import;
 }
 
+void CodePrinter::visit(AstExprList& ast) {
+    bool isFirst = true;
+    for (const auto& expr : ast.exprs) {
+        if (isFirst) {
+            isFirst = false;
+        } else {
+            m_os << ", ";
+        }
+        visit(*expr);
+    }
+}
+
 void CodePrinter::visit(AstAssignExpr& ast) {
     m_os << indent();
     visit(*ast.lhs);
@@ -343,16 +355,7 @@ void CodePrinter::visit(AstIdentExpr& ast) {
 void CodePrinter::visit(AstCallExpr& ast) {
     visit(*ast.callable);
     m_os << "(";
-    bool isFirst = true;
-    for (const auto& arg : ast.args) {
-        if (isFirst) {
-            isFirst = false;
-        } else {
-            m_os << ", ";
-        }
-
-        visit(*arg);
-    }
+    visit(*ast.args);
     m_os << ")";
 }
 

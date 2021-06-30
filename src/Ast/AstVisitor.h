@@ -47,7 +47,7 @@ public:
 
 #define AST_VISITOR_DECLARE_CONTENT_FUNCS() \
     using AstVisitor::visit;                \
-    VISIT_METHOD(Module)                    \
+    AST_BASIC_NODES(VISIT_METHOD)           \
     AST_STMT_NODES(VISIT_METHOD)            \
     AST_DECL_NODES(VISIT_METHOD)            \
     AST_ATTRIB_NODES(VISIT_METHOD)          \

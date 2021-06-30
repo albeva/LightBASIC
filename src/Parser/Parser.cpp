@@ -953,12 +953,12 @@ AstExpr* Parser::expression(ExprFlags flags) {
     if ((m_exprFlags & ExprFlags::CallWithoutParens) != 0 && m_token.isNot(TokenKind::EndOfStmt)) {
         if (m_token.is(TokenKind::Identifier) || m_token.isLiteral() || m_token.isUnary()) {
             auto start = expr->range.Start;
-            auto args = expressionList();
+            auto* args = expressionList();
 
             return m_context.create<AstCallExpr>(
                 llvm::SMRange{ start, m_endLoc },
                 expr,
-                std::move(args));
+                args);
         }
     }
 
@@ -1128,13 +1128,13 @@ AstCallExpr* Parser::callExpr() {
     auto* id = identifier();
 
     consume(TokenKind::ParenOpen);
-    auto args = expressionList();
+    auto* args = expressionList();
     consume(TokenKind::ParenClose);
 
     return m_context.create<AstCallExpr>(
         llvm::SMRange{ start, m_endLoc },
         id,
-        std::move(args));
+        args);
 }
 
 /**
@@ -1182,7 +1182,8 @@ AstLiteralExpr* Parser::literal() {
 /**
  * Parse comma separated list of expressionds
  */
-std::vector<AstExpr*> Parser::expressionList() {
+AstExprList* Parser::expressionList() {
+    auto start = m_token.range().Start;
     std::vector<AstExpr*> exprs;
 
     while (!m_token.isOneOf(TokenKind::EndOfFile, TokenKind::ParenClose, TokenKind::EndOfStmt)) {
@@ -1192,7 +1193,9 @@ std::vector<AstExpr*> Parser::expressionList() {
         }
     }
 
-    return exprs;
+    return m_context.create<AstExprList>(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(exprs));
 }
 
 //----------------------------------------
