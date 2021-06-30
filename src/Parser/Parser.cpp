@@ -29,7 +29,11 @@ Parser::~Parser() noexcept = default;
  *   .
  */
 AstModule* Parser::parse() {
-    auto* stmts = stmtList();
+    AstStmtList* stmts = nullptr;
+    if (!stmtList(stmts)) {
+        std::exit(EXIT_FAILURE);
+    }
+
     return m_context.create<AstModule>(
         m_fileId,
         stmts->range,
@@ -46,7 +50,7 @@ AstModule* Parser::parse() {
  *   = { Statement }
  *   .
  */
-AstStmtList* Parser::stmtList() {
+bool Parser::stmtList(AstStmtList*& ast) {
     constexpr auto isNonTerminator = [](const Token& token) {
         switch (token.getKind()) {
         case TokenKind::End:
@@ -68,9 +72,10 @@ AstStmtList* Parser::stmtList() {
         consume(TokenKind::EndOfStmt);
     }
 
-    return m_context.create<AstStmtList>(
+    ast = m_context.create<AstStmtList>(
         llvm::SMRange{ start, m_endLoc },
         std::move(stms));
+    return true;
 }
 
 /**
@@ -540,7 +545,10 @@ AstFuncStmt* Parser::kwFunction(AstAttributeList* attribs) {
     RESTORE_ON_EXIT(m_scope);
     m_scope = Scope::Function;
 
-    auto* stmts = stmtList();
+    AstStmtList* stmts = nullptr;
+    if (!stmtList(stmts)) {
+        std::exit(EXIT_FAILURE);
+    }
 
     consume(TokenKind::End);
 
@@ -663,7 +671,11 @@ AstIfStmtBlock Parser::ifBlock() {
 [[nodiscard]] AstIfStmtBlock Parser::thenBlock(std::vector<AstVarDecl*> decls, AstExpr* expr) {
     AstStmt* stmt = nullptr;
     if (accept(TokenKind::EndOfStmt)) {
-        stmt = stmtList();
+        AstStmtList* list = nullptr;
+        if (!stmtList(list)) {
+            std::exit(EXIT_FAILURE);
+        }
+        stmt = list;
     } else {
         stmt = statement();
     }
@@ -736,7 +748,11 @@ AstIfStmtBlock Parser::ifBlock() {
     } else {
         consume(TokenKind::EndOfStmt);
 
-        stmt = stmtList();
+        AstStmtList* list = nullptr;
+        if (!stmtList(list)) {
+            std::exit(EXIT_FAILURE);
+        }
+        stmt = list;
 
         consume(TokenKind::Next);
 
@@ -790,7 +806,11 @@ AstIfStmtBlock Parser::ifBlock() {
 
     // ( EoS StmtList "LOOP" [ Condition ]
     if (accept(TokenKind::EndOfStmt)) {
-        stmt = stmtList();
+        AstStmtList* list = nullptr;
+        if (!stmtList(list)) {
+            std::exit(EXIT_FAILURE);
+        }
+        stmt = list;
 
         consume(TokenKind::Loop);
 
@@ -814,7 +834,11 @@ AstIfStmtBlock Parser::ifBlock() {
 
         // EoS StmtList "LOOP"
         if (accept(TokenKind::EndOfStmt)) {
-            stmt = stmtList();
+            AstStmtList* list = nullptr;
+            if (!stmtList(list)) {
+                std::exit(EXIT_FAILURE);
+            }
+            stmt = list;
 
             consume(TokenKind::Loop);
         }

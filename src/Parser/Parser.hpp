@@ -36,7 +36,7 @@ private:
         LLVM_MARK_AS_BITMASK_ENUM(/* LargestValue = */ CallWithoutParens)
     };
 
-    [[nodiscard]] AstStmtList* stmtList();
+    [[nodiscard]] bool stmtList(AstStmtList*&);
     [[nodiscard]] AstStmt* statement();
     [[nodiscard]] AstImport* kwImport();
     [[nodiscard]] AstStmt* declaration();
