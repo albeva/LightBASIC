@@ -50,7 +50,6 @@ public:
     AST_BASIC_NODES(VISIT_METHOD)           \
     AST_STMT_NODES(VISIT_METHOD)            \
     AST_DECL_NODES(VISIT_METHOD)            \
-    AST_ATTRIB_NODES(VISIT_METHOD)          \
     AST_TYPE_NODES(VISIT_METHOD)            \
     AST_EXPR_NODES(VISIT_METHOD_EXPR)
 

@@ -18,8 +18,10 @@
 // Misc. nodes extending AstRoot
 //----------------------------------------
 #define AST_BASIC_NODES(_) \
-    _( Module   ) \
-    _( ExprList )
+    _( Module        ) \
+    _( ExprList      ) \
+    _( Attribute     ) \
+    _( AttributeList )
 
 //----------------------------------------
 // Statements nodes extending AstStmt
@@ -47,15 +49,6 @@
     _( TypeDecl      )
 
 #define AST_DECL_RANGE(_) _(VarDecl, TypeDecl)
-
-//----------------------------------------
-// Attributes nodes extending AstRoot
-//----------------------------------------
-#define AST_ATTRIB_NODES(_) \
-    _( AttributeList ) \
-    _( Attribute     )
-
-#define AST_ATTR_RANGE(_) _(AttributeList, Attribute)
 
 //----------------------------------------
 // Type nodes extending AstRoot
@@ -90,7 +83,6 @@
     AST_BASIC_NODES(_)  \
     AST_STMT_NODES(_)   \
     AST_DECL_NODES(_)   \
-    AST_ATTRIB_NODES(_) \
     AST_TYPE_NODES(_)   \
     AST_EXPR_NODES(_)
 
