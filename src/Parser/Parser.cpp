@@ -456,7 +456,7 @@ AstTypeDecl* Parser::kwType(AstAttributeList* attribs) {
 
     consume(TokenKind::EndOfStmt);
 
-    auto decls = typeDeclList();
+    auto* decls = typeDeclList();
 
     consume(TokenKind::End);
     consume(TokenKind::Type);
@@ -465,7 +465,7 @@ AstTypeDecl* Parser::kwType(AstAttributeList* attribs) {
         llvm::SMRange{ start, m_endLoc },
         id,
         attribs,
-        std::move(decls));
+        decls);
 }
 
 /**
@@ -473,7 +473,8 @@ AstTypeDecl* Parser::kwType(AstAttributeList* attribs) {
  *   = { [ AttributeList ] typeMember EoS }
  *   .
  */
-std::vector<AstDecl*> Parser::typeDeclList() {
+AstDeclList* Parser::typeDeclList() {
+    auto start = m_token.range().Start;
     std::vector<AstDecl*> decls;
 
     while (true) {
@@ -488,7 +489,9 @@ std::vector<AstDecl*> Parser::typeDeclList() {
         consume(TokenKind::EndOfStmt);
     }
 
-    return decls;
+    return m_context.create<AstDeclList>(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(decls));
 }
 
 /**

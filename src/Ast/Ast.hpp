@@ -331,6 +331,14 @@ struct AstDecl : AstStmt {
     Symbol* symbol = nullptr;
 };
 
+struct AstDeclList final : AstRoot {
+    AstDeclList(llvm::SMRange range_, std::vector<AstDecl*> decls_) noexcept
+    : AstRoot{ AstKind::DeclList, range_ },
+      decls{ std::move(decls_) } {}
+
+    std::vector<AstDecl*> decls;
+};
+
 struct AstVarDecl final : AstDecl {
     AstVarDecl(
         llvm::SMRange range_,
@@ -407,15 +415,15 @@ struct AstTypeDecl final : AstDecl {
         llvm::SMRange range_,
         StringRef name_,
         AstAttributeList* attrs,
-        std::vector<AstDecl*> decls_) noexcept
+        AstDeclList* decls_) noexcept
     : AstDecl{ AstKind::TypeDecl, range_, name_, attrs },
-      decls{ std::move(decls_) } {}
+      decls{ decls_ } {}
 
     constexpr static bool classof(const AstRoot* ast) noexcept {
         return ast->kind == AstKind::TypeDecl;
     }
 
-    std::vector<AstDecl*> decls;
+    AstDeclList* decls;
     SymbolTable* symbolTable = nullptr;
 };
 

@@ -83,8 +83,15 @@ void CodePrinter::visit(AstTypeExpr& ast) {
 
 // Declarations
 
+void CodePrinter::visit(AstDeclList& ast) {
+    for (const auto& decl: ast.decls) {
+        visit(*decl);
+        m_os << '\n';
+    }
+}
+
 void CodePrinter::visit(AstVarDecl& ast) {
-    if (ast.attributes) {
+    if (ast.attributes != nullptr) {
         visit(*ast.attributes);
         m_os << " _" << '\n';
     }
@@ -95,19 +102,19 @@ void CodePrinter::visit(AstVarDecl& ast) {
     }
     m_os << ast.name;
 
-    if (ast.typeExpr) {
+    if (ast.typeExpr != nullptr) {
         m_os << " AS ";
         visit(*ast.typeExpr);
     }
 
-    if (ast.expr) {
+    if (ast.expr != nullptr) {
         m_os << " = ";
         visit(*ast.expr);
     }
 }
 
 void CodePrinter::visit(AstFuncDecl& ast) {
-    if (ast.attributes) {
+    if (ast.attributes != nullptr) {
         visit(*ast.attributes);
         m_os << " _" << '\n';
     }
@@ -118,7 +125,7 @@ void CodePrinter::visit(AstFuncDecl& ast) {
         m_os << "DECLARE ";
     }
 
-    if (ast.retTypeExpr) {
+    if (ast.retTypeExpr != nullptr) {
         m_os << "FUNCTION ";
     } else {
         m_os << "SUB ";
@@ -139,7 +146,7 @@ void CodePrinter::visit(AstFuncDecl& ast) {
         m_os << ")";
     }
 
-    if (ast.retTypeExpr) {
+    if (ast.retTypeExpr != nullptr) {
         m_os << " AS ";
         visit(*ast.retTypeExpr);
     }
@@ -159,12 +166,12 @@ void CodePrinter::visit(AstFuncStmt& ast) {
     m_indent--;
 
     m_os << indent();
-    m_os << "END " << (ast.decl->retTypeExpr ? "FUNCTION" : "SUB");
+    m_os << "END " << (ast.decl->retTypeExpr != nullptr ? "FUNCTION" : "SUB");
 }
 
 void CodePrinter::visit(AstReturnStmt& ast) {
     m_os << indent() << "RETURN";
-    if (ast.expr) {
+    if (ast.expr != nullptr) {
         m_os << " ";
         visit(*ast.expr);
     }
@@ -178,18 +185,17 @@ void CodePrinter::visit(AstTypeDecl& ast) {
     RESTORE_ON_EXIT(emitVARkeyword);
     emitVARkeyword = false;
 
-    if (ast.attributes) {
+    if (ast.attributes != nullptr) {
         visit(*ast.attributes);
         m_os << " _" << '\n';
     }
 
     m_os << indent() << "TYPE " << ast.name << '\n';
-    m_indent++;
-    for (const auto& decl : ast.decls) {
-        visit(*decl);
-        m_os << '\n';
+    if (ast.decls != nullptr) {
+        m_indent++;
+        visit(*ast.decls);
+        m_indent--;
     }
-    m_indent--;
     m_os << indent() << "END TYPE";
 }
 

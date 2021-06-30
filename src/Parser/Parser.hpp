@@ -70,7 +70,7 @@ private:
     [[nodiscard]] AstFuncStmt* kwFunction(AstAttributeList* attribs);
     [[nodiscard]] AstStmt* kwReturn();
     [[nodiscard]] AstTypeDecl* kwType(AstAttributeList* attribs);
-    [[nodiscard]] std::vector<AstDecl*> typeDeclList();
+    [[nodiscard]] AstDeclList* typeDeclList();
     [[nodiscard]] AstDecl* typeMember(AstAttributeList* attribs);
 
     // replace token kind with another (e.g. Minus to Negate)

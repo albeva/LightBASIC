@@ -60,6 +60,17 @@ void AstPrinter::visit(AstExprStmt& ast) {
     });
 }
 
+void AstPrinter::visit(AstDeclList& ast) {
+    m_json.object([&] {
+        writeHeader(ast);
+        m_json.attributeArray("decls", [&]{
+            for (const auto& decl : ast.decls) {
+                visit(*decl);
+            }
+        });
+    });
+}
+
 void AstPrinter::visit(AstVarDecl& ast) {
     m_json.object([&] {
         writeHeader(ast);
@@ -125,11 +136,10 @@ void AstPrinter::visit(AstTypeDecl& ast) {
         writeHeader(ast);
         writeAttributes(ast.attributes);
         m_json.attribute("id", ast.name);
-        m_json.attributeArray("members", [&] {
-            for (const auto& decl : ast.decls) {
-                visit(*decl);
-            }
-        });
+
+        m_json.attributeBegin("members");
+        visit(*ast.decls);
+        m_json.attributeEnd();
     });
 }
 

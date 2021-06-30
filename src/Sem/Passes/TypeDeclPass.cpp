@@ -31,7 +31,7 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
 }
 
 void TypeDeclPass::declareMembers() {
-    for (const auto& decl : m_ast.decls) {
+    for (const auto& decl : m_ast.decls->decls) {
         m_sem.visit(*decl);
         decl->symbol->setParent(m_symbol);
     }
