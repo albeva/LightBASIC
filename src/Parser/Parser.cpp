@@ -239,7 +239,7 @@ AstAttribute* Parser::attribute() {
     auto start = m_token.range().Start;
 
     auto* id = identifier();
-    std::vector<AstLiteralExpr*> args;
+    AstExprList* args = nullptr;
     if (m_token.isOneOf(TokenKind::Assign, TokenKind::ParenOpen)) {
         args = attributeArgList();
     }
@@ -247,7 +247,7 @@ AstAttribute* Parser::attribute() {
     return m_context.create<AstAttribute>(
         llvm::SMRange{ start, m_endLoc },
         id,
-        std::move(args));
+        args);
 }
 
 /**
@@ -256,8 +256,10 @@ AstAttribute* Parser::attribute() {
  *   | "(" [ Literal { "," Literal } ] ")"
  *   .
  */
-std::vector<AstLiteralExpr*> Parser::attributeArgList() {
-    std::vector<AstLiteralExpr*> args;
+AstExprList* Parser::attributeArgList() {
+    auto start = m_token.range().Start;
+    std::vector<AstExpr*> args;
+
     if (accept(TokenKind::Assign)) {
         args.emplace_back(literal());
     } else if (accept(TokenKind::ParenOpen)) {
@@ -269,7 +271,10 @@ std::vector<AstLiteralExpr*> Parser::attributeArgList() {
         }
         consume(TokenKind::ParenClose);
     }
-    return args;
+
+    return m_context.create<AstExprList>(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(args));
 }
 
 //----------------------------------------

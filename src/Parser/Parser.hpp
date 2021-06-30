@@ -61,7 +61,7 @@ private:
     [[nodiscard]] AstContinuationStmt* kwExit();
     [[nodiscard]] AstAttributeList* attributeList();
     [[nodiscard]] AstAttribute* attribute();
-    [[nodiscard]] std::vector<AstLiteralExpr*> attributeArgList();
+    [[nodiscard]] AstExprList* attributeArgList();
     [[nodiscard]] AstTypeExpr* typeExpr();
     [[nodiscard]] AstFuncDecl* kwDeclare(AstAttributeList* attribs);
     [[nodiscard]] AstFuncDecl* funcSignature(llvm::SMLoc start, AstAttributeList* attribs, bool hasImpl);

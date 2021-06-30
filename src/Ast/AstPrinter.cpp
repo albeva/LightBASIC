@@ -273,13 +273,9 @@ void AstPrinter::visit(AstAttribute& ast) {
     m_json.object([&] {
         writeHeader(ast);
         writeIdent(ast.identExpr);
-        if (!ast.argExprs.empty()) {
-            m_json.attributeArray("args", [&] {
-                for (const auto& arg : ast.argExprs) {
-                    visit(*arg);
-                }
-            });
-        }
+        m_json.attributeBegin("args");
+        visit(*ast.args);
+        m_json.attributeEnd();
     });
 }
 
@@ -318,7 +314,7 @@ void AstPrinter::visit(AstLiteralExpr& ast) {
             return { TokenKind::StringLiteral, value.str() };
         },
         [&](uint64_t value) -> Ret {
-            if (ast.type->isSignedIntegral()) {
+            if (ast.type == nullptr || ast.type->isSignedIntegral()) {
                 auto sval = static_cast<int64_t>(value);
                 return { TokenKind::IntegerLiteral, std::to_string(sval) };
             }

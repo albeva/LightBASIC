@@ -296,17 +296,17 @@ struct AstAttribute final : AstRoot {
     AstAttribute(
         llvm::SMRange range_,
         AstIdentExpr* ident,
-        std::vector<AstLiteralExpr*> args) noexcept
+        AstExprList* args_) noexcept
     : AstRoot{ AstKind::Attribute, range_ },
       identExpr{ ident },
-      argExprs{ std::move(args) } {};
+      args{ args_ } {};
 
     constexpr static bool classof(const AstRoot* ast) noexcept {
         return ast->kind == AstKind::Attribute;
     }
 
     AstIdentExpr* identExpr;
-    std::vector<AstLiteralExpr*> argExprs;
+    AstExprList* args;
 };
 
 //----------------------------------------

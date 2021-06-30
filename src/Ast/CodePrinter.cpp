@@ -67,20 +67,12 @@ void CodePrinter::visit(AstAttributeList& ast) {
 
 void CodePrinter::visit(AstAttribute& ast) {
     visit(*ast.identExpr);
-    if (ast.argExprs.size() == 1) {
+    if (ast.args->exprs.size() == 1) {
         m_os << " = ";
-        visit(*ast.argExprs[0]);
-    } else if (ast.argExprs.size() > 1) {
-        bool isFirst = true;
+        visit(*ast.args);
+    } else if (ast.args->exprs.size() > 1) {
         m_os << "(";
-        for (const auto& arg : ast.argExprs) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                m_os << ", ";
-            }
-            visit(*arg);
-        }
+        visit(*ast.args);
         m_os << ")";
     }
 }
@@ -371,7 +363,7 @@ void CodePrinter::visit(AstLiteralExpr& ast) {
             return '"' + result + '"';
         },
         [&](uint64_t value) -> string {
-            if (ast.type->isSignedIntegral()) {
+            if (ast.type == nullptr || ast.type->isSignedIntegral()) {
                 auto sval = static_cast<int64_t>(value);
                 return std::to_string(sval);
             }
