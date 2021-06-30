@@ -50,7 +50,7 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
     symbol->setFlags(flags);
 
     // alias?
-    if (ast.attributes) {
+    if (ast.attributes != nullptr) {
         if (auto alias = ast.attributes->getStringLiteral("ALIAS")) {
             symbol->setAlias(*alias);
         }
@@ -65,12 +65,12 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
 
     // parameters
     std::vector<const TypeRoot*> paramTypes;
-    paramTypes.reserve(ast.paramDecls.size());
-    {
+    ast.symbolTable = m_context.create<SymbolTable>(m_table);
+    if (ast.params != nullptr) {
+        paramTypes.reserve(ast.params->params.size());
         RESTORE_ON_EXIT(m_table);
-        ast.symbolTable = m_context.create<SymbolTable>(m_table);
         m_table = ast.symbolTable;
-        for (auto& param : ast.paramDecls) {
+        for (auto& param : ast.params->params) {
             visitFuncParamDecl(*param);
             paramTypes.emplace_back(param->symbol->type());
         }
@@ -78,7 +78,7 @@ void FuncDeclarerPass::visitFuncDecl(AstFuncDecl& ast, bool external) {
 
     // return typeExpr. subs don't have one so default to Void
     const TypeRoot* retType = nullptr;
-    if (ast.retTypeExpr) {
+    if (ast.retTypeExpr != nullptr) {
         m_typePass.visit(*ast.retTypeExpr);
         retType = ast.retTypeExpr->type;
     } else {

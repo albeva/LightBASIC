@@ -21,7 +21,8 @@
     _( Module        ) \
     _( ExprList      ) \
     _( Attribute     ) \
-    _( AttributeList )
+    _( AttributeList ) \
+    _( FuncParamList )
 
 //----------------------------------------
 // Statements nodes extending AstStmt

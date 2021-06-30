@@ -274,11 +274,13 @@ void CodeGen::declareFunc(AstFuncDecl& ast) {
     fn->setDSOLocal(true);
     ast.symbol->setLlvmValue(fn);
 
-    auto* iter = fn->arg_begin();
-    for (const auto& param : ast.paramDecls) {
-        iter->setName(param->symbol->identifier());
-        param->symbol->setLlvmValue(iter);
-        iter++; // NOLINT
+    if (ast.params != nullptr) {
+        auto* iter = fn->arg_begin();
+        for (const auto& param : ast.params->params) {
+            iter->setName(param->symbol->identifier());
+            param->symbol->setLlvmValue(iter);
+            iter++; // NOLINT
+        }
     }
 }
 
@@ -299,14 +301,16 @@ void CodeGen::visit(AstFuncStmt& ast) {
     auto* block = llvm::BasicBlock::Create(m_llvmContext, "", func);
     m_builder.SetInsertPoint(block);
 
-    for (const auto& param : ast.decl->paramDecls) {
-        auto* sym = param->symbol;
-        auto* value = sym->getLlvmValue();
-        sym->setLlvmValue(m_builder.CreateAlloca(
-            sym->type()->getLlvmType(m_context),
-            nullptr,
-            sym->identifier() + ".addr"));
-        m_builder.CreateStore(value, sym->getLlvmValue());
+    if (ast.decl->params != nullptr) {
+        for (const auto& param : ast.decl->params->params) {
+            auto* sym = param->symbol;
+            auto* value = sym->getLlvmValue();
+            sym->setLlvmValue(m_builder.CreateAlloca(
+                sym->type()->getLlvmType(m_context),
+                nullptr,
+                sym->identifier() + ".addr"));
+            m_builder.CreateStore(value, sym->getLlvmValue());
+        }
     }
 
     visit(*ast.stmtList);

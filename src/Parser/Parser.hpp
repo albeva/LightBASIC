@@ -65,7 +65,7 @@ private:
     [[nodiscard]] AstTypeExpr* typeExpr();
     [[nodiscard]] AstFuncDecl* kwDeclare(AstAttributeList* attribs);
     [[nodiscard]] AstFuncDecl* funcSignature(llvm::SMLoc start, AstAttributeList* attribs, bool hasImpl);
-    [[nodiscard]] std::vector<AstFuncParamDecl*> funcParamList(bool& isVariadic);
+    [[nodiscard]] AstFuncParamList* funcParamList(bool& isVariadic);
     [[nodiscard]] AstFuncParamDecl* funcParam();
     [[nodiscard]] AstFuncStmt* kwFunction(AstAttributeList* attribs);
     [[nodiscard]] AstStmt* kwReturn();

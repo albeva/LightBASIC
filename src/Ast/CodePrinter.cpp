@@ -125,10 +125,10 @@ void CodePrinter::visit(AstFuncDecl& ast) {
     }
     m_os << ast.name;
 
-    if (!ast.paramDecls.empty()) {
+    if (ast.params != nullptr) {
         m_os << "(";
         bool isFirst = true;
-        for (const auto& param : ast.paramDecls) {
+        for (const auto& param : ast.params->params) {
             if (isFirst) {
                 isFirst = false;
             } else {

@@ -76,9 +76,9 @@ void AstPrinter::visit(AstFuncDecl& ast) {
         m_json.attribute("id", ast.name);
         writeAttributes(ast.attributes);
 
-        if (!ast.paramDecls.empty()) {
+        if (ast.params != nullptr) {
             m_json.attributeArray("params", [&] {
-                for (const auto& param : ast.paramDecls) {
+                for (const auto& param : ast.params->params) {
                     visit(*param);
                 }
             });

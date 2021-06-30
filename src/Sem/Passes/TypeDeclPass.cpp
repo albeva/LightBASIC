@@ -17,7 +17,7 @@ TypeDeclPass::TypeDeclPass(SemanticAnalyzer& sem, AstTypeDecl& ast)
     auto* current = m_sem.getSymbolTable();
 
     bool packed = false;
-    if (ast.attributes) {
+    if (ast.attributes != nullptr) {
         packed = ast.attributes->exists("PACKED");
     }
 

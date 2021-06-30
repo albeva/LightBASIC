@@ -360,7 +360,7 @@ AstFuncDecl* Parser::funcSignature(llvm::SMLoc start, AstAttributeList* attribs,
     advance();
 
     bool isVariadic = false;
-    std::vector<AstFuncParamDecl*> params;
+    AstFuncParamList* params = nullptr;
     if (accept(TokenKind::ParenOpen)) {
         params = funcParamList(isVariadic);
         consume(TokenKind::ParenClose);
@@ -376,7 +376,7 @@ AstFuncDecl* Parser::funcSignature(llvm::SMLoc start, AstAttributeList* attribs,
         llvm::SMRange{ start, m_endLoc },
         id,
         attribs,
-        std::move(params),
+        params,
         isVariadic,
         ret,
         hasImpl);
@@ -388,7 +388,8 @@ AstFuncDecl* Parser::funcSignature(llvm::SMLoc start, AstAttributeList* attribs,
  *   | "..."
  *   .
  */
-std::vector<AstFuncParamDecl*> Parser::funcParamList(bool& isVariadic) {
+AstFuncParamList* Parser::funcParamList(bool& isVariadic) {
+    auto start = m_token.range().Start;
     std::vector<AstFuncParamDecl*> params;
     while (!m_token.isOneOf(TokenKind::EndOfFile, TokenKind::ParenClose)) {
         if (accept(TokenKind::Ellipsis)) {
@@ -404,7 +405,10 @@ std::vector<AstFuncParamDecl*> Parser::funcParamList(bool& isVariadic) {
             break;
         }
     }
-    return params;
+
+    return m_context.create<AstFuncParamList>(
+        llvm::SMRange{ start, m_endLoc },
+        std::move(params));
 }
 
 /**

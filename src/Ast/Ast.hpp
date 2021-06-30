@@ -355,12 +355,12 @@ struct AstFuncDecl final : AstDecl {
         llvm::SMRange range_,
         StringRef name_,
         AstAttributeList* attrs_,
-        std::vector<AstFuncParamDecl*> params_,
+        AstFuncParamList* params_,
         bool variadic_,
         AstTypeExpr* retType_,
         bool hasImpl_) noexcept
     : AstDecl{ AstKind::FuncDecl, range_, name_, attrs_ },
-      paramDecls{ std::move(params_) },
+      params{ params_ },
       variadic{ variadic_ },
       retTypeExpr{ retType_ },
       hasImpl{ hasImpl_ } {};
@@ -369,7 +369,7 @@ struct AstFuncDecl final : AstDecl {
         return ast->kind == AstKind::FuncDecl;
     }
 
-    std::vector<AstFuncParamDecl*> paramDecls;
+    AstFuncParamList* params;
     const bool variadic;
     AstTypeExpr* retTypeExpr;
     const bool hasImpl;
@@ -390,6 +390,16 @@ struct AstFuncParamDecl final : AstDecl {
     }
 
     AstTypeExpr* typeExpr;
+};
+
+struct AstFuncParamList final : AstRoot {
+    AstFuncParamList(
+        llvm::SMRange range_,
+        std::vector<AstFuncParamDecl*> params_) noexcept
+    : AstRoot{ AstKind::FuncParamList, range_ },
+      params{ std::move(params_) } {}
+
+    std::vector<AstFuncParamDecl*> params;
 };
 
 struct AstTypeDecl final : AstDecl {
