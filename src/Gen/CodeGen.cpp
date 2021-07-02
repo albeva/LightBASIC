@@ -152,7 +152,7 @@ void CodeGen::visit(AstImport& ast) {
     visit(*ast.module->stmtList);
 }
 
-void CodeGen::visit(AstExprList& ast) {
+void CodeGen::visit(AstExprList& /*ast*/) {
     llvm_unreachable("Unhandled AstExprList&");
 }
 

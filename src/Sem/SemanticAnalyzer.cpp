@@ -47,7 +47,7 @@ void SemanticAnalyzer::visit(AstImport& ast) {
     visit(*ast.module->stmtList);
 }
 
-void SemanticAnalyzer::visit(AstExprList& ast) {
+void SemanticAnalyzer::visit(AstExprList& /*ast*/) {
     llvm_unreachable("Unhandled AstExprList&");
 }
 
