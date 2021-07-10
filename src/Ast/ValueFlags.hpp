@@ -4,7 +4,6 @@
 #pragma once
 
 namespace lbc {
-class Symbol;
 
 struct ValueFlags final {
     uint8_t addressable : 1;

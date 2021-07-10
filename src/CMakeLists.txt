@@ -14,6 +14,7 @@ add_library(
     Ast/ValueFlags.hpp
     Diag/DiagnosticEngine.cpp
     Diag/DiagnosticEngine.hpp
+    Diag/Diagnostics.def.hpp
     Driver/CmdLineParser.cpp
     Driver/CmdLineParser.hpp
     Driver/CompileOptions.cpp
@@ -74,8 +75,7 @@ add_library(
     Type/TypeUdt.hpp
     Utils/Utils.cpp
     Utils/Utils.hpp
-    Utils/Version.hpp
-    Diag/Diagnostics.def.hpp)
+    Utils/Version.hpp)
 
 target_precompile_headers(project_options INTERFACE pch.hpp)
 target_include_directories(lbc_lib PUBLIC ${lbc_SOURCE_DIR}/src)

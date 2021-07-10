@@ -84,7 +84,7 @@ void CodePrinter::visit(AstTypeExpr& ast) {
 // Declarations
 
 void CodePrinter::visit(AstDeclList& ast) {
-    for (const auto& decl: ast.decls) {
+    for (const auto& decl : ast.decls) {
         visit(*decl);
         m_os << '\n';
     }

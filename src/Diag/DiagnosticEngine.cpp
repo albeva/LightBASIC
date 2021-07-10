@@ -12,7 +12,7 @@ constexpr const char* messages[]{
 };
 
 constexpr llvm::SourceMgr::DiagKind diagKind[]{
-#define DIAG(LEVEL, ID, STR) llvm::SourceMgr::DiagKind::DK_##LEVEL,
+#define DIAG(LEVEL, ...) llvm::SourceMgr::DiagKind::DK_##LEVEL,
 #include "Diagnostics.def.hpp"
 };
 } // namespace
@@ -21,16 +21,16 @@ DiagnosticEngine::DiagnosticEngine(Context& context) noexcept
 : m_context{ context },
   m_sourceMgr{ context.getSourceMrg() } {}
 
-const char* DiagnosticEngine::getDiagnosticText(Diag diag) noexcept {
+const char* DiagnosticEngine::getText(Diag diag) noexcept {
     return messages[static_cast<size_t>(diag)];
 }
 
-llvm::SourceMgr::DiagKind DiagnosticEngine::getDiagKind(Diag diag) noexcept {
+llvm::SourceMgr::DiagKind DiagnosticEngine::getKind(Diag diag) noexcept {
     return diagKind[static_cast<size_t>(diag)];
 }
 
 void DiagnosticEngine::print(Diag diag, llvm::SMLoc loc, const string& str, llvm::ArrayRef<llvm::SMRange> ranges) noexcept {
-    auto kind = getDiagKind(diag);
+    auto kind = getKind(diag);
     if (kind == llvm::SourceMgr::DK_Error) {
         m_errorCounter++;
     }

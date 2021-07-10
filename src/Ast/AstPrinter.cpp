@@ -63,7 +63,7 @@ void AstPrinter::visit(AstExprStmt& ast) {
 void AstPrinter::visit(AstDeclList& ast) {
     m_json.object([&] {
         writeHeader(ast);
-        m_json.attributeArray("decls", [&]{
+        m_json.attributeArray("decls", [&] {
             for (const auto& decl : ast.decls) {
                 visit(*decl);
             }

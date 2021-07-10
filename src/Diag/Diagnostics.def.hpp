@@ -7,24 +7,40 @@
 #    define DIAG(LEVEL, ID, MSG)
 #endif
 
+#ifndef ERROR
+#   define ERROR(ID, MSG) DIAG(Error, ID, MSG)
+#endif
+
+#ifndef WARNING
+#   define WARNING(ID, MSG) DIAG(Warning, ID, MSG)
+#endif
+
+//----------------------------------------
 // Parse errors
-DIAG(Error, notAllowedTopLevelStatement,
+//----------------------------------------
+ERROR(notAllowedTopLevelStatement,
     "statements are not allowed at the top level")
-DIAG(Error, unexpectedToken,
+ERROR(unexpectedToken,
     "expected '{0}' got '{1}'")
-DIAG(Error, moduleNotFound,
+ERROR(moduleNotFound,
     "no such module '{0}'")
-DIAG(Error, failedToLoadModule,
+ERROR(failedToLoadModule,
     "failed to load module '{0}'")
-DIAG(Error, expectedDeclarationAfterAttribute,
+ERROR(expectedDeclarationAfterAttribute,
     "expected declaration after attributes, got '{0}'")
-DIAG(Error, unexpectedNestedDeclaration,
+ERROR(unexpectedNestedDeclaration,
     "unexpected nested declaration '{0}'")
-DIAG(Error, variadicArgumentNotLast,
+ERROR(variadicArgumentNotLast,
     "variadic argument must be last")
-DIAG(Error, unexpectedReturn,
+ERROR(unexpectedReturn,
     "return not allowed outside main module, SUB or FUNCTION")
-DIAG(Error, expectedExpression,
+ERROR(expectedExpression,
     "expected expression, got '{0}'")
 
+//----------------------------------------
+// Semantic errors
+//----------------------------------------
+
 #undef DIAG
+#undef ERROR
+#undef WARNING

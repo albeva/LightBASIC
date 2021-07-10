@@ -1,6 +1,6 @@
 @echo off
 
-set VERSION=llvm-12.0.0
+set VERSION=llvm-12.0.1
 
 set SRC=%cd%\%VERSION%.src
 set BUILD=%cd%\%VERSION%-build
@@ -18,3 +18,5 @@ cmake -G "Ninja" -S "%SRC%" -B "%BUILD%" ^
     -DLLVM_INSTALL_UTILS=ON
 
 ninja -C "%BUILD%" install
+
+setx LLVM_DIR "%INSTALL%\lib\cmake\llvm"

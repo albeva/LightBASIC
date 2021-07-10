@@ -23,7 +23,7 @@ public:
     template<typename... Args>
     void report(Diag diag, llvm::SMRange range, Args... args) noexcept {
         auto formatted = llvm::formatv(
-            getDiagnosticText(diag),
+            getText(diag),
             std::forward<Args>(args)...);
         print(diag, range.Start, formatted.str(), range);
     }
@@ -31,16 +31,16 @@ public:
     template<typename... Args>
     void report(Diag diag, llvm::SMLoc loc, Args... args) noexcept {
         auto formatted = llvm::formatv(
-            getDiagnosticText(diag),
+            getText(diag),
             std::forward<Args>(args)...);
         print(diag, loc, formatted.str());
     }
 
-    void print(Diag diag, llvm::SMLoc loc, const string& str, llvm::ArrayRef<llvm::SMRange> Ranges = {}) noexcept;
+    void print(Diag diag, llvm::SMLoc loc, const string& str, llvm::ArrayRef<llvm::SMRange> ranges = {}) noexcept;
 
 private:
-    static const char* getDiagnosticText(Diag diag) noexcept;
-    static llvm::SourceMgr::DiagKind getDiagKind(Diag diag) noexcept;
+    static const char* getText(Diag diag) noexcept;
+    static llvm::SourceMgr::DiagKind getKind(Diag diag) noexcept;
 
     Context& m_context;
     llvm::SourceMgr& m_sourceMgr;
